@@ -54,6 +54,17 @@ dependencies:
   printing: ^5.13.4
 
   # Subscriptions
+  # ⛔ iOS BLOCKED ON TOOLCHAIN, not on this pin. BOTH cached apphud versions
+  # reference `Product.PurchaseOption.billingPlanType` / `pricingTerms`:
+  #   apphud 3.2.5 -> ApphudSDK 4.2.3   (has it)
+  #   apphud 3.4.0 -> ApphudSDK 4.4.9   (has it)
+  # That symbol is absent from the iOS 26.2 SDK shipped by Xcode 26.3 — the
+  # only Xcode installed — and `if #available(iOS 26.4)` defers RUNTIME
+  # execution, not compile-time symbol resolution. So `flutter build ios`
+  # fails regardless of which of these two is selected; downgrading does not
+  # help. Android is unaffected and builds/runs.
+  # RESOLUTION: install an Xcode shipping the iOS 26.4+ SDK. Revisit this pin
+  # then; 3.4.0 is the latest and is the right target once the SDK exists.
   apphud: ^3.4.0
 
   # Firebase (Crashlytics + optional auth only)
