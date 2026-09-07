@@ -123,12 +123,32 @@ using the design system's own stated rule — *"same lightness and chroma, only 
 | Restaurants & Coffee | `#F9A8D4` | design |
 | Health | `#6EE7B7` | design |
 | Other | `#8E8E93` | design |
-| Personal Care | `#F8A8B8` | derived |
-| Entertainment | `#C9A0F5` | derived |
-| Shopping | `#8BC6F5` | derived |
-| Electronics | `#8BF5C6` | derived |
-| Bills | `#F5D98B` | derived |
-| Travel | `#8BA8F5` | derived |
+| Personal Care | `#F57D7E` | derived |
+| Entertainment | `#B2F57D` | derived |
+| Shopping | `#F0F57D` | derived |
+| Education | `#E47DF5` | derived |
+| Utilities | `#7DF587` | derived |
+| Travel | `#7DA3F5` | derived |
+
+**Two names drifted from the original plan**, which listed *Electronics* and *Bills*; the
+build seeded **Education** and **Utilities** instead. Both are sensible expense categories,
+but you picked the 12, so say if you want them renamed — it is an ARB + seed change, not a
+structural one.
+
+**A hue concern worth a look.** Three of the derived six sit close together in the
+yellow-green band — Shopping `#F0F57D`, Entertainment `#B2F57D`, Utilities `#7DF587` — and
+are hard to tell apart in the Analytics donut legend, where colour is the only distinguishing
+mark. Green also carries a specific meaning in this design system: *"amber when spending
+rose, green when it fell."* A green category bar reads, at a glance, as a positive trend
+rather than a category hue.
+
+Suggested respacing across the wheel, keeping the design's six untouched:
+
+| Category | Current | Suggested |
+|---|---|---|
+| Shopping | `#F0F57D` | `#F5D98B` |
+| Entertainment | `#B2F57D` | `#C9A0F5` |
+| Utilities | `#7DF587` | `#8BC6F5` |
 
 Seeding proceeds with these; say the word if you want different hues.
 
