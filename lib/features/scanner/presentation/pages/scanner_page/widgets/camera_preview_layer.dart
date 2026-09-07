@@ -326,7 +326,7 @@ class _CameraPreviewLayerState extends State<CameraPreviewLayer> {
         if (controller != null && controller.value.isInitialized)
           CameraPreview(controller)
         else
-          const ColoredBox(color: Colors.black),
+          ColoredBox(color: AppColors.black.value),
         if (state.isSearching) const ScannerScanLine(),
         if (state.isSearching || state.isDetected)
           ScannerCornerOverlay(
