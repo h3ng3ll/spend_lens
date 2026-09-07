@@ -1,4 +1,4 @@
-package com.hengell.spend_lens.spend_lens
+package com.hengell.spendlens
 
 import io.flutter.embedding.android.FlutterActivity
 
