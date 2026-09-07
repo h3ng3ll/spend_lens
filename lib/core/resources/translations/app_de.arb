@@ -1,7 +1,7 @@
 {
   "@@locale": "de",
   "deleteAllTitle": "Alle Daten löschen?",
-  "deleteAllBody": "Entfernt {n} Einträge, Belegfotos, Läden und Kategorien von {device}. Cloud-Backups bleiben erhalten. Das kann nicht rückgängig gemacht werden.",
+  "deleteAllBody": "{n,plural, =1{Entfernt 1 Eintrag, Belegfotos, Läden und Kategorien von {device}. Cloud-Backups bleiben erhalten. Das kann nicht rückgängig gemacht werden.} other{Entfernt {n} Einträge, Belegfotos, Läden und Kategorien von {device}. Cloud-Backups bleiben erhalten. Das kann nicht rückgängig gemacht werden.}}",
   "deleteAllConfirm": "Alles löschen",
   "tDeletedAll": "Alle Daten gelöscht",
   "renameCategory": "Kategorie umbenennen",
@@ -82,11 +82,8 @@
   "periodRange": "Einträge von {a} bis {b}",
   "pdf": "PDF",
   "pdfExportUnavailable": "PDF-Export folgt in einem späteren Update.",
-  "signInComingSoon": "Die Anmeldung folgt in einem späteren Update.",
-  "exportComingSoon": "Export und Import folgen in einem späteren Update.",
   "pdfToast": "Bericht {m} · PDF bereit zum Teilen",
-  "purchase1": "{n} Einkauf",
-  "purchaseN": "{n} Einkäufe",
+  "purchaseCount": "{n,plural, =1{{n} Einkauf} other{{n} Einkäufe}}",
   "top": "Top",
   "ins1": "Lebensmittel machen {p}% deiner Ausgaben aus.",
   "ins2": "{category}ausgaben {direction} diesen Monat um {percent}%.",
@@ -149,7 +146,7 @@
   "storeEmpty": "{t} · noch keine Belege",
   "bought": "{n}× gekauft",
   "byWeight": "nach Gewicht",
-  "cheapestOf": "Günstigster von {n} Läden",
+  "cheapestOf": "{n,plural, =1{Günstigster von 1 Laden} other{Günstigster von {n} Läden}}",
   "cheaperBy": "{s} {p} · günstiger um {d}",
   "cheaperHere": "{s} {p} /kg · hier günstiger",
   "onlyHere": "Nur hier gekauft",
@@ -210,7 +207,7 @@
   "tSignedIn": "Angemeldet · Sync aktiv",
   "tSignedOut": "Abgemeldet · Daten bleiben auf dem Gerät",
   "tBackup": "Backup bereit · {filename}",
-  "tCsv": "Tabelle bereit · {count} Zeilen",
+  "tCsv": "{count,plural, =1{Tabelle bereit · 1 Zeile} other{Tabelle bereit · {count} Zeilen}}",
   "tImport": "Backup-Datei auswählen",
   "dark": "Dunkel",
   "light": "Hell",
@@ -224,7 +221,7 @@
   "cashExpense": "Barausgabe",
   "deleteReceipt": "Beleg löschen",
   "deleteExpense": "Ausgabe löschen",
-  "items": "{n} Artikel",
+  "items": "{n,plural, =1{{n} Artikel} other{{n} Artikel}}",
   "photoStored": "Belegfoto · auf dem Gerät",
   "photoUpdated": "Belegfoto · gerade aktualisiert",
   "photoTitle": "{n} · Beleg",
@@ -290,7 +287,6 @@
   "homeNoExpensesTitle": "Noch keine Ausgaben",
   "homeNoExpensesBody": "Scanne ein paar Belege, um deine Ausgabenmuster zu sehen.",
   "scanFirstReceipt": "Ersten Beleg scannen",
-  "scanComingSoon": "Das Scannen kommt in einem späteren Update",
   "historyNoRecordsTitle": "Noch keine Einträge",
   "historyNoRecordsBody": "Scanne einen Beleg oder füge eine Barausgabe hinzu, um sie hier zu sehen.",
   "historyNoMatchTitle": "Keine Treffer",
@@ -316,7 +312,6 @@
   "deleteExpenseConfirmTitle": "Diese Ausgabe löschen?",
   "deleteExpenseConfirmBody": "Dies entfernt die Ausgabe dauerhaft aus deinem Verlauf. Dies kann nicht rückgängig gemacht werden.",
   "recordNotFound": "Dieser Eintrag existiert nicht mehr.",
-  "editComingSoon": "Die Bearbeitung folgt in einem späteren Update.",
   "historyAllRecords": "Alle Einträge",
   "recordNotFoundBody": "Er wurde möglicherweise gelöscht.",
   "priceHistoryTitle": "Preisverlauf",
@@ -360,21 +355,22 @@
     }
   },
   "importConfirm": "Wiederherstellen",
-  "tImported": "Backup wiederhergestellt · {n} Belege, {m} Ausgaben",
+  "tImported": "Backup wiederhergestellt · {n,plural, =1{1 Beleg} other{{n} Belege}}, {m,plural, =1{1 Ausgabe} other{{m} Ausgaben}}",
   "@tImported": {
     "description": "Import success toast (design_spendlens.md §6/§9/§11).",
     "placeholders": {
       "n": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       },
       "m": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       }
     }
   },
-  "importMalformed": "Diese Datei ist kein SpendLens-Backup.",
+  "importMalformed": "Diese Datei ist kein gültiges Backup.",
+  "importUnexpected": "Beim Wiederherstellen dieses Backups ist ein Fehler aufgetreten.",
   "importTooNew": "Dieses Backup wurde mit einer neueren App-Version erstellt.",
   "importCanceled": "Keine Datei ausgewählt."
 }

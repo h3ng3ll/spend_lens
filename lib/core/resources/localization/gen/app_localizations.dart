@@ -114,11 +114,11 @@ abstract class AppLocalizations {
   /// **'Delete all data?'**
   String get deleteAllTitle;
 
-  /// Auto-ported from i18n.js key "deleteAllBody".
+  /// Auto-ported from i18n.js key "deleteAllBody". Converted to a real ICU plural — was raw string interpolation (recorded bug count-plus-noun-concatenated-without-icu-plural).
   ///
   /// In en, this message translates to:
-  /// **'This removes {n} records, receipt photos, stores and categories from {device}. Cloud backups are not affected. This cannot be undone.'**
-  String deleteAllBody(int n, String device);
+  /// **'{n,plural, =1{This removes 1 record, receipt photos, stores and categories from {device}. Cloud backups are not affected. This cannot be undone.} other{This removes {n} records, receipt photos, stores and categories from {device}. Cloud backups are not affected. This cannot be undone.}}'**
+  String deleteAllBody(num n, String device);
 
   /// No description provided for @deleteAllConfirm.
   ///
@@ -600,35 +600,17 @@ abstract class AppLocalizations {
   /// **'PDF export arrives in a later update.'**
   String get pdfExportUnavailable;
 
-  /// No description provided for @signInComingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Sign-in arrives in a later update.'**
-  String get signInComingSoon;
-
-  /// No description provided for @exportComingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Export and import arrive in a later update.'**
-  String get exportComingSoon;
-
   /// Auto-ported from i18n.js key "pdfToast".
   ///
   /// In en, this message translates to:
   /// **'{m} report · PDF ready to share'**
   String pdfToast(String m);
 
-  /// Auto-ported from i18n.js key "purchase1".
+  /// Replaces the auto-ported i18n.js "purchase1"/"purchaseN" pair — that split-by-count-bucket shape is not a real ICU plural (it has no dedicated code call site and was never localized to non-English plural rules; recorded bug count-plus-noun-concatenated-without-icu-plural). This single key is the correct replacement shape for any future count+noun purchases string.
   ///
   /// In en, this message translates to:
-  /// **'{n} purchase'**
-  String purchase1(int n);
-
-  /// Auto-ported from i18n.js key "purchaseN".
-  ///
-  /// In en, this message translates to:
-  /// **'{n} purchases'**
-  String purchaseN(int n);
+  /// **'{n,plural, =1{{n} purchase} other{{n} purchases}}'**
+  String purchaseCount(num n);
 
   /// No description provided for @top.
   ///
@@ -1002,11 +984,11 @@ abstract class AppLocalizations {
   /// **'by weight'**
   String get byWeight;
 
-  /// Auto-ported from i18n.js key "cheapestOf".
+  /// Auto-ported from i18n.js key "cheapestOf". Converted to a real ICU plural — was raw string interpolation (recorded bug count-plus-noun-concatenated-without-icu-plural).
   ///
   /// In en, this message translates to:
-  /// **'Cheapest of {n} stores'**
-  String cheapestOf(int n);
+  /// **'{n,plural, =1{Cheapest of 1 store} other{Cheapest of {n} stores}}'**
+  String cheapestOf(num n);
 
   /// Auto-ported from i18n.js key "cheaperBy".
   ///
@@ -1368,11 +1350,11 @@ abstract class AppLocalizations {
   /// **'Backup ready · {filename}'**
   String tBackup(String filename);
 
-  /// Auto-ported from i18n.js key "tCsv".
+  /// Auto-ported from i18n.js key "tCsv". Converted to a real ICU plural — was raw string interpolation (recorded bug count-plus-noun-concatenated-without-icu-plural).
   ///
   /// In en, this message translates to:
-  /// **'Spreadsheet ready · {count} rows'**
-  String tCsv(int count);
+  /// **'{count,plural, =1{Spreadsheet ready · 1 row} other{Spreadsheet ready · {count} rows}}'**
+  String tCsv(num count);
 
   /// No description provided for @tImport.
   ///
@@ -1452,11 +1434,11 @@ abstract class AppLocalizations {
   /// **'Delete expense'**
   String get deleteExpense;
 
-  /// Auto-ported from i18n.js key "items".
+  /// Auto-ported from i18n.js key "items". Converted to a real ICU plural — was raw string interpolation (recorded bug count-plus-noun-concatenated-without-icu-plural).
   ///
   /// In en, this message translates to:
-  /// **'{n} items'**
-  String items(int n);
+  /// **'{n,plural, =1{{n} item} other{{n} items}}'**
+  String items(num n);
 
   /// No description provided for @photoStored.
   ///
@@ -1848,12 +1830,6 @@ abstract class AppLocalizations {
   /// **'Scan your first receipt'**
   String get scanFirstReceipt;
 
-  /// No description provided for @scanComingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Scanning arrives in a later update'**
-  String get scanComingSoon;
-
   /// No description provided for @historyNoRecordsTitle.
   ///
   /// In en, this message translates to:
@@ -1961,12 +1937,6 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This record no longer exists.'**
   String get recordNotFound;
-
-  /// No description provided for @editComingSoon.
-  ///
-  /// In en, this message translates to:
-  /// **'Editing arrives in a later update.'**
-  String get editComingSoon;
 
   /// No description provided for @historyAllRecords.
   ///
@@ -2112,17 +2082,23 @@ abstract class AppLocalizations {
   /// **'Restore'**
   String get importConfirm;
 
-  /// Import success toast (design_spendlens.md §6/§9/§11).
+  /// Import success toast (design_spendlens.md §6/§9/§11). Converted to a real ICU plural — was raw string interpolation (recorded bug count-plus-noun-concatenated-without-icu-plural).
   ///
   /// In en, this message translates to:
-  /// **'Backup restored · {n} receipts, {m} expenses'**
-  String tImported(int n, int m);
+  /// **'Backup restored · {n,plural, =1{1 receipt} other{{n} receipts}}, {m,plural, =1{1 expense} other{{m} expenses}}'**
+  String tImported(num n, num m);
 
   /// No description provided for @importMalformed.
   ///
   /// In en, this message translates to:
-  /// **'That file isn\'t a SpendLens backup.'**
+  /// **'That file isn\'t a valid backup.'**
   String get importMalformed;
+
+  /// No description provided for @importUnexpected.
+  ///
+  /// In en, this message translates to:
+  /// **'Something went wrong while restoring this backup.'**
+  String get importUnexpected;
 
   /// No description provided for @importTooNew.
   ///

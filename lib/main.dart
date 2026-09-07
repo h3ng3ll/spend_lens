@@ -49,10 +49,38 @@ import 'firebase_options.dart';
 /// wiring (design_spendlens.md §6), so registering an empty shell of it now
 /// would be dead infrastructure.
 ///
-/// M10: the native splash is preserved here and released exactly once, from
-/// `SplashPage.initState()` (`~/.claude/rules/splash_screen_rules.md`) —
-/// this file calls `preserve()` and ONLY `preserve()`; `remove()` lives
-/// solely in the splash page.
+/// M10 → post-M10 correction: the native splash is preserved here in
+/// `main()`, and released exactly once from `_SpendLensAppState.initState()`
+/// below (`~/.claude/rules/splash_screen_rules.md`).
+///
+/// DEVIATION FROM THE RULES FILE'S LETTER, IN SERVICE OF ITS INTENT: the
+/// rules file names the splash SCREEN's `initState()` as `remove()`'s home,
+/// on the assumption that screen is actually built. In this project it is
+/// not — `resolveRedirect` (`init_router/init_router.dart`) is a PURE,
+/// synchronous function of `onboardingCompleted`, evaluated by GoRouter on
+/// its very first navigation to `initialLocation: '/'`, and it redirects
+/// away in BOTH branches before `SplashPageRoute.buildPage` (and therefore
+/// any splash widget's `initState`) is ever invoked. A `remove()` placed
+/// there is provably unreachable: the native splash would never lift, and
+/// the Android launch image would hang forever with a clean logcat — this
+/// was confirmed on-device (`dumpsys SurfaceFlinger` still showing the
+/// splash layer on top 20+ seconds after launch, with Flutter's SurfaceView
+/// present but never revealed underneath).
+///
+/// `SpendLensApp` is the correct owner instead: it is the ROOT widget passed
+/// to `runApp`, so its `initState()` is the earliest point in the widget
+/// tree that is GUARANTEED to run on every cold start, before GoRouter
+/// evaluates any redirect and before the first frame paints — identical in
+/// spirit to the rules file's requirement, just anchored one level higher
+/// because this project's splash route can never be the one that runs.
+/// `resolveRedirect` remains the app's ONE navigation authority; this file
+/// makes no routing decision of its own. See `_SpendLensAppState.initState`
+/// below for the call itself, and
+/// `test/regression/splash_native_remove_test.dart` for the updated gate
+/// that now asserts THIS contract.
+///
+/// This file calls `preserve()` and ONLY `preserve()` — `remove()` lives
+/// solely in `_SpendLensAppState.initState()`.
 void main() async {
   final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
   FlutterNativeSplash.preserve(
@@ -148,7 +176,7 @@ void main() async {
   );
 }
 
-class SpendLensApp extends StatelessWidget {
+class SpendLensApp extends StatefulWidget {
   final SettingsBloc settingsBloc;
   final CategoriesBloc categoriesBloc;
   final StoresBloc storesBloc;
@@ -165,20 +193,37 @@ class SpendLensApp extends StatelessWidget {
   });
 
   @override
+  State<SpendLensApp> createState() => _SpendLensAppState();
+}
+
+class _SpendLensAppState extends State<SpendLensApp> {
+  @override
+  void initState() {
+    super.initState();
+    // FIRST statement after super.initState() — unconditional, synchronous,
+    // never after an await/guard/if. `SpendLensApp` is the root widget
+    // passed to `runApp`, so this is the earliest point GUARANTEED to run
+    // on every cold start, before GoRouter evaluates `resolveRedirect` and
+    // before the first frame paints. See the doc comment on `main()` above
+    // for why this replaces the (unreachable) splash-screen-owned call.
+    FlutterNativeSplash.remove();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
         BlocProvider<SettingsBloc>.value(
-          value: settingsBloc,
+          value: widget.settingsBloc,
         ),
         BlocProvider<CategoriesBloc>.value(
-          value: categoriesBloc,
+          value: widget.categoriesBloc,
         ),
         BlocProvider<StoresBloc>.value(
-          value: storesBloc,
+          value: widget.storesBloc,
         ),
         BlocProvider<AuthBloc>.value(
-          value: authBloc,
+          value: widget.authBloc,
         ),
       ],
       child: BlocBuilder<SettingsBloc, SettingsState>(
@@ -199,7 +244,7 @@ class SpendLensApp extends StatelessWidget {
             locale: state.resolvedLocale,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocale.supportedLocales,
-            routerConfig: router,
+            routerConfig: widget.router,
           );
         },
       ),

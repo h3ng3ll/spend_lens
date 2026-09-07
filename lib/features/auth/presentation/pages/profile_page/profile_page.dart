@@ -118,7 +118,7 @@ class _ProfilePageState extends State<ProfilePage> {
         switch (state.error) {
           EBackupError.schemaTooNew => lo.importTooNew,
           EBackupError.malformed => lo.importMalformed,
-          EBackupError.unexpected || EBackupError.none => lo.importMalformed,
+          EBackupError.unexpected || EBackupError.none => lo.importUnexpected,
         },
       );
     }

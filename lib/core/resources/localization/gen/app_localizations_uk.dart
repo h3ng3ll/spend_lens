@@ -12,13 +12,25 @@ class AppLocalizationsUk extends AppLocalizations {
   String get deleteAllTitle => 'Видалити всі дані?';
 
   @override
-  String deleteAllBody(int n, String device) {
+  String deleteAllBody(num n, String device) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Буде видалено $nString записів, фото чеків, магазини та категорії з $device. Хмарні копії не зачеплені. Скасувати неможливо.';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          'Буде видалено $nString запису, фото чеків, магазини та категорії з $device. Хмарні копії не зачеплені. Скасувати неможливо.',
+      many:
+          'Буде видалено $nString записів, фото чеків, магазини та категорії з $device. Хмарні копії не зачеплені. Скасувати неможливо.',
+      few:
+          'Буде видалено $nString записи, фото чеків, магазини та категорії з $device. Хмарні копії не зачеплені. Скасувати неможливо.',
+      one:
+          'Буде видалено $nString запис, фото чеків, магазини та категорії з $device. Хмарні копії не зачеплені. Скасувати неможливо.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -304,36 +316,26 @@ class AppLocalizationsUk extends AppLocalizations {
       'Експорт у PDF з’явиться в одному з наступних оновлень.';
 
   @override
-  String get signInComingSoon =>
-      'Вхід в акаунт з’явиться в одному з наступних оновлень.';
-
-  @override
-  String get exportComingSoon =>
-      'Експорт і імпорт з’являться в одному з наступних оновлень.';
-
-  @override
   String pdfToast(String m) {
     return 'Звіт $m · PDF готовий';
   }
 
   @override
-  String purchase1(int n) {
+  String purchaseCount(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return '$nString покупка';
-  }
-
-  @override
-  String purchaseN(int n) {
-    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
-      localeName,
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$nString покупки',
+      many: '$nString покупок',
+      few: '$nString покупки',
+      one: '$nString покупка',
     );
-    final String nString = nNumberFormat.format(n);
-
-    return '$nString покупок';
+    return '$_temp0';
   }
 
   @override
@@ -575,13 +577,21 @@ class AppLocalizationsUk extends AppLocalizations {
   String get byWeight => 'на вагу';
 
   @override
-  String cheapestOf(int n) {
+  String cheapestOf(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Найдешевше з $nString магазинів';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Найдешевше з $nString магазину',
+      many: 'Найдешевше з $nString магазинів',
+      few: 'Найдешевше з $nString магазинів',
+      one: 'Найдешевше з $nString магазину',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -814,12 +824,20 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
-  String tCsv(int count) {
+  String tCsv(num count) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return 'Таблиця готова · $countString рядків';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Таблиця готова · $countString рядка',
+      many: 'Таблиця готова · $countString рядків',
+      few: 'Таблиця готова · $countString рядки',
+      one: 'Таблиця готова · $countString рядок',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -862,13 +880,21 @@ class AppLocalizationsUk extends AppLocalizations {
   String get deleteExpense => 'Видалити витрату';
 
   @override
-  String items(int n) {
+  String items(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return '$nString позицій';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$nString позиції',
+      many: '$nString позицій',
+      few: '$nString позиції',
+      one: '$nString позиція',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1089,10 +1115,6 @@ class AppLocalizationsUk extends AppLocalizations {
   String get scanFirstReceipt => 'Сканувати перший чек';
 
   @override
-  String get scanComingSoon =>
-      'Сканування з\'явиться в одному з наступних оновлень';
-
-  @override
   String get historyNoRecordsTitle => 'Ще немає записів';
 
   @override
@@ -1151,10 +1173,6 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get recordNotFound => 'Цей запис більше не існує.';
-
-  @override
-  String get editComingSoon =>
-      'Редагування з\'явиться в одному з наступних оновлень.';
 
   @override
   String get historyAllRecords => 'Усі записи';
@@ -1240,7 +1258,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get importConfirm => 'Відновити';
 
   @override
-  String tImported(int n, int m) {
+  String tImported(num n, num m) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
@@ -1250,11 +1268,31 @@ class AppLocalizationsUk extends AppLocalizations {
     );
     final String mString = mNumberFormat.format(m);
 
-    return 'Резервну копію відновлено · $nString чеків, $mString витрат';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$nString чека',
+      many: '$nString чеків',
+      few: '$nString чеки',
+      one: '$nString чек',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      m,
+      locale: localeName,
+      other: '$mString витрати',
+      many: '$mString витрат',
+      few: '$mString витрати',
+      one: '$mString витрата',
+    );
+    return 'Резервну копію відновлено · $_temp0, $_temp1';
   }
 
   @override
-  String get importMalformed => 'Цей файл не є резервною копією SpendLens.';
+  String get importMalformed => 'Цей файл не є дійсною резервною копією.';
+
+  @override
+  String get importUnexpected =>
+      'Під час відновлення цієї резервної копії сталася помилка.';
 
   @override
   String get importTooNew =>

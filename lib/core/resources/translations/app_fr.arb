@@ -1,7 +1,7 @@
 {
   "@@locale": "fr",
   "deleteAllTitle": "Supprimer toutes les données ?",
-  "deleteAllBody": "Supprime {n} enregistrements, photos de tickets, magasins et catégories de {device}. Les sauvegardes cloud ne sont pas affectées. Irréversible.",
+  "deleteAllBody": "{n,plural, =1{Supprime 1 enregistrement, photos de tickets, magasins et catégories de {device}. Les sauvegardes cloud ne sont pas affectées. Irréversible.} other{Supprime {n} enregistrements, photos de tickets, magasins et catégories de {device}. Les sauvegardes cloud ne sont pas affectées. Irréversible.}}",
   "deleteAllConfirm": "Tout supprimer",
   "tDeletedAll": "Toutes les données supprimées",
   "renameCategory": "Renommer la catégorie",
@@ -82,11 +82,8 @@
   "periodRange": "Enregistrements de {a} à {b}",
   "pdf": "PDF",
   "pdfExportUnavailable": "L’export PDF arrivera dans une prochaine mise à jour.",
-  "signInComingSoon": "La connexion arrivera dans une prochaine mise à jour.",
-  "exportComingSoon": "L’export et l’import arriveront dans une prochaine mise à jour.",
   "pdfToast": "Rapport {m} · PDF prêt à partager",
-  "purchase1": "{n} achat",
-  "purchaseN": "{n} achats",
+  "purchaseCount": "{n,plural, one{{n} achat} other{{n} achats}}",
   "top": "top",
   "ins1": "L’alimentation représente {p}% de vos dépenses.",
   "ins2": "Les dépenses {category} ont {direction} de {percent}% ce mois-ci.",
@@ -149,7 +146,7 @@
   "storeEmpty": "{t} · aucun ticket pour l’instant",
   "bought": "Acheté {n}×",
   "byWeight": "au poids",
-  "cheapestOf": "Le moins cher de {n} magasins",
+  "cheapestOf": "{n,plural, one{Le moins cher de {n} magasin} other{Le moins cher de {n} magasins}}",
   "cheaperBy": "{s} {p} · moins cher de {d}",
   "cheaperHere": "{s} {p} /kg · moins cher ici",
   "onlyHere": "Acheté uniquement ici",
@@ -210,7 +207,7 @@
   "tSignedIn": "Connecté · synchronisation activée",
   "tSignedOut": "Déconnecté · données conservées sur l’appareil",
   "tBackup": "Sauvegarde prête · {filename}",
-  "tCsv": "Tableau prêt · {count} lignes",
+  "tCsv": "{count,plural, one{Tableau prêt · {count} ligne} other{Tableau prêt · {count} lignes}}",
   "tImport": "Choisissez un fichier de sauvegarde",
   "dark": "Sombre",
   "light": "Clair",
@@ -224,7 +221,7 @@
   "cashExpense": "Dépense en espèces",
   "deleteReceipt": "Supprimer le ticket",
   "deleteExpense": "Supprimer la dépense",
-  "items": "{n} articles",
+  "items": "{n,plural, one{{n} article} other{{n} articles}}",
   "photoStored": "photo du ticket · sur l’appareil",
   "photoUpdated": "photo du ticket · mise à jour à l’instant",
   "photoTitle": "{n} · ticket",
@@ -290,7 +287,6 @@
   "homeNoExpensesTitle": "Aucune dépense pour le moment",
   "homeNoExpensesBody": "Scannez quelques reçus pour voir vos habitudes de dépense.",
   "scanFirstReceipt": "Scanner votre premier reçu",
-  "scanComingSoon": "La numérisation arrivera dans une prochaine mise à jour",
   "historyNoRecordsTitle": "Aucun enregistrement pour le moment",
   "historyNoRecordsBody": "Scannez un reçu ou ajoutez une dépense en espèces pour la voir ici.",
   "historyNoMatchTitle": "Aucune correspondance",
@@ -316,7 +312,6 @@
   "deleteExpenseConfirmTitle": "Supprimer cette dépense ?",
   "deleteExpenseConfirmBody": "Cela supprime définitivement la dépense de votre historique. Cette action est irréversible.",
   "recordNotFound": "Cet enregistrement n'existe plus.",
-  "editComingSoon": "La modification arrivera dans une prochaine mise à jour.",
   "historyAllRecords": "Tous les enregistrements",
   "recordNotFoundBody": "Il a peut-être été supprimé.",
   "priceHistoryTitle": "Historique des prix",
@@ -360,21 +355,22 @@
     }
   },
   "importConfirm": "Restaurer",
-  "tImported": "Sauvegarde restaurée · {n} reçus, {m} dépenses",
+  "tImported": "Sauvegarde restaurée · {n,plural, one{{n} reçu} other{{n} reçus}}, {m,plural, one{{m} dépense} other{{m} dépenses}}",
   "@tImported": {
     "description": "Import success toast (design_spendlens.md §6/§9/§11).",
     "placeholders": {
       "n": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       },
       "m": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       }
     }
   },
-  "importMalformed": "Ce fichier n'est pas une sauvegarde SpendLens.",
+  "importMalformed": "Ce fichier n'est pas une sauvegarde valide.",
+  "importUnexpected": "Une erreur s'est produite lors de la restauration de cette sauvegarde.",
   "importTooNew": "Cette sauvegarde a été créée avec une version plus récente de l'application.",
   "importCanceled": "Aucun fichier sélectionné."
 }

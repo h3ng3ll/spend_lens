@@ -24,8 +24,8 @@ import '../../../features/store/presentation/pages/choose_store_page/choose_stor
 import '../../../features/store/presentation/pages/new_store_page/new_store_page.dart';
 import '../../../features/store/presentation/pages/store_detail_page/store_detail_page.dart';
 import '../../../features/store/presentation/pages/store_page/store_page.dart';
+import '../presentation/loading_data_widget.dart';
 import '../root_page/root_page.dart';
-import '../splash_page/splash_page.dart';
 
 part 'init_router.g.dart';
 
@@ -117,13 +117,20 @@ CustomTransitionPage<void> slideUpPage(Widget child) {
 
 // ─────────────────────────── top level ────────────────────────────────
 
+/// `resolveRedirect` fires synchronously on GoRouter's very first navigation
+/// evaluation to `/` — before this route's `buildPage` is ever invoked, in
+/// EITHER branch (`!onboardingCompleted` → `/onboarding`; completed →
+/// `/home`). This route therefore never actually paints; it exists only so
+/// `initialLocation: '/'` and `resolveRedirect`'s location comparisons have
+/// a registered route to resolve against. See `main.dart` for where
+/// `FlutterNativeSplash.remove()` now lives, and why.
 @TypedGoRoute<SplashPageRoute>(path: '/')
 class SplashPageRoute extends GoRouteData with $SplashPageRoute {
   const SplashPageRoute();
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const SplashPage());
+    return slideUpPage(const LoadingDataWidget());
   }
 }
 

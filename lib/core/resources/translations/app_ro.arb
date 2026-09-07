@@ -1,7 +1,7 @@
 {
   "@@locale": "ro",
   "deleteAllTitle": "Ștergi toate datele?",
-  "deleteAllBody": "Se vor șterge {n} înregistrări, pozele bonurilor, magazinele și categoriile de pe {device}. Backup-urile cloud nu sunt afectate. Acțiunea este ireversibilă.",
+  "deleteAllBody": "{n,plural, one{Se va șterge 1 înregistrare, pozele bonurilor, magazinele și categoriile de pe {device}. Backup-urile cloud nu sunt afectate. Acțiunea este ireversibilă.} few{Se vor șterge {n} înregistrări, pozele bonurilor, magazinele și categoriile de pe {device}. Backup-urile cloud nu sunt afectate. Acțiunea este ireversibilă.} other{Se vor șterge {n} de înregistrări, pozele bonurilor, magazinele și categoriile de pe {device}. Backup-urile cloud nu sunt afectate. Acțiunea este ireversibilă.}}",
   "deleteAllConfirm": "Șterge tot",
   "tDeletedAll": "Toate datele au fost șterse",
   "renameCategory": "Redenumește categoria",
@@ -82,11 +82,8 @@
   "periodRange": "Înregistrări din {a} până în {b}",
   "pdf": "PDF",
   "pdfExportUnavailable": "Exportul PDF va fi disponibil într-o actualizare viitoare.",
-  "signInComingSoon": "Autentificarea va fi disponibilă într-o actualizare viitoare.",
-  "exportComingSoon": "Exportul și importul vor fi disponibile într-o actualizare viitoare.",
   "pdfToast": "Raport {m} · PDF gata de trimis",
-  "purchase1": "{n} cumpărătură",
-  "purchaseN": "{n} cumpărături",
+  "purchaseCount": "{n,plural, one{{n} cumpărătură} few{{n} cumpărături} other{{n} de cumpărături}}",
   "top": "top",
   "ins1": "Alimentele reprezintă {p}% din cheltuieli.",
   "ins2": "Cheltuielile la {category} au {direction} cu {percent}% luna aceasta.",
@@ -149,7 +146,7 @@
   "storeEmpty": "{t} · fără bonuri încă",
   "bought": "Cumpărat {n}×",
   "byWeight": "la cântar",
-  "cheapestOf": "Cel mai ieftin din {n} magazine",
+  "cheapestOf": "{n,plural, one{Cel mai ieftin din 1 magazin} few{Cel mai ieftin din {n} magazine} other{Cel mai ieftin din {n} de magazine}}",
   "cheaperBy": "{s} {p} · mai ieftin cu {d}",
   "cheaperHere": "{s} {p} /kg · mai ieftin aici",
   "onlyHere": "Cumpărat doar aici",
@@ -210,7 +207,7 @@
   "tSignedIn": "Conectat · sincronizare activă",
   "tSignedOut": "Deconectat · datele rămân pe dispozitiv",
   "tBackup": "Backup gata · {filename}",
-  "tCsv": "Tabel gata · {count} rânduri",
+  "tCsv": "{count,plural, one{Tabel gata · 1 rând} few{Tabel gata · {count} rânduri} other{Tabel gata · {count} de rânduri}}",
   "tImport": "Alege un fișier de backup",
   "dark": "Întunecat",
   "light": "Luminos",
@@ -224,7 +221,7 @@
   "cashExpense": "Cheltuială cash",
   "deleteReceipt": "Șterge bonul",
   "deleteExpense": "Șterge cheltuiala",
-  "items": "{n} produse",
+  "items": "{n,plural, one{{n} produs} few{{n} produse} other{{n} de produse}}",
   "photoStored": "poza bonului · pe dispozitiv",
   "photoUpdated": "poza bonului · actualizată acum",
   "photoTitle": "{n} · bon",
@@ -290,7 +287,6 @@
   "homeNoExpensesTitle": "Încă nicio cheltuială",
   "homeNoExpensesBody": "Scanează câteva bonuri pentru a-ți vedea tiparele de cheltuieli.",
   "scanFirstReceipt": "Scanează primul bon",
-  "scanComingSoon": "Scanarea va fi disponibilă într-o actualizare viitoare",
   "historyNoRecordsTitle": "Încă nicio înregistrare",
   "historyNoRecordsBody": "Scanează un bon sau adaugă o cheltuială cash pentru a o vedea aici.",
   "historyNoMatchTitle": "Nicio înregistrare potrivită",
@@ -316,7 +312,6 @@
   "deleteExpenseConfirmTitle": "Ștergi această cheltuială?",
   "deleteExpenseConfirmBody": "Aceasta elimină definitiv cheltuiala din istoric. Nu poate fi anulată.",
   "recordNotFound": "Această înregistrare nu mai există.",
-  "editComingSoon": "Editarea va fi disponibilă într-o actualizare viitoare.",
   "historyAllRecords": "Toate înregistrările",
   "recordNotFoundBody": "Este posibil să fi fost ștearsă.",
   "priceHistoryTitle": "Istoric preț",
@@ -360,21 +355,22 @@
     }
   },
   "importConfirm": "Restabiliți",
-  "tImported": "Backup restabilit · {n} bonuri, {m} cheltuieli",
+  "tImported": "Backup restabilit · {n,plural, one{1 bon} few{{n} bonuri} other{{n} de bonuri}}, {m,plural, one{1 cheltuială} few{{m} cheltuieli} other{{m} de cheltuieli}}",
   "@tImported": {
     "description": "Import success toast (design_spendlens.md §6/§9/§11).",
     "placeholders": {
       "n": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       },
       "m": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       }
     }
   },
-  "importMalformed": "Acest fișier nu este un backup SpendLens.",
+  "importMalformed": "Acest fișier nu este o copie de rezervă validă.",
+  "importUnexpected": "A apărut o eroare la restaurarea acestei copii de rezervă.",
   "importTooNew": "Acest backup a fost creat cu o versiune mai nouă a aplicației.",
   "importCanceled": "Niciun fișier selectat."
 }

@@ -12,13 +12,21 @@ class AppLocalizationsDe extends AppLocalizations {
   String get deleteAllTitle => 'Alle Daten löschen?';
 
   @override
-  String deleteAllBody(int n, String device) {
+  String deleteAllBody(num n, String device) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Entfernt $nString Einträge, Belegfotos, Läden und Kategorien von $device. Cloud-Backups bleiben erhalten. Das kann nicht rückgängig gemacht werden.';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          'Entfernt $nString Einträge, Belegfotos, Läden und Kategorien von $device. Cloud-Backups bleiben erhalten. Das kann nicht rückgängig gemacht werden.',
+      one:
+          'Entfernt 1 Eintrag, Belegfotos, Läden und Kategorien von $device. Cloud-Backups bleiben erhalten. Das kann nicht rückgängig gemacht werden.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -304,36 +312,24 @@ class AppLocalizationsDe extends AppLocalizations {
       'PDF-Export folgt in einem späteren Update.';
 
   @override
-  String get signInComingSoon =>
-      'Die Anmeldung folgt in einem späteren Update.';
-
-  @override
-  String get exportComingSoon =>
-      'Export und Import folgen in einem späteren Update.';
-
-  @override
   String pdfToast(String m) {
     return 'Bericht $m · PDF bereit zum Teilen';
   }
 
   @override
-  String purchase1(int n) {
+  String purchaseCount(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return '$nString Einkauf';
-  }
-
-  @override
-  String purchaseN(int n) {
-    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
-      localeName,
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$nString Einkäufe',
+      one: '$nString Einkauf',
     );
-    final String nString = nNumberFormat.format(n);
-
-    return '$nString Einkäufe';
+    return '$_temp0';
   }
 
   @override
@@ -575,13 +571,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get byWeight => 'nach Gewicht';
 
   @override
-  String cheapestOf(int n) {
+  String cheapestOf(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Günstigster von $nString Läden';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Günstigster von $nString Läden',
+      one: 'Günstigster von 1 Laden',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -813,12 +815,18 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
-  String tCsv(int count) {
+  String tCsv(num count) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return 'Tabelle bereit · $countString Zeilen';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tabelle bereit · $countString Zeilen',
+      one: 'Tabelle bereit · 1 Zeile',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -861,13 +869,19 @@ class AppLocalizationsDe extends AppLocalizations {
   String get deleteExpense => 'Ausgabe löschen';
 
   @override
-  String items(int n) {
+  String items(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return '$nString Artikel';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$nString Artikel',
+      one: '$nString Artikel',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1090,9 +1104,6 @@ class AppLocalizationsDe extends AppLocalizations {
   String get scanFirstReceipt => 'Ersten Beleg scannen';
 
   @override
-  String get scanComingSoon => 'Das Scannen kommt in einem späteren Update';
-
-  @override
   String get historyNoRecordsTitle => 'Noch keine Einträge';
 
   @override
@@ -1153,10 +1164,6 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get recordNotFound => 'Dieser Eintrag existiert nicht mehr.';
-
-  @override
-  String get editComingSoon =>
-      'Die Bearbeitung folgt in einem späteren Update.';
 
   @override
   String get historyAllRecords => 'Alle Einträge';
@@ -1242,7 +1249,7 @@ class AppLocalizationsDe extends AppLocalizations {
   String get importConfirm => 'Wiederherstellen';
 
   @override
-  String tImported(int n, int m) {
+  String tImported(num n, num m) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
@@ -1252,11 +1259,27 @@ class AppLocalizationsDe extends AppLocalizations {
     );
     final String mString = mNumberFormat.format(m);
 
-    return 'Backup wiederhergestellt · $nString Belege, $mString Ausgaben';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$nString Belege',
+      one: '1 Beleg',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      m,
+      locale: localeName,
+      other: '$mString Ausgaben',
+      one: '1 Ausgabe',
+    );
+    return 'Backup wiederhergestellt · $_temp0, $_temp1';
   }
 
   @override
-  String get importMalformed => 'Diese Datei ist kein SpendLens-Backup.';
+  String get importMalformed => 'Diese Datei ist kein gültiges Backup.';
+
+  @override
+  String get importUnexpected =>
+      'Beim Wiederherstellen dieses Backups ist ein Fehler aufgetreten.';
 
   @override
   String get importTooNew =>

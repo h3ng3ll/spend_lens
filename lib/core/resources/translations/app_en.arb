@@ -1,12 +1,12 @@
 {
   "@@locale": "en",
   "deleteAllTitle": "Delete all data?",
-  "deleteAllBody": "This removes {n} records, receipt photos, stores and categories from {device}. Cloud backups are not affected. This cannot be undone.",
+  "deleteAllBody": "{n,plural, =1{This removes 1 record, receipt photos, stores and categories from {device}. Cloud backups are not affected. This cannot be undone.} other{This removes {n} records, receipt photos, stores and categories from {device}. Cloud backups are not affected. This cannot be undone.}}",
   "@deleteAllBody": {
-    "description": "Auto-ported from i18n.js key \"deleteAllBody\".",
+    "description": "Auto-ported from i18n.js key \"deleteAllBody\". Converted to a real ICU plural — was raw string interpolation (recorded bug count-plus-noun-concatenated-without-icu-plural).",
     "placeholders": {
       "n": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       },
       "device": {
@@ -165,8 +165,6 @@
   },
   "pdf": "PDF",
   "pdfExportUnavailable": "PDF export arrives in a later update.",
-  "signInComingSoon": "Sign-in arrives in a later update.",
-  "exportComingSoon": "Export and import arrive in a later update.",
   "pdfToast": "{m} report · PDF ready to share",
   "@pdfToast": {
     "description": "Auto-ported from i18n.js key \"pdfToast\".",
@@ -176,22 +174,12 @@
       }
     }
   },
-  "purchase1": "{n} purchase",
-  "@purchase1": {
-    "description": "Auto-ported from i18n.js key \"purchase1\".",
+  "purchaseCount": "{n,plural, =1{{n} purchase} other{{n} purchases}}",
+  "@purchaseCount": {
+    "description": "Replaces the auto-ported i18n.js \"purchase1\"/\"purchaseN\" pair — that split-by-count-bucket shape is not a real ICU plural (it has no dedicated code call site and was never localized to non-English plural rules; recorded bug count-plus-noun-concatenated-without-icu-plural). This single key is the correct replacement shape for any future count+noun purchases string.",
     "placeholders": {
       "n": {
-        "type": "int",
-        "format": "decimalPattern"
-      }
-    }
-  },
-  "purchaseN": "{n} purchases",
-  "@purchaseN": {
-    "description": "Auto-ported from i18n.js key \"purchaseN\".",
-    "placeholders": {
-      "n": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       }
     }
@@ -364,12 +352,12 @@
     }
   },
   "byWeight": "by weight",
-  "cheapestOf": "Cheapest of {n} stores",
+  "cheapestOf": "{n,plural, =1{Cheapest of 1 store} other{Cheapest of {n} stores}}",
   "@cheapestOf": {
-    "description": "Auto-ported from i18n.js key \"cheapestOf\".",
+    "description": "Auto-ported from i18n.js key \"cheapestOf\". Converted to a real ICU plural — was raw string interpolation (recorded bug count-plus-noun-concatenated-without-icu-plural).",
     "placeholders": {
       "n": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       }
     }
@@ -546,12 +534,12 @@
       }
     }
   },
-  "tCsv": "Spreadsheet ready · {count} rows",
+  "tCsv": "{count,plural, =1{Spreadsheet ready · 1 row} other{Spreadsheet ready · {count} rows}}",
   "@tCsv": {
-    "description": "Auto-ported from i18n.js key \"tCsv\".",
+    "description": "Auto-ported from i18n.js key \"tCsv\". Converted to a real ICU plural — was raw string interpolation (recorded bug count-plus-noun-concatenated-without-icu-plural).",
     "placeholders": {
       "count": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       }
     }
@@ -569,12 +557,12 @@
   "cashExpense": "Cash expense",
   "deleteReceipt": "Delete receipt",
   "deleteExpense": "Delete expense",
-  "items": "{n} items",
+  "items": "{n,plural, =1{{n} item} other{{n} items}}",
   "@items": {
-    "description": "Auto-ported from i18n.js key \"items\".",
+    "description": "Auto-ported from i18n.js key \"items\". Converted to a real ICU plural — was raw string interpolation (recorded bug count-plus-noun-concatenated-without-icu-plural).",
     "placeholders": {
       "n": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       }
     }
@@ -707,7 +695,6 @@
   "homeNoExpensesTitle": "No expenses yet",
   "homeNoExpensesBody": "Scan a few receipts to see your spending patterns.",
   "scanFirstReceipt": "Scan your first receipt",
-  "scanComingSoon": "Scanning arrives in a later update",
   "historyNoRecordsTitle": "No records yet",
   "historyNoRecordsBody": "Scan a receipt or add a cash expense to see it here.",
   "historyNoMatchTitle": "No matching records",
@@ -733,7 +720,6 @@
   "deleteExpenseConfirmTitle": "Delete this expense?",
   "deleteExpenseConfirmBody": "This permanently removes this expense from your history. This can't be undone.",
   "recordNotFound": "This record no longer exists.",
-  "editComingSoon": "Editing arrives in a later update.",
   "historyAllRecords": "All records",
   "recordNotFoundBody": "It may have been deleted.",
   "priceHistoryTitle": "Price history",
@@ -795,21 +781,22 @@
     }
   },
   "importConfirm": "Restore",
-  "tImported": "Backup restored · {n} receipts, {m} expenses",
+  "tImported": "Backup restored · {n,plural, =1{1 receipt} other{{n} receipts}}, {m,plural, =1{1 expense} other{{m} expenses}}",
   "@tImported": {
-    "description": "Import success toast (design_spendlens.md §6/§9/§11).",
+    "description": "Import success toast (design_spendlens.md §6/§9/§11). Converted to a real ICU plural — was raw string interpolation (recorded bug count-plus-noun-concatenated-without-icu-plural).",
     "placeholders": {
       "n": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       },
       "m": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       }
     }
   },
-  "importMalformed": "That file isn't a SpendLens backup.",
+  "importMalformed": "That file isn't a valid backup.",
+  "importUnexpected": "Something went wrong while restoring this backup.",
   "importTooNew": "This backup was made with a newer version of the app.",
   "importCanceled": "No file selected."
 }

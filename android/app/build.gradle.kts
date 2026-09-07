@@ -23,9 +23,16 @@ android {
         applicationId = "com.hengell.spendlens"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        // Explicit per design_spendlens.md §6 — never left to
-        // `flutter.minSdkVersion`'s default for this project.
-        minSdk = 21
+        // Explicit — never left to `flutter.minSdkVersion`'s default.
+        //
+        // design_spendlens.md §6 specifies 21, but that predates the Apphud
+        // decision and is UNACHIEVABLE with it: apphud 3.4.0 declares
+        // minSdkVersion 26, so a lower value fails the manifest merge and the
+        // app cannot be built at all. Highest floor among the dependencies
+        // wins: apphud 26 > camera_android_camerax 23 > mlkit 21.
+        // Raising it is the only way to ship the subscription SDK the spec
+        // itself mandates (§6, "Apphud only, no custom StoreKit").
+        minSdk = 26
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

@@ -1,7 +1,7 @@
 {
   "@@locale": "es",
   "deleteAllTitle": "¿Borrar todos los datos?",
-  "deleteAllBody": "Se eliminarán {n} registros, fotos de tickets, tiendas y categorías de {device}. Las copias en la nube no se ven afectadas. No se puede deshacer.",
+  "deleteAllBody": "{n,plural, =1{Se eliminará 1 registro, fotos de tickets, tiendas y categorías de {device}. Las copias en la nube no se ven afectadas. No se puede deshacer.} other{Se eliminarán {n} registros, fotos de tickets, tiendas y categorías de {device}. Las copias en la nube no se ven afectadas. No se puede deshacer.}}",
   "deleteAllConfirm": "Borrar todo",
   "tDeletedAll": "Todos los datos borrados",
   "renameCategory": "Renombrar categoría",
@@ -82,11 +82,8 @@
   "periodRange": "Registros de {a} a {b}",
   "pdf": "PDF",
   "pdfExportUnavailable": "La exportación a PDF llegará en una futura actualización.",
-  "signInComingSoon": "El inicio de sesión llegará en una futura actualización.",
-  "exportComingSoon": "La exportación e importación llegarán en una futura actualización.",
   "pdfToast": "Informe {m} · PDF listo para compartir",
-  "purchase1": "{n} compra",
-  "purchaseN": "{n} compras",
+  "purchaseCount": "{n,plural, =1{{n} compra} other{{n} compras}}",
   "top": "top",
   "ins1": "Alimentación es el {p}% de tu gasto.",
   "ins2": "El gasto en {category} {direction} un {percent}% este mes.",
@@ -149,7 +146,7 @@
   "storeEmpty": "{t} · aún sin tickets",
   "bought": "Comprado {n}×",
   "byWeight": "a peso",
-  "cheapestOf": "El más barato de {n} tiendas",
+  "cheapestOf": "{n,plural, =1{El más barato de 1 tienda} other{El más barato de {n} tiendas}}",
   "cheaperBy": "{s} {p} · más barato por {d}",
   "cheaperHere": "{s} {p} /kg · más barato aquí",
   "onlyHere": "Solo comprado aquí",
@@ -210,7 +207,7 @@
   "tSignedIn": "Sesión iniciada · sincronización activa",
   "tSignedOut": "Sesión cerrada · datos en el dispositivo",
   "tBackup": "Copia lista · {filename}",
-  "tCsv": "Hoja lista · {count} filas",
+  "tCsv": "{count,plural, =1{Hoja lista · 1 fila} other{Hoja lista · {count} filas}}",
   "tImport": "Elige un archivo de copia",
   "dark": "Oscuro",
   "light": "Claro",
@@ -224,7 +221,7 @@
   "cashExpense": "Gasto en efectivo",
   "deleteReceipt": "Eliminar ticket",
   "deleteExpense": "Eliminar gasto",
-  "items": "{n} artículos",
+  "items": "{n,plural, =1{{n} artículo} other{{n} artículos}}",
   "photoStored": "foto del ticket · en el dispositivo",
   "photoUpdated": "foto del ticket · actualizada ahora",
   "photoTitle": "{n} · ticket",
@@ -290,7 +287,6 @@
   "homeNoExpensesTitle": "Aún no hay gastos",
   "homeNoExpensesBody": "Escanea algunos recibos para ver tus patrones de gasto.",
   "scanFirstReceipt": "Escanea tu primer recibo",
-  "scanComingSoon": "El escaneo llegará en una futura actualización",
   "historyNoRecordsTitle": "Aún no hay registros",
   "historyNoRecordsBody": "Escanea un recibo o añade un gasto en efectivo para verlo aquí.",
   "historyNoMatchTitle": "Sin coincidencias",
@@ -316,7 +312,6 @@
   "deleteExpenseConfirmTitle": "¿Eliminar este gasto?",
   "deleteExpenseConfirmBody": "Esto elimina permanentemente el gasto de tu historial. No se puede deshacer.",
   "recordNotFound": "Este registro ya no existe.",
-  "editComingSoon": "La edición llegará en una futura actualización.",
   "historyAllRecords": "Todos los registros",
   "recordNotFoundBody": "Puede que se haya eliminado.",
   "priceHistoryTitle": "Historial de precios",
@@ -360,21 +355,22 @@
     }
   },
   "importConfirm": "Restaurar",
-  "tImported": "Copia restaurada · {n} recibos, {m} gastos",
+  "tImported": "Copia restaurada · {n,plural, =1{1 recibo} other{{n} recibos}}, {m,plural, =1{1 gasto} other{{m} gastos}}",
   "@tImported": {
     "description": "Import success toast (design_spendlens.md §6/§9/§11).",
     "placeholders": {
       "n": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       },
       "m": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       }
     }
   },
-  "importMalformed": "Ese archivo no es una copia de seguridad de SpendLens.",
+  "importMalformed": "Ese archivo no es una copia de seguridad válida.",
+  "importUnexpected": "Se produjo un error al restaurar esta copia de seguridad.",
   "importTooNew": "Esta copia de seguridad se creó con una versión más reciente de la app.",
   "importCanceled": "No se seleccionó ningún archivo."
 }

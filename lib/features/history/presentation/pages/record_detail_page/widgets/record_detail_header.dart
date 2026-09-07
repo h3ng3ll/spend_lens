@@ -6,26 +6,23 @@ import '../../../../../../core/widgets/btn/circle_back_btn.dart';
 import '../../../../../../core/widgets/padding/horizontal_padding.dart';
 
 /// Record Detail's header (design_spendlens.md — Record detail artboard): a
-/// circular back button, the centered record-type label (`{{ dType }}`),
-/// and a text Edit action on the right.
+/// circular back button and the centered record-type label (`{{ dType }}`).
 ///
-/// M5 scope boundary: [onEdit] is wired by the page to an info toast, not a
-/// real edit flow — there is no dedicated edit-cash-expense route in
-/// `init_router.dart` at this milestone (verified: only `CashExpensePageRoute`
-/// exists, and it creates a NEW expense), and inventing one is outside this
-/// screen's scope. See `RecordDetailPage`'s doc comment.
+/// M5 scope boundary: no Edit action is rendered here — there is no
+/// dedicated edit-cash-expense route in `init_router.dart` at this
+/// milestone (verified: only `CashExpensePageRoute` exists, and it creates
+/// a NEW expense), and inventing one is outside this screen's scope. A
+/// control that only echoed its own label back as a toast was removed
+/// rather than shipped as a dead stub. See `RecordDetailPage`'s doc
+/// comment.
 class RecordDetailHeader extends StatelessWidget {
   final String typeLabel;
-  final String editLabel;
   final VoidCallback onClose;
-  final VoidCallback onEdit;
 
   const RecordDetailHeader({
     super.key,
     required this.typeLabel,
-    required this.editLabel,
     required this.onClose,
-    required this.onEdit,
   });
 
   @override
@@ -48,21 +45,7 @@ class RecordDetailHeader extends StatelessWidget {
                 style: textTheme.headline17Semi.copyWith(color: scheme.ink),
               ),
             ),
-            SizedBox(
-              width: 40.0,
-              child: GestureDetector(
-                onTap: onEdit,
-                child: Align(
-                  child: Text(
-                    editLabel,
-                    style: textTheme.subhead15.copyWith(
-                      color: scheme.accent,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ),
-              ),
-            ),
+            const SizedBox(width: 40.0),
           ],
         ),
       ),

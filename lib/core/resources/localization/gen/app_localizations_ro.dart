@@ -12,13 +12,23 @@ class AppLocalizationsRo extends AppLocalizations {
   String get deleteAllTitle => 'Ștergi toate datele?';
 
   @override
-  String deleteAllBody(int n, String device) {
+  String deleteAllBody(num n, String device) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Se vor șterge $nString înregistrări, pozele bonurilor, magazinele și categoriile de pe $device. Backup-urile cloud nu sunt afectate. Acțiunea este ireversibilă.';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          'Se vor șterge $nString de înregistrări, pozele bonurilor, magazinele și categoriile de pe $device. Backup-urile cloud nu sunt afectate. Acțiunea este ireversibilă.',
+      few:
+          'Se vor șterge $nString înregistrări, pozele bonurilor, magazinele și categoriile de pe $device. Backup-urile cloud nu sunt afectate. Acțiunea este ireversibilă.',
+      one:
+          'Se va șterge 1 înregistrare, pozele bonurilor, magazinele și categoriile de pe $device. Backup-urile cloud nu sunt afectate. Acțiunea este ireversibilă.',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -303,36 +313,25 @@ class AppLocalizationsRo extends AppLocalizations {
       'Exportul PDF va fi disponibil într-o actualizare viitoare.';
 
   @override
-  String get signInComingSoon =>
-      'Autentificarea va fi disponibilă într-o actualizare viitoare.';
-
-  @override
-  String get exportComingSoon =>
-      'Exportul și importul vor fi disponibile într-o actualizare viitoare.';
-
-  @override
   String pdfToast(String m) {
     return 'Raport $m · PDF gata de trimis';
   }
 
   @override
-  String purchase1(int n) {
+  String purchaseCount(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return '$nString cumpărătură';
-  }
-
-  @override
-  String purchaseN(int n) {
-    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
-      localeName,
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$nString de cumpărături',
+      few: '$nString cumpărături',
+      one: '$nString cumpărătură',
     );
-    final String nString = nNumberFormat.format(n);
-
-    return '$nString cumpărături';
+    return '$_temp0';
   }
 
   @override
@@ -574,13 +573,20 @@ class AppLocalizationsRo extends AppLocalizations {
   String get byWeight => 'la cântar';
 
   @override
-  String cheapestOf(int n) {
+  String cheapestOf(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Cel mai ieftin din $nString magazine';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Cel mai ieftin din $nString de magazine',
+      few: 'Cel mai ieftin din $nString magazine',
+      one: 'Cel mai ieftin din 1 magazin',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -813,12 +819,19 @@ class AppLocalizationsRo extends AppLocalizations {
   }
 
   @override
-  String tCsv(int count) {
+  String tCsv(num count) {
     final intl.NumberFormat countNumberFormat =
         intl.NumberFormat.decimalPattern(localeName);
     final String countString = countNumberFormat.format(count);
 
-    return 'Tabel gata · $countString rânduri';
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Tabel gata · $countString de rânduri',
+      few: 'Tabel gata · $countString rânduri',
+      one: 'Tabel gata · 1 rând',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -861,13 +874,20 @@ class AppLocalizationsRo extends AppLocalizations {
   String get deleteExpense => 'Șterge cheltuiala';
 
   @override
-  String items(int n) {
+  String items(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return '$nString produse';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$nString de produse',
+      few: '$nString produse',
+      one: '$nString produs',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1088,10 +1108,6 @@ class AppLocalizationsRo extends AppLocalizations {
   String get scanFirstReceipt => 'Scanează primul bon';
 
   @override
-  String get scanComingSoon =>
-      'Scanarea va fi disponibilă într-o actualizare viitoare';
-
-  @override
   String get historyNoRecordsTitle => 'Încă nicio înregistrare';
 
   @override
@@ -1150,10 +1166,6 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get recordNotFound => 'Această înregistrare nu mai există.';
-
-  @override
-  String get editComingSoon =>
-      'Editarea va fi disponibilă într-o actualizare viitoare.';
 
   @override
   String get historyAllRecords => 'Toate înregistrările';
@@ -1240,7 +1252,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get importConfirm => 'Restabiliți';
 
   @override
-  String tImported(int n, int m) {
+  String tImported(num n, num m) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
@@ -1250,11 +1262,30 @@ class AppLocalizationsRo extends AppLocalizations {
     );
     final String mString = mNumberFormat.format(m);
 
-    return 'Backup restabilit · $nString bonuri, $mString cheltuieli';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: '$nString de bonuri',
+      few: '$nString bonuri',
+      one: '1 bon',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      m,
+      locale: localeName,
+      other: '$mString de cheltuieli',
+      few: '$mString cheltuieli',
+      one: '1 cheltuială',
+    );
+    return 'Backup restabilit · $_temp0, $_temp1';
   }
 
   @override
-  String get importMalformed => 'Acest fișier nu este un backup SpendLens.';
+  String get importMalformed =>
+      'Acest fișier nu este o copie de rezervă validă.';
+
+  @override
+  String get importUnexpected =>
+      'A apărut o eroare la restaurarea acestei copii de rezervă.';
 
   @override
   String get importTooNew =>
