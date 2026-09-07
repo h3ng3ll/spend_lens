@@ -268,6 +268,7 @@
   "correct": "Korrigieren",
   "saveReceipt": "Beleg sichern",
   "tSaved": "Beleg gesichert · {a}",
+  "tSaveFailed": "Der Beleg konnte nicht gespeichert werden. Bitte versuche es erneut.",
   "checkThis": "Prüfen · gelesen als „{r}“ · {q}",
   "readAs": "Gelesen als „{r}“",
   "lowConf": "geringe Sicherheit",
@@ -346,5 +347,33 @@
         "type": "String"
       }
     }
-  }
+  },
+  "importTitle": "Aus Backup wiederherstellen?",
+  "importBody": "Dadurch wird jeder Eintrag aus der Datei zu deinen vorhandenen Daten hinzugefügt. Übereinstimmende Einträge werden aktualisiert; nichts auf {device} wird entfernt.",
+  "@importBody": {
+    "description": "Import confirm dialog body (design_spendlens.md §6/§9/§11).",
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "importConfirm": "Wiederherstellen",
+  "tImported": "Backup wiederhergestellt · {n} Belege, {m} Ausgaben",
+  "@tImported": {
+    "description": "Import success toast (design_spendlens.md §6/§9/§11).",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "m": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "importMalformed": "Diese Datei ist kein SpendLens-Backup.",
+  "importTooNew": "Dieses Backup wurde mit einer neueren App-Version erstellt.",
+  "importCanceled": "Keine Datei ausgewählt."
 }

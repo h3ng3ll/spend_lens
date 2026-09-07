@@ -268,6 +268,7 @@
   "correct": "Corriger",
   "saveReceipt": "Enregistrer le ticket",
   "tSaved": "Ticket enregistré · {a}",
+  "tSaveFailed": "Impossible d'enregistrer le ticket. Réessayez.",
   "checkThis": "À vérifier · lu comme « {r} » · {q}",
   "readAs": "Lu comme « {r} »",
   "lowConf": "faible confiance",
@@ -346,5 +347,33 @@
         "type": "String"
       }
     }
-  }
+  },
+  "importTitle": "Restaurer depuis la sauvegarde ?",
+  "importBody": "Cela ajoute chaque enregistrement du fichier à ce que vous avez déjà. Les enregistrements correspondants sont mis à jour ; rien sur {device} n'est supprimé.",
+  "@importBody": {
+    "description": "Import confirm dialog body (design_spendlens.md §6/§9/§11).",
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "importConfirm": "Restaurer",
+  "tImported": "Sauvegarde restaurée · {n} reçus, {m} dépenses",
+  "@tImported": {
+    "description": "Import success toast (design_spendlens.md §6/§9/§11).",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "m": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "importMalformed": "Ce fichier n'est pas une sauvegarde SpendLens.",
+  "importTooNew": "Cette sauvegarde a été créée avec une version plus récente de l'application.",
+  "importCanceled": "Aucun fichier sélectionné."
 }

@@ -658,6 +658,7 @@
   "correct": "Correct",
   "saveReceipt": "Save Receipt",
   "tSaved": "Receipt saved · {a}",
+  "tSaveFailed": "Couldn't save the receipt. Please try again.",
   "@tSaved": {
     "description": "Auto-ported from i18n.js key \"tSaved\".",
     "placeholders": {
@@ -781,5 +782,33 @@
         "type": "String"
       }
     }
-  }
+  },
+  "importTitle": "Restore from backup?",
+  "importBody": "This adds every record from the file to what you already have. Matching records are updated; nothing already on {device} is removed.",
+  "@importBody": {
+    "description": "Import confirm dialog body (design_spendlens.md §6/§9/§11).",
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "importConfirm": "Restore",
+  "tImported": "Backup restored · {n} receipts, {m} expenses",
+  "@tImported": {
+    "description": "Import success toast (design_spendlens.md §6/§9/§11).",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "m": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "importMalformed": "That file isn't a SpendLens backup.",
+  "importTooNew": "This backup was made with a newer version of the app.",
+  "importCanceled": "No file selected."
 }

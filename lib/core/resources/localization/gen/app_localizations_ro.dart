@@ -1016,6 +1016,9 @@ class AppLocalizationsRo extends AppLocalizations {
   }
 
   @override
+  String get tSaveFailed => 'Bonul nu a putut fi salvat. Încearcă din nou.';
+
+  @override
   String checkThis(String r, String q) {
     return 'Verifică · citit ca „$r” · $q';
   }
@@ -1221,4 +1224,39 @@ class AppLocalizationsRo extends AppLocalizations {
   String possibleDuplicateReceipt(String store, String date) {
     return 'Acesta pare a fi un bon deja salvat de la $store din $date.';
   }
+
+  @override
+  String get importTitle => 'Restabiliți din backup?';
+
+  @override
+  String importBody(String device) {
+    return 'Aceasta adaugă fiecare înregistrare din fișier la ce aveți deja. Înregistrările care se potrivesc sunt actualizate; nimic de pe $device nu este eliminat.';
+  }
+
+  @override
+  String get importConfirm => 'Restabiliți';
+
+  @override
+  String tImported(int n, int m) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+    final intl.NumberFormat mNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String mString = mNumberFormat.format(m);
+
+    return 'Backup restabilit · $nString bonuri, $mString cheltuieli';
+  }
+
+  @override
+  String get importMalformed => 'Acest fișier nu este un backup SpendLens.';
+
+  @override
+  String get importTooNew =>
+      'Acest backup a fost creat cu o versiune mai nouă a aplicației.';
+
+  @override
+  String get importCanceled => 'Niciun fișier selectat.';
 }

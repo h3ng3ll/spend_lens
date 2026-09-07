@@ -1018,6 +1018,9 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
+  String get tSaveFailed => 'Impossible d\'enregistrer le ticket. Réessayez.';
+
+  @override
   String checkThis(String r, String q) {
     return 'À vérifier · lu comme « $r » · $q';
   }
@@ -1226,4 +1229,40 @@ class AppLocalizationsFr extends AppLocalizations {
   String possibleDuplicateReceipt(String store, String date) {
     return 'Cela ressemble à un reçu déjà enregistré depuis $store le $date.';
   }
+
+  @override
+  String get importTitle => 'Restaurer depuis la sauvegarde ?';
+
+  @override
+  String importBody(String device) {
+    return 'Cela ajoute chaque enregistrement du fichier à ce que vous avez déjà. Les enregistrements correspondants sont mis à jour ; rien sur $device n\'est supprimé.';
+  }
+
+  @override
+  String get importConfirm => 'Restaurer';
+
+  @override
+  String tImported(int n, int m) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+    final intl.NumberFormat mNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String mString = mNumberFormat.format(m);
+
+    return 'Sauvegarde restaurée · $nString reçus, $mString dépenses';
+  }
+
+  @override
+  String get importMalformed =>
+      'Ce fichier n\'est pas une sauvegarde SpendLens.';
+
+  @override
+  String get importTooNew =>
+      'Cette sauvegarde a été créée avec une version plus récente de l\'application.';
+
+  @override
+  String get importCanceled => 'Aucun fichier sélectionné.';
 }

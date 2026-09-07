@@ -1018,6 +1018,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
+  String get tSaveFailed => 'No se pudo guardar el recibo. Inténtalo de nuevo.';
+
+  @override
   String checkThis(String r, String q) {
     return 'Revisa · leído como \"$r\" · $q';
   }
@@ -1222,4 +1225,40 @@ class AppLocalizationsEs extends AppLocalizations {
   String possibleDuplicateReceipt(String store, String date) {
     return 'Esto parece un recibo que ya guardaste de $store el $date.';
   }
+
+  @override
+  String get importTitle => '¿Restaurar desde la copia de seguridad?';
+
+  @override
+  String importBody(String device) {
+    return 'Esto añade cada registro del archivo a lo que ya tienes. Los registros coincidentes se actualizan; nada en $device se elimina.';
+  }
+
+  @override
+  String get importConfirm => 'Restaurar';
+
+  @override
+  String tImported(int n, int m) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+    final intl.NumberFormat mNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String mString = mNumberFormat.format(m);
+
+    return 'Copia restaurada · $nString recibos, $mString gastos';
+  }
+
+  @override
+  String get importMalformed =>
+      'Ese archivo no es una copia de seguridad de SpendLens.';
+
+  @override
+  String get importTooNew =>
+      'Esta copia de seguridad se creó con una versión más reciente de la app.';
+
+  @override
+  String get importCanceled => 'No se seleccionó ningún archivo.';
 }

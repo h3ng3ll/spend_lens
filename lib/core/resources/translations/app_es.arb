@@ -268,6 +268,7 @@
   "correct": "Corregir",
   "saveReceipt": "Guardar ticket",
   "tSaved": "Ticket guardado · {a}",
+  "tSaveFailed": "No se pudo guardar el recibo. Inténtalo de nuevo.",
   "checkThis": "Revisa · leído como \"{r}\" · {q}",
   "readAs": "Leído como \"{r}\"",
   "lowConf": "baja confianza",
@@ -346,5 +347,33 @@
         "type": "String"
       }
     }
-  }
+  },
+  "importTitle": "¿Restaurar desde la copia de seguridad?",
+  "importBody": "Esto añade cada registro del archivo a lo que ya tienes. Los registros coincidentes se actualizan; nada en {device} se elimina.",
+  "@importBody": {
+    "description": "Import confirm dialog body (design_spendlens.md §6/§9/§11).",
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "importConfirm": "Restaurar",
+  "tImported": "Copia restaurada · {n} recibos, {m} gastos",
+  "@tImported": {
+    "description": "Import success toast (design_spendlens.md §6/§9/§11).",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "m": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "importMalformed": "Ese archivo no es una copia de seguridad de SpendLens.",
+  "importTooNew": "Esta copia de seguridad se creó con una versión más reciente de la app.",
+  "importCanceled": "No se seleccionó ningún archivo."
 }

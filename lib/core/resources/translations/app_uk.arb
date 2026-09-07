@@ -268,6 +268,7 @@
   "correct": "Виправити",
   "saveReceipt": "Зберегти чек",
   "tSaved": "Чек збережено · {a}",
+  "tSaveFailed": "Не вдалося зберегти чек. Спробуйте ще раз.",
   "checkThis": "Перевірте · прочитано як «{r}» · {q}",
   "readAs": "Прочитано як «{r}»",
   "lowConf": "низька впевненість",
@@ -346,5 +347,33 @@
         "type": "String"
       }
     }
-  }
+  },
+  "importTitle": "Відновити з резервної копії?",
+  "importBody": "Це додасть кожен запис із файлу до тих, що вже є. Записи, що збігаються, буде оновлено; нічого на {device} не буде видалено.",
+  "@importBody": {
+    "description": "Import confirm dialog body (design_spendlens.md §6/§9/§11).",
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "importConfirm": "Відновити",
+  "tImported": "Резервну копію відновлено · {n} чеків, {m} витрат",
+  "@tImported": {
+    "description": "Import success toast (design_spendlens.md §6/§9/§11).",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "m": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "importMalformed": "Цей файл не є резервною копією SpendLens.",
+  "importTooNew": "Цю резервну копію створено новішою версією застосунку.",
+  "importCanceled": "Файл не вибрано."
 }

@@ -1716,6 +1716,12 @@ abstract class AppLocalizations {
   /// **'Receipt saved · {a}'**
   String tSaved(String a);
 
+  /// No description provided for @tSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save the receipt. Please try again.'**
+  String get tSaveFailed;
+
   /// Auto-ported from i18n.js key "checkThis".
   ///
   /// In en, this message translates to:
@@ -2081,6 +2087,48 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'This looks like a receipt you already saved from {store} on {date}.'**
   String possibleDuplicateReceipt(String store, String date);
+
+  /// No description provided for @importTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore from backup?'**
+  String get importTitle;
+
+  /// Import confirm dialog body (design_spendlens.md §6/§9/§11).
+  ///
+  /// In en, this message translates to:
+  /// **'This adds every record from the file to what you already have. Matching records are updated; nothing already on {device} is removed.'**
+  String importBody(String device);
+
+  /// No description provided for @importConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore'**
+  String get importConfirm;
+
+  /// Import success toast (design_spendlens.md §6/§9/§11).
+  ///
+  /// In en, this message translates to:
+  /// **'Backup restored · {n} receipts, {m} expenses'**
+  String tImported(int n, int m);
+
+  /// No description provided for @importMalformed.
+  ///
+  /// In en, this message translates to:
+  /// **'That file isn\'t a SpendLens backup.'**
+  String get importMalformed;
+
+  /// No description provided for @importTooNew.
+  ///
+  /// In en, this message translates to:
+  /// **'This backup was made with a newer version of the app.'**
+  String get importTooNew;
+
+  /// No description provided for @importCanceled.
+  ///
+  /// In en, this message translates to:
+  /// **'No file selected.'**
+  String get importCanceled;
 }
 
 class _AppLocalizationsDelegate

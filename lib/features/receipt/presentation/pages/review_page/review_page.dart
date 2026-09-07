@@ -92,11 +92,11 @@ class _ReviewPageState extends State<ReviewPage> {
     _reviewBloc.add(ReviewEvent.setCategory(pickedId));
   }
 
-  void _onSave(BuildContext context) {
-    final lo = AppLocalizations.of(context);
-    _reviewBloc.add(const ReviewEvent.save());
-    UiMessageService.showSuccess(lo.tSaved(lo.reviewReceipt));
-  }
+  /// Dispatches the intent ONLY. The success toast is NOT shown here: at
+  /// this point the bloc has not written anything yet, so a failing save
+  /// would still have reported "saved". Feedback for both outcomes lives
+  /// in the `saved` / `failed` listeners in `build`.
+  void _onSave() => _reviewBloc.add(const ReviewEvent.save());
 
   void _onCorrect() => _reviewBloc.add(const ReviewEvent.saveAndCorrect());
 
@@ -112,7 +112,22 @@ class _ReviewPageState extends State<ReviewPage> {
           BlocListener<ReviewBloc, ReviewState>(
             listenWhen: (previous, current) =>
                 !previous.isSaved && current.isSaved,
-            listener: (context, state) => HomePageRoute().go(context),
+            listener: (context, state) {
+              final lo = AppLocalizations.of(context);
+              UiMessageService.showSuccess(lo.tSaved(lo.reviewReceipt));
+              HomePageRoute().go(context);
+            },
+          ),
+          // `failed` was reachable and had an `isFailed` getter, but NOTHING
+          // read it — a save that failed was completely silent, leaving the
+          // user on a screen that looked unchanged. Surfacing it is the
+          // other half of moving feedback off the dispatch site.
+          BlocListener<ReviewBloc, ReviewState>(
+            listenWhen: (previous, current) =>
+                !previous.isFailed && current.isFailed,
+            listener: (context, state) => UiMessageService.showError(
+              AppLocalizations.of(context).tSaveFailed,
+            ),
           ),
           BlocListener<ReviewBloc, ReviewState>(
             listenWhen: (previous, current) =>
@@ -131,7 +146,7 @@ class _ReviewPageState extends State<ReviewPage> {
           onStartEditItem: _onStartEditItem,
           onDoneEditingItem: _onDoneEditingItem,
           onPickCategory: () => _onPickCategory(context),
-          onSave: () => _onSave(context),
+          onSave: _onSave,
           onCorrect: _onCorrect,
         ),
       ),

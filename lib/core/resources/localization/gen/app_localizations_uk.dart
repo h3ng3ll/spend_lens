@@ -1017,6 +1017,9 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
+  String get tSaveFailed => 'Не вдалося зберегти чек. Спробуйте ще раз.';
+
+  @override
   String checkThis(String r, String q) {
     return 'Перевірте · прочитано як «$r» · $q';
   }
@@ -1221,4 +1224,39 @@ class AppLocalizationsUk extends AppLocalizations {
   String possibleDuplicateReceipt(String store, String date) {
     return 'Схоже, цей чек із $store від $date вже збережено.';
   }
+
+  @override
+  String get importTitle => 'Відновити з резервної копії?';
+
+  @override
+  String importBody(String device) {
+    return 'Це додасть кожен запис із файлу до тих, що вже є. Записи, що збігаються, буде оновлено; нічого на $device не буде видалено.';
+  }
+
+  @override
+  String get importConfirm => 'Відновити';
+
+  @override
+  String tImported(int n, int m) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+    final intl.NumberFormat mNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String mString = mNumberFormat.format(m);
+
+    return 'Резервну копію відновлено · $nString чеків, $mString витрат';
+  }
+
+  @override
+  String get importMalformed => 'Цей файл не є резервною копією SpendLens.';
+
+  @override
+  String get importTooNew =>
+      'Цю резервну копію створено новішою версією застосунку.';
+
+  @override
+  String get importCanceled => 'Файл не вибрано.';
 }

@@ -1012,6 +1012,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String get tSaveFailed => 'Couldn\'t save the receipt. Please try again.';
+
+  @override
   String checkThis(String r, String q) {
     return 'Check this · read as \"$r\" · $q';
   }
@@ -1213,4 +1216,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String possibleDuplicateReceipt(String store, String date) {
     return 'This looks like a receipt you already saved from $store on $date.';
   }
+
+  @override
+  String get importTitle => 'Restore from backup?';
+
+  @override
+  String importBody(String device) {
+    return 'This adds every record from the file to what you already have. Matching records are updated; nothing already on $device is removed.';
+  }
+
+  @override
+  String get importConfirm => 'Restore';
+
+  @override
+  String tImported(int n, int m) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+    final intl.NumberFormat mNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String mString = mNumberFormat.format(m);
+
+    return 'Backup restored · $nString receipts, $mString expenses';
+  }
+
+  @override
+  String get importMalformed => 'That file isn\'t a SpendLens backup.';
+
+  @override
+  String get importTooNew =>
+      'This backup was made with a newer version of the app.';
+
+  @override
+  String get importCanceled => 'No file selected.';
 }

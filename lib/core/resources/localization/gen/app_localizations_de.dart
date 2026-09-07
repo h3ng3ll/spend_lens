@@ -1016,6 +1016,10 @@ class AppLocalizationsDe extends AppLocalizations {
   }
 
   @override
+  String get tSaveFailed =>
+      'Der Beleg konnte nicht gespeichert werden. Bitte versuche es erneut.';
+
+  @override
   String checkThis(String r, String q) {
     return 'Prüfen · gelesen als „$r“ · $q';
   }
@@ -1221,4 +1225,39 @@ class AppLocalizationsDe extends AppLocalizations {
   String possibleDuplicateReceipt(String store, String date) {
     return 'Das sieht nach einem Beleg aus, den du bereits von $store am $date gespeichert hast.';
   }
+
+  @override
+  String get importTitle => 'Aus Backup wiederherstellen?';
+
+  @override
+  String importBody(String device) {
+    return 'Dadurch wird jeder Eintrag aus der Datei zu deinen vorhandenen Daten hinzugefügt. Übereinstimmende Einträge werden aktualisiert; nichts auf $device wird entfernt.';
+  }
+
+  @override
+  String get importConfirm => 'Wiederherstellen';
+
+  @override
+  String tImported(int n, int m) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+    final intl.NumberFormat mNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String mString = mNumberFormat.format(m);
+
+    return 'Backup wiederhergestellt · $nString Belege, $mString Ausgaben';
+  }
+
+  @override
+  String get importMalformed => 'Diese Datei ist kein SpendLens-Backup.';
+
+  @override
+  String get importTooNew =>
+      'Dieses Backup wurde mit einer neueren App-Version erstellt.';
+
+  @override
+  String get importCanceled => 'Keine Datei ausgewählt.';
 }
