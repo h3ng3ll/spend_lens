@@ -2075,6 +2075,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Camera access is blocked — enable it in Settings'**
   String get scanUnsupportedPermissionPermanentlyDenied;
+
+  /// Duplicate-detector warning toast (design_spendlens.md §6/§46) — warns only, never blocks saving.
+  ///
+  /// In en, this message translates to:
+  /// **'This looks like a receipt you already saved from {store} on {date}.'**
+  String possibleDuplicateReceipt(String store, String date);
 }
 
 class _AppLocalizationsDelegate

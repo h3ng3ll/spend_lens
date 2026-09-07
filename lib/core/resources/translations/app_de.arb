@@ -334,5 +334,17 @@
   "scanUnsupportedNoCamera": "Dieses Gerät hat keine Kamera",
   "scanUnsupportedOcrUnavailable": "Die Texterkennung ist auf diesem Gerät nicht verfügbar",
   "scanUnsupportedPermissionDenied": "Für das Scannen von Belegen ist Kamerazugriff erforderlich",
-  "scanUnsupportedPermissionPermanentlyDenied": "Der Kamerazugriff ist blockiert — aktiviere ihn in den Einstellungen"
+  "scanUnsupportedPermissionPermanentlyDenied": "Der Kamerazugriff ist blockiert — aktiviere ihn in den Einstellungen",
+  "possibleDuplicateReceipt": "Das sieht nach einem Beleg aus, den du bereits von {store} am {date} gespeichert hast.",
+  "@possibleDuplicateReceipt": {
+    "description": "Duplicate-detector warning toast (design_spendlens.md §6/§46) — warns only, never blocks saving.",
+    "placeholders": {
+      "store": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

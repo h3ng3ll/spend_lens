@@ -334,5 +334,17 @@
   "scanUnsupportedNoCamera": "Este dispositivo no tiene cámara",
   "scanUnsupportedOcrUnavailable": "El reconocimiento de texto no está disponible en este dispositivo",
   "scanUnsupportedPermissionDenied": "Se necesita permiso de cámara para escanear recibos",
-  "scanUnsupportedPermissionPermanentlyDenied": "El acceso a la cámara está bloqueado. Actívalo en Ajustes"
+  "scanUnsupportedPermissionPermanentlyDenied": "El acceso a la cámara está bloqueado. Actívalo en Ajustes",
+  "possibleDuplicateReceipt": "Esto parece un recibo que ya guardaste de {store} el {date}.",
+  "@possibleDuplicateReceipt": {
+    "description": "Duplicate-detector warning toast (design_spendlens.md §6/§46) — warns only, never blocks saving.",
+    "placeholders": {
+      "store": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

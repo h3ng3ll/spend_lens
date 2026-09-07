@@ -1221,4 +1221,9 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get scanUnsupportedPermissionPermanentlyDenied =>
       'L\'accès à l\'appareil photo est bloqué — activez-le dans les réglages';
+
+  @override
+  String possibleDuplicateReceipt(String store, String date) {
+    return 'Cela ressemble à un reçu déjà enregistré depuis $store le $date.';
+  }
 }

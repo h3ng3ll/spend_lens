@@ -334,5 +334,17 @@
   "scanUnsupportedNoCamera": "Acest dispozitiv nu are cameră",
   "scanUnsupportedOcrUnavailable": "Recunoașterea textului nu este disponibilă pe acest dispozitiv",
   "scanUnsupportedPermissionDenied": "Este necesară permisiunea pentru cameră pentru a scana bonuri",
-  "scanUnsupportedPermissionPermanentlyDenied": "Accesul la cameră este blocat — activează-l din Setări"
+  "scanUnsupportedPermissionPermanentlyDenied": "Accesul la cameră este blocat — activează-l din Setări",
+  "possibleDuplicateReceipt": "Acesta pare a fi un bon deja salvat de la {store} din {date}.",
+  "@possibleDuplicateReceipt": {
+    "description": "Duplicate-detector warning toast (design_spendlens.md §6/§46) — warns only, never blocks saving.",
+    "placeholders": {
+      "store": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

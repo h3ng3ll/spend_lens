@@ -1,0 +1,261 @@
+import 'package:bloc/bloc.dart';
+import 'package:freezed_annotation/freezed_annotation.dart';
+
+import '../../../../../core/models/e_sync_status.dart';
+import '../../../../product/domain/models/product/e_unit.dart';
+import '../../../../product/domain/normalizer/product_normalizer.dart';
+import '../../../../product/domain/repositories/i_product_local_repository.dart';
+import '../../../domain/models/receipt/receipt.dart';
+import '../../../domain/models/receipt_item/receipt_item.dart';
+import '../../../domain/repositories/i_receipt_item_local_repository.dart';
+import '../../../domain/repositories/i_receipt_local_repository.dart';
+import '../../../domain/rules/receipt_reconciler.dart';
+import 'edit_draft_item.dart';
+
+part 'edit_receipt_event.dart';
+
+part 'edit_receipt_state.dart';
+
+part 'edit_receipt_state_ext.dart';
+
+part 'edit_receipt_bloc.freezed.dart';
+
+/// Screen-scoped bloc (`registerFactory` semantics: built in
+/// `EditReceiptPage.initState`, closed in `dispose` — BLoC rule A3.8).
+///
+/// `load` is a ONE-SHOT read (hive_rules.md §6's explicit exemption: "form/
+/// action blocs loading an initial value to populate an editor") — this
+/// screen is a form seeded once from the existing [Receipt]/[ReceiptItem]s,
+/// never a live display of data another screen might mutate concurrently.
+///
+/// Every edit here changes `EditDraftItem.name`, never `rawName` — the
+/// underlying `ReceiptItem.rawName` is carried forward UNCHANGED into the
+/// saved item (spec §11, the hardest invariant this milestone protects).
+class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
+  final IReceiptLocalRepository _receiptRepository;
+  final IReceiptItemLocalRepository _receiptItemRepository;
+  final IProductLocalRepository _productRepository;
+  final ProductNormalizer _productNormalizer;
+  final ReceiptReconciler _reconciler;
+  final DateTime Function() _now;
+
+  EditReceiptBloc({
+    required this._receiptRepository,
+    required this._receiptItemRepository,
+    required this._productRepository,
+    this._productNormalizer = const ProductNormalizer(),
+    this._reconciler = const ReceiptReconciler(),
+    this._now = DateTime.now,
+  }) : super(const EditReceiptState()) {
+    on<_Load>(_onLoad);
+    on<_SetStore>(_onSetStore);
+    on<_SetPurchasedAt>(_onSetPurchasedAt);
+    on<_SetPrintedTotal>(_onSetPrintedTotal);
+    on<_UpdateItemName>(_onUpdateItemName);
+    on<_UpdateItemQuantity>(_onUpdateItemQuantity);
+    on<_UpdateItemPrice>(_onUpdateItemPrice);
+    on<_RemoveItem>(_onRemoveItem);
+    on<_AddItem>(_onAddItem);
+    on<_Save>(_onSave);
+  }
+
+  Future<void> _onLoad(_Load event, Emitter<EditReceiptState> emit) async {
+    emit(state.copyWith(status: EEditReceiptStatus.loading));
+
+    final receipt = await _receiptRepository.getById(event.receiptId);
+    if (receipt == null) {
+      emit(
+        state.copyWith(
+          status: EEditReceiptStatus.failed,
+          errorMessage: 'receipt_not_found',
+        ),
+      );
+      return;
+    }
+
+    final items = <EditDraftItem>[];
+    for (final itemId in receipt.itemIds) {
+      final item = await _receiptItemRepository.getById(itemId);
+      if (item == null || item.deletedAt != null) continue;
+      items.add(
+        EditDraftItem(
+          id: item.id,
+          rawName: item.rawName,
+          name: item.normalizedName,
+          quantity: item.quantity,
+          unit: item.unit,
+          lineTotal: item.lineTotal,
+        ),
+      );
+    }
+
+    emit(
+      state.copyWith(
+        status: EEditReceiptStatus.ready,
+        receiptId: receipt.id,
+        storeId: receipt.storeId,
+        purchasedAt: receipt.purchasedAt,
+        printedTotal: receipt.printedTotal,
+        items: items,
+        matchesTotal: _reconciler
+            .reconcile(
+              printedTotal: receipt.printedTotal,
+              itemsTotal: items.fold(0.0, (s, i) => s + i.lineTotal),
+            )
+            .matches,
+      ),
+    );
+  }
+
+  void _onSetStore(_SetStore event, Emitter<EditReceiptState> emit) {
+    emit(state.copyWith(storeId: event.storeId, storeName: event.storeName));
+  }
+
+  void _onSetPurchasedAt(
+    _SetPurchasedAt event,
+    Emitter<EditReceiptState> emit,
+  ) {
+    emit(state.copyWith(purchasedAt: event.purchasedAt));
+  }
+
+  void _onSetPrintedTotal(
+    _SetPrintedTotal event,
+    Emitter<EditReceiptState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        printedTotal: event.printedTotal,
+        matchesTotal: _reconciler
+            .reconcile(
+              printedTotal: event.printedTotal,
+              itemsTotal: state.itemsTotal,
+            )
+            .matches,
+      ),
+    );
+  }
+
+  void _onUpdateItemName(
+    _UpdateItemName event,
+    Emitter<EditReceiptState> emit,
+  ) {
+    final updated = state.items.map((item) {
+      if (item.id != event.itemId) return item;
+      // `rawName` untouched — only `name` (spec §11).
+      return item.copyWith(name: event.name);
+    }).toList();
+    emit(state.copyWith(items: updated));
+  }
+
+  void _onUpdateItemQuantity(
+    _UpdateItemQuantity event,
+    Emitter<EditReceiptState> emit,
+  ) {
+    final updated = state.items.map((item) {
+      if (item.id != event.itemId) return item;
+      return item.copyWith(quantity: event.quantity);
+    }).toList();
+    emit(state.copyWith(items: updated));
+  }
+
+  void _onUpdateItemPrice(
+    _UpdateItemPrice event,
+    Emitter<EditReceiptState> emit,
+  ) {
+    final updated = state.items.map((item) {
+      if (item.id != event.itemId) return item;
+      return item.copyWith(lineTotal: event.lineTotal);
+    }).toList();
+    final itemsTotal = updated.fold(0.0, (s, i) => s + i.lineTotal);
+    emit(
+      state.copyWith(
+        items: updated,
+        matchesTotal: _reconciler
+            .reconcile(printedTotal: state.printedTotal, itemsTotal: itemsTotal)
+            .matches,
+      ),
+    );
+  }
+
+  void _onRemoveItem(_RemoveItem event, Emitter<EditReceiptState> emit) {
+    final updated = state.items.where((i) => i.id != event.itemId).toList();
+    emit(state.copyWith(items: updated));
+  }
+
+  void _onAddItem(_AddItem event, Emitter<EditReceiptState> emit) {
+    final now = _now();
+    final newItem = EditDraftItem(
+      id: '${now.microsecondsSinceEpoch}_manual',
+      rawName: '',
+      name: '',
+      quantity: 1.0,
+      unit: EUnit.piece,
+      lineTotal: 0.0,
+    );
+    emit(state.copyWith(items: [...state.items, newItem]));
+  }
+
+  Future<void> _onSave(_Save event, Emitter<EditReceiptState> emit) async {
+    final receiptId = state.receiptId;
+    if (receiptId == null) return;
+
+    final now = _now();
+    final existing = await _receiptRepository.getById(receiptId);
+    if (existing == null) return;
+
+    final existingProducts = await _productRepository.getAll();
+    final mutableProducts = List.of(existingProducts);
+
+    final itemIds = <String>[];
+    for (var i = 0; i < state.items.length; i++) {
+      final draftItem = state.items[i];
+      final isManuallyAdded = draftItem.rawName.isEmpty;
+
+      final matchResult = _productNormalizer.normalize(
+        rawName: draftItem.name,
+        existingProducts: mutableProducts,
+        generateId: () => '${now.microsecondsSinceEpoch}_product_$i',
+        defaultUnit: draftItem.unit,
+      );
+      if (matchResult.isNewProduct) {
+        mutableProducts.add(matchResult.product);
+        await _productRepository.save(matchResult.product);
+      }
+
+      final item = ReceiptItem(
+        id: draftItem.id,
+        // A manually-added row has no OCR origin — its rawName is its
+        // typed name, set ONCE here at creation. An OCR-derived row keeps
+        // its ORIGINAL rawName untouched (spec §11) — never the edited
+        // `name`.
+        rawName: isManuallyAdded ? draftItem.name : draftItem.rawName,
+        normalizedName: matchResult.product.displayName,
+        productId: matchResult.product.id,
+        quantity: draftItem.quantity,
+        unit: draftItem.unit,
+        lineTotal: draftItem.lineTotal,
+        confidence: isManuallyAdded ? 1.0 : 1.0,
+        isManuallyAdded: isManuallyAdded,
+        lineIndex: i,
+        updatedAt: now,
+        syncStatus: ESyncStatus.pendingUpdate,
+      );
+      await _receiptItemRepository.save(item);
+      itemIds.add(item.id);
+    }
+
+    final updatedReceipt = existing.copyWith(
+      storeId: state.storeId,
+      purchasedAt: state.purchasedAt ?? existing.purchasedAt,
+      printedTotal: state.printedTotal,
+      itemsTotal: state.itemsTotal,
+      itemIds: itemIds,
+      isReconciled: state.matchesTotal,
+      updatedAt: now,
+      syncStatus: ESyncStatus.pendingUpdate,
+    );
+    await _receiptRepository.save(updatedReceipt);
+
+    emit(state.copyWith(status: EEditReceiptStatus.saved));
+  }
+}

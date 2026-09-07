@@ -769,5 +769,17 @@
   "scanUnsupportedNoCamera": "This device has no camera",
   "scanUnsupportedOcrUnavailable": "Text recognition isn't available on this device",
   "scanUnsupportedPermissionDenied": "Camera permission is needed to scan receipts",
-  "scanUnsupportedPermissionPermanentlyDenied": "Camera access is blocked — enable it in Settings"
+  "scanUnsupportedPermissionPermanentlyDenied": "Camera access is blocked — enable it in Settings",
+  "possibleDuplicateReceipt": "This looks like a receipt you already saved from {store} on {date}.",
+  "@possibleDuplicateReceipt": {
+    "description": "Duplicate-detector warning toast (design_spendlens.md §6/§46) — warns only, never blocks saving.",
+    "placeholders": {
+      "store": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

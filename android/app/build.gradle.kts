@@ -42,6 +42,18 @@ kotlin {
     }
 }
 
+dependencies {
+    // M8: the native ML Kit Latin text-recognition SDK, called directly
+    // from `OcrChannel.kt` (design_spendlens.md §6 — "no Kotlin needed for
+    // OCR" means no custom recognition code is written, not that the
+    // native SDK is unavailable to Kotlin). This is the SAME artifact the
+    // `google_mlkit_text_recognition` Dart plugin already pulls in
+    // transitively; declaring it explicitly here keeps the native OCR
+    // channel resolvable even if that pub package's own dependency ever
+    // changes.
+    implementation("com.google.mlkit:text-recognition:16.0.1")
+}
+
 flutter {
     source = "../.."
 }

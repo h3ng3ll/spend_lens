@@ -1214,4 +1214,9 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get scanUnsupportedPermissionPermanentlyDenied =>
       'Доступ к камере заблокирован — включите его в настройках';
+
+  @override
+  String possibleDuplicateReceipt(String store, String date) {
+    return 'Похоже, вы уже сохранили этот чек из $store от $date.';
+  }
 }

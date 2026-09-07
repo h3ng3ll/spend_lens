@@ -1208,4 +1208,9 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get scanUnsupportedPermissionPermanentlyDenied =>
       'Camera access is blocked — enable it in Settings';
+
+  @override
+  String possibleDuplicateReceipt(String store, String date) {
+    return 'This looks like a receipt you already saved from $store on $date.';
+  }
 }

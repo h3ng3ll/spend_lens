@@ -1216,4 +1216,9 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get scanUnsupportedPermissionPermanentlyDenied =>
       'Accesul la cameră este blocat — activează-l din Setări';
+
+  @override
+  String possibleDuplicateReceipt(String store, String date) {
+    return 'Acesta pare a fi un bon deja salvat de la $store din $date.';
+  }
 }

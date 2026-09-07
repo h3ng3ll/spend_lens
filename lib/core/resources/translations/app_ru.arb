@@ -334,5 +334,17 @@
   "scanUnsupportedNoCamera": "На этом устройстве нет камеры",
   "scanUnsupportedOcrUnavailable": "Распознавание текста недоступно на этом устройстве",
   "scanUnsupportedPermissionDenied": "Для сканирования чеков нужно разрешение на камеру",
-  "scanUnsupportedPermissionPermanentlyDenied": "Доступ к камере заблокирован — включите его в настройках"
+  "scanUnsupportedPermissionPermanentlyDenied": "Доступ к камере заблокирован — включите его в настройках",
+  "possibleDuplicateReceipt": "Похоже, вы уже сохранили этот чек из {store} от {date}.",
+  "@possibleDuplicateReceipt": {
+    "description": "Duplicate-detector warning toast (design_spendlens.md §6/§46) — warns only, never blocks saving.",
+    "placeholders": {
+      "store": {
+        "type": "String"
+      },
+      "date": {
+        "type": "String"
+      }
+    }
+  }
 }

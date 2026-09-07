@@ -6,11 +6,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../../core/di/injection.dart';
 import '../../../../../../core/resources/colors/app_colors.dart';
+import '../../../../../../core/routes/init_router/init_router.dart';
 import '../../../../../../core/services/ocr/i_receipt_detector.dart';
 import '../../../../../../core/services/ocr/ocr_service.dart';
 import '../../../../../settings/domain/models/app_settings/e_flash_mode.dart';
-import '../../../../presentation/bloc/scanner_bloc/scanner_bloc.dart';
 import '../../../../domain/i_receipt_parse_pipeline.dart';
+import '../../../../domain/pending_receipt_draft_store.dart';
+import '../../../../domain/receipt_parse_pipeline.dart';
+import '../../../../presentation/bloc/scanner_bloc/scanner_bloc.dart';
 import 'scanner_capture_flash.dart';
 import 'scanner_corner_overlay.dart';
 import 'scanner_scan_line.dart';
@@ -292,7 +295,14 @@ class _CameraPreviewLayerState extends State<CameraPreviewLayer> {
       const ScannerEvent.processingStepCompleted(),
     );
 
-    // Step 3 — Finding products (parse + normalize).
+    // Step 3 — Finding products (parse + normalize). The ORIGINAL captured
+    // bytes (never the cropped/working copy) are what get attached to the
+    // draft — the design keeps the actual capture for Review's photo card
+    // and the scan-failed sheet, never a perspective-corrected substitute.
+    final pipeline = _parsePipeline;
+    if (pipeline is ReceiptParsePipeline) {
+      pipeline.attachImageBytes(bytes);
+    }
     final productCount = await _parsePipeline.findProducts(blocks);
     if (!mounted) return;
     context.read<ScannerBloc>().add(
@@ -306,9 +316,21 @@ class _CameraPreviewLayerState extends State<CameraPreviewLayer> {
       const ScannerEvent.processingStepCompleted(),
     );
 
-    // M8 lands Review — until then a completed scan has nowhere new to go,
-    // so the pipeline finishing is the visible end state for this
-    // milestone rather than a route this milestone does not own.
+    // A parse that found nothing usable at all (no items AND no total) is
+    // the scan-failed state — never a generic error (design_spendlens.md
+    // §8/§66) — and the captured image is NEVER discarded on that path
+    // (the draft store already holds it, and the failed sub-state's Retry/
+    // Enter Manually sheet reads it from there). A usable parse advances to
+    // Review.
+    final draft = getIt<PendingReceiptDraftStore>().current;
+    if (draft == null || draft.parsedReceipt.isUnusable) {
+      context.read<ScannerBloc>().add(
+        const ScannerEvent.failed('unusable_scan'),
+      );
+      return;
+    }
+
+    ReviewPageRoute().go(context);
   }
 
   void _onShutterTap() {
