@@ -38,6 +38,7 @@ class ScanCapabilityRow extends StatelessWidget {
     EScanCapability.permissionDenied => lo.scanStatusPermissionDenied,
     EScanCapability.permissionPermanentlyDenied =>
       lo.scanStatusPermissionPermanentlyDenied,
+    EScanCapability.unavailable => lo.scanStatusUnavailable,
   };
 
   @override
@@ -53,7 +54,11 @@ class ScanCapabilityRow extends StatelessWidget {
     final statusColor = switch (capability) {
       null => scheme.sec,
       EScanCapability.supported => scheme.accent2,
-      _ => scheme.warn,
+      EScanCapability.noCamera ||
+      EScanCapability.ocrUnavailable ||
+      EScanCapability.permissionDenied ||
+      EScanCapability.permissionPermanentlyDenied ||
+      EScanCapability.unavailable => scheme.warn,
     };
 
     return SettingsRow(
@@ -66,6 +71,9 @@ class ScanCapabilityRow extends StatelessWidget {
               behavior: HitTestBehavior.opaque,
               child: Text(
                 lo.openSettings,
+                textAlign: TextAlign.right,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
                 style: textTheme.body17.copyWith(
                   color: scheme.accent,
                   fontWeight: FontWeight.w600,
@@ -74,6 +82,9 @@ class ScanCapabilityRow extends StatelessWidget {
             )
           : Text(
               _statusLabel(lo),
+              textAlign: TextAlign.right,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
               style: textTheme.body17.copyWith(
                 color: statusColor,
                 fontWeight: FontWeight.w500,

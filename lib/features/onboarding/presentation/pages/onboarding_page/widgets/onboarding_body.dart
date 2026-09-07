@@ -95,7 +95,11 @@ class _OnboardingBodyState extends State<OnboardingBody> {
           ],
         ),
         title: lo.onb1Title,
-        points: [lo.onb1Point0, lo.onb1Point1, lo.onb1Point2],
+        points: [
+          lo.onb1Point0,
+          lo.onb1Point1(lo.thisDevice),
+          lo.onb1Point2,
+        ],
       ),
       OnboardingStepContent(
         hero: const OnboardingPrivacyHero(size: 130.0),

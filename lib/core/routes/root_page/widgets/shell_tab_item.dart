@@ -24,6 +24,13 @@ class ShellTabItem extends StatelessWidget {
     required this.onTap,
   });
 
+  /// Caps how far the OS text-scale setting can grow this label — the tab
+  /// bar has a fixed pill of 5 items and no room for the label to double in
+  /// height, so scaling is clamped rather than ignored outright (never a
+  /// hard 64.0dp box with unclamped text — the fixed-dp-cell-height chronic
+  /// bug, `sig:developer-derived-fixed-dp-cell-height-ignores-textScaleFactor`).
+  static const double _kMaxLabelTextScale = 1.3;
+
   void _onTap() => onTap();
 
   @override
@@ -31,6 +38,9 @@ class ShellTabItem extends StatelessWidget {
     final scheme = AppColorScheme.of(context);
     final textTheme = AppTextTheme.of(context);
     final color = isSelected ? scheme.accent : scheme.ter;
+    final clampedScaler = MediaQuery.textScalerOf(
+      context,
+    ).clamp(maxScaleFactor: _kMaxLabelTextScale);
 
     return Expanded(
       child: GestureDetector(
@@ -43,6 +53,9 @@ class ShellTabItem extends StatelessWidget {
             AppSvgIcon(asset: asset, color: color, size: 22.0),
             Text(
               label,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              textScaler: clampedScaler,
               style: textTheme.tabLabel10.copyWith(color: color),
             ),
           ],

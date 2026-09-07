@@ -16,11 +16,16 @@ sealed class SettingsEvent with _$SettingsEvent {
   const factory SettingsEvent.setCurrency({required String code}) =
       _SetCurrency;
 
-  /// Toggle intent — NO payload. The handler reads `state.settings.themeMode`
-  /// and flips it internally (BLoC rule A3.11): light ↔ dark. `system` is
-  /// reachable only as the pre-first-choice default, never re-selected by
-  /// this toggle.
-  const factory SettingsEvent.toggleTheme() = _ToggleTheme;
+  /// Absolute selection intent for the Appearance segmented control
+  /// (design_spendlens.md §10 / `SpendLens Prototype.dc.html` line 781
+  /// `themeOpts`): each segment (Dark/Light) sets its OWN absolute value —
+  /// this is a 2-segment picker, not a binary toggle, so BLoC rule A3.11
+  /// (no-payload toggle events) does not apply here, the same way
+  /// `setLocale`/`setCurrency` legitimately carry a payload for a selection.
+  /// `system` is reachable only as the pre-first-choice default and is never
+  /// re-selected by this control.
+  const factory SettingsEvent.pickTheme({required EAppThemeMode mode}) =
+      _PickTheme;
 
   /// Persists that onboarding finished. Dispatched by the Onboarding Get
   /// Started action (M4 router plumbing only — the real multi-step

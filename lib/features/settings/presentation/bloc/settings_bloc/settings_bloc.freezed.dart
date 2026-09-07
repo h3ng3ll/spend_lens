@@ -55,14 +55,14 @@ extension SettingsEventPatterns on SettingsEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Watch value)?  watch,TResult Function( _SetLocale value)?  setLocale,TResult Function( _SetCurrency value)?  setCurrency,TResult Function( _ToggleTheme value)?  toggleTheme,TResult Function( _CompleteOnboarding value)?  completeOnboarding,TResult Function( _ToggleFlashMode value)?  toggleFlashMode,TResult Function( _LoadRecordCount value)?  loadRecordCount,TResult Function( _DeleteAll value)?  deleteAll,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Watch value)?  watch,TResult Function( _SetLocale value)?  setLocale,TResult Function( _SetCurrency value)?  setCurrency,TResult Function( _PickTheme value)?  pickTheme,TResult Function( _CompleteOnboarding value)?  completeOnboarding,TResult Function( _ToggleFlashMode value)?  toggleFlashMode,TResult Function( _LoadRecordCount value)?  loadRecordCount,TResult Function( _DeleteAll value)?  deleteAll,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch(_that);case _SetLocale() when setLocale != null:
 return setLocale(_that);case _SetCurrency() when setCurrency != null:
-return setCurrency(_that);case _ToggleTheme() when toggleTheme != null:
-return toggleTheme(_that);case _CompleteOnboarding() when completeOnboarding != null:
+return setCurrency(_that);case _PickTheme() when pickTheme != null:
+return pickTheme(_that);case _CompleteOnboarding() when completeOnboarding != null:
 return completeOnboarding(_that);case _ToggleFlashMode() when toggleFlashMode != null:
 return toggleFlashMode(_that);case _LoadRecordCount() when loadRecordCount != null:
 return loadRecordCount(_that);case _DeleteAll() when deleteAll != null:
@@ -84,14 +84,14 @@ return deleteAll(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Watch value)  watch,required TResult Function( _SetLocale value)  setLocale,required TResult Function( _SetCurrency value)  setCurrency,required TResult Function( _ToggleTheme value)  toggleTheme,required TResult Function( _CompleteOnboarding value)  completeOnboarding,required TResult Function( _ToggleFlashMode value)  toggleFlashMode,required TResult Function( _LoadRecordCount value)  loadRecordCount,required TResult Function( _DeleteAll value)  deleteAll,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Watch value)  watch,required TResult Function( _SetLocale value)  setLocale,required TResult Function( _SetCurrency value)  setCurrency,required TResult Function( _PickTheme value)  pickTheme,required TResult Function( _CompleteOnboarding value)  completeOnboarding,required TResult Function( _ToggleFlashMode value)  toggleFlashMode,required TResult Function( _LoadRecordCount value)  loadRecordCount,required TResult Function( _DeleteAll value)  deleteAll,}){
 final _that = this;
 switch (_that) {
 case _Watch():
 return watch(_that);case _SetLocale():
 return setLocale(_that);case _SetCurrency():
-return setCurrency(_that);case _ToggleTheme():
-return toggleTheme(_that);case _CompleteOnboarding():
+return setCurrency(_that);case _PickTheme():
+return pickTheme(_that);case _CompleteOnboarding():
 return completeOnboarding(_that);case _ToggleFlashMode():
 return toggleFlashMode(_that);case _LoadRecordCount():
 return loadRecordCount(_that);case _DeleteAll():
@@ -109,14 +109,14 @@ return deleteAll(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Watch value)?  watch,TResult? Function( _SetLocale value)?  setLocale,TResult? Function( _SetCurrency value)?  setCurrency,TResult? Function( _ToggleTheme value)?  toggleTheme,TResult? Function( _CompleteOnboarding value)?  completeOnboarding,TResult? Function( _ToggleFlashMode value)?  toggleFlashMode,TResult? Function( _LoadRecordCount value)?  loadRecordCount,TResult? Function( _DeleteAll value)?  deleteAll,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Watch value)?  watch,TResult? Function( _SetLocale value)?  setLocale,TResult? Function( _SetCurrency value)?  setCurrency,TResult? Function( _PickTheme value)?  pickTheme,TResult? Function( _CompleteOnboarding value)?  completeOnboarding,TResult? Function( _ToggleFlashMode value)?  toggleFlashMode,TResult? Function( _LoadRecordCount value)?  loadRecordCount,TResult? Function( _DeleteAll value)?  deleteAll,}){
 final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch(_that);case _SetLocale() when setLocale != null:
 return setLocale(_that);case _SetCurrency() when setCurrency != null:
-return setCurrency(_that);case _ToggleTheme() when toggleTheme != null:
-return toggleTheme(_that);case _CompleteOnboarding() when completeOnboarding != null:
+return setCurrency(_that);case _PickTheme() when pickTheme != null:
+return pickTheme(_that);case _CompleteOnboarding() when completeOnboarding != null:
 return completeOnboarding(_that);case _ToggleFlashMode() when toggleFlashMode != null:
 return toggleFlashMode(_that);case _LoadRecordCount() when loadRecordCount != null:
 return loadRecordCount(_that);case _DeleteAll() when deleteAll != null:
@@ -137,13 +137,13 @@ return deleteAll(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String? code)?  setLocale,TResult Function( String code)?  setCurrency,TResult Function()?  toggleTheme,TResult Function()?  completeOnboarding,TResult Function()?  toggleFlashMode,TResult Function()?  loadRecordCount,TResult Function()?  deleteAll,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String? code)?  setLocale,TResult Function( String code)?  setCurrency,TResult Function( EAppThemeMode mode)?  pickTheme,TResult Function()?  completeOnboarding,TResult Function()?  toggleFlashMode,TResult Function()?  loadRecordCount,TResult Function()?  deleteAll,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _SetLocale() when setLocale != null:
 return setLocale(_that.code);case _SetCurrency() when setCurrency != null:
-return setCurrency(_that.code);case _ToggleTheme() when toggleTheme != null:
-return toggleTheme();case _CompleteOnboarding() when completeOnboarding != null:
+return setCurrency(_that.code);case _PickTheme() when pickTheme != null:
+return pickTheme(_that.mode);case _CompleteOnboarding() when completeOnboarding != null:
 return completeOnboarding();case _ToggleFlashMode() when toggleFlashMode != null:
 return toggleFlashMode();case _LoadRecordCount() when loadRecordCount != null:
 return loadRecordCount();case _DeleteAll() when deleteAll != null:
@@ -165,13 +165,13 @@ return deleteAll();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String? code)  setLocale,required TResult Function( String code)  setCurrency,required TResult Function()  toggleTheme,required TResult Function()  completeOnboarding,required TResult Function()  toggleFlashMode,required TResult Function()  loadRecordCount,required TResult Function()  deleteAll,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String? code)  setLocale,required TResult Function( String code)  setCurrency,required TResult Function( EAppThemeMode mode)  pickTheme,required TResult Function()  completeOnboarding,required TResult Function()  toggleFlashMode,required TResult Function()  loadRecordCount,required TResult Function()  deleteAll,}) {final _that = this;
 switch (_that) {
 case _Watch():
 return watch();case _SetLocale():
 return setLocale(_that.code);case _SetCurrency():
-return setCurrency(_that.code);case _ToggleTheme():
-return toggleTheme();case _CompleteOnboarding():
+return setCurrency(_that.code);case _PickTheme():
+return pickTheme(_that.mode);case _CompleteOnboarding():
 return completeOnboarding();case _ToggleFlashMode():
 return toggleFlashMode();case _LoadRecordCount():
 return loadRecordCount();case _DeleteAll():
@@ -189,13 +189,13 @@ return deleteAll();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String? code)?  setLocale,TResult? Function( String code)?  setCurrency,TResult? Function()?  toggleTheme,TResult? Function()?  completeOnboarding,TResult? Function()?  toggleFlashMode,TResult? Function()?  loadRecordCount,TResult? Function()?  deleteAll,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String? code)?  setLocale,TResult? Function( String code)?  setCurrency,TResult? Function( EAppThemeMode mode)?  pickTheme,TResult? Function()?  completeOnboarding,TResult? Function()?  toggleFlashMode,TResult? Function()?  loadRecordCount,TResult? Function()?  deleteAll,}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _SetLocale() when setLocale != null:
 return setLocale(_that.code);case _SetCurrency() when setCurrency != null:
-return setCurrency(_that.code);case _ToggleTheme() when toggleTheme != null:
-return toggleTheme();case _CompleteOnboarding() when completeOnboarding != null:
+return setCurrency(_that.code);case _PickTheme() when pickTheme != null:
+return pickTheme(_that.mode);case _CompleteOnboarding() when completeOnboarding != null:
 return completeOnboarding();case _ToggleFlashMode() when toggleFlashMode != null:
 return toggleFlashMode();case _LoadRecordCount() when loadRecordCount != null:
 return loadRecordCount();case _DeleteAll() when deleteAll != null:
@@ -374,34 +374,68 @@ as String,
 /// @nodoc
 
 
-class _ToggleTheme implements SettingsEvent {
-  const _ToggleTheme();
+class _PickTheme implements SettingsEvent {
+  const _PickTheme({required this.mode});
   
 
+ final  EAppThemeMode mode;
 
-
+/// Create a copy of SettingsEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PickThemeCopyWith<_PickTheme> get copyWith => __$PickThemeCopyWithImpl<_PickTheme>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ToggleTheme);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PickTheme&&(identical(other.mode, mode) || other.mode == mode));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,mode);
 
 @override
 String toString() {
-  return 'SettingsEvent.toggleTheme()';
+  return 'SettingsEvent.pickTheme(mode: $mode)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$PickThemeCopyWith<$Res> implements $SettingsEventCopyWith<$Res> {
+  factory _$PickThemeCopyWith(_PickTheme value, $Res Function(_PickTheme) _then) = __$PickThemeCopyWithImpl;
+@useResult
+$Res call({
+ EAppThemeMode mode
+});
 
 
+
+
+}
+/// @nodoc
+class __$PickThemeCopyWithImpl<$Res>
+    implements _$PickThemeCopyWith<$Res> {
+  __$PickThemeCopyWithImpl(this._self, this._then);
+
+  final _PickTheme _self;
+  final $Res Function(_PickTheme) _then;
+
+/// Create a copy of SettingsEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? mode = null,}) {
+  return _then(_PickTheme(
+mode: null == mode ? _self.mode : mode // ignore: cast_nullable_to_non_nullable
+as EAppThemeMode,
+  ));
+}
+
+
+}
 
 /// @nodoc
 

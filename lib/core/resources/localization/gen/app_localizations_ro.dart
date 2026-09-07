@@ -74,13 +74,20 @@ class AppLocalizationsRo extends AppLocalizations {
   String get catCustom => 'Personalizată · nefolosită';
 
   @override
-  String catUsed(int n) {
+  String catUsed(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Personalizată · $nString înregistrări';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Personalizată · $nString de înregistrări',
+      few: 'Personalizată · $nString înregistrări',
+      one: 'Personalizată · $nString înregistrare',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -148,6 +155,9 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get language => 'Limbă';
+
+  @override
+  String get languageSystemDefault => 'Implicit sistem';
 
   @override
   String get appearance => 'Aspect';
@@ -224,7 +234,9 @@ class AppLocalizationsRo extends AppLocalizations {
   String get onb1Point0 => 'Îndreaptă camera, bonul este găsit';
 
   @override
-  String get onb1Point1 => 'Textul este citit pe iPhone-ul tău';
+  String onb1Point1(String device) {
+    return 'Textul este citit pe $device';
+  }
 
   @override
   String get onb1Point2 => 'Produse și prețuri extrase automat';
@@ -541,7 +553,7 @@ class AppLocalizationsRo extends AppLocalizations {
       'Comparațiile folosesc bonurile tale din ultimele 60 de zile, nu prețuri live.';
 
   @override
-  String storeMeta(int v, int p) {
+  String storeMeta(num v, num p) {
     final intl.NumberFormat vNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
@@ -551,7 +563,21 @@ class AppLocalizationsRo extends AppLocalizations {
     );
     final String pString = pNumberFormat.format(p);
 
-    return '$vString vizite · $pString produse';
+    String _temp0 = intl.Intl.pluralLogic(
+      v,
+      locale: localeName,
+      other: '$vString de vizite',
+      few: '$vString vizite',
+      one: '$vString vizită',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      p,
+      locale: localeName,
+      other: '$pString de produse',
+      few: '$pString produse',
+      one: '$pString produs',
+    );
+    return '$_temp0 · $_temp1';
   }
 
   @override
@@ -560,13 +586,20 @@ class AppLocalizationsRo extends AppLocalizations {
   }
 
   @override
-  String bought(int n) {
+  String bought(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Cumpărat $nString×';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Cumpărat $nString×',
+      few: 'Cumpărat $nString×',
+      one: 'Cumpărat $nString×',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1218,6 +1251,9 @@ class AppLocalizationsRo extends AppLocalizations {
       'Accesul la cameră este blocat';
 
   @override
+  String get scanStatusUnavailable => 'Nu s-a putut verifica';
+
+  @override
   String get openSettings => 'Deschide Setările';
 
   @override
@@ -1234,6 +1270,10 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get scanUnsupportedPermissionPermanentlyDenied =>
       'Accesul la cameră este blocat — activează-l din Setări';
+
+  @override
+  String get scanUnsupportedUnavailable =>
+      'Nu s-a putut verifica camera — încearcă din nou';
 
   @override
   String possibleDuplicateReceipt(String store, String date) {

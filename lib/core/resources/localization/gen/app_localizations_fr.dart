@@ -73,13 +73,19 @@ class AppLocalizationsFr extends AppLocalizations {
   String get catCustom => 'Personnalisée · inutilisée';
 
   @override
-  String catUsed(int n) {
+  String catUsed(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Personnalisée · $nString enregistrements';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Personnalisée · $nString enregistrements',
+      one: 'Personnalisée · $nString enregistrement',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -147,6 +153,9 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get language => 'Langue';
+
+  @override
+  String get languageSystemDefault => 'Par défaut du système';
 
   @override
   String get appearance => 'Apparence';
@@ -223,7 +232,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get onb1Point0 => 'Visez le ticket, il est détecté';
 
   @override
-  String get onb1Point1 => 'Le texte est lu sur votre iPhone';
+  String onb1Point1(String device) {
+    return 'Le texte est lu sur $device';
+  }
 
   @override
   String get onb1Point2 => 'Produits et prix extraits automatiquement';
@@ -540,7 +551,7 @@ class AppLocalizationsFr extends AppLocalizations {
       'Les comparaisons utilisent vos tickets des 60 derniers jours, pas les prix en direct.';
 
   @override
-  String storeMeta(int v, int p) {
+  String storeMeta(num v, num p) {
     final intl.NumberFormat vNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
@@ -550,7 +561,19 @@ class AppLocalizationsFr extends AppLocalizations {
     );
     final String pString = pNumberFormat.format(p);
 
-    return '$vString visites · $pString produits';
+    String _temp0 = intl.Intl.pluralLogic(
+      v,
+      locale: localeName,
+      other: '$vString visites',
+      one: '$vString visite',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      p,
+      locale: localeName,
+      other: '$pString produits',
+      one: '$pString produit',
+    );
+    return '$_temp0 · $_temp1';
   }
 
   @override
@@ -559,13 +582,19 @@ class AppLocalizationsFr extends AppLocalizations {
   }
 
   @override
-  String bought(int n) {
+  String bought(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Acheté $nString×';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Acheté $nString×',
+      one: 'Acheté $nString×',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1216,6 +1245,9 @@ class AppLocalizationsFr extends AppLocalizations {
       'Accès à l\'appareil photo bloqué';
 
   @override
+  String get scanStatusUnavailable => 'Impossible de vérifier';
+
+  @override
   String get openSettings => 'Ouvrir les réglages';
 
   @override
@@ -1233,6 +1265,10 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get scanUnsupportedPermissionPermanentlyDenied =>
       'L\'accès à l\'appareil photo est bloqué — activez-le dans les réglages';
+
+  @override
+  String get scanUnsupportedUnavailable =>
+      'Impossible de vérifier la caméra — réessayez';
 
   @override
   String possibleDuplicateReceipt(String store, String date) {

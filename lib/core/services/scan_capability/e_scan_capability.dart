@@ -23,4 +23,13 @@ enum EScanCapability {
   /// Camera permission was denied permanently ("Don't ask again" / iOS
   /// "Never Allow") — the only way forward is the OS Settings app.
   permissionPermanentlyDenied,
+
+  /// The native capability probe (`availableCameras()` / OCR availability)
+  /// did not settle within its bound. This is a REAL, surfaced state — never
+  /// a silent hang — for the same reason `Apphud.start` is timeout-bound
+  /// before `runApp` (`sig:unbounded-third-party-sdk-await-before-runapp-
+  /// hangs-first-frame`): a plugin channel call can fail to complete on some
+  /// devices/emulators with no camera HAL, and the caller must never await
+  /// it unbounded.
+  unavailable,
 }

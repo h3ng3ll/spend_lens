@@ -76,13 +76,21 @@ class AppLocalizationsUk extends AppLocalizations {
   String get catCustom => 'Власна · не використовується';
 
   @override
-  String catUsed(int n) {
+  String catUsed(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Власна · $nString записів';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Власна · $nString запису',
+      many: 'Власна · $nString записів',
+      few: 'Власна · $nString записи',
+      one: 'Власна · $nString запис',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -151,6 +159,9 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get language => 'Мова';
+
+  @override
+  String get languageSystemDefault => 'Як у системі';
 
   @override
   String get appearance => 'Оформлення';
@@ -227,7 +238,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get onb1Point0 => 'Наведіть камеру — чек знайдено';
 
   @override
-  String get onb1Point1 => 'Текст читається на вашому iPhone';
+  String onb1Point1(String device) {
+    return 'Текст читається на $device';
+  }
 
   @override
   String get onb1Point2 => 'Товари й ціни витягуються автоматично';
@@ -545,7 +558,7 @@ class AppLocalizationsUk extends AppLocalizations {
       'Порівняння за вашими чеками за останні 60 днів, а не за живими цінами.';
 
   @override
-  String storeMeta(int v, int p) {
+  String storeMeta(num v, num p) {
     final intl.NumberFormat vNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
@@ -555,7 +568,23 @@ class AppLocalizationsUk extends AppLocalizations {
     );
     final String pString = pNumberFormat.format(p);
 
-    return '$vString візитів · $pString товарів';
+    String _temp0 = intl.Intl.pluralLogic(
+      v,
+      locale: localeName,
+      other: '$vString візиту',
+      many: '$vString візитів',
+      few: '$vString візити',
+      one: '$vString візит',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      p,
+      locale: localeName,
+      other: '$pString товару',
+      many: '$pString товарів',
+      few: '$pString товари',
+      one: '$pString товар',
+    );
+    return '$_temp0 · $_temp1';
   }
 
   @override
@@ -564,13 +593,21 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
-  String bought(int n) {
+  String bought(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Куплено $nString×';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Куплено $nString×',
+      many: 'Куплено $nString×',
+      few: 'Куплено $nString×',
+      one: 'Куплено $nString×',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1224,6 +1261,9 @@ class AppLocalizationsUk extends AppLocalizations {
       'Доступ до камери заблоковано';
 
   @override
+  String get scanStatusUnavailable => 'Не вдалося перевірити';
+
+  @override
   String get openSettings => 'Відкрити налаштування';
 
   @override
@@ -1240,6 +1280,10 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get scanUnsupportedPermissionPermanentlyDenied =>
       'Доступ до камери заблоковано — увімкніть його в налаштуваннях';
+
+  @override
+  String get scanUnsupportedUnavailable =>
+      'Не вдалося перевірити камеру — спробуйте ще раз';
 
   @override
   String possibleDuplicateReceipt(String store, String date) {

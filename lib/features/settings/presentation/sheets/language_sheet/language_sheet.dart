@@ -34,7 +34,7 @@ class LanguageSheet extends StatelessWidget {
   }
 
   List<LanguageOption> _options(AppLocalizations lo) => [
-    LanguageOption(code: null, label: lo.language),
+    LanguageOption(code: null, label: lo.languageSystemDefault),
     const LanguageOption(code: 'en', label: 'English'),
     const LanguageOption(code: 'ro', label: 'Română'),
     const LanguageOption(code: 'ru', label: 'Русский'),

@@ -7,12 +7,22 @@ import '../repositories/i_settings_local_repository.dart';
 /// `~/.claude/rules/delete_all_records_rules.md`).
 ///
 /// Clears every user-entered dataset this app currently has (M5: expenses,
-/// custom stores, custom categories — the built-in categories are also
-/// cleared, matching the design's `confirmDeleteAll`, which "empties
-/// transactions, clears custom stores and categories" and never re-seeds),
-/// then persists `AppSettings.dataCleared = true` so the seed guard
+/// custom stores, and CUSTOM categories only) then persists
+/// `AppSettings.dataCleared = true` so the seed guard
 /// (`isEmpty && !dataCleared`, see `SeedCategoriesUseCase`) never silently
 /// repopulates the app on the next cold start. **Never re-seeds here.**
+///
+/// R2-9 correction: the built-in categories are **preserved**, matching the
+/// design source's own `confirmDeleteAll` (`SpendLens Prototype.dc.html`
+/// line 901), which clears only `customCats`, while
+/// `allCats = [...defaultCats, ...customCats]` (line 808) keeps
+/// `defaultCats` — a hardcoded constant — intact. The built-ins surviving
+/// delete-all IS the design's own restore path; deleting them (the previous
+/// behavior of this use case) produced the exact contradiction QA observed:
+/// zero categories left while the destructive-action footer still states
+/// "Built-in categories cannot be deleted." This does not add a new restore
+/// flow — it stops removing data the design never asked this action to
+/// remove.
 ///
 /// Receipts/receipt items/price observations are intentionally not yet
 /// dependencies — M5 is manual-entry only (zero native code, no scanning),
@@ -57,6 +67,9 @@ class DeleteAllRecordsUseCase {
 
     final categories = await _categoryLocalRepository.getAll();
     for (final category in categories) {
+      // Built-in categories survive delete-all by design (see the doc
+      // comment above) — only user-created ones are cleared.
+      if (category.isBuiltIn) continue;
       await _categoryLocalRepository.delete(category.id);
     }
 

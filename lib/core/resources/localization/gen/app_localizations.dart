@@ -198,11 +198,11 @@ abstract class AppLocalizations {
   /// **'Custom · unused'**
   String get catCustom;
 
-  /// Auto-ported from i18n.js key "catUsed".
+  /// Converted to a real ICU plural (recorded bug count-plus-noun-concatenated-without-icu-plural, R2-10).
   ///
   /// In en, this message translates to:
-  /// **'Custom · {n} records'**
-  String catUsed(int n);
+  /// **'{n,plural, =1{Custom · 1 record} other{Custom · {n} records}}'**
+  String catUsed(num n);
 
   /// Auto-ported from i18n.js key "catCreated".
   ///
@@ -293,6 +293,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Language'**
   String get language;
+
+  /// No description provided for @languageSystemDefault.
+  ///
+  /// In en, this message translates to:
+  /// **'System default'**
+  String get languageSystemDefault;
 
   /// No description provided for @appearance.
   ///
@@ -432,11 +438,11 @@ abstract class AppLocalizations {
   /// **'Point the camera, the receipt is found'**
   String get onb1Point0;
 
-  /// No description provided for @onb1Point1.
+  /// R2-8: converted to the {device} mechanism already used at onDevice/keepSafeBody/limitLocal/scanner_processing_sheet — spec section 4.4 omitted this 5th site, a spec-coverage gap, not an unwired call site.
   ///
   /// In en, this message translates to:
-  /// **'Text is read on your iPhone'**
-  String get onb1Point1;
+  /// **'Text is read on {device}'**
+  String onb1Point1(String device);
 
   /// No description provided for @onb1Point2.
   ///
@@ -960,11 +966,11 @@ abstract class AppLocalizations {
   /// **'Comparisons use your own receipts from the last 60 days, not live store prices.'**
   String get cmpNote;
 
-  /// Auto-ported from i18n.js key "storeMeta".
+  /// Converted to TWO independent real ICU plural blocks — v (visits) and p (products) are separate counts, both previously raw string interpolation (recorded bug count-plus-noun-concatenated-without-icu-plural, R2-10).
   ///
   /// In en, this message translates to:
-  /// **'{v} visits · {p} products'**
-  String storeMeta(int v, int p);
+  /// **'{v,plural, =1{1 visit} other{{v} visits}} · {p,plural, =1{1 product} other{{p} products}}'**
+  String storeMeta(num v, num p);
 
   /// Auto-ported from i18n.js key "storeEmpty".
   ///
@@ -972,11 +978,11 @@ abstract class AppLocalizations {
   /// **'{t} · no receipts yet'**
   String storeEmpty(String t);
 
-  /// Auto-ported from i18n.js key "bought".
+  /// Converted to a real ICU plural (recorded bug count-plus-noun-concatenated-without-icu-plural, R2-10). The design source (SpendLens Prototype.dc.html trMeta) has no plural noun here — pure numeral + "×" — so every ICU form renders identical visible text; the placeholder itself is what the signature requires, not new wording.
   ///
   /// In en, this message translates to:
-  /// **'Bought {n}×'**
-  String bought(int n);
+  /// **'{n,plural, =1{Bought 1×} other{Bought {n}×}}'**
+  String bought(num n);
 
   /// No description provided for @byWeight.
   ///
@@ -2028,6 +2034,12 @@ abstract class AppLocalizations {
   /// **'Camera access blocked'**
   String get scanStatusPermissionPermanentlyDenied;
 
+  /// No description provided for @scanStatusUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check'**
+  String get scanStatusUnavailable;
+
   /// No description provided for @openSettings.
   ///
   /// In en, this message translates to:
@@ -2057,6 +2069,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Camera access is blocked — enable it in Settings'**
   String get scanUnsupportedPermissionPermanentlyDenied;
+
+  /// No description provided for @scanUnsupportedUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t check the camera — try again'**
+  String get scanUnsupportedUnavailable;
 
   /// Duplicate-detector warning toast (design_spendlens.md §6/§46) — warns only, never blocks saving.
   ///

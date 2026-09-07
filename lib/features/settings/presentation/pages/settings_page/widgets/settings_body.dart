@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../../../core/services/scan_capability/e_scan_capability.dart';
 import '../../../../../../core/widgets/padding/horizontal_padding.dart';
 import '../../../../../category/presentation/bloc/categories_bloc/categories_bloc.dart';
+import '../../../../domain/models/app_settings/e_app_theme_mode.dart';
 import '../../../bloc/settings_bloc/settings_bloc.dart';
 import 'delete_all_card.dart';
 import 'legal_card.dart';
@@ -29,7 +30,7 @@ class SettingsBody extends StatelessWidget {
   final VoidCallback onCurrency;
   final VoidCallback onCategories;
   final VoidCallback onLanguage;
-  final VoidCallback onToggleTheme;
+  final ValueChanged<EAppThemeMode> onPickTheme;
   final VoidCallback onDeleteAll;
   final VoidCallback onPrivacy;
   final VoidCallback onAbout;
@@ -49,7 +50,7 @@ class SettingsBody extends StatelessWidget {
     required this.onCurrency,
     required this.onCategories,
     required this.onLanguage,
-    required this.onToggleTheme,
+    required this.onPickTheme,
     required this.onDeleteAll,
     required this.onPrivacy,
     required this.onAbout,
@@ -78,7 +79,7 @@ class SettingsBody extends StatelessWidget {
                 onCurrency: onCurrency,
                 onCategories: onCategories,
                 onLanguage: onLanguage,
-                onToggleTheme: onToggleTheme,
+                onPickTheme: onPickTheme,
               ),
             ),
             ScanCapabilityCard(

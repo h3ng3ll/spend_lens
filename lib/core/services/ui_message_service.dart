@@ -1,3 +1,5 @@
+import 'dart:developer' as developer;
+
 import 'package:flutter/material.dart';
 
 import '../widgets/app_toast.dart';
@@ -56,7 +58,20 @@ final class UiMessageService {
 
   static void _show(String message, {required Duration duration}) {
     final overlayState = _navigatorKey?.currentState?.overlay;
-    if (overlayState == null) return;
+    if (overlayState == null) {
+      // R2-7 hardening: a dropped toast must never be silent. This was
+      // previously a bare `return` — indistinguishable, from the outside,
+      // from a toast that fired and was simply not observed. Logged, never
+      // thrown: a missing overlay must not crash the caller that only
+      // wanted to notify the user.
+      developer.log(
+        'UiMessageService: dropped "$message" — no attached overlay '
+        '(attach() not yet called, or the navigator has no overlay).',
+        level: 900,
+        name: 'App',
+      );
+      return;
+    }
 
     _currentEntry?.remove();
 

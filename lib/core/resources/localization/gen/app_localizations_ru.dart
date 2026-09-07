@@ -76,13 +76,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get catCustom => 'Своя · не используется';
 
   @override
-  String catUsed(int n) {
+  String catUsed(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Своя · $nString записей';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Своя · $nString записи',
+      many: 'Своя · $nString записей',
+      few: 'Своя · $nString записи',
+      one: 'Своя · $nString запись',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -150,6 +158,9 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get language => 'Язык';
+
+  @override
+  String get languageSystemDefault => 'Как в системе';
 
   @override
   String get appearance => 'Оформление';
@@ -226,7 +237,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get onb1Point0 => 'Наведите камеру — чек найден';
 
   @override
-  String get onb1Point1 => 'Текст читается на вашем iPhone';
+  String onb1Point1(String device) {
+    return 'Текст читается на $device';
+  }
 
   @override
   String get onb1Point2 => 'Товары и цены извлекаются автоматически';
@@ -544,7 +557,7 @@ class AppLocalizationsRu extends AppLocalizations {
       'Сравнение по вашим чекам за последние 60 дней, а не по живым ценам.';
 
   @override
-  String storeMeta(int v, int p) {
+  String storeMeta(num v, num p) {
     final intl.NumberFormat vNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
@@ -554,7 +567,23 @@ class AppLocalizationsRu extends AppLocalizations {
     );
     final String pString = pNumberFormat.format(p);
 
-    return '$vString визитов · $pString товаров';
+    String _temp0 = intl.Intl.pluralLogic(
+      v,
+      locale: localeName,
+      other: '$vString визита',
+      many: '$vString визитов',
+      few: '$vString визита',
+      one: '$vString визит',
+    );
+    String _temp1 = intl.Intl.pluralLogic(
+      p,
+      locale: localeName,
+      other: '$pString товара',
+      many: '$pString товаров',
+      few: '$pString товара',
+      one: '$pString товар',
+    );
+    return '$_temp0 · $_temp1';
   }
 
   @override
@@ -563,13 +592,21 @@ class AppLocalizationsRu extends AppLocalizations {
   }
 
   @override
-  String bought(int n) {
+  String bought(num n) {
     final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
       localeName,
     );
     final String nString = nNumberFormat.format(n);
 
-    return 'Куплено $nString×';
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Куплено $nString×',
+      many: 'Куплено $nString×',
+      few: 'Куплено $nString×',
+      one: 'Куплено $nString×',
+    );
+    return '$_temp0';
   }
 
   @override
@@ -1222,6 +1259,9 @@ class AppLocalizationsRu extends AppLocalizations {
       'Доступ к камере заблокирован';
 
   @override
+  String get scanStatusUnavailable => 'Не удалось проверить';
+
+  @override
   String get openSettings => 'Открыть настройки';
 
   @override
@@ -1238,6 +1278,10 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get scanUnsupportedPermissionPermanentlyDenied =>
       'Доступ к камере заблокирован — включите его в настройках';
+
+  @override
+  String get scanUnsupportedUnavailable =>
+      'Не удалось проверить камеру — попробуйте снова';
 
   @override
   String possibleDuplicateReceipt(String store, String date) {

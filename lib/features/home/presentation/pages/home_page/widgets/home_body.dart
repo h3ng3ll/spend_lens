@@ -54,9 +54,10 @@ class HomeBody extends StatelessWidget {
       EScanCapability.permissionDenied => lo.scanUnsupportedPermissionDenied,
       EScanCapability.permissionPermanentlyDenied =>
         lo.scanUnsupportedPermissionPermanentlyDenied,
+      EScanCapability.unavailable => lo.scanUnsupportedUnavailable,
       EScanCapability.supported => lo.scanUnsupportedNoCamera, // unreachable
     };
-    UiMessageService.showInfo(message);
+    await UiMessageService.showInfo(message);
   }
 
   void _onAddCashExpense(BuildContext context) =>

@@ -64,20 +64,22 @@ class RootPage extends StatelessWidget {
       bottomNavigationBar: SafeArea(
         child: Padding(
           padding: const EdgeInsets.fromLTRB(16.0, 0.0, 16.0, 8.0),
-          child: AppContainer(
-            height: 64.0,
-            color: scheme.bar,
-            borderRadius: BorderRadius.circular(24.0),
-            child: Row(
-              children: [
-                for (var i = 0; i < tabs.length; i++)
-                  ShellTabItem(
-                    asset: tabs[i].$1,
-                    label: tabs[i].$2,
-                    isSelected: navigationShell.currentIndex == i,
-                    onTap: () => _goBranch(context, i),
-                  ),
-              ],
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minHeight: 64.0),
+            child: AppContainer(
+              color: scheme.bar,
+              borderRadius: BorderRadius.circular(24.0),
+              child: Row(
+                children: [
+                  for (var i = 0; i < tabs.length; i++)
+                    ShellTabItem(
+                      asset: tabs[i].$1,
+                      label: tabs[i].$2,
+                      isSelected: navigationShell.currentIndex == i,
+                      onTap: () => _goBranch(context, i),
+                    ),
+                ],
+              ),
             ),
           ),
         ),

@@ -35,12 +35,12 @@
   "catNote": "Built-in categories cannot be deleted. Custom categories can be removed while unused.",
   "catDefault": "Built-in",
   "catCustom": "Custom · unused",
-  "catUsed": "Custom · {n} records",
+  "catUsed": "{n,plural, =1{Custom · 1 record} other{Custom · {n} records}}",
   "@catUsed": {
-    "description": "Auto-ported from i18n.js key \"catUsed\".",
+    "description": "Converted to a real ICU plural (recorded bug count-plus-noun-concatenated-without-icu-plural, R2-10).",
     "placeholders": {
       "n": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       }
     }
@@ -87,6 +87,7 @@
   "currency": "Currency",
   "categories": "Categories",
   "language": "Language",
+  "languageSystemDefault": "System default",
   "appearance": "Appearance",
   "deleteAll": "Delete all data",
   "privacy": "Privacy",
@@ -118,7 +119,15 @@
   "onb0Point2": "Prices tracked over time",
   "onb1Title": "Scan receipts in seconds.",
   "onb1Point0": "Point the camera, the receipt is found",
-  "onb1Point1": "Text is read on your iPhone",
+  "onb1Point1": "Text is read on {device}",
+  "@onb1Point1": {
+    "description": "R2-8: converted to the {device} mechanism already used at onDevice/keepSafeBody/limitLocal/scanner_processing_sheet — spec section 4.4 omitted this 5th site, a spec-coverage gap, not an unwired call site.",
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
   "onb1Point2": "Products and prices extracted automatically",
   "onb2Title": "Your data stays on your device.",
   "onb2Point0": "Local-first, works offline",
@@ -318,16 +327,16 @@
   "products": "Products",
   "productsHere": "Products bought here",
   "cmpNote": "Comparisons use your own receipts from the last 60 days, not live store prices.",
-  "storeMeta": "{v} visits · {p} products",
+  "storeMeta": "{v,plural, =1{1 visit} other{{v} visits}} · {p,plural, =1{1 product} other{{p} products}}",
   "@storeMeta": {
-    "description": "Auto-ported from i18n.js key \"storeMeta\".",
+    "description": "Converted to TWO independent real ICU plural blocks — v (visits) and p (products) are separate counts, both previously raw string interpolation (recorded bug count-plus-noun-concatenated-without-icu-plural, R2-10).",
     "placeholders": {
       "v": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       },
       "p": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       }
     }
@@ -341,12 +350,12 @@
       }
     }
   },
-  "bought": "Bought {n}×",
+  "bought": "{n,plural, =1{Bought 1×} other{Bought {n}×}}",
   "@bought": {
-    "description": "Auto-ported from i18n.js key \"bought\".",
+    "description": "Converted to a real ICU plural (recorded bug count-plus-noun-concatenated-without-icu-plural, R2-10). The design source (SpendLens Prototype.dc.html trMeta) has no plural noun here — pure numeral + \"×\" — so every ICU form renders identical visible text; the placeholder itself is what the signature requires, not new wording.",
     "placeholders": {
       "n": {
-        "type": "int",
+        "type": "num",
         "format": "decimalPattern"
       }
     }
@@ -753,11 +762,13 @@
   "scanStatusOcrUnavailable": "Text recognition unavailable",
   "scanStatusPermissionDenied": "Camera permission needed",
   "scanStatusPermissionPermanentlyDenied": "Camera access blocked",
+  "scanStatusUnavailable": "Couldn't check",
   "openSettings": "Open Settings",
   "scanUnsupportedNoCamera": "This device has no camera",
   "scanUnsupportedOcrUnavailable": "Text recognition isn't available on this device",
   "scanUnsupportedPermissionDenied": "Camera permission is needed to scan receipts",
   "scanUnsupportedPermissionPermanentlyDenied": "Camera access is blocked — enable it in Settings",
+  "scanUnsupportedUnavailable": "Couldn't check the camera — try again",
   "possibleDuplicateReceipt": "This looks like a receipt you already saved from {store} on {date}.",
   "@possibleDuplicateReceipt": {
     "description": "Duplicate-detector warning toast (design_spendlens.md §6/§46) — warns only, never blocks saving.",

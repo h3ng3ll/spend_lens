@@ -59,7 +59,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<_Watch>(_onWatch);
     on<_SetLocale>(_onSetLocale);
     on<_SetCurrency>(_onSetCurrency);
-    on<_ToggleTheme>(_onToggleTheme);
+    on<_PickTheme>(_onPickTheme);
     on<_CompleteOnboarding>(_onCompleteOnboarding);
     on<_ToggleFlashMode>(_onToggleFlashMode);
     on<_LoadRecordCount>(_onLoadRecordCount);
@@ -100,14 +100,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     await _saveSettingsUseCase(updated);
   }
 
-  Future<void> _onToggleTheme(
-    _ToggleTheme event,
+  Future<void> _onPickTheme(
+    _PickTheme event,
     Emitter<SettingsState> emit,
   ) async {
-    final next = state.settings.themeMode == EAppThemeMode.dark
-        ? EAppThemeMode.light
-        : EAppThemeMode.dark;
-    final updated = state.settings.copyWith(themeMode: next);
+    final updated = state.settings.copyWith(themeMode: event.mode);
+    if (updated == state.settings) return;
 
     emit(state.copyWith(settings: updated));
     await _saveSettingsUseCase(updated);

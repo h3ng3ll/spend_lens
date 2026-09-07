@@ -1,9 +1,21 @@
+import 'dart:async';
+
 import 'package:camera/camera.dart';
 import 'package:permission_handler/permission_handler.dart' as ph;
 
 import '../ocr/ocr_service.dart';
 import 'e_scan_capability.dart';
 import 'i_scan_capability_service.dart';
+
+/// How long the native camera-enumeration probe (`availableCameras()`) may
+/// run before this service gives up on it and reports
+/// [EScanCapability.unavailable]. Bound for the same reason
+/// `Apphud.start` is timeout-bound (`sig:unbounded-third-party-sdk-await-
+/// before-runapp-hangs-first-frame`): a plugin channel call is a native
+/// await this Dart code cannot otherwise cap, and an unbounded await on it
+/// can hang the calling UI (Home's "Scan Receipt" / Settings' capability
+/// row) with no exception and no log.
+const Duration _kHardwareProbeTimeout = Duration(seconds: 5);
 
 /// The single, real [IScanCapabilityService] implementation.
 ///
@@ -57,7 +69,8 @@ class ScanCapabilityService implements IScanCapabilityService {
   }
 
   Future<EScanCapability> _checkHardwareAndOcr() async {
-    final hasCamera = await _hasUsableCamera();
+    final bool? hasCamera = await _hasUsableCameraOrTimeout();
+    if (hasCamera == null) return EScanCapability.unavailable;
     if (!hasCamera) return EScanCapability.noCamera;
 
     final ocrAvailable = await _ocrService.isAvailable();
@@ -66,12 +79,19 @@ class ScanCapabilityService implements IScanCapabilityService {
     return EScanCapability.supported;
   }
 
-  Future<bool> _hasUsableCamera() async {
+  /// `null` means the probe did not settle within [_kHardwareProbeTimeout] —
+  /// distinct from `false` ("settled, no camera"), so the caller can report
+  /// [EScanCapability.unavailable] instead of misreporting [noCamera].
+  Future<bool?> _hasUsableCameraOrTimeout() async {
     try {
-      final cameras = await availableCameras();
+      final cameras = await availableCameras().timeout(
+        _kHardwareProbeTimeout,
+      );
       return cameras.isNotEmpty;
     } on CameraException {
       return false;
+    } on TimeoutException {
+      return null;
     }
   }
 }

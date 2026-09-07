@@ -46,7 +46,9 @@ class _HistoryPageState extends State<HistoryPage> {
 
     return Scaffold(
       backgroundColor: scheme.bg,
-      appBar: CustomAppBar(title: Text(lo.tabHistory)),
+      // History is a bottom-tab shell-branch ROOT (init_router.dart) — it
+      // has nothing to pop, so no back arrow is synthesized (R2-4).
+      appBar: CustomAppBar(title: Text(lo.tabHistory), canGoBack: false),
       body: BlocProvider<HistoryBloc>.value(
         value: _historyBloc,
         child: BlocBuilder<HistoryBloc, HistoryState>(

@@ -17,7 +17,7 @@ class PreferencesCard extends StatelessWidget {
   final VoidCallback onCurrency;
   final VoidCallback onCategories;
   final VoidCallback onLanguage;
-  final VoidCallback onToggleTheme;
+  final ValueChanged<EAppThemeMode> onPickTheme;
 
   const PreferencesCard({
     super.key,
@@ -28,15 +28,27 @@ class PreferencesCard extends StatelessWidget {
     required this.onCurrency,
     required this.onCategories,
     required this.onLanguage,
-    required this.onToggleTheme,
+    required this.onPickTheme,
   });
+
+  void _onPickDark() => onPickTheme(EAppThemeMode.dark);
+
+  void _onPickLight() => onPickTheme(EAppThemeMode.light);
 
   @override
   Widget build(BuildContext context) {
     final scheme = AppColorScheme.of(context);
     final lo = AppLocalizations.of(context);
 
-    final isDark = themeMode != EAppThemeMode.light;
+    // `system` must resolve against the ACTUAL platform brightness, never
+    // fall silently onto dark — otherwise a light-rendered device shows
+    // "Dark" highlighted while the app is visibly light (R2-6).
+    final isDark = switch (themeMode) {
+      EAppThemeMode.dark => true,
+      EAppThemeMode.light => false,
+      EAppThemeMode.system =>
+        MediaQuery.platformBrightnessOf(context) == Brightness.dark,
+    };
 
     return AppSectionCard(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -68,7 +80,8 @@ class PreferencesCard extends StatelessWidget {
               isDark: isDark,
               darkLabel: lo.dark,
               lightLabel: lo.light,
-              onToggle: onToggleTheme,
+              onPickDark: _onPickDark,
+              onPickLight: _onPickLight,
             ),
           ),
         ],

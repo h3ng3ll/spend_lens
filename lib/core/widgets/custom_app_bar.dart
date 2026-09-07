@@ -19,6 +19,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final bool? forceMaterialTransparency;
   final Color? shadowColor;
 
+  /// Whether a back-arrow affordance may be synthesized when [leading] is
+  /// not supplied. Defaults to `true` for pushed/detail screens, which have
+  /// something to pop back to. A screen that is the ROOT of a
+  /// `StatefulShellRoute` branch (a bottom-tab root) has nothing to pop —
+  /// `context.goBack` would instead jump to an unrelated tab — so that
+  /// caller MUST pass `false` (R2-4).
+  final bool canGoBack;
+
   const CustomAppBar({
     super.key,
     this.actions,
@@ -34,6 +42,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.shape,
     this.forceMaterialTransparency,
     this.shadowColor,
+    this.canGoBack = true,
   });
 
   @override
@@ -41,22 +50,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     final colorScheme = AppColorScheme.of(context);
     final iconColor = colorScheme.ink;
 
-    return AppBar(
-      leadingWidth: leadingWidth,
-      title: title,
-      centerTitle: centerTitle,
-      forceMaterialTransparency: forceMaterialTransparency ?? false,
-      shadowColor: shadowColor,
-      iconTheme: IconThemeData(color: iconColor),
-      actionsIconTheme: IconThemeData(color: iconColor),
-      foregroundColor: iconColor,
-      leading: Padding(
-        padding: const EdgeInsets.only(
-          left: 8.0,
-        ),
-        child: Center(
-          child: leading ??
-              InkWell(
+    final resolvedLeading = leading ??
+        (canGoBack
+            ? InkWell(
                 onTap: context.goBack,
                 child: SvgPicture.asset(
                   AppIcons.arrowLeftOutlined,
@@ -67,9 +63,27 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
                     BlendMode.srcIn,
                   ),
                 ),
+              )
+            : null);
+
+    return AppBar(
+      leadingWidth: leadingWidth,
+      title: title,
+      centerTitle: centerTitle,
+      forceMaterialTransparency: forceMaterialTransparency ?? false,
+      shadowColor: shadowColor,
+      iconTheme: IconThemeData(color: iconColor),
+      actionsIconTheme: IconThemeData(color: iconColor),
+      foregroundColor: iconColor,
+      automaticallyImplyLeading: false,
+      leading: resolvedLeading == null
+          ? null
+          : Padding(
+              padding: const EdgeInsets.only(
+                left: 8.0,
               ),
-        ),
-      ),
+              child: Center(child: resolvedLeading),
+            ),
       actionsPadding: actionsPadding,
       backgroundColor: backgroundColor ?? AppColors.transparent.value,
       toolbarHeight: height ?? 120,

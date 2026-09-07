@@ -49,18 +49,43 @@ class SettingsRow extends StatelessWidget {
       child: Row(
         children: [
           Expanded(
+            flex: 3,
             child: Text(
               label,
               style: textTheme.body17.copyWith(color: labelColor ?? scheme.ink),
             ),
           ),
-          ?trailing,
+          if (trailing != null)
+            // `FlexFit.tight` + a clamped scaler: a bare `Flexible` let the
+            // trailing WIDGET keep its intrinsic width and overflow at large
+            // text scales, while the `trailingText` branch below was already
+            // clamped. Fixing only the text branch left this one live --
+            // the same partial-rollout shape the fixed-dp chronic keeps
+            // taking (`sig:developer-derived-fixed-dp-cell-height-ignores-
+            // textScaleFactor`).
+            Flexible(
+              flex: 2,
+              fit: FlexFit.tight,
+              child: Align(
+                alignment: Alignment.centerRight,
+                child: MediaQuery.withClampedTextScaling(
+                  maxScaleFactor: 1.3,
+                  child: trailing!,
+                ),
+              ),
+            ),
           if (trailing == null && trailingText != null)
-            Text(
-              trailingText!,
-              style: textTheme.body17.copyWith(
-                color: trailingTextColor ?? scheme.sec,
-                fontWeight: FontWeight.w500,
+            Flexible(
+              flex: 2,
+              child: Text(
+                trailingText!,
+                textAlign: TextAlign.right,
+                overflow: TextOverflow.ellipsis,
+                maxLines: 2,
+                style: textTheme.body17.copyWith(
+                  color: trailingTextColor ?? scheme.sec,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           if (showChevron)

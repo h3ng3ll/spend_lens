@@ -10,6 +10,7 @@ import '../../../../../core/services/scan_capability/e_scan_capability.dart';
 import '../../../../../core/services/scan_capability/i_scan_capability_service.dart';
 import '../../../../../core/services/ui_message_service.dart';
 import '../../../../../core/widgets/confirm_dialog.dart';
+import '../../../domain/models/app_settings/e_app_theme_mode.dart';
 import '../../bloc/settings_bloc/settings_bloc.dart';
 import '../../sheets/currency_sheet/currency_sheet.dart';
 import '../../sheets/language_sheet/language_sheet.dart';
@@ -85,8 +86,9 @@ class _SettingsPageState extends State<SettingsPage>
 
   void _onCurrency(BuildContext context) => CurrencySheet.show(context);
 
-  void _onToggleTheme(BuildContext context) =>
-      context.read<SettingsBloc>().add(const SettingsEvent.toggleTheme());
+  void _onPickTheme(BuildContext context, EAppThemeMode mode) => context
+      .read<SettingsBloc>()
+      .add(SettingsEvent.pickTheme(mode: mode));
 
   void _onCategories(BuildContext context) =>
       CategoriesPageRoute().push(context);
@@ -192,7 +194,7 @@ class _SettingsPageState extends State<SettingsPage>
                     return SettingsBody(
                       state: state,
                       languageLabel: state.settings.localeCode == null
-                          ? lo.language
+                          ? lo.languageSystemDefault
                           : (_languageLabels[state.settings.localeCode] ??
                                 state.settings.localeCode!),
                       currencyLabel: state.settings.currencyCode,
@@ -201,7 +203,7 @@ class _SettingsPageState extends State<SettingsPage>
                       onCurrency: () => _onCurrency(context),
                       onCategories: () => _onCategories(context),
                       onLanguage: () => _onLanguage(context),
-                      onToggleTheme: () => _onToggleTheme(context),
+                      onPickTheme: (mode) => _onPickTheme(context, mode),
                       onDeleteAll: () => _onDeleteAll(context),
                       onPrivacy: () => _onPrivacy(context),
                       onAbout: () => _onAbout(context),
