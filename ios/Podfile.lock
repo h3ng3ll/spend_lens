@@ -11,10 +11,10 @@ PODS:
     - PromisesObjC (~> 2.4)
     - PromisesSwift (~> 2.4)
     - RecaptchaInterop (~> 101.0)
-  - apphud (3.4.0):
-    - ApphudSDK (= 4.4.9)
+  - apphud (3.1.2):
+    - ApphudSDK (= 4.0.4)
     - Flutter
-  - ApphudSDK (4.4.9)
+  - ApphudSDK (4.0.4)
   - camera_avfoundation (0.0.1):
     - Flutter
   - device_info_plus (0.0.1):
@@ -292,8 +292,8 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   AppAuth: ef4da5a3fc2e10b90c09a0a94a9baeaedc0341d5
   AppCheckCore: e215d35177a9cf469927863e69c13e220df32a8b
-  apphud: 8014f13ab36f1289b0b758db6e29a8502feb0546
-  ApphudSDK: c42a60908d076a7b74dc48575a09f04a7663e406
+  apphud: 74f8310b3290551d940d9253207db6a8e8108f53
+  ApphudSDK: 7b57e9764c438d03842245053f182d50399ceaf4
   camera_avfoundation: 5675ca25298b6f81fa0a325188e7df62cc217741
   device_info_plus: 21fcca2080fbcd348be798aa36c3e5ed849eefbe
   file_picker_darwin: 4c2b9a50ea44cb3b071381ea0cf48591bdd80251
