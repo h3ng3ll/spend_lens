@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet><meta name="design_doc_mode" content="canvas"><style>body{margin:0;background:#ECEAE5;font-family:-apple-system,BlinkMacSystemFont,"SF Pro Text","SF Pro Display",system-ui,sans-serif;color:#1C1C1E;-webkit-font-smoothing:antialiased}a{color:#167C8A;text-decoration:none}a:hover{color:#0F5F6B}@keyframes slPulse{0%,100%{opacity:.55}50%{opacity:1}}@keyframes slScan{0%{top:6%}100%{top:92%}}@keyframes slBreathe{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}@keyframes slSpin{to{transform:rotate(360deg)}}@keyframes slBar{0%{width:12%}100%{width:64%}}</style></helmet>
+
+<div style="padding:48px 56px 96px;display:flex;flex-direction:column;gap:56px;min-width:1720px">
+
+<div style="display:grid;grid-template-columns:minmax(0,520px) minmax(0,1fr);gap:48px;align-items:end">
+  <div>
+    <div style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#8E8E93">SpendLens · iOS design system</div>
+    <h1 style="margin:10px 0 0;font-size:44px;line-height:1.05;font-weight:600;letter-spacing:-.03em">Photograph the receipt.<br>Everything else is done.</h1>
+  </div>
+  <div style="font-size:14px;line-height:1.55;color:#48484A;max-width:720px;display:flex;flex-direction:column;gap:8px">
+    <div><b>Assumptions.</b> Light mode first (dark follows the same token map). iPhone 15/16 class, 402×874. System type (SF Pro) with tabular numerals for every amount. Currency MDL, written after the number.</div>
+    <div><b>Direction.</b> Warm paper white ground, ink-black primary action, one teal accent reserved for "the system understood this" (detection, confidence, category Food). Amber only for "check this". No red for spending — spending is information, not failure.</div>
+    <div><b>Screens below:</b> Home, Review, Analytics, then the scanner in its four states. The review screen is interactive: tap the flagged item, switch category.</div>
+  </div>
+</div>
+
+<!-- FOUNDATIONS -->
+<div style="display:flex;flex-direction:column;gap:20px">
+  <div style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#8E8E93">01 · Foundations</div>
+  <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px">
+    <div style="background:#fff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05)">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px">Color</div>
+      <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px">
+        <div><div style="height:56px;border-radius:12px;background:#1C1C1E"></div><div style="font-size:11px;margin-top:6px;color:#48484A">Ink · #1C1C1E</div></div>
+        <div><div style="height:56px;border-radius:12px;background:#6E6E73"></div><div style="font-size:11px;margin-top:6px;color:#48484A">Secondary · #6E6E73</div></div>
+        <div><div style="height:56px;border-radius:12px;background:#F7F6F3;border:1px solid rgba(0,0,0,.06)"></div><div style="font-size:11px;margin-top:6px;color:#48484A">Paper · #F7F6F3</div></div>
+        <div><div style="height:56px;border-radius:12px;background:#fff;border:1px solid rgba(0,0,0,.08)"></div><div style="font-size:11px;margin-top:6px;color:#48484A">Card · #FFFFFF</div></div>
+        <div><div style="height:56px;border-radius:12px;background:#167C8A"></div><div style="font-size:11px;margin-top:6px;color:#48484A">Accent · #167C8A</div></div>
+        <div><div style="height:56px;border-radius:12px;background:#E3F0F2"></div><div style="font-size:11px;margin-top:6px;color:#48484A">Accent tint · #E3F0F2</div></div>
+        <div><div style="height:56px;border-radius:12px;background:#B9781C"></div><div style="font-size:11px;margin-top:6px;color:#48484A">Attention · #B9781C</div></div>
+        <div><div style="height:56px;border-radius:12px;background:#FBF1E1"></div><div style="font-size:11px;margin-top:6px;color:#48484A">Attention tint · #FBF1E1</div></div>
+      </div>
+      <div style="font-size:12px;color:#6E6E73;margin:18px 0 8px">Category hues — same lightness and chroma, only hue changes</div>
+      <div style="display:flex;gap:8px">
+        <div style="flex:1;height:28px;border-radius:8px;background:#167C8A"></div>
+        <div style="flex:1;height:28px;border-radius:8px;background:#5B6BA6"></div>
+        <div style="flex:1;height:28px;border-radius:8px;background:#8A7A3A"></div>
+        <div style="flex:1;height:28px;border-radius:8px;background:#A8625E"></div>
+        <div style="flex:1;height:28px;border-radius:8px;background:#5F8A5C"></div>
+        <div style="flex:1;height:28px;border-radius:8px;background:#9A9A9F"></div>
+      </div>
+      <div style="display:flex;gap:8px;font-size:11px;color:#48484A;margin-top:6px"><div style="flex:1">Food</div><div style="flex:1">Transport</div><div style="flex:1">Household</div><div style="flex:1">Restaurants</div><div style="flex:1">Health</div><div style="flex:1">Other</div></div>
+    </div>
+    <div style="background:#fff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05)">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px">Typography · SF Pro, tabular numerals</div>
+      <div style="display:flex;flex-direction:column;gap:14px">
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px"><span style="font-size:44px;font-weight:600;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums">8,420 <span style="font-size:22px;font-weight:500;color:#6E6E73;letter-spacing:0">MDL</span></span><span style="font-size:11px;color:#8E8E93">Hero amount · 44/600 · −0.035em</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px"><span style="font-size:28px;font-weight:600;letter-spacing:-.02em">September</span><span style="font-size:11px;color:#8E8E93">Title · 28/600</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px"><span style="font-size:17px;font-weight:600">Milk 1L</span><span style="font-size:11px;color:#8E8E93">Headline · 17/600</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px"><span style="font-size:17px">Keep the receipt inside the frame</span><span style="font-size:11px;color:#8E8E93">Body · 17/400</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px"><span style="font-size:15px;color:#6E6E73">1 × 22.90</span><span style="font-size:11px;color:#8E8E93">Subhead · 15/400 secondary</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px"><span style="font-size:13px;color:#8E8E93">Yesterday · Kaufland</span><span style="font-size:11px;color:#8E8E93">Footnote · 13/400</span></div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:16px"><span style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8E8E93">Recent purchases</span><span style="font-size:11px;color:#8E8E93">Section label · 12/600 caps</span></div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05)">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px">Spacing · Radius · Depth</div>
+      <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:6px">
+        <div style="width:4px;height:4px;background:#167C8A;border-radius:1px"></div><div style="width:8px;height:8px;background:#167C8A;border-radius:2px"></div><div style="width:12px;height:12px;background:#167C8A;border-radius:2px"></div><div style="width:16px;height:16px;background:#167C8A;border-radius:3px"></div><div style="width:20px;height:20px;background:#167C8A;border-radius:4px"></div><div style="width:24px;height:24px;background:#167C8A;border-radius:4px"></div><div style="width:32px;height:32px;background:#167C8A;border-radius:6px"></div>
+      </div>
+      <div style="font-size:11px;color:#48484A;margin-bottom:20px">4 · 8 · 12 · 16 · 20 · 24 · 32 — screen gutter 20, card padding 16/20, row height 52</div>
+      <div style="display:flex;gap:12px;margin-bottom:6px">
+        <div style="flex:1;height:52px;border-radius:10px;background:#F7F6F3;border:1px solid rgba(0,0,0,.06)"></div>
+        <div style="flex:1;height:52px;border-radius:14px;background:#F7F6F3;border:1px solid rgba(0,0,0,.06)"></div>
+        <div style="flex:1;height:52px;border-radius:20px;background:#F7F6F3;border:1px solid rgba(0,0,0,.06)"></div>
+        <div style="flex:1;height:52px;border-radius:999px;background:#F7F6F3;border:1px solid rgba(0,0,0,.06)"></div>
+      </div>
+      <div style="display:flex;gap:12px;font-size:11px;color:#48484A;margin-bottom:20px"><div style="flex:1">10 · chips, inputs</div><div style="flex:1">14 · buttons</div><div style="flex:1">20 · cards</div><div style="flex:1">pill · nav, badges</div></div>
+      <div style="display:flex;gap:16px">
+        <div style="flex:1;height:64px;border-radius:16px;background:#fff;border:1px solid rgba(0,0,0,.06)"></div>
+        <div style="flex:1;height:64px;border-radius:16px;background:#fff;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05)"></div>
+        <div style="flex:1;height:64px;border-radius:16px;background:#fff;box-shadow:0 2px 6px rgba(28,28,30,.06),0 24px 48px rgba(28,28,30,.12)"></div>
+      </div>
+      <div style="display:flex;gap:16px;font-size:11px;color:#48484A;margin-top:6px"><div style="flex:1">Flat · hairline only</div><div style="flex:1">Resting card</div><div style="flex:1">Sheet / modal</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- COMPONENTS -->
+<div style="display:flex;flex-direction:column;gap:20px">
+  <div style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#8E8E93">02 · Components</div>
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px">
+
+    <div style="background:#fff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05);display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px">Buttons</div>
+      <div style="height:56px;border-radius:16px;background:#1C1C1E;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:600;cursor:pointer" style-hover="background:#2C2C2E" style-active="transform:scale(.985)"><span style="width:18px;height:18px;position:relative;display:inline-block"><span style="position:absolute;left:0;top:0;width:6px;height:6px;border-left:2px solid #fff;border-top:2px solid #fff;border-radius:2px 0 0 0"></span><span style="position:absolute;right:0;top:0;width:6px;height:6px;border-right:2px solid #fff;border-top:2px solid #fff;border-radius:0 2px 0 0"></span><span style="position:absolute;left:0;bottom:0;width:6px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;border-radius:0 0 0 2px"></span><span style="position:absolute;right:0;bottom:0;width:6px;height:6px;border-right:2px solid #fff;border-bottom:2px solid #fff;border-radius:0 0 2px 0"></span></span>Scan Receipt</div>
+      <div style="height:52px;border-radius:16px;background:#F7F6F3;color:#1C1C1E;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;cursor:pointer" style-hover="background:#EFEDE8">Add Cash Expense</div>
+      <div style="height:52px;border-radius:16px;background:#167C8A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;cursor:pointer" style-hover="background:#136C79">Save Receipt</div>
+      <div style="display:flex;gap:10px">
+        <div style="flex:1;height:44px;border-radius:14px;border:1px solid rgba(0,0,0,.1);display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;cursor:pointer" style-hover="background:#F7F6F3">Try Again</div>
+        <div style="flex:1;height:44px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#167C8A;cursor:pointer" style-hover="background:#E3F0F2">Enter Manually</div>
+      </div>
+      <div style="height:52px;border-radius:16px;background:#E5E5EA;color:#AEAEB2;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600">Disabled</div>
+      <div style="font-size:11px;color:#8E8E93">Primary ink 56 · Secondary paper 52 · Confirm teal 52 · Tertiary 44 · one primary per screen</div>
+    </div>
+
+    <div style="background:#fff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05);display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px">Inputs</div>
+      <div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:13px;color:#6E6E73">Amount</div><div style="height:56px;border-radius:14px;background:#F7F6F3;display:flex;align-items:center;padding:0 16px;gap:8px;font-size:28px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">45<span style="font-size:17px;font-weight:500;color:#8E8E93;letter-spacing:0">MDL</span></div></div>
+      <div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:13px;color:#6E6E73">Note</div><div style="height:48px;border-radius:14px;background:#F7F6F3;display:flex;align-items:center;padding:0 16px;font-size:17px;color:#AEAEB2">Optional</div></div>
+      <div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:13px;color:#6E6E73">Focused</div><div style="height:48px;border-radius:14px;background:#fff;box-shadow:0 0 0 2px #167C8A inset;display:flex;align-items:center;padding:0 16px;font-size:17px">Lidl<span style="width:2px;height:22px;background:#167C8A;margin-left:1px;border-radius:1px"></span></div></div>
+      <div style="display:flex;flex-direction:column;gap:6px"><div style="font-size:13px;color:#B9781C">Needs a check</div><div style="height:48px;border-radius:14px;background:#FBF1E1;display:flex;align-items:center;justify-content:space-between;padding:0 16px;font-size:17px">CH1CKEN<span style="font-size:13px;color:#B9781C;font-weight:600">OCR 61%</span></div></div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap">
+        <div style="height:36px;padding:0 14px;border-radius:999px;background:#1C1C1E;color:#fff;font-size:15px;font-weight:600;display:flex;align-items:center">Food</div>
+        <div style="height:36px;padding:0 14px;border-radius:999px;background:#F7F6F3;font-size:15px;font-weight:500;display:flex;align-items:center;cursor:pointer" style-hover="background:#EFEDE8">Household</div>
+        <div style="height:36px;padding:0 14px;border-radius:999px;background:#F7F6F3;font-size:15px;font-weight:500;display:flex;align-items:center;cursor:pointer" style-hover="background:#EFEDE8">Other</div>
+      </div>
+      <div style="display:flex;background:#F7F6F3;border-radius:12px;padding:3px">
+        <div style="flex:1;height:32px;border-radius:9px;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600">All</div>
+        <div style="flex:1;height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:#6E6E73">Receipts</div>
+        <div style="flex:1;height:32px;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:500;color:#6E6E73">Cash</div>
+      </div>
+    </div>
+
+    <div style="background:#fff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05);display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px">Badges &amp; status</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center">
+        <div style="height:26px;padding:0 10px;border-radius:999px;background:#E3F0F2;color:#0F5F6B;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#167C8A"></span>Auto-detected</div>
+        <div style="height:26px;padding:0 10px;border-radius:999px;background:#FBF1E1;color:#8A5A12;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#B9781C"></span>Check this</div>
+        <div style="height:26px;padding:0 10px;border-radius:999px;background:#F2F2F7;color:#48484A;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:8px;height:9px;border:1.5px solid #48484A;border-radius:2px;position:relative;top:1px"></span>On device</div>
+        <div style="height:26px;padding:0 10px;border-radius:999px;background:#F2F2F7;color:#48484A;font-size:12px;font-weight:600;display:flex;align-items:center">Cash</div>
+        <div style="height:26px;padding:0 10px;border-radius:999px;background:#F2F2F7;color:#48484A;font-size:12px;font-weight:600;display:flex;align-items:center">Receipt</div>
+      </div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;margin-top:4px">
+        <div style="font-size:15px;font-weight:600;color:#B9781C;font-variant-numeric:tabular-nums">+12% <span style="font-weight:400;color:#6E6E73">vs August</span></div>
+        <div style="font-size:15px;font-weight:600;color:#5F8A5C;font-variant-numeric:tabular-nums;margin-left:8px">−8% <span style="font-weight:400;color:#6E6E73">vs July</span></div>
+      </div>
+      <div style="font-size:11px;color:#8E8E93">Trend text: amber when spending rose, green when it fell. Never red.</div>
+      <div style="font-size:15px;font-weight:600;margin:12px 0 4px">Tab bar</div>
+      <div style="background:#F7F6F3;border-radius:20px;padding:14px">
+        <div style="height:64px;border-radius:999px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);box-shadow:0 1px 2px rgba(0,0,0,.04),0 10px 30px rgba(28,28,30,.10),0 0 0 .5px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-around;padding:0 12px">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#1C1C1E"><span style="width:20px;height:20px;border-radius:6px;background:#1C1C1E;display:block"></span><span style="font-size:10px;font-weight:600">Home</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#8E8E93"><span style="width:20px;height:20px;display:flex;align-items:flex-end;gap:3px"><span style="width:4px;height:9px;background:#8E8E93;border-radius:1px"></span><span style="width:4px;height:16px;background:#8E8E93;border-radius:1px"></span><span style="width:4px;height:12px;background:#8E8E93;border-radius:1px"></span></span><span style="font-size:10px;font-weight:500">Analytics</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#8E8E93"><span style="width:20px;height:20px;border-radius:50%;border:2.5px solid #8E8E93;box-sizing:border-box;display:block"></span><span style="font-size:10px;font-weight:500">History</span></div>
+          <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#8E8E93"><span style="width:20px;height:20px;border-radius:50%;border:2.5px solid #8E8E93;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><span style="width:6px;height:6px;border-radius:50%;background:#8E8E93"></span></span><span style="font-size:10px;font-weight:500">Settings</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div style="background:#fff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05);display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:15px;font-weight:600;margin-bottom:4px">Charts</div>
+      <div style="display:flex;gap:20px;align-items:center">
+        <div style="width:96px;height:96px;border-radius:50%;background:conic-gradient(#167C8A 0 57%,#5B6BA6 57% 68%,#8A7A3A 68% 77%,#A8625E 77% 85%,#D1D1D6 85% 100%);display:flex;align-items:center;justify-content:center;flex:none"><div style="width:66px;height:66px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-size:15px;font-weight:600;letter-spacing:-.02em">57%</span><span style="font-size:9px;color:#8E8E93">Food</span></div></div>
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px">
+          <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Food</span><span style="font-variant-numeric:tabular-nums;color:#6E6E73">4,820</span></div><div style="height:6px;border-radius:3px;background:#F2F2F7"><div style="width:57%;height:6px;border-radius:3px;background:#167C8A"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Transport</span><span style="font-variant-numeric:tabular-nums;color:#6E6E73">920</span></div><div style="height:6px;border-radius:3px;background:#F2F2F7"><div style="width:11%;height:6px;border-radius:3px;background:#5B6BA6"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:4px"><span>Household</span><span style="font-variant-numeric:tabular-nums;color:#6E6E73">740</span></div><div style="height:6px;border-radius:3px;background:#F2F2F7"><div style="width:9%;height:6px;border-radius:3px;background:#8A7A3A"></div></div></div>
+        </div>
+      </div>
+      <div style="font-size:13px;color:#6E6E73;margin-top:6px">Price history · Milk 1L</div>
+      <div style="display:flex;align-items:flex-end;gap:10px;height:64px">
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:36px;border-radius:6px;background:#E5E5EA"></div><span style="font-size:10px;color:#8E8E93">Jun</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:40px;border-radius:6px;background:#E5E5EA"></div><span style="font-size:10px;color:#8E8E93">Jul</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:44px;border-radius:6px;background:#E5E5EA"></div><span style="font-size:10px;color:#8E8E93">Aug</span></div>
+        <div style="flex:1;display:flex;flex-direction:column;align-items:center;gap:4px"><div style="width:100%;height:48px;border-radius:6px;background:#1C1C1E"></div><span style="font-size:10px;color:#1C1C1E;font-weight:600">Sep</span></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:13px"><span style="color:#6E6E73">18.50 → 22.90 MDL</span><span style="font-weight:600;color:#B9781C">+23.8% since June</span></div>
+      <div style="font-size:13px;color:#6E6E73;margin-top:6px">Cash vs receipt</div>
+      <div style="height:10px;border-radius:5px;background:#F2F2F7;display:flex;overflow:hidden"><div style="width:86%;background:#1C1C1E"></div><div style="width:14%;background:#C7C7CC"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:12px;color:#6E6E73"><span><b style="color:#1C1C1E">86%</b> receipts</span><span><b style="color:#1C1C1E">14%</b> cash</span></div>
+    </div>
+  </div>
+
+  <div style="display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px">
+    <div style="background:#fff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05)">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px">Empty state</div>
+      <div style="background:#F7F6F3;border-radius:16px;padding:36px 24px;display:flex;flex-direction:column;align-items:center;text-align:center;gap:10px">
+        <div style="width:56px;height:68px;border-radius:6px;background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.06),0 6px 16px rgba(28,28,30,.08);display:flex;flex-direction:column;gap:6px;padding:12px 10px;box-sizing:border-box"><span style="height:3px;background:#E5E5EA;border-radius:2px;width:60%"></span><span style="height:3px;background:#E5E5EA;border-radius:2px"></span><span style="height:3px;background:#E5E5EA;border-radius:2px"></span><span style="height:3px;background:#E5E5EA;border-radius:2px;width:80%"></span></div>
+        <div style="font-size:17px;font-weight:600;margin-top:6px">No expenses yet</div>
+        <div style="font-size:15px;color:#6E6E73;line-height:1.4;text-wrap:pretty">Scan a few receipts to see your spending patterns.</div>
+        <div style="height:44px;padding:0 20px;border-radius:14px;background:#1C1C1E;color:#fff;display:flex;align-items:center;font-size:15px;font-weight:600;margin-top:6px">Scan your first receipt</div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05)">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px">Error state · scan failed</div>
+      <div style="background:#F7F6F3;border-radius:16px;padding:24px;display:flex;flex-direction:column;gap:12px">
+        <div style="font-size:17px;font-weight:600;text-wrap:pretty">We couldn't read this receipt clearly.</div>
+        <div style="font-size:15px;color:#48484A;line-height:1.5">Try:<br>• Move to better lighting<br>• Flatten the receipt<br>• Keep the whole receipt inside the frame</div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <div style="flex:1;height:44px;border-radius:14px;background:#1C1C1E;color:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Try Again</div>
+          <div style="flex:1;height:44px;border-radius:14px;background:#fff;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600">Enter Manually</div>
+        </div>
+      </div>
+    </div>
+    <div style="background:#fff;border-radius:20px;padding:24px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05);grid-column:span 2">
+      <div style="font-size:15px;font-weight:600;margin-bottom:16px">Receipt scanning states · frame corners and copy</div>
+      <div style="display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:12px">
+        <div style="background:#141416;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;color:#fff"><div style="height:72px;position:relative">{{ cornersSearch }}</div><div style="font-size:13px;font-weight:600">Searching</div><div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.4">White corners, 55% opacity, slow pulse. "Looking for a receipt…"</div></div>
+        <div style="background:#141416;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;color:#fff"><div style="height:72px;position:relative">{{ cornersDetected }}</div><div style="font-size:13px;font-weight:600">Detected</div><div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.4">Corners snap to edges, turn teal, teal wash on receipt. "Hold still"</div></div>
+        <div style="background:#141416;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;color:#fff"><div style="height:72px;position:relative;background:rgba(255,255,255,.35);border-radius:10px"></div><div style="font-size:13px;font-weight:600">Capturing</div><div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.4">120 ms white flash, shutter ring contracts, haptic.</div></div>
+        <div style="background:#141416;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;color:#fff"><div style="height:72px;position:relative;overflow:hidden;border-radius:10px;background:#2A2A2E">{{ scanLine }}</div><div style="font-size:13px;font-weight:600">Processing</div><div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.4">Detecting receipt → Reading text → Finding products → Checking prices</div></div>
+        <div style="background:#141416;border-radius:16px;padding:16px;display:flex;flex-direction:column;gap:10px;color:#fff"><div style="height:72px;display:flex;align-items:center;justify-content:center"><div style="width:32px;height:32px;border-radius:50%;background:#FBF1E1;color:#B9781C;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:18px">!</div></div><div style="font-size:13px;font-weight:600">Failed</div><div style="font-size:12px;color:rgba(255,255,255,.6);line-height:1.4">Sheet with three tips. Retry or enter manually — never a dead end.</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- SCREENS -->
+<div style="display:flex;flex-direction:column;gap:20px">
+  <div style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#8E8E93">03 · Screens</div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <!-- HOME -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;color:#48484A"><b>Home</b> · the month, then the one thing to do</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+        <div data-screen-label="Home" style="height:874px;background:#F7F6F3;position:relative;overflow:hidden"><div style="height:874px;overflow:auto;padding:64px 20px 140px;box-sizing:border-box;display:flex;flex-direction:column;gap:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="font-size:15px;font-weight:500;color:#6E6E73">September 2026</div>
+            <div style="height:26px;padding:0 10px;border-radius:999px;background:#fff;color:#48484A;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px;box-shadow:0 0 0 .5px rgba(0,0,0,.06)"><span style="width:8px;height:9px;border:1.5px solid #48484A;border-radius:2px;position:relative;top:1px"></span>On device</div>
+          </div>
+          <div>
+            <div style="font-size:44px;font-weight:600;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums">8,420 <span style="font-size:22px;font-weight:500;color:#6E6E73;letter-spacing:0">MDL</span></div>
+            <div style="font-size:15px;color:#6E6E73;margin-top:8px">spent this month</div>
+            <div style="font-size:15px;font-weight:600;color:#B9781C;margin-top:14px;font-variant-numeric:tabular-nums">+12% <span style="font-weight:400;color:#6E6E73">vs August · 7,520 MDL</span></div>
+          </div>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            <div style="height:56px;border-radius:16px;background:#1C1C1E;color:#fff;display:flex;align-items:center;justify-content:center;gap:10px;font-size:17px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(28,28,30,.18)" style-hover="background:#2C2C2E" style-active="transform:scale(.985)"><span style="width:18px;height:18px;position:relative;display:inline-block"><span style="position:absolute;left:0;top:0;width:6px;height:6px;border-left:2px solid #fff;border-top:2px solid #fff;border-radius:2px 0 0 0"></span><span style="position:absolute;right:0;top:0;width:6px;height:6px;border-right:2px solid #fff;border-top:2px solid #fff;border-radius:0 2px 0 0"></span><span style="position:absolute;left:0;bottom:0;width:6px;height:6px;border-left:2px solid #fff;border-bottom:2px solid #fff;border-radius:0 0 0 2px"></span><span style="position:absolute;right:0;bottom:0;width:6px;height:6px;border-right:2px solid #fff;border-bottom:2px solid #fff;border-radius:0 0 2px 0"></span></span>Scan Receipt</div>
+            <div style="height:48px;border-radius:16px;background:#fff;color:#1C1C1E;display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;cursor:pointer;box-shadow:0 0 0 .5px rgba(0,0,0,.06)" style-hover="background:#FCFBF9">Add Cash Expense</div>
+          </div>
+          <div style="background:#fff;border-radius:20px;padding:18px 20px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05);display:flex;flex-direction:column;gap:14px">
+            <div style="display:flex;justify-content:space-between;align-items:baseline"><span style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8E8E93">Categories</span><span style="font-size:13px;color:#167C8A;font-weight:500">All</span></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:15px;margin-bottom:6px"><span>Food</span><span style="font-variant-numeric:tabular-nums;font-weight:500">4,820</span></div><div style="height:6px;border-radius:3px;background:#F2F2F7"><div style="width:57%;height:6px;border-radius:3px;background:#167C8A"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:15px;margin-bottom:6px"><span>Transport</span><span style="font-variant-numeric:tabular-nums;font-weight:500">920</span></div><div style="height:6px;border-radius:3px;background:#F2F2F7"><div style="width:11%;height:6px;border-radius:3px;background:#5B6BA6"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:15px;margin-bottom:6px"><span>Household</span><span style="font-variant-numeric:tabular-nums;font-weight:500">740</span></div><div style="height:6px;border-radius:3px;background:#F2F2F7"><div style="width:9%;height:6px;border-radius:3px;background:#8A7A3A"></div></div></div>
+            <div><div style="display:flex;justify-content:space-between;font-size:15px;margin-bottom:6px"><span>Restaurants</span><span style="font-variant-numeric:tabular-nums;font-weight:500">680</span></div><div style="height:6px;border-radius:3px;background:#F2F2F7"><div style="width:8%;height:6px;border-radius:3px;background:#A8625E"></div></div></div>
+          </div>
+          <div style="background:#fff;border-radius:20px;padding:6px 20px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05)">
+            <div style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8E8E93;padding:12px 0 4px">Recent</div>
+            <div style="display:flex;align-items:center;gap:12px;height:56px;border-bottom:.5px solid rgba(60,60,67,.14)"><div style="width:36px;height:36px;border-radius:10px;background:#E3F0F2;color:#0F5F6B;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px">L</div><div style="flex:1"><div style="font-size:17px;font-weight:500">Lidl</div><div style="font-size:13px;color:#8E8E93">Today · Receipt</div></div><div style="font-size:17px;font-weight:500;font-variant-numeric:tabular-nums">110.10</div></div>
+            <div style="display:flex;align-items:center;gap:12px;height:56px;border-bottom:.5px solid rgba(60,60,67,.14)"><div style="width:36px;height:36px;border-radius:10px;background:#F4ECEB;color:#A8625E;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px">C</div><div style="flex:1"><div style="font-size:17px;font-weight:500">Coffee</div><div style="font-size:13px;color:#8E8E93">Today · Cash</div></div><div style="font-size:17px;font-weight:500;font-variant-numeric:tabular-nums">45.00</div></div>
+            <div style="display:flex;align-items:center;gap:12px;height:56px"><div style="width:36px;height:36px;border-radius:10px;background:#E3F0F2;color:#0F5F6B;display:flex;align-items:center;justify-content:center;font-weight:600;font-size:15px">K</div><div style="flex:1"><div style="font-size:17px;font-weight:500">Kaufland</div><div style="font-size:13px;color:#8E8E93">Yesterday · Receipt</div></div><div style="font-size:17px;font-weight:500;font-variant-numeric:tabular-nums">238.50</div></div>
+          </div>
+          </div>
+          <div style="position:absolute;left:20px;right:20px;bottom:44px;height:64px;border-radius:999px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);box-shadow:0 1px 2px rgba(0,0,0,.04),0 10px 30px rgba(28,28,30,.12),0 0 0 .5px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-around;padding:0 12px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#1C1C1E"><span style="width:20px;height:20px;border-radius:6px;background:#1C1C1E;display:block"></span><span style="font-size:10px;font-weight:600">Home</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#8E8E93"><span style="width:20px;height:20px;display:flex;align-items:flex-end;gap:3px"><span style="width:4px;height:9px;background:#8E8E93;border-radius:1px"></span><span style="width:4px;height:16px;background:#8E8E93;border-radius:1px"></span><span style="width:4px;height:12px;background:#8E8E93;border-radius:1px"></span></span><span style="font-size:10px;font-weight:500">Analytics</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#8E8E93"><span style="width:20px;height:20px;border-radius:50%;border:2.5px solid #8E8E93;box-sizing:border-box;display:block"></span><span style="font-size:10px;font-weight:500">History</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#8E8E93"><span style="width:20px;height:20px;border-radius:50%;border:2.5px solid #8E8E93;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><span style="width:6px;height:6px;border-radius:50%;background:#8E8E93"></span></span><span style="font-size:10px;font-weight:500">Settings</span></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+
+    <!-- REVIEW -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;color:#48484A"><b>Review</b> · OCR did the work, you verify · tap the flagged item</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+        <div data-screen-label="Review" style="height:874px;background:#F7F6F3;position:relative;overflow:hidden"><div style="height:874px;overflow:auto;padding:64px 20px 130px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="width:9px;height:9px;border-left:2px solid #1C1C1E;border-bottom:2px solid #1C1C1E;transform:rotate(45deg);margin-left:3px"></span></div>
+            <div style="font-size:17px;font-weight:600">Review receipt</div>
+            <div style="width:40px;height:40px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;color:#167C8A;font-weight:500">Photo</div>
+          </div>
+          <div style="background:#fff;border-radius:20px;padding:18px 20px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05);display:flex;justify-content:space-between;align-items:center">
+            <div>
+              <div style="font-size:28px;font-weight:600;letter-spacing:-.02em">Lidl</div>
+              <div style="font-size:15px;color:#6E6E73;margin-top:2px">September 6, 2026 · 18:42</div>
+            </div>
+            <div style="height:26px;padding:0 10px;border-radius:999px;background:#E3F0F2;color:#0F5F6B;font-size:12px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#167C8A"></span>Auto-detected</div>
+          </div>
+          <div style="background:#fff;border-radius:20px;padding:6px 20px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05)">
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding:12px 0 4px"><span style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8E8E93">4 items</span><span style="font-size:13px;color:#167C8A;font-weight:500;cursor:pointer">Add item</span></div>
+            <div style="display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 0;border-bottom:.5px solid rgba(60,60,67,.14)"><div style="flex:1"><div style="font-size:17px;font-weight:500">Milk 1L</div><div style="font-size:13px;color:#8E8E93">1 × 22.90 · <span style="color:#AEAEB2">LAPTE 1L</span></div></div><div style="font-size:17px;font-weight:500;font-variant-numeric:tabular-nums">22.90</div></div>
+            <div style="display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 0;border-bottom:.5px solid rgba(60,60,67,.14)"><div style="flex:1"><div style="font-size:17px;font-weight:500">Bread</div><div style="font-size:13px;color:#8E8E93">1 × 7.90 · <span style="color:#AEAEB2">FRANZELA DE GRIU</span></div></div><div style="font-size:17px;font-weight:500;font-variant-numeric:tabular-nums">7.90</div></div>
+            <sc-if value="{{ editing }}" hint-placeholder-val="{{ false }}">
+              <div style="margin:8px -8px;padding:12px;border-radius:14px;background:#FBF1E1;display:flex;flex-direction:column;gap:10px;border-bottom:none">
+                <div style="display:flex;justify-content:space-between;align-items:center"><span style="font-size:12px;font-weight:600;color:#8A5A12">Read as "CH1CKEN" · low confidence</span><span style="font-size:13px;font-weight:600;color:#167C8A;cursor:pointer" onClick="{{ stopEdit }}">Done</span></div>
+                <input value="{{ name }}" onChange="{{ setName }}" style="height:44px;border-radius:12px;border:none;background:#fff;box-shadow:0 0 0 2px #167C8A inset;padding:0 14px;font:inherit;font-size:17px;outline:none;width:100%;box-sizing:border-box">
+                <div style="display:flex;gap:8px">
+                  <div style="flex:1;height:44px;border-radius:12px;background:#fff;display:flex;align-items:center;padding:0 14px;font-size:15px;gap:6px"><span style="color:#8E8E93">Qty</span><span style="font-weight:500">1.2 kg</span></div>
+                  <div style="flex:1;height:44px;border-radius:12px;background:#fff;display:flex;align-items:center;padding:0 14px;font-size:15px;gap:6px"><span style="color:#8E8E93">Total</span><span style="font-weight:500;font-variant-numeric:tabular-nums">104.00</span></div>
+                </div>
+                <div style="font-size:12px;color:#8A5A12">86.67 MDL/kg — used for price history</div>
+              </div>
+            </sc-if>
+            <sc-if value="{{ notEditing }}" hint-placeholder-val="{{ true }}">
+              <div style="display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 0;border-bottom:.5px solid rgba(60,60,67,.14);cursor:pointer" onClick="{{ startEdit }}" style-hover="background:rgba(0,0,0,.015)"><div style="flex:1"><div style="font-size:17px;font-weight:500;display:flex;align-items:center;gap:8px">{{ name }}<span style="width:7px;height:7px;border-radius:50%;background:#B9781C;display:inline-block"></span></div><div style="font-size:13px;color:#B9781C">Check this · read as "CH1CKEN" · 1.2 kg × 86.67</div></div><div style="font-size:17px;font-weight:500;font-variant-numeric:tabular-nums">104.00</div></div>
+            </sc-if>
+            <div style="display:flex;align-items:center;gap:12px;min-height:56px;padding:8px 0"><div style="flex:1"><div style="font-size:17px;font-weight:500">Tomatoes</div><div style="font-size:13px;color:#8E8E93">1 × 16.30 · <span style="color:#AEAEB2">ROSII</span></div></div><div style="font-size:17px;font-weight:500;font-variant-numeric:tabular-nums">16.30</div></div>
+          </div>
+          <div style="background:#fff;border-radius:20px;padding:16px 20px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05);display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;justify-content:space-between;font-size:15px;color:#6E6E73"><span>Subtotal</span><span style="font-variant-numeric:tabular-nums">151.10</span></div>
+            <div style="display:flex;justify-content:space-between;font-size:15px;color:#6E6E73"><span>Discount</span><span style="font-variant-numeric:tabular-nums">0.00</span></div>
+            <div style="display:flex;justify-content:space-between;align-items:baseline;padding-top:8px;border-top:.5px solid rgba(60,60,67,.14)"><span style="font-size:17px;font-weight:600">Total</span><span style="font-size:24px;font-weight:600;letter-spacing:-.02em;font-variant-numeric:tabular-nums">151.10 <span style="font-size:15px;font-weight:500;color:#6E6E73;letter-spacing:0">MDL</span></span></div>
+            <div style="font-size:13px;color:#167C8A;font-weight:500;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#167C8A"></span>Items add up to the printed total</div>
+          </div>
+          <div style="background:#fff;border-radius:20px;padding:16px 20px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05);display:flex;flex-direction:column;gap:12px">
+            <span style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8E8E93">Category</span>
+            <div style="display:flex;gap:8px;flex-wrap:wrap">
+              <sc-for list="{{ chips }}" as="chip" hint-placeholder-count="4">
+                <div style="{{ chip.style }}" onClick="{{ chip.pick }}">{{ chip.label }}</div>
+              </sc-for>
+            </div>
+          </div>
+          </div>
+          <div style="position:absolute;left:20px;right:20px;bottom:44px;height:56px;border-radius:16px;background:#167C8A;color:#fff;display:flex;align-items:center;justify-content:center;font-size:17px;font-weight:600;cursor:pointer;box-shadow:0 8px 24px rgba(22,124,138,.28)" style-hover="background:#136C79" style-active="transform:scale(.985)">Save Receipt</div>
+        </div>
+      </x-import>
+    </div>
+
+    <!-- ANALYTICS -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;color:#48484A"><b>Analytics</b> · answers, not dashboards</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" hint-size="402px,874px">
+        <div data-screen-label="Analytics" style="height:874px;background:#F7F6F3;position:relative;overflow:hidden"><div style="height:874px;overflow:auto;padding:64px 20px 140px;box-sizing:border-box;display:flex;flex-direction:column;gap:16px">
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <div style="width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="width:9px;height:9px;border-left:2px solid #1C1C1E;border-bottom:2px solid #1C1C1E;transform:rotate(45deg);margin-left:3px"></span></div>
+            <div style="font-size:17px;font-weight:600">September</div>
+            <div style="width:40px;height:40px;border-radius:50%;background:#fff;box-shadow:0 0 0 .5px rgba(0,0,0,.08);display:flex;align-items:center;justify-content:center;opacity:.35"><span style="width:9px;height:9px;border-right:2px solid #1C1C1E;border-top:2px solid #1C1C1E;transform:rotate(45deg);margin-right:3px"></span></div>
+          </div>
+          <div>
+            <div style="font-size:44px;font-weight:600;letter-spacing:-.035em;line-height:1;font-variant-numeric:tabular-nums">8,420 <span style="font-size:22px;font-weight:500;color:#6E6E73;letter-spacing:0">MDL</span></div>
+            <div style="font-size:15px;font-weight:600;color:#B9781C;margin-top:10px;font-variant-numeric:tabular-nums">+12% <span style="font-weight:400;color:#6E6E73">vs August</span></div>
+          </div>
+          <div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px">
+            <div style="background:#fff;border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05)"><div style="font-size:12px;color:#8E8E93">Average</div><div style="font-size:20px;font-weight:600;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums">167</div><div style="font-size:12px;color:#8E8E93">MDL</div></div>
+            <div style="background:#fff;border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05)"><div style="font-size:12px;color:#8E8E93">Purchases</div><div style="font-size:20px;font-weight:600;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums">51</div><div style="font-size:12px;color:#8E8E93">this month</div></div>
+            <div style="background:#fff;border-radius:16px;padding:14px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05)"><div style="font-size:12px;color:#8E8E93">Cash</div><div style="font-size:20px;font-weight:600;letter-spacing:-.02em;margin-top:4px;font-variant-numeric:tabular-nums">14%</div><div style="font-size:12px;color:#8E8E93">of spending</div></div>
+          </div>
+          <div style="background:#fff;border-radius:20px;padding:18px 20px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05);display:flex;gap:20px;align-items:center">
+            <div style="width:112px;height:112px;border-radius:50%;background:conic-gradient(#167C8A 0 57%,#5B6BA6 57% 68%,#8A7A3A 68% 77%,#A8625E 77% 85%,#D1D1D6 85% 100%);display:flex;align-items:center;justify-content:center;flex:none"><div style="width:78px;height:78px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center"><span style="font-size:20px;font-weight:600;letter-spacing:-.02em">57%</span><span style="font-size:11px;color:#8E8E93">Food</span></div></div>
+            <div style="flex:1;display:flex;flex-direction:column;gap:9px;font-size:14px">
+              <div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:#167C8A"></span><span style="flex:1">Food</span><span style="font-variant-numeric:tabular-nums;color:#6E6E73">57%</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:#5B6BA6"></span><span style="flex:1">Transport</span><span style="font-variant-numeric:tabular-nums;color:#6E6E73">11%</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:#8A7A3A"></span><span style="flex:1">Household</span><span style="font-variant-numeric:tabular-nums;color:#6E6E73">9%</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:#A8625E"></span><span style="flex:1">Restaurants</span><span style="font-variant-numeric:tabular-nums;color:#6E6E73">8%</span></div>
+              <div style="display:flex;align-items:center;gap:8px"><span style="width:8px;height:8px;border-radius:50%;background:#D1D1D6"></span><span style="flex:1">Other</span><span style="font-variant-numeric:tabular-nums;color:#6E6E73">15%</span></div>
+            </div>
+          </div>
+          <div style="background:#fff;border-radius:20px;padding:6px 20px;box-shadow:0 1px 2px rgba(28,28,30,.04),0 8px 24px rgba(28,28,30,.05)">
+            <div style="font-size:12px;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#8E8E93;padding:12px 0 4px">Insights</div>
+            <div style="padding:12px 0;border-bottom:.5px solid rgba(60,60,67,.14);font-size:15px;line-height:1.4;text-wrap:pretty">Food represents <b>57%</b> of your spending.</div>
+            <div style="padding:12px 0;border-bottom:.5px solid rgba(60,60,67,.14);font-size:15px;line-height:1.4;text-wrap:pretty">Restaurant spending increased <b style="color:#B9781C">32%</b> this month.</div>
+            <div style="padding:12px 0;font-size:15px;line-height:1.4;text-wrap:pretty">Your average purchase increased from <b>143</b> to <b>167 MDL</b>.</div>
+          </div>
+          </div>
+          <div style="position:absolute;left:20px;right:20px;bottom:44px;height:64px;border-radius:999px;background:rgba(255,255,255,.85);backdrop-filter:blur(20px);box-shadow:0 1px 2px rgba(0,0,0,.04),0 10px 30px rgba(28,28,30,.12),0 0 0 .5px rgba(0,0,0,.06);display:flex;align-items:center;justify-content:space-around;padding:0 12px">
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#8E8E93"><span style="width:20px;height:20px;border-radius:6px;background:#8E8E93;display:block"></span><span style="font-size:10px;font-weight:500">Home</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#1C1C1E"><span style="width:20px;height:20px;display:flex;align-items:flex-end;gap:3px"><span style="width:4px;height:9px;background:#1C1C1E;border-radius:1px"></span><span style="width:4px;height:16px;background:#1C1C1E;border-radius:1px"></span><span style="width:4px;height:12px;background:#1C1C1E;border-radius:1px"></span></span><span style="font-size:10px;font-weight:600">Analytics</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#8E8E93"><span style="width:20px;height:20px;border-radius:50%;border:2.5px solid #8E8E93;box-sizing:border-box;display:block"></span><span style="font-size:10px;font-weight:500">History</span></div>
+            <div style="display:flex;flex-direction:column;align-items:center;gap:3px;color:#8E8E93"><span style="width:20px;height:20px;border-radius:50%;border:2.5px solid #8E8E93;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><span style="width:6px;height:6px;border-radius:50%;background:#8E8E93"></span></span><span style="font-size:10px;font-weight:500">Settings</span></div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+  </div>
+
+  <!-- SCANNER -->
+  <div style="font-size:12px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:#8E8E93;margin-top:20px">04 · Scanner states</div>
+  <div style="display:flex;gap:40px;flex-wrap:wrap;align-items:flex-start">
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;color:#48484A"><b>1 · Searching</b> · white corners breathe, receipt not yet found</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
+        <div data-screen-label="Scanner searching" style="height:874px;background:radial-gradient(120% 80% at 50% 40%,#3A3A40 0%,#1E1E22 55%,#121214 100%);position:relative;overflow:hidden">
+          <div style="position:absolute;left:78px;top:250px;width:250px;height:360px;background:#F3F1EC;border-radius:3px;transform:rotate(-7deg) translateX(-30px);box-shadow:0 20px 40px rgba(0,0,0,.5);padding:26px 20px;box-sizing:border-box;display:flex;flex-direction:column;gap:9px;opacity:.9"><span style="height:6px;width:40%;background:#C9C6BF;border-radius:2px;align-self:center"></span><span style="height:4px;width:60%;background:#DAD7D0;border-radius:2px;align-self:center;margin-bottom:8px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px;width:85%"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px;width:70%"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px;width:90%"></span><span style="height:6px;width:50%;background:#C9C6BF;border-radius:2px;margin-top:8px"></span></div>
+          <div style="position:absolute;left:44px;top:170px;width:314px;height:500px">{{ bigCornersSearch }}</div>
+          <div style="position:absolute;top:64px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:center">
+            <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.14);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="width:9px;height:9px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);margin-left:3px"></span></div>
+            <div style="height:36px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.14);backdrop-filter:blur(12px);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px"><span style="width:6px;height:10px;background:#fff;border-radius:1px;transform:skewX(-14deg)"></span>Auto</div>
+          </div>
+          <div style="position:absolute;left:0;right:0;bottom:200px;text-align:center;color:#fff;display:flex;flex-direction:column;gap:6px"><div style="font-size:17px;font-weight:600">Looking for a receipt…</div><div style="font-size:15px;color:rgba(255,255,255,.65)">Keep the whole receipt inside the frame</div></div>
+          <div style="position:absolute;left:0;right:0;bottom:64px;display:flex;justify-content:center"><div style="width:76px;height:76px;border-radius:50%;border:4px solid rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;box-sizing:border-box"><div style="width:60px;height:60px;border-radius:50%;background:#fff"></div></div></div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;color:#48484A"><b>2 · Detected</b> · corners snap to the edges and turn teal</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
+        <div data-screen-label="Scanner detected" style="height:874px;background:radial-gradient(120% 80% at 50% 40%,#3A3A40 0%,#1E1E22 55%,#121214 100%);position:relative;overflow:hidden">
+          <div style="position:absolute;left:76px;top:190px;width:250px;height:440px;background:#F3F1EC;border-radius:3px;box-shadow:0 20px 40px rgba(0,0,0,.5);padding:26px 20px;box-sizing:border-box;display:flex;flex-direction:column;gap:9px"><span style="height:6px;width:40%;background:#C9C6BF;border-radius:2px;align-self:center"></span><span style="height:4px;width:60%;background:#DAD7D0;border-radius:2px;align-self:center;margin-bottom:8px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px;width:85%"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px;width:70%"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px;width:90%"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px;width:80%"></span><span style="height:6px;width:50%;background:#C9C6BF;border-radius:2px;margin-top:8px"></span></div>
+          <div style="position:absolute;left:76px;top:190px;width:250px;height:440px;background:rgba(22,124,138,.14);border-radius:3px;box-shadow:0 0 0 1.5px rgba(22,124,138,.9),0 0 40px rgba(22,124,138,.35)"></div>
+          <div style="position:absolute;left:66px;top:180px;width:270px;height:460px">{{ bigCornersDetected }}</div>
+          <div style="position:absolute;top:64px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:center">
+            <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.14);backdrop-filter:blur(12px);display:flex;align-items:center;justify-content:center;cursor:pointer"><span style="width:9px;height:9px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);margin-left:3px"></span></div>
+            <div style="height:36px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.14);backdrop-filter:blur(12px);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px"><span style="width:6px;height:10px;background:#fff;border-radius:1px;transform:skewX(-14deg)"></span>Auto</div>
+          </div>
+          <div style="position:absolute;left:0;right:0;top:130px;display:flex;justify-content:center"><div style="height:30px;padding:0 12px;border-radius:999px;background:#167C8A;color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:6px"><span style="width:6px;height:6px;border-radius:50%;background:#fff"></span>Receipt detected</div></div>
+          <div style="position:absolute;left:0;right:0;bottom:200px;text-align:center;color:#fff;display:flex;flex-direction:column;gap:6px"><div style="font-size:17px;font-weight:600">Hold still</div><div style="font-size:15px;color:rgba(255,255,255,.65)">Capturing automatically</div></div>
+          <div style="position:absolute;left:0;right:0;bottom:64px;display:flex;justify-content:center">{{ shutterDetected }}</div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;color:#48484A"><b>3 · Capturing</b> · a 120 ms flash, shutter ring contracts</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
+        <div data-screen-label="Scanner capturing" style="height:874px;background:radial-gradient(120% 80% at 50% 40%,#3A3A40 0%,#1E1E22 55%,#121214 100%);position:relative;overflow:hidden">
+          <div style="position:absolute;left:76px;top:190px;width:250px;height:440px;background:#F3F1EC;border-radius:3px;box-shadow:0 20px 40px rgba(0,0,0,.5);padding:26px 20px;box-sizing:border-box;display:flex;flex-direction:column;gap:9px"><span style="height:6px;width:40%;background:#C9C6BF;border-radius:2px;align-self:center"></span><span style="height:4px;width:60%;background:#DAD7D0;border-radius:2px;align-self:center;margin-bottom:8px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px;width:85%"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px;width:70%"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px;width:90%"></span><span style="height:4px;background:#DAD7D0;border-radius:2px"></span><span style="height:4px;background:#DAD7D0;border-radius:2px;width:80%"></span><span style="height:6px;width:50%;background:#C9C6BF;border-radius:2px;margin-top:8px"></span></div>
+          <div style="position:absolute;inset:0;background:rgba(255,255,255,.42)"></div>
+          <div style="position:absolute;left:76px;top:190px;width:250px;height:440px;border-radius:3px;box-shadow:0 0 0 2px #fff"></div>
+          <div style="position:absolute;top:64px;left:20px;right:20px;display:flex;justify-content:space-between;align-items:center;opacity:.4">
+            <div style="width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,.14);display:flex;align-items:center;justify-content:center"><span style="width:9px;height:9px;border-left:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);margin-left:3px"></span></div>
+            <div style="height:36px;padding:0 14px;border-radius:999px;background:rgba(255,255,255,.14);color:#fff;font-size:13px;font-weight:600;display:flex;align-items:center;gap:8px"><span style="width:6px;height:10px;background:#fff;border-radius:1px;transform:skewX(-14deg)"></span>Auto</div>
+          </div>
+          <div style="position:absolute;left:0;right:0;bottom:200px;text-align:center;color:#fff;display:flex;flex-direction:column;gap:6px"><div style="font-size:17px;font-weight:600">Capturing…</div></div>
+          <div style="position:absolute;left:0;right:0;bottom:64px;display:flex;justify-content:center"><div style="width:76px;height:76px;border-radius:50%;border:4px solid rgba(255,255,255,.9);display:flex;align-items:center;justify-content:center;box-sizing:border-box"><div style="width:46px;height:46px;border-radius:50%;background:#fff"></div></div></div>
+        </div>
+      </x-import>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:12px">
+      <div style="font-size:13px;color:#48484A"><b>4 · Processing</b> · human words, never technical steps</div>
+      <x-import component-from-global-scope="IOSDevice" from="./ios-frame.jsx" dark="{{ true }}" hint-size="402px,874px">
+        <div data-screen-label="Scanner processing" style="height:874px;background:#121214;position:relative;overflow:hidden">
+          <div style="position:absolute;left:101px;top:120px;width:200px;height:352px;background:#F3F1EC;border-radius:6px;box-shadow:0 30px 60px rgba(0,0,0,.6);padding:22px 16px;box-sizing:border-box;display:flex;flex-direction:column;gap:8px;overflow:hidden"><span style="height:5px;width:40%;background:#C9C6BF;border-radius:2px;align-self:center"></span><span style="height:3px;width:60%;background:#DAD7D0;border-radius:2px;align-self:center;margin-bottom:6px"></span><span style="height:3px;background:#DAD7D0;border-radius:2px"></span><span style="height:3px;background:#DAD7D0;border-radius:2px"></span><span style="height:3px;background:#DAD7D0;border-radius:2px;width:85%"></span><span style="height:3px;background:#DAD7D0;border-radius:2px"></span><span style="height:3px;background:#DAD7D0;border-radius:2px;width:70%"></span><span style="height:3px;background:#DAD7D0;border-radius:2px"></span><span style="height:3px;background:#DAD7D0;border-radius:2px;width:90%"></span><span style="height:3px;background:#DAD7D0;border-radius:2px"></span><span style="height:3px;background:#DAD7D0;border-radius:2px;width:80%"></span><span style="height:5px;width:50%;background:#C9C6BF;border-radius:2px;margin-top:6px"></span>{{ bigScanLine }}</div>
+          <div style="position:absolute;left:0;right:0;bottom:0;background:#F7F6F3;border-radius:28px 28px 0 0;padding:24px 24px 56px;box-shadow:0 -20px 60px rgba(0,0,0,.4)">
+            <div style="width:36px;height:5px;border-radius:3px;background:#D1D1D6;margin:0 auto 22px"></div>
+            <div style="display:flex;align-items:center;gap:12px;margin-bottom:22px">{{ spinner }}<div><div style="font-size:20px;font-weight:600;letter-spacing:-.01em">Reading text…</div><div style="font-size:13px;color:#8E8E93">Everything stays on this iPhone</div></div></div>
+            <div style="height:4px;border-radius:2px;background:#E5E5EA;margin-bottom:22px;overflow:hidden">{{ progressBar }}</div>
+            <div style="display:flex;flex-direction:column;gap:14px;font-size:15px">
+              <div style="display:flex;align-items:center;gap:12px"><span style="width:20px;height:20px;border-radius:50%;background:#167C8A;display:flex;align-items:center;justify-content:center"><span style="width:5px;height:9px;border-right:2px solid #fff;border-bottom:2px solid #fff;transform:rotate(45deg);margin-top:-2px"></span></span><span>Detecting receipt</span></div>
+              <div style="display:flex;align-items:center;gap:12px;font-weight:600"><span style="width:20px;height:20px;border-radius:50%;border:2px solid #167C8A;box-sizing:border-box;display:flex;align-items:center;justify-content:center"><span style="width:8px;height:8px;border-radius:50%;background:#167C8A"></span></span><span>Reading text</span></div>
+              <div style="display:flex;align-items:center;gap:12px;color:#AEAEB2"><span style="width:20px;height:20px;border-radius:50%;border:2px solid #D1D1D6;box-sizing:border-box"></span><span>Finding products</span></div>
+              <div style="display:flex;align-items:center;gap:12px;color:#AEAEB2"><span style="width:20px;height:20px;border-radius:50%;border:2px solid #D1D1D6;box-sizing:border-box"></span><span>Checking prices</span></div>
+            </div>
+          </div>
+        </div>
+      </x-import>
+    </div>
+  </div>
+</div>
+
+<div style="font-size:13px;color:#6E6E73;line-height:1.6;max-width:760px"><b>Next steps.</b> Dark mode pass on the same tokens · History and Settings screens · Add Cash Expense sheet · onboarding (3 screens) · receipt detail with photo · price-history product page. Tell me which to build first.</div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;animateScanner&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;Scanner&quot;}}">
+class Component extends DCLogic {
+  state = { editing: false, name: 'Chicken', cat: 'Food' };
+  corners(color, w, h, size, thick, animate, opacity) {
+    const h_ = React.createElement;
+    const base = { position: 'absolute', width: size, height: size, borderColor: color, borderStyle: 'solid', borderWidth: 0 };
+    const mk = (pos, bw, radius) => h_('span', { style: { ...base, ...pos, borderWidth: bw, borderRadius: radius } });
+    return h_('div', { style: { position: 'absolute', inset: 0, opacity, animation: animate ? 'slPulse 2.2s ease-in-out infinite' : 'none' } },
+      mk({ left: 0, top: 0 }, `${thick}px 0 0 ${thick}px`, `${thick * 2}px 0 0 0`),
+      mk({ right: 0, top: 0 }, `${thick}px ${thick}px 0 0`, `0 ${thick * 2}px 0 0`),
+      mk({ left: 0, bottom: 0 }, `0 0 ${thick}px ${thick}px`, `0 0 0 ${thick * 2}px`),
+      mk({ right: 0, bottom: 0 }, `0 ${thick}px ${thick}px 0`, `0 0 ${thick * 2}px 0`));
+  }
+  renderVals() {
+    const h = React.createElement;
+    const anim = this.props.animateScanner ?? true;
+    const line = (height) => h('div', { style: { position: 'absolute', left: 0, right: 0, top: '6%', height: 2, background: '#167C8A', boxShadow: '0 0 18px 4px rgba(22,124,138,.55)', animation: anim ? 'slScan 2.4s ease-in-out infinite alternate' : 'none' } });
+    const chipBase = 'height:36px;padding:0 14px;border-radius:999px;font-size:15px;display:flex;align-items:center;cursor:pointer;';
+    const chips = ['Food', 'Household', 'Restaurants & Coffee', 'Other'].map(label => ({
+      label,
+      style: chipBase + (label === this.state.cat ? 'background:#1C1C1E;color:#fff;font-weight:600' : 'background:#F7F6F3;color:#1C1C1E;font-weight:500'),
+      pick: () => this.setState({ cat: label }),
+    }));
+    return {
+      editing: this.state.editing, notEditing: !this.state.editing, name: this.state.name,
+      startEdit: () => this.setState({ editing: true }), stopEdit: () => this.setState({ editing: false }),
+      setName: e => this.setState({ name: e.target.value }),
+      chips,
+      cornersSearch: this.corners('#fff', 0, 0, 16, 2, anim, .55),
+      cornersDetected: this.corners('#2FA7B8', 0, 0, 16, 2.5, false, 1),
+      bigCornersSearch: this.corners('#fff', 0, 0, 34, 3, anim, .55),
+      bigCornersDetected: this.corners('#2FA7B8', 0, 0, 34, 3.5, false, 1),
+      scanLine: line(), bigScanLine: line(),
+      shutterDetected: h('div', { style: { width: 76, height: 76, borderRadius: '50%', border: '4px solid #2FA7B8', display: 'flex', alignItems: 'center', justifyContent: 'center', boxSizing: 'border-box', animation: anim ? 'slBreathe 1.4s ease-in-out infinite' : 'none' } }, h('div', { style: { width: 60, height: 60, borderRadius: '50%', background: '#fff' } })),
+      spinner: h('div', { style: { width: 36, height: 36, borderRadius: '50%', border: '3px solid #E3F0F2', borderTopColor: '#167C8A', boxSizing: 'border-box', animation: anim ? 'slSpin 1s linear infinite' : 'none', flex: 'none' } }),
+      progressBar: h('div', { style: { height: 4, borderRadius: 2, background: '#167C8A', width: '38%', animation: anim ? 'slBar 6s ease-in-out infinite alternate' : 'none' } }),
+    };
+  }
+}
+</script>
+</body>
+</html>
