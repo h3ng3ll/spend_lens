@@ -158,3 +158,41 @@ Seeding proceeds with these; say the word if you want different hues.
 
 - **Jira** — no metadata sync step runs (`set_info_plist.sh --sync` is skipped).
 - **App Store / Play signing** — only for an actual store release, not for the build.
+
+---
+
+## 9. iOS build is blocked by an Xcode/Apphud toolchain mismatch
+
+**Blocks: any iOS build. Android is unaffected and was verified on device.**
+
+```
+Type 'Product.PurchaseOption' has no member 'billingPlanType'
+Value of type 'Product.SubscriptionInfo' has no member 'pricingTerms'
+  ios/Pods/ApphudSDK/Sources/Internal/ApphudAsyncStoreKit.swift:91
+```
+
+ApphudSDK references iOS **26.4** StoreKit APIs. The call sites are wrapped in
+`if #available(iOS 26.4, ...)`, but `#available` defers *runtime* execution only — the
+symbols must still exist at **compile** time. This machine has **Xcode 26.3, which ships the
+iOS 26.2 SDK**, so they do not.
+
+Nothing in this project causes it and no project-side change fixes it.
+
+**I tested the downgrade path and it does not work.** `apphud 3.2.5` pins ApphudSDK 4.2.3
+(vs 4.4.9 on 3.4.0), so it looked promising. After `pod update ApphudSDK` the lockfile did
+move to 4.2.3 — but the build failed on the *same line*, because **4.2.3 contains the same
+iOS 26.4 references**. The offending code is present across SDK versions, so pinning the Dart
+package lower is a dead end. Everything was restored afterwards: `apphud: ^3.4.0`,
+`ApphudSDK (= 4.4.9)`, clean tree, 209/209 still green.
+
+That leaves two real options:
+
+1. **Update Xcode** to a version shipping the iOS 26.4 SDK — the clean fix, and the only one
+   that keeps subscriptions on iOS.
+2. **Temporarily drop `apphud`** — the subscription layer already degrades gracefully behind
+   `ISubscriptionRepository` with an empty key, so iOS would build and Android is unaffected.
+   Subscriptions stay disabled until Xcode is updated.
+
+Worth stating plainly: **Android was verified end-to-end on a device; iOS has never been
+built in this environment.** The green Dart suite says nothing about an iOS pod graph — the
+same blind spot as the `build.gradle` gap found earlier in this build.
