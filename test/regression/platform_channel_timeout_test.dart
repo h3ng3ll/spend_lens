@@ -21,16 +21,38 @@ import 'support/source_scanner.dart';
 /// capable of never settling: a native platform-channel round trip this
 /// Dart code cannot otherwise cap. Ordinary Dart-side awaits (Hive reads,
 /// bloc-to-bloc calls) are not plugin boundaries and are out of scope here.
+/// The call shapes this gate requires a `.timeout(...)` on.
+///
+/// `invokeMethod`/`availableCameras` are the raw platform-channel shapes.
+/// The rest are THIRD-PARTY SDK entry points that tunnel to a native channel
+/// internally — so they never contain the literal `invokeMethod` in our
+/// source, yet they hang in exactly the same way. Both launch blockers this
+/// run were of that second kind: `Apphud.start` (401 → future never settles,
+/// froze the native splash) and `GoogleSignIn.initialize` (same shape, found
+/// awaited before `runApp()`).
+///
+/// Scoping the gate to the raw shapes alone left it green while a real
+/// `.timeout(...)` was deleted from either of those files — verified by
+/// surgically removing one bound per file and re-running. Adding a plugin
+/// here is cheaper than rediscovering the hang on a device.
+const List<String> _kBoundedCallPatterns = [
+  'invokeMethod',
+  'availableCameras',
+  r'Apphud\.start',
+  r'Apphud\.hasPremiumAccess',
+  r'\.initialize',
+];
+
 void main() {
   test(
-    'every invokeMethod(/availableCameras( call in lib/ is .timeout()-bounded',
+    'every platform-channel and native-SDK await in lib/ is .timeout()-bounded',
     () {
       final offenders = <String>[];
 
       for (final file in SourceScanner.libDartFiles()) {
         final stripped = SourceScanner.readStripped(file);
 
-        for (final pattern in ['invokeMethod', 'availableCameras']) {
+        for (final pattern in _kBoundedCallPatterns) {
           // NOTE the generic matcher is `[^(]*` and NOT `[^>]*`: the real
           // calls use NESTED generics —
           // `invokeMethod<Map<Object?, Object?>>(` — and `[^>]*` stops at
