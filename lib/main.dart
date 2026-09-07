@@ -9,10 +9,18 @@ import 'core/resources/app_locale.dart';
 import 'core/resources/app_theme.dart';
 import 'core/resources/localization/gen/app_localizations.dart';
 import 'core/services/ui_message_service.dart';
+import 'features/analytics/di/analytics_injection.dart';
+import 'features/category/di/category_injection.dart';
+import 'features/category/domain/repositories/i_category_local_repository.dart';
+import 'features/category/domain/use_cases/seed_categories_use_case.dart';
+import 'features/expense/di/expense_injection.dart';
+import 'features/product/di/product_injection.dart';
+import 'features/receipt/di/receipt_injection.dart';
 import 'features/settings/di/settings_injection.dart';
 import 'features/settings/domain/use_cases/save_settings_use_case.dart';
 import 'features/settings/domain/use_cases/watch_settings_use_case.dart';
 import 'features/settings/presentation/bloc/settings_bloc/settings_bloc.dart';
+import 'features/store/di/store_injection.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
 
@@ -36,6 +44,27 @@ void main() async {
   // Resolved BEFORE runApp — this is the value SettingsBloc is seeded with,
   // never left for an async fetch to deliver after the first frame.
   final initialSettings = await initSettingsFeature();
+
+  // M3: the remaining 6 data-layer slices. Each registers a repository only
+  // — blocs land in M4/M5 (design_spendlens.md §5).
+  await initCategoryFeature();
+  initStoreFeature();
+  initProductFeature();
+  initReceiptFeature();
+  initExpenseFeature();
+  initAnalyticsFeature();
+
+  // First-launch category seed (design_spendlens.md §7). THE GUARD IS
+  // isEmpty && !dataCleared — never isEmpty alone, or a store the user
+  // deliberately emptied via "Delete all records" would silently
+  // repopulate on the next cold start
+  // (~/.claude/rules/delete_all_records_rules.md).
+  final categoryRepository = getIt<ICategoryLocalRepository>();
+  final existingCategories = await categoryRepository.getAll();
+  await getIt<SeedCategoriesUseCase>().call(
+    isEmpty: existingCategories.isEmpty,
+    dataCleared: initialSettings.dataCleared,
+  );
 
   final settingsBloc = SettingsBloc(
     initialSettings: initialSettings,

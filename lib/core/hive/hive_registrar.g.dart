@@ -8,11 +8,25 @@ import 'package:spend_lens/core/hive/hive_adapters.dart';
 extension HiveRegistrar on HiveInterface {
   void registerAdapters() {
     registerAdapter(AppSettingsAdapter());
+    registerAdapter(CategoryAdapter());
+    registerAdapter(ExpenseAdapter());
+    registerAdapter(PriceObservationAdapter());
+    registerAdapter(ProductAdapter());
+    registerAdapter(ReceiptAdapter());
+    registerAdapter(ReceiptItemAdapter());
+    registerAdapter(StoreAdapter());
   }
 }
 
 extension IsolatedHiveRegistrar on IsolatedHiveInterface {
   void registerAdapters() {
     registerAdapter(AppSettingsAdapter());
+    registerAdapter(CategoryAdapter());
+    registerAdapter(ExpenseAdapter());
+    registerAdapter(PriceObservationAdapter());
+    registerAdapter(ProductAdapter());
+    registerAdapter(ReceiptAdapter());
+    registerAdapter(ReceiptItemAdapter());
+    registerAdapter(StoreAdapter());
   }
 }

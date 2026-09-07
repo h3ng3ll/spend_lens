@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 
+import '../hive/hive_database.dart';
 import '../services/logger_service.dart';
 import '../utils/env/env.dart';
 
@@ -24,4 +25,9 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton(() => LoggerService());
 
   getIt.registerLazySingleton<Env>(() => ConcreteEnv());
+
+  // M3: shared, stateless box-access helper — every feature repository
+  // below resolves this one instance via constructor injection rather than
+  // opening boxes ad hoc (hive_rules.md §7).
+  getIt.registerLazySingleton(() => const HiveDatabase());
 }

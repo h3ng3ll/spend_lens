@@ -21,7 +21,14 @@ mixin _$AppSettings {
 /// keep their own printed currency regardless of this setting
 /// (design_spendlens.md §4 "no conversion" resolution) — this is
 /// display-only.
- String get currencyCode; EAppThemeMode get themeMode;
+ String get currencyCode; EAppThemeMode get themeMode;/// Whether the user has completed onboarding (M10). Read by the
+/// splash → onboarding/home redirect once the router lands (M5).
+ bool get onboardingCompleted;/// The scanner's persisted camera-flash preference (M7).
+ EFlashMode get flashMode;/// design_spendlens.md §7 — set `true` by "Delete all records"; the
+/// seed guard checks `isEmpty && !dataCleared` so a deliberately
+/// emptied app never silently repopulates. Any restore path sets this
+/// back to `false`.
+ bool get dataCleared;
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -34,16 +41,16 @@ $AppSettingsCopyWith<AppSettings> get copyWith => _$AppSettingsCopyWithImpl<AppS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode);
+int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared);
 
 @override
 String toString() {
-  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode)';
+  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared)';
 }
 
 
@@ -54,7 +61,7 @@ abstract mixin class $AppSettingsCopyWith<$Res>  {
   factory $AppSettingsCopyWith(AppSettings value, $Res Function(AppSettings) _then) = _$AppSettingsCopyWithImpl;
 @useResult
 $Res call({
- String? localeCode, String currencyCode, EAppThemeMode themeMode
+ String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared
 });
 
 
@@ -71,12 +78,15 @@ class _$AppSettingsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,}) {
   return _then(_self.copyWith(
 localeCode: freezed == localeCode ? _self.localeCode : localeCode // ignore: cast_nullable_to_non_nullable
 as String?,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
 as String,themeMode: null == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
-as EAppThemeMode,
+as EAppThemeMode,onboardingCompleted: null == onboardingCompleted ? _self.onboardingCompleted : onboardingCompleted // ignore: cast_nullable_to_non_nullable
+as bool,flashMode: null == flashMode ? _self.flashMode : flashMode // ignore: cast_nullable_to_non_nullable
+as EFlashMode,dataCleared: null == dataCleared ? _self.dataCleared : dataCleared // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -158,10 +168,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppSettings() when $default != null:
-return $default(_that.localeCode,_that.currencyCode,_that.themeMode);case _:
+return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared);case _:
   return orElse();
 
 }
@@ -179,10 +189,10 @@ return $default(_that.localeCode,_that.currencyCode,_that.themeMode);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared)  $default,) {final _that = this;
 switch (_that) {
 case _AppSettings():
-return $default(_that.localeCode,_that.currencyCode,_that.themeMode);}
+return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -196,10 +206,10 @@ return $default(_that.localeCode,_that.currencyCode,_that.themeMode);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared)?  $default,) {final _that = this;
 switch (_that) {
 case _AppSettings() when $default != null:
-return $default(_that.localeCode,_that.currencyCode,_that.themeMode);case _:
+return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared);case _:
   return null;
 
 }
@@ -211,7 +221,7 @@ return $default(_that.localeCode,_that.currencyCode,_that.themeMode);case _:
 @JsonSerializable()
 
 class _AppSettings implements AppSettings {
-  const _AppSettings({this.localeCode, this.currencyCode = 'MDL', this.themeMode = EAppThemeMode.system});
+  const _AppSettings({this.localeCode, this.currencyCode = 'MDL', this.themeMode = EAppThemeMode.system, this.onboardingCompleted = false, this.flashMode = EFlashMode.auto, this.dataCleared = false});
   factory _AppSettings.fromJson(Map<String, dynamic> json) => _$AppSettingsFromJson(json);
 
 /// `null` = follow the device locale. Never defaulted to a concrete
@@ -223,6 +233,16 @@ class _AppSettings implements AppSettings {
 /// display-only.
 @override@JsonKey() final  String currencyCode;
 @override@JsonKey() final  EAppThemeMode themeMode;
+/// Whether the user has completed onboarding (M10). Read by the
+/// splash → onboarding/home redirect once the router lands (M5).
+@override@JsonKey() final  bool onboardingCompleted;
+/// The scanner's persisted camera-flash preference (M7).
+@override@JsonKey() final  EFlashMode flashMode;
+/// design_spendlens.md §7 — set `true` by "Delete all records"; the
+/// seed guard checks `isEmpty && !dataCleared` so a deliberately
+/// emptied app never silently repopulates. Any restore path sets this
+/// back to `false`.
+@override@JsonKey() final  bool dataCleared;
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +257,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode);
+int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared);
 
 @override
 String toString() {
-  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode)';
+  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared)';
 }
 
 
@@ -257,7 +277,7 @@ abstract mixin class _$AppSettingsCopyWith<$Res> implements $AppSettingsCopyWith
   factory _$AppSettingsCopyWith(_AppSettings value, $Res Function(_AppSettings) _then) = __$AppSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- String? localeCode, String currencyCode, EAppThemeMode themeMode
+ String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared
 });
 
 
@@ -274,12 +294,15 @@ class __$AppSettingsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,}) {
   return _then(_AppSettings(
 localeCode: freezed == localeCode ? _self.localeCode : localeCode // ignore: cast_nullable_to_non_nullable
 as String?,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
 as String,themeMode: null == themeMode ? _self.themeMode : themeMode // ignore: cast_nullable_to_non_nullable
-as EAppThemeMode,
+as EAppThemeMode,onboardingCompleted: null == onboardingCompleted ? _self.onboardingCompleted : onboardingCompleted // ignore: cast_nullable_to_non_nullable
+as bool,flashMode: null == flashMode ? _self.flashMode : flashMode // ignore: cast_nullable_to_non_nullable
+as EFlashMode,dataCleared: null == dataCleared ? _self.dataCleared : dataCleared // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

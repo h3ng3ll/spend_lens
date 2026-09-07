@@ -390,6 +390,24 @@ class AppLocalizationsRu extends AppLocalizations {
   String get catOther => 'Другое';
 
   @override
+  String get catShopping => 'Покупки';
+
+  @override
+  String get catEntertainment => 'Развлечения';
+
+  @override
+  String get catUtilities => 'Коммунальные услуги';
+
+  @override
+  String get catTravel => 'Путешествия';
+
+  @override
+  String get catEducation => 'Образование';
+
+  @override
+  String get catPersonalCare => 'Личная гигиена';
+
+  @override
   String get months0 => 'Январь';
 
   @override

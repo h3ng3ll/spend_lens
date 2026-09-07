@@ -391,6 +391,24 @@ class AppLocalizationsUk extends AppLocalizations {
   String get catOther => 'Інше';
 
   @override
+  String get catShopping => 'Покупки';
+
+  @override
+  String get catEntertainment => 'Розваги';
+
+  @override
+  String get catUtilities => 'Комунальні послуги';
+
+  @override
+  String get catTravel => 'Подорожі';
+
+  @override
+  String get catEducation => 'Освіта';
+
+  @override
+  String get catPersonalCare => 'Особиста гігієна';
+
+  @override
   String get months0 => 'Січень';
 
   @override

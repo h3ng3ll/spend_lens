@@ -391,6 +391,24 @@ class AppLocalizationsDe extends AppLocalizations {
   String get catOther => 'Sonstiges';
 
   @override
+  String get catShopping => 'Einkaufen';
+
+  @override
+  String get catEntertainment => 'Unterhaltung';
+
+  @override
+  String get catUtilities => 'Nebenkosten';
+
+  @override
+  String get catTravel => 'Reisen';
+
+  @override
+  String get catEducation => 'Bildung';
+
+  @override
+  String get catPersonalCare => 'Körperpflege';
+
+  @override
   String get months0 => 'Januar';
 
   @override

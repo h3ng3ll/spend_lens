@@ -390,6 +390,24 @@ class AppLocalizationsRo extends AppLocalizations {
   String get catOther => 'Altele';
 
   @override
+  String get catShopping => 'Cumpărături';
+
+  @override
+  String get catEntertainment => 'Divertisment';
+
+  @override
+  String get catUtilities => 'Utilități';
+
+  @override
+  String get catTravel => 'Călătorii';
+
+  @override
+  String get catEducation => 'Educație';
+
+  @override
+  String get catPersonalCare => 'Îngrijire personală';
+
+  @override
   String get months0 => 'Ianuarie';
 
   @override

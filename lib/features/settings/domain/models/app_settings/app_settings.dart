@@ -1,19 +1,19 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import 'e_app_theme_mode.dart';
+import 'e_flash_mode.dart';
 
 part 'app_settings.freezed.dart';
 part 'app_settings.g.dart';
 
 /// The single persisted app-settings record (design_spendlens.md §3).
 ///
-/// M2 seeds the three fields this milestone needs (`localeCode`,
-/// `currencyCode`, `themeMode` — the Currency sheet also switches and
-/// persists per the M2 acceptance bar); M3 extends this with
-/// `onboardingCompleted`, `flashMode`, `dataCleared` when the full 8-entity
-/// Hive layer lands. Kept as ONE freezed model + ONE box (`settings`,
-/// singular key `'app_settings'`) so M3 only ADDS fields — it never
-/// re-shapes this box.
+/// M2 seeded the first three fields (`localeCode`, `currencyCode`,
+/// `themeMode` — field indices 0–2, LOCKED, never reordered: stored data
+/// depends on them). M3 APPENDS `onboardingCompleted`, `flashMode`,
+/// `dataCleared` as field indices 3–5 — this file only ever grows new
+/// trailing fields; it never re-shapes the box (`settings`, singular key
+/// `'app_settings'`).
 ///
 /// `localeCode` is deliberately NULLABLE:
 /// `null` means "follow the device locale" (recorded global bug
@@ -33,6 +33,19 @@ sealed class AppSettings with _$AppSettings {
     /// display-only.
     @Default('MDL') String currencyCode,
     @Default(EAppThemeMode.system) EAppThemeMode themeMode,
+
+    /// Whether the user has completed onboarding (M10). Read by the
+    /// splash → onboarding/home redirect once the router lands (M5).
+    @Default(false) bool onboardingCompleted,
+
+    /// The scanner's persisted camera-flash preference (M7).
+    @Default(EFlashMode.auto) EFlashMode flashMode,
+
+    /// design_spendlens.md §7 — set `true` by "Delete all records"; the
+    /// seed guard checks `isEmpty && !dataCleared` so a deliberately
+    /// emptied app never silently repopulates. Any restore path sets this
+    /// back to `false`.
+    @Default(false) bool dataCleared,
   }) = _AppSettings;
 
   factory AppSettings.fromJson(Map<String, dynamic> json) =>

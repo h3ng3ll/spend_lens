@@ -678,6 +678,42 @@ abstract class AppLocalizations {
   /// **'Other'**
   String get catOther;
 
+  /// No description provided for @catShopping.
+  ///
+  /// In en, this message translates to:
+  /// **'Shopping'**
+  String get catShopping;
+
+  /// No description provided for @catEntertainment.
+  ///
+  /// In en, this message translates to:
+  /// **'Entertainment'**
+  String get catEntertainment;
+
+  /// No description provided for @catUtilities.
+  ///
+  /// In en, this message translates to:
+  /// **'Utilities'**
+  String get catUtilities;
+
+  /// No description provided for @catTravel.
+  ///
+  /// In en, this message translates to:
+  /// **'Travel'**
+  String get catTravel;
+
+  /// No description provided for @catEducation.
+  ///
+  /// In en, this message translates to:
+  /// **'Education'**
+  String get catEducation;
+
+  /// No description provided for @catPersonalCare.
+  ///
+  /// In en, this message translates to:
+  /// **'Personal Care'**
+  String get catPersonalCare;
+
   /// No description provided for @months0.
   ///
   /// In en, this message translates to:

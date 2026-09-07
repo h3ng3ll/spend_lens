@@ -12,6 +12,11 @@ _AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => _AppSettings(
   themeMode:
       $enumDecodeNullable(_$EAppThemeModeEnumMap, json['themeMode']) ??
       EAppThemeMode.system,
+  onboardingCompleted: json['onboardingCompleted'] as bool? ?? false,
+  flashMode:
+      $enumDecodeNullable(_$EFlashModeEnumMap, json['flashMode']) ??
+      EFlashMode.auto,
+  dataCleared: json['dataCleared'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
@@ -19,10 +24,19 @@ Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
       'localeCode': instance.localeCode,
       'currencyCode': instance.currencyCode,
       'themeMode': _$EAppThemeModeEnumMap[instance.themeMode]!,
+      'onboardingCompleted': instance.onboardingCompleted,
+      'flashMode': _$EFlashModeEnumMap[instance.flashMode]!,
+      'dataCleared': instance.dataCleared,
     };
 
 const _$EAppThemeModeEnumMap = {
   EAppThemeMode.system: 'system',
   EAppThemeMode.light: 'light',
   EAppThemeMode.dark: 'dark',
+};
+
+const _$EFlashModeEnumMap = {
+  EFlashMode.auto: 'auto',
+  EFlashMode.on: 'on',
+  EFlashMode.off: 'off',
 };
