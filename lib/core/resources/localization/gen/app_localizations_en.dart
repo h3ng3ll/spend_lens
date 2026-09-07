@@ -1169,4 +1169,43 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get priceHistoryNotFoundBody => 'It may have been deleted.';
+
+  @override
+  String get scanningStatus => 'Scanning';
+
+  @override
+  String get scanStatusSupported => 'Ready';
+
+  @override
+  String get scanStatusChecking => 'Checking…';
+
+  @override
+  String get scanStatusNoCamera => 'No camera available';
+
+  @override
+  String get scanStatusOcrUnavailable => 'Text recognition unavailable';
+
+  @override
+  String get scanStatusPermissionDenied => 'Camera permission needed';
+
+  @override
+  String get scanStatusPermissionPermanentlyDenied => 'Camera access blocked';
+
+  @override
+  String get openSettings => 'Open Settings';
+
+  @override
+  String get scanUnsupportedNoCamera => 'This device has no camera';
+
+  @override
+  String get scanUnsupportedOcrUnavailable =>
+      'Text recognition isn\'t available on this device';
+
+  @override
+  String get scanUnsupportedPermissionDenied =>
+      'Camera permission is needed to scan receipts';
+
+  @override
+  String get scanUnsupportedPermissionPermanentlyDenied =>
+      'Camera access is blocked — enable it in Settings';
 }

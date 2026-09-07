@@ -2003,6 +2003,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'It may have been deleted.'**
   String get priceHistoryNotFoundBody;
+
+  /// No description provided for @scanningStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning'**
+  String get scanningStatus;
+
+  /// No description provided for @scanStatusSupported.
+  ///
+  /// In en, this message translates to:
+  /// **'Ready'**
+  String get scanStatusSupported;
+
+  /// No description provided for @scanStatusChecking.
+  ///
+  /// In en, this message translates to:
+  /// **'Checking…'**
+  String get scanStatusChecking;
+
+  /// No description provided for @scanStatusNoCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'No camera available'**
+  String get scanStatusNoCamera;
+
+  /// No description provided for @scanStatusOcrUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Text recognition unavailable'**
+  String get scanStatusOcrUnavailable;
+
+  /// No description provided for @scanStatusPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission needed'**
+  String get scanStatusPermissionDenied;
+
+  /// No description provided for @scanStatusPermissionPermanentlyDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access blocked'**
+  String get scanStatusPermissionPermanentlyDenied;
+
+  /// No description provided for @openSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Settings'**
+  String get openSettings;
+
+  /// No description provided for @scanUnsupportedNoCamera.
+  ///
+  /// In en, this message translates to:
+  /// **'This device has no camera'**
+  String get scanUnsupportedNoCamera;
+
+  /// No description provided for @scanUnsupportedOcrUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Text recognition isn\'t available on this device'**
+  String get scanUnsupportedOcrUnavailable;
+
+  /// No description provided for @scanUnsupportedPermissionDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera permission is needed to scan receipts'**
+  String get scanUnsupportedPermissionDenied;
+
+  /// No description provided for @scanUnsupportedPermissionPermanentlyDenied.
+  ///
+  /// In en, this message translates to:
+  /// **'Camera access is blocked — enable it in Settings'**
+  String get scanUnsupportedPermissionPermanentlyDenied;
 }
 
 class _AppLocalizationsDelegate

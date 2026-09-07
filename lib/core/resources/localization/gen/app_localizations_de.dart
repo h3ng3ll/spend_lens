@@ -1177,4 +1177,43 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get priceHistoryNotFoundBody => 'Es wurde möglicherweise gelöscht.';
+
+  @override
+  String get scanningStatus => 'Scannen';
+
+  @override
+  String get scanStatusSupported => 'Bereit';
+
+  @override
+  String get scanStatusChecking => 'Wird geprüft…';
+
+  @override
+  String get scanStatusNoCamera => 'Keine Kamera verfügbar';
+
+  @override
+  String get scanStatusOcrUnavailable => 'Texterkennung nicht verfügbar';
+
+  @override
+  String get scanStatusPermissionDenied => 'Kamerazugriff erforderlich';
+
+  @override
+  String get scanStatusPermissionPermanentlyDenied => 'Kamerazugriff blockiert';
+
+  @override
+  String get openSettings => 'Einstellungen öffnen';
+
+  @override
+  String get scanUnsupportedNoCamera => 'Dieses Gerät hat keine Kamera';
+
+  @override
+  String get scanUnsupportedOcrUnavailable =>
+      'Die Texterkennung ist auf diesem Gerät nicht verfügbar';
+
+  @override
+  String get scanUnsupportedPermissionDenied =>
+      'Für das Scannen von Belegen ist Kamerazugriff erforderlich';
+
+  @override
+  String get scanUnsupportedPermissionPermanentlyDenied =>
+      'Der Kamerazugriff ist blockiert — aktiviere ihn in den Einstellungen';
 }

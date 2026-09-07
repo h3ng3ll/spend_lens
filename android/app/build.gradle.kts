@@ -19,7 +19,9 @@ android {
         applicationId = "com.hengell.spendlens"
         // You can update the following values to match your application needs.
         // For more information, see: https://flutter.dev/to/review-gradle-config.
-        minSdk = flutter.minSdkVersion
+        // Explicit per design_spendlens.md §6 — never left to
+        // `flutter.minSdkVersion`'s default for this project.
+        minSdk = 21
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
         versionName = flutter.versionName

@@ -1176,4 +1176,45 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get priceHistoryNotFoundBody => 'Puede que se haya eliminado.';
+
+  @override
+  String get scanningStatus => 'Escaneo';
+
+  @override
+  String get scanStatusSupported => 'Listo';
+
+  @override
+  String get scanStatusChecking => 'Comprobando…';
+
+  @override
+  String get scanStatusNoCamera => 'No hay cámara disponible';
+
+  @override
+  String get scanStatusOcrUnavailable =>
+      'Reconocimiento de texto no disponible';
+
+  @override
+  String get scanStatusPermissionDenied => 'Se necesita permiso de cámara';
+
+  @override
+  String get scanStatusPermissionPermanentlyDenied =>
+      'Acceso a la cámara bloqueado';
+
+  @override
+  String get openSettings => 'Abrir Ajustes';
+
+  @override
+  String get scanUnsupportedNoCamera => 'Este dispositivo no tiene cámara';
+
+  @override
+  String get scanUnsupportedOcrUnavailable =>
+      'El reconocimiento de texto no está disponible en este dispositivo';
+
+  @override
+  String get scanUnsupportedPermissionDenied =>
+      'Se necesita permiso de cámara para escanear recibos';
+
+  @override
+  String get scanUnsupportedPermissionPermanentlyDenied =>
+      'El acceso a la cámara está bloqueado. Actívalo en Ajustes';
 }

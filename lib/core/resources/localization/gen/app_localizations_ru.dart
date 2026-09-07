@@ -1174,4 +1174,44 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get priceHistoryNotFoundBody => 'Возможно, он был удалён.';
+
+  @override
+  String get scanningStatus => 'Сканирование';
+
+  @override
+  String get scanStatusSupported => 'Готово';
+
+  @override
+  String get scanStatusChecking => 'Проверка…';
+
+  @override
+  String get scanStatusNoCamera => 'Камера недоступна';
+
+  @override
+  String get scanStatusOcrUnavailable => 'Распознавание текста недоступно';
+
+  @override
+  String get scanStatusPermissionDenied => 'Требуется разрешение на камеру';
+
+  @override
+  String get scanStatusPermissionPermanentlyDenied =>
+      'Доступ к камере заблокирован';
+
+  @override
+  String get openSettings => 'Открыть настройки';
+
+  @override
+  String get scanUnsupportedNoCamera => 'На этом устройстве нет камеры';
+
+  @override
+  String get scanUnsupportedOcrUnavailable =>
+      'Распознавание текста недоступно на этом устройстве';
+
+  @override
+  String get scanUnsupportedPermissionDenied =>
+      'Для сканирования чеков нужно разрешение на камеру';
+
+  @override
+  String get scanUnsupportedPermissionPermanentlyDenied =>
+      'Доступ к камере заблокирован — включите его в настройках';
 }

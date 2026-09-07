@@ -6,6 +6,8 @@ import '../../../../../core/di/injection.dart';
 import '../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
+import '../../../../../core/services/scan_capability/e_scan_capability.dart';
+import '../../../../../core/services/scan_capability/i_scan_capability_service.dart';
 import '../../../../../core/services/ui_message_service.dart';
 import '../../../../../core/widgets/confirm_dialog.dart';
 import '../../../../category/domain/repositories/i_category_local_repository.dart';
@@ -31,9 +33,19 @@ import 'widgets/settings_body.dart';
 /// this page owns its own TOP inset via `SafeArea(bottom: false)` — the
 /// BOTTOM inset stays owned by `RootPage`'s tab pill (`root_page.dart`'s doc
 /// comment).
-class SettingsPage extends StatelessWidget {
+class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
+  @override
+  State<SettingsPage> createState() => _SettingsPageState();
+}
+
+/// Owns the [IScanCapabilityService] re-check via [WidgetsBindingObserver]:
+/// permission state can change while the app is backgrounded (the user
+/// grants/revokes camera access from OS Settings after tapping "Open
+/// Settings"), so the row must re-read on resume rather than caching the
+/// value for the page's lifetime.
+class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver {
   static const Map<String, String> _languageLabels = {
     'en': 'English',
     'ro': 'Română',
@@ -43,6 +55,34 @@ class SettingsPage extends StatelessWidget {
     'de': 'Deutsch',
     'fr': 'Français',
   };
+
+  late Future<EScanCapability> _scanCapability;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    _scanCapability = getIt<IScanCapabilityService>().check();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state == AppLifecycleState.resumed) {
+      setState(() {
+        _scanCapability = getIt<IScanCapabilityService>().check();
+      });
+    }
+  }
+
+  Future<void> _onOpenScanSettings() async {
+    await getIt<IScanCapabilityService>().openAppSettings();
+  }
 
   void _onLanguage(BuildContext context) => LanguageSheet.show(context);
 
@@ -110,25 +150,36 @@ class SettingsPage extends StatelessWidget {
         child: BlocBuilder<SettingsBloc, SettingsState>(
           builder: (context, state) => FutureBuilder<PackageInfo>(
             future: PackageInfo.fromPlatform(),
-            builder: (context, snapshot) {
-              final version = snapshot.data?.version ?? '1.0';
+            builder: (context, packageSnapshot) {
+              final version = packageSnapshot.data?.version ?? '1.0';
 
-              return SettingsBody(
-                state: state,
-                languageLabel: state.settings.localeCode == null
-                    ? lo.language
-                    : (_languageLabels[state.settings.localeCode] ??
-                          state.settings.localeCode!),
-                currencyLabel: state.settings.currencyCode,
-                versionLabel: version,
-                onProfile: () => _onProfile(context),
-                onCurrency: () => _onCurrency(context),
-                onCategories: () => _onCategories(context),
-                onLanguage: () => _onLanguage(context),
-                onToggleTheme: () => _onToggleTheme(context),
-                onDeleteAll: () => _onDeleteAll(context),
-                onPrivacy: () => _onPrivacy(context),
-                onAbout: () => _onAbout(context),
+              return FutureBuilder<EScanCapability>(
+                future: _scanCapability,
+                builder: (context, capabilitySnapshot) {
+                  // No `??` fallback: a pending probe stays null so the row
+                  // shows "checking", not a fabricated concrete cause.
+                  final capability = capabilitySnapshot.data;
+
+                  return SettingsBody(
+                    state: state,
+                    languageLabel: state.settings.localeCode == null
+                        ? lo.language
+                        : (_languageLabels[state.settings.localeCode] ??
+                              state.settings.localeCode!),
+                    currencyLabel: state.settings.currencyCode,
+                    versionLabel: version,
+                    onProfile: () => _onProfile(context),
+                    onCurrency: () => _onCurrency(context),
+                    onCategories: () => _onCategories(context),
+                    onLanguage: () => _onLanguage(context),
+                    onToggleTheme: () => _onToggleTheme(context),
+                    onDeleteAll: () => _onDeleteAll(context),
+                    onPrivacy: () => _onPrivacy(context),
+                    onAbout: () => _onAbout(context),
+                    scanCapability: capability,
+                    onOpenScanSettings: _onOpenScanSettings,
+                  );
+                },
               );
             },
           ),

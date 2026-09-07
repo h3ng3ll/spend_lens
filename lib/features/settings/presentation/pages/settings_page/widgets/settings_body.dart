@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../../core/services/scan_capability/e_scan_capability.dart';
 import '../../../../../../core/widgets/padding/horizontal_padding.dart';
 import '../../../../../category/presentation/bloc/categories_bloc/categories_bloc.dart';
 import '../../../bloc/settings_bloc/settings_bloc.dart';
@@ -8,6 +9,7 @@ import 'delete_all_card.dart';
 import 'legal_card.dart';
 import 'preferences_card.dart';
 import 'profile_summary_card.dart';
+import 'scan_capability_card.dart';
 import 'settings_header_row.dart';
 
 /// The Settings artboard's full grouped-card layout
@@ -31,6 +33,11 @@ class SettingsBody extends StatelessWidget {
   final VoidCallback onDeleteAll;
   final VoidCallback onPrivacy;
   final VoidCallback onAbout;
+  /// `null` while the capability probe is in flight — passed straight
+  /// through to [ScanCapabilityRow], which renders a neutral "checking"
+  /// state rather than a fabricated concrete cause.
+  final EScanCapability? scanCapability;
+  final VoidCallback onOpenScanSettings;
 
   const SettingsBody({
     super.key,
@@ -46,6 +53,8 @@ class SettingsBody extends StatelessWidget {
     required this.onDeleteAll,
     required this.onPrivacy,
     required this.onAbout,
+    required this.scanCapability,
+    required this.onOpenScanSettings,
   });
 
   @override
@@ -71,6 +80,10 @@ class SettingsBody extends StatelessWidget {
                 onLanguage: onLanguage,
                 onToggleTheme: onToggleTheme,
               ),
+            ),
+            ScanCapabilityCard(
+              capability: scanCapability,
+              onOpenSettings: onOpenScanSettings,
             ),
             DeleteAllCard(onTap: onDeleteAll),
             LegalCard(

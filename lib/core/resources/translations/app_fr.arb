@@ -322,5 +322,17 @@
   "priceHistoryNoDataTitle": "Aucun historique de prix pour le moment",
   "priceHistoryNoDataBody": "Scannez un reçu avec ce produit pour commencer à suivre son prix dans le temps.",
   "priceHistoryNotFoundTitle": "Ce produit n'existe plus.",
-  "priceHistoryNotFoundBody": "Il a peut-être été supprimé."
+  "priceHistoryNotFoundBody": "Il a peut-être été supprimé.",
+  "scanningStatus": "Numérisation",
+  "scanStatusSupported": "Prêt",
+  "scanStatusChecking": "Vérification…",
+  "scanStatusNoCamera": "Aucun appareil photo disponible",
+  "scanStatusOcrUnavailable": "Reconnaissance de texte indisponible",
+  "scanStatusPermissionDenied": "Autorisation de l'appareil photo requise",
+  "scanStatusPermissionPermanentlyDenied": "Accès à l'appareil photo bloqué",
+  "openSettings": "Ouvrir les réglages",
+  "scanUnsupportedNoCamera": "Cet appareil n'a pas d'appareil photo",
+  "scanUnsupportedOcrUnavailable": "La reconnaissance de texte n'est pas disponible sur cet appareil",
+  "scanUnsupportedPermissionDenied": "L'autorisation de l'appareil photo est requise pour numériser les reçus",
+  "scanUnsupportedPermissionPermanentlyDenied": "L'accès à l'appareil photo est bloqué — activez-le dans les réglages"
 }

@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../domain/models/app_settings/app_settings.dart';
 import '../../../domain/models/app_settings/e_app_theme_mode.dart';
+import '../../../domain/models/app_settings/e_flash_mode.dart';
 import '../../../domain/use_cases/save_settings_use_case.dart';
 import '../../../domain/use_cases/watch_settings_use_case.dart';
 
@@ -48,6 +49,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<_SetCurrency>(_onSetCurrency);
     on<_ToggleTheme>(_onToggleTheme);
     on<_CompleteOnboarding>(_onCompleteOnboarding);
+    on<_ToggleFlashMode>(_onToggleFlashMode);
   }
 
   Future<void> _onWatch(_Watch event, Emitter<SettingsState> emit) async {
@@ -104,6 +106,21 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     if (state.settings.onboardingCompleted) return;
 
     final updated = state.settings.copyWith(onboardingCompleted: true);
+    emit(state.copyWith(settings: updated));
+    await _saveSettingsUseCase(updated);
+  }
+
+  Future<void> _onToggleFlashMode(
+    _ToggleFlashMode event,
+    Emitter<SettingsState> emit,
+  ) async {
+    final next = switch (state.settings.flashMode) {
+      EFlashMode.auto => EFlashMode.on,
+      EFlashMode.on => EFlashMode.off,
+      EFlashMode.off => EFlashMode.auto,
+    };
+    final updated = state.settings.copyWith(flashMode: next);
+
     emit(state.copyWith(settings: updated));
     await _saveSettingsUseCase(updated);
   }

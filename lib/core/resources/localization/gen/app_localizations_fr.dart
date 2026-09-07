@@ -1179,4 +1179,46 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get priceHistoryNotFoundBody => 'Il a peut-être été supprimé.';
+
+  @override
+  String get scanningStatus => 'Numérisation';
+
+  @override
+  String get scanStatusSupported => 'Prêt';
+
+  @override
+  String get scanStatusChecking => 'Vérification…';
+
+  @override
+  String get scanStatusNoCamera => 'Aucun appareil photo disponible';
+
+  @override
+  String get scanStatusOcrUnavailable => 'Reconnaissance de texte indisponible';
+
+  @override
+  String get scanStatusPermissionDenied =>
+      'Autorisation de l\'appareil photo requise';
+
+  @override
+  String get scanStatusPermissionPermanentlyDenied =>
+      'Accès à l\'appareil photo bloqué';
+
+  @override
+  String get openSettings => 'Ouvrir les réglages';
+
+  @override
+  String get scanUnsupportedNoCamera =>
+      'Cet appareil n\'a pas d\'appareil photo';
+
+  @override
+  String get scanUnsupportedOcrUnavailable =>
+      'La reconnaissance de texte n\'est pas disponible sur cet appareil';
+
+  @override
+  String get scanUnsupportedPermissionDenied =>
+      'L\'autorisation de l\'appareil photo est requise pour numériser les reçus';
+
+  @override
+  String get scanUnsupportedPermissionPermanentlyDenied =>
+      'L\'accès à l\'appareil photo est bloqué — activez-le dans les réglages';
 }

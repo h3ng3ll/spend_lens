@@ -21,6 +21,7 @@ import 'features/category/presentation/bloc/categories_bloc/categories_bloc.dart
 import 'features/expense/di/expense_injection.dart';
 import 'features/product/di/product_injection.dart';
 import 'features/receipt/di/receipt_injection.dart';
+import 'features/scanner/di/scanner_injection.dart';
 import 'features/settings/di/settings_injection.dart';
 import 'features/settings/domain/use_cases/save_settings_use_case.dart';
 import 'features/settings/domain/use_cases/watch_settings_use_case.dart';
@@ -60,6 +61,7 @@ void main() async {
   initReceiptFeature();
   initExpenseFeature();
   initAnalyticsFeature();
+  initScannerFeature();
 
   // First-launch category seed (design_spendlens.md §7). THE GUARD IS
   // isEmpty && !dataCleared — never isEmpty alone, or a store the user

@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../core/di/injection.dart';
 import '../../../../../../core/resources/app_icons.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../../core/routes/init_router/init_router.dart';
+import '../../../../../../core/services/scan_capability/e_scan_capability.dart';
+import '../../../../../../core/services/scan_capability/i_scan_capability_service.dart';
 import '../../../../../../core/services/ui_message_service.dart';
 import '../../../../../../core/widgets/padding/horizontal_padding.dart';
 import '../../../bloc/home_bloc/home_bloc.dart';
@@ -22,12 +25,38 @@ class HomeBody extends StatelessWidget {
 
   const HomeBody({super.key, required this.state});
 
-  void _onScanReceipt(BuildContext context) {
-    // M5 ships no scanner (M7/M8) — the button is real, its destination
-    // isn't yet, so it surfaces that honestly via a toast instead of
-    // pretending to navigate somewhere.
+  /// design_spendlens.md §6: reads the ONE `IScanCapabilityService` source —
+  /// the Settings screen's capability row reads the same service. Tapping
+  /// Scan Receipt when the device is not [EScanCapability.supported] shows
+  /// a per-state toast naming the ACTUAL reason (no camera / OCR
+  /// unavailable / permission denied / permanently denied) and never
+  /// navigates; on [EScanCapability.permissionDenied] it requests the
+  /// permission inline first, since that state is still recoverable without
+  /// leaving the app.
+  Future<void> _onScanReceipt(BuildContext context) async {
     final lo = AppLocalizations.of(context);
-    UiMessageService.showInfo(lo.scanComingSoon);
+    final capabilityService = getIt<IScanCapabilityService>();
+
+    var capability = await capabilityService.check();
+    if (capability == EScanCapability.permissionDenied) {
+      capability = await capabilityService.requestPermission();
+    }
+
+    if (capability == EScanCapability.supported) {
+      if (!context.mounted) return;
+      const ScannerPageRoute().push(context);
+      return;
+    }
+
+    final message = switch (capability) {
+      EScanCapability.noCamera => lo.scanUnsupportedNoCamera,
+      EScanCapability.ocrUnavailable => lo.scanUnsupportedOcrUnavailable,
+      EScanCapability.permissionDenied => lo.scanUnsupportedPermissionDenied,
+      EScanCapability.permissionPermanentlyDenied =>
+        lo.scanUnsupportedPermissionPermanentlyDenied,
+      EScanCapability.supported => lo.scanUnsupportedNoCamera, // unreachable
+    };
+    UiMessageService.showInfo(message);
   }
 
   void _onAddCashExpense(BuildContext context) =>

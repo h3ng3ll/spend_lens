@@ -1,8 +1,24 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- design_spendlens.md §6: camera is used for receipt scanning only.
+         `required="false"` lets a camera-less tablet still install the app
+         for cash-only use — capability is reported per-device by
+         `IScanCapabilityService`, never assumed from the manifest alone. -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+
     <application
         android:label="spend_lens"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
+        <!-- Bundles the ML Kit Latin text-recognition model into the APK at
+             install time instead of downloading it on first use — a
+             downloaded model would fail on a first launch in airplane mode,
+             which design_spendlens.md §64 forbids. M8 wires the real OCR
+             call; this metadata must exist from M7 so the model is already
+             on-device when M8 lands. -->
+        <meta-data
+            android:name="com.google.mlkit.vision.DEPENDENCIES"
+            android:value="ocr" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

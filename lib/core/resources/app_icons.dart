@@ -37,6 +37,10 @@ abstract class AppIcons {
   static const emptyReceipt = '${_path}empty_receipt$_ext';
   static const scanFrame = '${_path}scan_frame$_ext';
 
+  // M7: Scanner artboard's flash toggle + close controls
+  // (design_spendlens.md §10). `close` already exists (M5).
+  static const flash = '${_path}flash$_ext';
+
   // M5: Profile screen's sign-in buttons (design_spendlens.md's Profile
   // artboard). `googleLogo` is a real multi-color brand mark — render it
   // via a bare `SvgPicture.asset`, NOT `AppSvgIcon`, since `AppSvgIcon`

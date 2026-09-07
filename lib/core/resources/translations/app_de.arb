@@ -322,5 +322,17 @@
   "priceHistoryNoDataTitle": "Noch kein Preisverlauf",
   "priceHistoryNoDataBody": "Scanne einen Beleg mit diesem Produkt, um seinen Preis im Zeitverlauf zu verfolgen.",
   "priceHistoryNotFoundTitle": "Dieses Produkt existiert nicht mehr.",
-  "priceHistoryNotFoundBody": "Es wurde möglicherweise gelöscht."
+  "priceHistoryNotFoundBody": "Es wurde möglicherweise gelöscht.",
+  "scanningStatus": "Scannen",
+  "scanStatusSupported": "Bereit",
+  "scanStatusChecking": "Wird geprüft…",
+  "scanStatusNoCamera": "Keine Kamera verfügbar",
+  "scanStatusOcrUnavailable": "Texterkennung nicht verfügbar",
+  "scanStatusPermissionDenied": "Kamerazugriff erforderlich",
+  "scanStatusPermissionPermanentlyDenied": "Kamerazugriff blockiert",
+  "openSettings": "Einstellungen öffnen",
+  "scanUnsupportedNoCamera": "Dieses Gerät hat keine Kamera",
+  "scanUnsupportedOcrUnavailable": "Die Texterkennung ist auf diesem Gerät nicht verfügbar",
+  "scanUnsupportedPermissionDenied": "Für das Scannen von Belegen ist Kamerazugriff erforderlich",
+  "scanUnsupportedPermissionPermanentlyDenied": "Der Kamerazugriff ist blockiert — aktiviere ihn in den Einstellungen"
 }

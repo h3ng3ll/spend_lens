@@ -39,6 +39,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/empty_receipt.svg
   String get emptyReceipt => 'assets/icons/empty_receipt.svg';
 
+  /// File path: assets/icons/flash.svg
+  String get flash => 'assets/icons/flash.svg';
+
   /// File path: assets/icons/google_logo.svg
   String get googleLogo => 'assets/icons/google_logo.svg';
 
@@ -101,6 +104,7 @@ class $AssetsIconsGen {
     close,
     edit,
     emptyReceipt,
+    flash,
     googleLogo,
     noWifi,
     pdf,

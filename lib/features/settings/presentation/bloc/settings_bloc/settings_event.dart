@@ -27,4 +27,13 @@ sealed class SettingsEvent with _$SettingsEvent {
   /// onboarding UI is M10); `redirect` in `init_router.dart` reads
   /// `settings.onboardingCompleted` to decide Splash → Onboarding vs. Home.
   const factory SettingsEvent.completeOnboarding() = _CompleteOnboarding;
+
+  /// Toggle intent — NO payload (BLoC rule A3.11). The handler reads
+  /// `state.settings.flashMode` and cycles it internally:
+  /// auto → on → off → auto. Dispatched by the Scanner screen's flash
+  /// control (design_spendlens.md §6/§10 — the flash preference is a
+  /// device-level setting persisted on [AppSettings], not scanner-screen
+  /// state, so it belongs on this app-lifetime bloc rather than the
+  /// screen-scoped `ScannerBloc`).
+  const factory SettingsEvent.toggleFlashMode() = _ToggleFlashMode;
 }

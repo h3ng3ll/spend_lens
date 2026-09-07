@@ -322,5 +322,17 @@
   "priceHistoryNoDataTitle": "Пока нет истории цены",
   "priceHistoryNoDataBody": "Отсканируйте чек с этим товаром, чтобы начать отслеживать его цену со временем.",
   "priceHistoryNotFoundTitle": "Этот товар больше не существует.",
-  "priceHistoryNotFoundBody": "Возможно, он был удалён."
+  "priceHistoryNotFoundBody": "Возможно, он был удалён.",
+  "scanningStatus": "Сканирование",
+  "scanStatusSupported": "Готово",
+  "scanStatusChecking": "Проверка…",
+  "scanStatusNoCamera": "Камера недоступна",
+  "scanStatusOcrUnavailable": "Распознавание текста недоступно",
+  "scanStatusPermissionDenied": "Требуется разрешение на камеру",
+  "scanStatusPermissionPermanentlyDenied": "Доступ к камере заблокирован",
+  "openSettings": "Открыть настройки",
+  "scanUnsupportedNoCamera": "На этом устройстве нет камеры",
+  "scanUnsupportedOcrUnavailable": "Распознавание текста недоступно на этом устройстве",
+  "scanUnsupportedPermissionDenied": "Для сканирования чеков нужно разрешение на камеру",
+  "scanUnsupportedPermissionPermanentlyDenied": "Доступ к камере заблокирован — включите его в настройках"
 }

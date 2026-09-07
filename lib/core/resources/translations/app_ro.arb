@@ -322,5 +322,17 @@
   "priceHistoryNoDataTitle": "Încă niciun istoric de preț",
   "priceHistoryNoDataBody": "Scanează un bon cu acest produs pentru a începe să-i urmărești prețul în timp.",
   "priceHistoryNotFoundTitle": "Acest produs nu mai există.",
-  "priceHistoryNotFoundBody": "Este posibil să fi fost șters."
+  "priceHistoryNotFoundBody": "Este posibil să fi fost șters.",
+  "scanningStatus": "Scanare",
+  "scanStatusSupported": "Pregătit",
+  "scanStatusChecking": "Se verifică…",
+  "scanStatusNoCamera": "Nicio cameră disponibilă",
+  "scanStatusOcrUnavailable": "Recunoașterea textului indisponibilă",
+  "scanStatusPermissionDenied": "Este necesară permisiunea pentru cameră",
+  "scanStatusPermissionPermanentlyDenied": "Accesul la cameră este blocat",
+  "openSettings": "Deschide Setările",
+  "scanUnsupportedNoCamera": "Acest dispozitiv nu are cameră",
+  "scanUnsupportedOcrUnavailable": "Recunoașterea textului nu este disponibilă pe acest dispozitiv",
+  "scanUnsupportedPermissionDenied": "Este necesară permisiunea pentru cameră pentru a scana bonuri",
+  "scanUnsupportedPermissionPermanentlyDenied": "Accesul la cameră este blocat — activează-l din Setări"
 }

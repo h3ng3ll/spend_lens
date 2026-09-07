@@ -322,5 +322,17 @@
   "priceHistoryNoDataTitle": "Aún no hay historial de precios",
   "priceHistoryNoDataBody": "Escanea un recibo con este producto para empezar a seguir su precio en el tiempo.",
   "priceHistoryNotFoundTitle": "Este producto ya no existe.",
-  "priceHistoryNotFoundBody": "Puede que se haya eliminado."
+  "priceHistoryNotFoundBody": "Puede que se haya eliminado.",
+  "scanningStatus": "Escaneo",
+  "scanStatusSupported": "Listo",
+  "scanStatusChecking": "Comprobando…",
+  "scanStatusNoCamera": "No hay cámara disponible",
+  "scanStatusOcrUnavailable": "Reconocimiento de texto no disponible",
+  "scanStatusPermissionDenied": "Se necesita permiso de cámara",
+  "scanStatusPermissionPermanentlyDenied": "Acceso a la cámara bloqueado",
+  "openSettings": "Abrir Ajustes",
+  "scanUnsupportedNoCamera": "Este dispositivo no tiene cámara",
+  "scanUnsupportedOcrUnavailable": "El reconocimiento de texto no está disponible en este dispositivo",
+  "scanUnsupportedPermissionDenied": "Se necesita permiso de cámara para escanear recibos",
+  "scanUnsupportedPermissionPermanentlyDenied": "El acceso a la cámara está bloqueado. Actívalo en Ajustes"
 }

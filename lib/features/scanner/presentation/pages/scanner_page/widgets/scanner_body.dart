@@ -1,39 +1,49 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../../core/resources/colors/app_color_scheme.dart';
-import '../../../../../../core/resources/localization/gen/app_localizations.dart';
-import '../../../../../../core/resources/text/app_text_theme.dart';
-import '../../../bloc/scanner_bloc/scanner_bloc.dart';
+import '../../../../../settings/presentation/bloc/settings_bloc/settings_bloc.dart';
+import '../../../../presentation/bloc/scanner_bloc/scanner_bloc.dart';
+import 'camera_preview_layer.dart';
+import 'scanner_processing_sheet.dart';
+import 'scanner_top_controls.dart';
 
-/// The scanner's four sub-states as one body (design_spendlens.md §5). M4
-/// minimal placeholder — the camera preview, detection outline animation
-/// and step-tick labels (spec §8: real events, never the prototype's fixed
-/// timer chain) are M7/M8.
+/// The scanner's four sub-states as one body (design_spendlens.md §5):
+/// [CameraPreviewLayer] owns the camera + pipeline orchestration and paints
+/// the searching/detected/capturing overlays; [ScannerProcessingSheet]
+/// slides up only while `EScannerStatus.processing`.
+///
+/// Reads [SettingsBloc] via an explicit `BlocBuilder` (never a raw
+/// `context.watch`/`.read` inside `build()`, per BLoC rule A3.6) for the
+/// persisted flash preference — flash is a device-level setting owned by
+/// the app-lifetime `SettingsBloc`, not scanner-screen state.
 class ScannerBody extends StatelessWidget {
-  final ScannerState state;
-
-  const ScannerBody({super.key, required this.state});
+  const ScannerBody({super.key});
 
   @override
   Widget build(BuildContext context) {
-    final scheme = AppColorScheme.of(context);
-    final textTheme = AppTextTheme.of(context);
-    final lo = AppLocalizations.of(context);
-
-    final label = switch (state.status) {
-      EScannerStatus.searching => lo.looking,
-      EScannerStatus.detected => lo.receiptDetected,
-      EScannerStatus.capturing => lo.capturing,
-      EScannerStatus.processing => lo.steps0,
-      EScannerStatus.failed => lo.blurry,
-    };
-
-    return Center(
-      child: Text(
-        label,
-        textAlign: TextAlign.center,
-        style: textTheme.body17.copyWith(color: scheme.ink),
-      ),
+    return BlocBuilder<SettingsBloc, SettingsState>(
+      buildWhen: (previous, current) =>
+          previous.settings.flashMode != current.settings.flashMode,
+      builder: (context, settingsState) {
+        return BlocBuilder<ScannerBloc, ScannerState>(
+          builder: (context, state) {
+            return Stack(
+              fit: StackFit.expand,
+              children: [
+                CameraPreviewLayer(
+                  state: state,
+                  flashMode: settingsState.settings.flashMode,
+                ),
+                ScannerTopControls(
+                  flashMode: settingsState.settings.flashMode,
+                ),
+                if (state.isProcessing)
+                  ScannerProcessingSheet(processingStep: state.processingStep),
+              ],
+            );
+          },
+        );
+      },
     );
   }
 }

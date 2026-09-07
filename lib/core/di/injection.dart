@@ -2,6 +2,12 @@ import 'package:get_it/get_it.dart';
 
 import '../hive/hive_database.dart';
 import '../services/logger_service.dart';
+import '../services/ocr/i_receipt_detector.dart';
+import '../services/ocr/method_channel_ocr_service.dart';
+import '../services/ocr/method_channel_receipt_detector.dart';
+import '../services/ocr/ocr_service.dart';
+import '../services/scan_capability/i_scan_capability_service.dart';
+import '../services/scan_capability/scan_capability_service.dart';
 import '../utils/env/env.dart';
 
 final getIt = GetIt.instance;
@@ -30,4 +36,18 @@ Future<void> initDependencies() async {
   // below resolves this one instance via constructor injection rather than
   // opening boxes ad hoc (hive_rules.md §7).
   getIt.registerLazySingleton(() => const HiveDatabase());
+
+  // M7: the single channel contract (design_spendlens.md §6), identical on
+  // both platforms — no `Platform.isX` branch anywhere above this line.
+  getIt.registerLazySingleton<OcrService>(() => MethodChannelOcrService());
+  getIt.registerLazySingleton<IReceiptDetector>(
+    () => MethodChannelReceiptDetector(),
+  );
+
+  // M7: lives in core because two unrelated consumers read it — the Home
+  // screen's Scan Receipt button AND the Settings capability row
+  // (design_spendlens.md §6).
+  getIt.registerLazySingleton<IScanCapabilityService>(
+    () => ScanCapabilityService(getIt<OcrService>()),
+  );
 }

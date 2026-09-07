@@ -1175,4 +1175,45 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get priceHistoryNotFoundBody => 'Este posibil să fi fost șters.';
+
+  @override
+  String get scanningStatus => 'Scanare';
+
+  @override
+  String get scanStatusSupported => 'Pregătit';
+
+  @override
+  String get scanStatusChecking => 'Se verifică…';
+
+  @override
+  String get scanStatusNoCamera => 'Nicio cameră disponibilă';
+
+  @override
+  String get scanStatusOcrUnavailable => 'Recunoașterea textului indisponibilă';
+
+  @override
+  String get scanStatusPermissionDenied =>
+      'Este necesară permisiunea pentru cameră';
+
+  @override
+  String get scanStatusPermissionPermanentlyDenied =>
+      'Accesul la cameră este blocat';
+
+  @override
+  String get openSettings => 'Deschide Setările';
+
+  @override
+  String get scanUnsupportedNoCamera => 'Acest dispozitiv nu are cameră';
+
+  @override
+  String get scanUnsupportedOcrUnavailable =>
+      'Recunoașterea textului nu este disponibilă pe acest dispozitiv';
+
+  @override
+  String get scanUnsupportedPermissionDenied =>
+      'Este necesară permisiunea pentru cameră pentru a scana bonuri';
+
+  @override
+  String get scanUnsupportedPermissionPermanentlyDenied =>
+      'Accesul la cameră este blocat — activează-l din Setări';
 }

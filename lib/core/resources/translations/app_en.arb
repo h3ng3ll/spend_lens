@@ -757,5 +757,17 @@
         "type": "String"
       }
     }
-  }
+  },
+  "scanningStatus": "Scanning",
+  "scanStatusSupported": "Ready",
+  "scanStatusChecking": "Checking…",
+  "scanStatusNoCamera": "No camera available",
+  "scanStatusOcrUnavailable": "Text recognition unavailable",
+  "scanStatusPermissionDenied": "Camera permission needed",
+  "scanStatusPermissionPermanentlyDenied": "Camera access blocked",
+  "openSettings": "Open Settings",
+  "scanUnsupportedNoCamera": "This device has no camera",
+  "scanUnsupportedOcrUnavailable": "Text recognition isn't available on this device",
+  "scanUnsupportedPermissionDenied": "Camera permission is needed to scan receipts",
+  "scanUnsupportedPermissionPermanentlyDenied": "Camera access is blocked — enable it in Settings"
 }
