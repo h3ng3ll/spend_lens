@@ -269,6 +269,7 @@
   "saveReceipt": "Salvează bonul",
   "tSaved": "Bon salvat · {a}",
   "tSaveFailed": "Bonul nu a putut fi salvat. Încearcă din nou.",
+  "tSaveFailedGeneric": "Salvarea a eșuat. Încearcă din nou.",
   "checkThis": "Verifică · citit ca „{r}” · {q}",
   "readAs": "Citit ca „{r}”",
   "lowConf": "încredere scăzută",

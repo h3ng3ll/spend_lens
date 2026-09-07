@@ -2,9 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../category/domain/repositories/i_category_local_repository.dart';
+import '../../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../../../store/domain/repositories/i_store_local_repository.dart';
 import '../../../domain/models/app_settings/app_settings.dart';
 import '../../../domain/models/app_settings/e_app_theme_mode.dart';
 import '../../../domain/models/app_settings/e_flash_mode.dart';
+import '../../../domain/use_cases/delete_all_records_use_case.dart';
 import '../../../domain/use_cases/save_settings_use_case.dart';
 import '../../../domain/use_cases/watch_settings_use_case.dart';
 
@@ -33,11 +37,19 @@ part 'settings_bloc.freezed.dart';
 class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
   final WatchSettingsUseCase _watchSettingsUseCase;
   final SaveSettingsUseCase _saveSettingsUseCase;
+  final DeleteAllRecordsUseCase _deleteAllRecordsUseCase;
+  final IExpenseLocalRepository _expenseLocalRepository;
+  final IStoreLocalRepository _storeLocalRepository;
+  final ICategoryLocalRepository _categoryLocalRepository;
 
   SettingsBloc({
     required AppSettings initialSettings,
     required this._watchSettingsUseCase,
     required this._saveSettingsUseCase,
+    required this._deleteAllRecordsUseCase,
+    required this._expenseLocalRepository,
+    required this._storeLocalRepository,
+    required this._categoryLocalRepository,
   }) : super(
          SettingsState(
            status: ESettingsStatus.ready,
@@ -50,6 +62,8 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<_ToggleTheme>(_onToggleTheme);
     on<_CompleteOnboarding>(_onCompleteOnboarding);
     on<_ToggleFlashMode>(_onToggleFlashMode);
+    on<_LoadRecordCount>(_onLoadRecordCount);
+    on<_DeleteAll>(_onDeleteAll);
   }
 
   Future<void> _onWatch(_Watch event, Emitter<SettingsState> emit) async {
@@ -123,5 +137,44 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
 
     emit(state.copyWith(settings: updated));
     await _saveSettingsUseCase(updated);
+  }
+
+  /// Sums the current record count across the datasets
+  /// [DeleteAllRecordsUseCase] clears, for the delete-all confirm dialog's
+  /// `{n}` — a one-shot read feeding a dialog's copy, not reactively
+  /// displayed state, so `getAll()` here is not a hive_rules.md §9
+  /// violation (that rule governs reactive screen state). Used to be a
+  /// UI-side method in `SettingsPage` calling three repositories directly
+  /// via `getIt`.
+  Future<void> _onLoadRecordCount(
+    _LoadRecordCount event,
+    Emitter<SettingsState> emit,
+  ) async {
+    final expenses = await _expenseLocalRepository.getAll();
+    final stores = await _storeLocalRepository.getAll();
+    final categories = await _categoryLocalRepository.getAll();
+    emit(
+      state.copyWith(
+        recordCount: expenses.length + stores.length + categories.length,
+      ),
+    );
+  }
+
+  /// The destructive delete-all write (delete_all_records_rules.md): the
+  /// confirm dialog has already run by the time this is dispatched. Used to
+  /// be a UI-side `getIt<DeleteAllRecordsUseCase>().call()` fire-and-forget
+  /// call from `SettingsPage._onConfirmDeleteAll`, whose success toast fired
+  /// from a `.then(...)` chained at the dispatch site rather than from an
+  /// outcome listener, and whose failure was never surfaced at all.
+  Future<void> _onDeleteAll(
+    _DeleteAll event,
+    Emitter<SettingsState> emit,
+  ) async {
+    try {
+      await _deleteAllRecordsUseCase.call();
+      emit(state.copyWith(lastDeleteAllFailed: false));
+    } catch (_) {
+      emit(state.copyWith(lastDeleteAllFailed: true));
+    }
   }
 }

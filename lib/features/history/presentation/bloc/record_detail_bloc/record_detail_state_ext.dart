@@ -15,4 +15,8 @@ extension RecordDetailStateX on RecordDetailState {
   bool get isNotFound => status == ERecordDetailStatus.notFound;
 
   bool get isFailed => status == ERecordDetailStatus.failed;
+
+  /// The most recent `deleteRecord` write failed. A one-shot signal for a
+  /// `BlocListener` error toast.
+  bool get isDeleteFailed => lastDeleteFailed;
 }

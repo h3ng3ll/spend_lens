@@ -1020,6 +1020,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get tSaveFailed => 'Не вдалося зберегти чек. Спробуйте ще раз.';
 
   @override
+  String get tSaveFailedGeneric => 'Не вдалося зберегти. Спробуйте ще раз.';
+
+  @override
   String checkThis(String r, String q) {
     return 'Перевірте · прочитано як «$r» · $q';
   }

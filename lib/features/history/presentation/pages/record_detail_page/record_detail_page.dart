@@ -65,6 +65,20 @@ class _RecordDetailPageState extends State<RecordDetailPage> {
     UiMessageService.showInfo(lo.editComingSoon);
   }
 
+  bool _listenWhenNotFound(
+    RecordDetailState previous,
+    RecordDetailState current,
+  ) {
+    return !previous.isNotFound && current.isNotFound;
+  }
+
+  /// The record vanished from the watched stream — either this screen's own
+  /// delete action succeeded, or it was deleted elsewhere. Either way, the
+  /// detail page has nothing left to show and exits.
+  void _onNotFound(BuildContext context, RecordDetailState state) {
+    context.goBack();
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = AppColorScheme.of(context);
@@ -74,22 +88,26 @@ class _RecordDetailPageState extends State<RecordDetailPage> {
       backgroundColor: scheme.bg,
       body: BlocProvider<RecordDetailBloc>.value(
         value: _recordDetailBloc,
-        child: SafeArea(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              RecordDetailHeader(
-                typeLabel: lo.cashType,
-                editLabel: lo.edit,
-                onClose: _onClose,
-                onEdit: _onEdit,
-              ),
-              Expanded(
-                child: BlocBuilder<RecordDetailBloc, RecordDetailState>(
-                  builder: (context, state) => RecordDetailBody(state: state),
+        child: BlocListener<RecordDetailBloc, RecordDetailState>(
+          listenWhen: _listenWhenNotFound,
+          listener: _onNotFound,
+          child: SafeArea(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                RecordDetailHeader(
+                  typeLabel: lo.cashType,
+                  editLabel: lo.edit,
+                  onClose: _onClose,
+                  onEdit: _onEdit,
                 ),
-              ),
-            ],
+                Expanded(
+                  child: BlocBuilder<RecordDetailBloc, RecordDetailState>(
+                    builder: (context, state) => RecordDetailBody(state: state),
+                  ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

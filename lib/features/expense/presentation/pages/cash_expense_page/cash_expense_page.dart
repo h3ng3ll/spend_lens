@@ -15,9 +15,8 @@ import '../../../../category/domain/models/category/category.dart';
 import '../../../../category/presentation/bloc/categories_bloc/categories_bloc.dart';
 import '../../../../settings/presentation/bloc/settings_bloc/settings_bloc.dart';
 import '../../../../store/domain/repositories/i_store_local_repository.dart';
-import '../../../domain/models/expense/e_expense_source.dart';
-import '../../../domain/models/expense/expense.dart';
 import '../../../domain/repositories/i_expense_local_repository.dart';
+import '../../bloc/cash_expense_bloc/cash_expense_bloc.dart';
 import 'widgets/cash_amount_field.dart';
 import 'widgets/cash_category_row.dart';
 import 'widgets/cash_date_row.dart';
@@ -27,6 +26,17 @@ import 'widgets/cash_store_row.dart';
 /// `CashExpensePageRoute` (design_spendlens.md §5) — a top-level push above
 /// the shell for logging a cash expense (`EExpenseSource.cash`) with no
 /// receipt.
+///
+/// [CashExpenseBloc] is screen-scoped (`registerFactory` semantics: built
+/// here in `initState`, closed in `dispose` — BLoC rule A3.8). It replaces
+/// what used to be a bloc-free screen: `_onSave` built an [Expense] by hand
+/// and wrote it straight to `getIt<IExpenseLocalRepository>()`, and
+/// `_onPickStore` resolved the picked id via a direct
+/// `getIt<IStoreLocalRepository>().getById(...)` call — both BLoC-layer
+/// violations this build fixes. `category`/`currencyCode` stay sourced from
+/// the already-live app-lifetime `CategoriesBloc`/`SettingsBloc` (read here,
+/// forwarded into the save intent) rather than re-subscribed on the
+/// screen-scoped bloc.
 ///
 /// KEYBOARD-HIDES-FIELD GUARD (`db:keyboard-hides-text-field`): this is a
 /// full-screen route, not a bottom sheet, so the fix is the "screen fields
@@ -48,14 +58,18 @@ class _CashExpensePageState extends State<CashExpensePage> {
   final TextEditingController _amountController = TextEditingController();
   final TextEditingController _noteController = TextEditingController();
 
+  final CashExpenseBloc _cashExpenseBloc = CashExpenseBloc(
+    expenseLocalRepository: getIt<IExpenseLocalRepository>(),
+    storeLocalRepository: getIt<IStoreLocalRepository>(),
+  );
+
   Category? _category;
-  String? _storeId;
-  String? _storeName;
 
   @override
   void dispose() {
     _amountController.dispose();
     _noteController.dispose();
+    _cashExpenseBloc.close();
     super.dispose();
   }
 
@@ -101,24 +115,18 @@ class _CashExpensePageState extends State<CashExpensePage> {
   Future<void> _onPickStore(BuildContext context) async {
     final pickedId = await ChooseStorePageRoute().push<String>(context);
     if (pickedId == null || !context.mounted) return;
-
-    final store = await getIt<IStoreLocalRepository>().getById(pickedId);
-    if (store == null) return;
-
-    setState(() {
-      _storeId = store.id;
-      _storeName = store.name;
-    });
+    _cashExpenseBloc.add(CashExpenseEvent.pickStore(pickedId));
   }
 
-  void _onClearStore() {
-    setState(() {
-      _storeId = null;
-      _storeName = null;
-    });
-  }
+  void _onClearStore() =>
+      _cashExpenseBloc.add(const CashExpenseEvent.clearStore());
 
-  Future<void> _onSave(BuildContext context) async {
+  /// Dispatches the save intent only — `CashExpenseBloc` owns the write.
+  /// The `amount` validity check stays here because it drives an immediate
+  /// error toast on the RAW text field input, never a bloc round-trip (the
+  /// bloc's own `amount <= 0.0` guard is a defense-in-depth backstop, not
+  /// the primary validation path).
+  void _onSave(BuildContext context) {
     final lo = AppLocalizations.of(context);
     final amount = double.tryParse(_amountController.text);
 
@@ -129,87 +137,123 @@ class _CashExpensePageState extends State<CashExpensePage> {
 
     final categories = context.read<CategoriesBloc>().state.categories;
     final category = _defaultCategory(categories);
-    final currencyCode = context.read<SettingsBloc>().state.settings.currencyCode;
-    final now = DateTime.now();
+    final currencyCode = context
+        .read<SettingsBloc>()
+        .state
+        .settings
+        .currencyCode;
 
-    final expense = Expense(
-      id: now.microsecondsSinceEpoch.toString(),
-      amount: amount,
-      currencyCode: currencyCode,
-      categoryId: category.id,
-      storeId: _storeId,
-      note: _noteController.text.isEmpty ? null : _noteController.text,
-      occurredAt: now,
-      source: EExpenseSource.cash,
-      updatedAt: now,
+    _cashExpenseBloc.add(
+      CashExpenseEvent.save(
+        amount: amount,
+        categoryId: category.id,
+        currencyCode: currencyCode,
+        note: _noteController.text,
+      ),
     );
+  }
 
-    await getIt<IExpenseLocalRepository>().save(expense);
-    if (!context.mounted) return;
+  bool _listenWhenSaved(CashExpenseState previous, CashExpenseState current) {
+    return !previous.isSaved && current.isSaved;
+  }
 
+  void _onSaved(BuildContext context, CashExpenseState state) {
+    final lo = AppLocalizations.of(context);
     UiMessageService.showSuccess(lo.tCashAdded(_amountController.text));
     context.pop();
   }
+
+  bool _listenWhenFailed(CashExpenseState previous, CashExpenseState current) {
+    return !previous.isFailed && current.isFailed;
+  }
+
+  void _onFailed(BuildContext context, CashExpenseState state) =>
+      UiMessageService.showError(
+        AppLocalizations.of(context).tSaveFailedGeneric,
+      );
 
   @override
   Widget build(BuildContext context) {
     final scheme = AppColorScheme.of(context);
     final lo = AppLocalizations.of(context);
-    final currencyCode = context.watch<SettingsBloc>().state.settings.currencyCode;
+    final currencyCode = context
+        .watch<SettingsBloc>()
+        .state
+        .settings
+        .currencyCode;
     final categories = context.watch<CategoriesBloc>().state.categories;
     final category = _defaultCategory(categories);
 
-    return Scaffold(
-      backgroundColor: scheme.bg,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 24.0),
-          child: HorizontalPadding(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 18.0,
-              children: [
-                SheetCloseHeader(
-                  title: lo.cashExpense,
-                  onClose: () => _onClose(context),
-                ),
-                LabeledField(
-                  label: lo.amount,
-                  child: CashAmountField(
-                    controller: _amountController,
-                    currencyCode: currencyCode,
-                  ),
-                ),
-                LabeledField(
-                  label: lo.category,
-                  child: CashCategoryRow(
-                    category: category,
-                    onTap: () => _onPickCategory(context),
-                  ),
-                ),
-                LabeledField(
-                  label: lo.note,
-                  child: CashNoteField(controller: _noteController),
-                ),
-                LabeledField(
-                  label: '${lo.store} · ${lo.optional}',
-                  child: CashStoreRow(
-                    storeName: _storeName,
-                    noStoreLabel: lo.noStore,
-                    onTap: () => _onPickStore(context),
-                    onClear: _onClearStore,
-                  ),
-                ),
-                const CashDateRow(),
-                GradientCtaButton(
-                  label: lo.save,
-                  enabled: true,
-                  onTap: () => _onSave(context),
-                ),
-              ],
-            ),
+    return BlocProvider<CashExpenseBloc>.value(
+      value: _cashExpenseBloc,
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<CashExpenseBloc, CashExpenseState>(
+            listenWhen: _listenWhenSaved,
+            listener: _onSaved,
           ),
+          BlocListener<CashExpenseBloc, CashExpenseState>(
+            listenWhen: _listenWhenFailed,
+            listener: _onFailed,
+          ),
+        ],
+        child: BlocBuilder<CashExpenseBloc, CashExpenseState>(
+          builder: (context, state) {
+            return Scaffold(
+              backgroundColor: scheme.bg,
+              body: SafeArea(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(vertical: 24.0),
+                  child: HorizontalPadding(
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      spacing: 18.0,
+                      children: [
+                        SheetCloseHeader(
+                          title: lo.cashExpense,
+                          onClose: () => _onClose(context),
+                        ),
+                        LabeledField(
+                          label: lo.amount,
+                          child: CashAmountField(
+                            controller: _amountController,
+                            currencyCode: currencyCode,
+                          ),
+                        ),
+                        LabeledField(
+                          label: lo.category,
+                          child: CashCategoryRow(
+                            category: category,
+                            onTap: () => _onPickCategory(context),
+                          ),
+                        ),
+                        LabeledField(
+                          label: lo.note,
+                          child: CashNoteField(controller: _noteController),
+                        ),
+                        LabeledField(
+                          label: '${lo.store} · ${lo.optional}',
+                          child: CashStoreRow(
+                            storeName: state.storeName,
+                            noStoreLabel: lo.noStore,
+                            onTap: () => _onPickStore(context),
+                            onClear: _onClearStore,
+                          ),
+                        ),
+                        const CashDateRow(),
+                        GradientCtaButton(
+                          label: lo.save,
+                          enabled: true,
+                          onTap: () => _onSave(context),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
         ),
       ),
     );

@@ -1021,6 +1021,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get tSaveFailed => 'Impossible d\'enregistrer le ticket. Réessayez.';
 
   @override
+  String get tSaveFailedGeneric => 'Impossible d\'enregistrer. Réessayez.';
+
+  @override
   String checkThis(String r, String q) {
     return 'À vérifier · lu comme « $r » · $q';
   }

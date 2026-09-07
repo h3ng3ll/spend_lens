@@ -1020,6 +1020,10 @@ class AppLocalizationsDe extends AppLocalizations {
       'Der Beleg konnte nicht gespeichert werden. Bitte versuche es erneut.';
 
   @override
+  String get tSaveFailedGeneric =>
+      'Speichern fehlgeschlagen. Bitte versuche es erneut.';
+
+  @override
   String checkThis(String r, String q) {
     return 'Prüfen · gelesen als „$r“ · $q';
   }

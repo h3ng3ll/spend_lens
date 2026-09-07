@@ -1015,6 +1015,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get tSaveFailed => 'Couldn\'t save the receipt. Please try again.';
 
   @override
+  String get tSaveFailedGeneric => 'Couldn\'t save. Please try again.';
+
+  @override
   String checkThis(String r, String q) {
     return 'Check this · read as \"$r\" · $q';
   }

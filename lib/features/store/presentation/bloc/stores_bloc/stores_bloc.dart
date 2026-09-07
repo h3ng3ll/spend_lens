@@ -1,6 +1,7 @@
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../domain/models/store/e_store_type.dart';
 import '../../../domain/models/store/store.dart';
 import '../../../domain/repositories/i_store_local_repository.dart';
 
@@ -20,12 +21,24 @@ part 'stores_bloc.freezed.dart';
 /// [IStoreLocalRepository.watchAll] via `emit.forEach` — a store created via
 /// "New store", or resolved automatically by the receipt parser (M8), is
 /// reflected here without a re-dispatch.
+///
+/// Also owns every store WRITE (quick-create, full create, delete) — these
+/// used to be direct `getIt<IStoreLocalRepository>()` calls from
+/// `ChooseStorePage`/`NewStorePage`/`StoreDeleteSection`, a BLoC-layer
+/// violation. The write path emits [lastCreatedId] once, for a
+/// `BlocListener` to pop the picker/create screen with — and
+/// [lastWriteFailed] on any write exception, read by an error-toast
+/// listener.
 class StoresBloc extends Bloc<StoresEvent, StoresState> {
   final IStoreLocalRepository _storeLocalRepository;
+  final DateTime Function() _now;
 
-  StoresBloc({required this._storeLocalRepository})
+  StoresBloc({required this._storeLocalRepository, this._now = DateTime.now})
     : super(const StoresState()) {
     on<_Watch>(_onWatch);
+    on<_QuickCreate>(_onQuickCreate);
+    on<_Create>(_onCreate);
+    on<_Delete>(_onDelete);
   }
 
   Future<void> _onWatch(_Watch event, Emitter<StoresState> emit) async {
@@ -40,5 +53,57 @@ class StoresBloc extends Bloc<StoresEvent, StoresState> {
         errorMessage: error.toString(),
       ),
     );
+  }
+
+  Future<void> _onQuickCreate(
+    _QuickCreate event,
+    Emitter<StoresState> emit,
+  ) async {
+    final trimmed = event.name.trim();
+    if (trimmed.isEmpty) return;
+
+    try {
+      final now = _now();
+      final store = Store(
+        id: now.microsecondsSinceEpoch.toString(),
+        name: trimmed,
+        type: EStoreType.other,
+        updatedAt: now,
+      );
+      await _storeLocalRepository.save(store);
+      emit(state.copyWith(lastCreatedId: store.id, lastWriteFailed: false));
+    } catch (_) {
+      emit(state.copyWith(lastWriteFailed: true));
+    }
+  }
+
+  Future<void> _onCreate(_Create event, Emitter<StoresState> emit) async {
+    final trimmedName = event.name.trim();
+    if (trimmedName.isEmpty) return;
+
+    try {
+      final trimmedAlias = event.receiptAlias.trim();
+      final now = _now();
+      final store = Store(
+        id: now.microsecondsSinceEpoch.toString(),
+        name: trimmedName,
+        receiptAliases: trimmedAlias.isEmpty ? const [] : [trimmedAlias],
+        type: event.type,
+        updatedAt: now,
+      );
+      await _storeLocalRepository.save(store);
+      emit(state.copyWith(lastCreatedId: store.id, lastWriteFailed: false));
+    } catch (_) {
+      emit(state.copyWith(lastWriteFailed: true));
+    }
+  }
+
+  Future<void> _onDelete(_Delete event, Emitter<StoresState> emit) async {
+    try {
+      await _storeLocalRepository.delete(event.storeId);
+      emit(state.copyWith(lastWriteFailed: false));
+    } catch (_) {
+      emit(state.copyWith(lastWriteFailed: true));
+    }
   }
 }

@@ -10,19 +10,25 @@ import 'core/resources/app_locale.dart';
 import 'core/resources/app_theme.dart';
 import 'core/resources/localization/gen/app_localizations.dart';
 import 'core/routes/init_router/init_router.dart';
+import 'core/services/subscription/apphud_subscription_repository.dart';
+import 'core/services/subscription/i_subscription_repository.dart';
 import 'core/services/ui_message_service.dart';
+import 'core/utils/env/env.dart';
 import 'features/analytics/di/analytics_injection.dart';
 import 'features/auth/di/auth_injection.dart';
 import 'features/auth/presentation/bloc/auth_bloc/auth_bloc.dart';
+import 'features/backup/di/backup_injection.dart';
 import 'features/category/di/category_injection.dart';
 import 'features/category/domain/repositories/i_category_local_repository.dart';
 import 'features/category/domain/use_cases/seed_categories_use_case.dart';
 import 'features/category/presentation/bloc/categories_bloc/categories_bloc.dart';
 import 'features/expense/di/expense_injection.dart';
+import 'features/expense/domain/repositories/i_expense_local_repository.dart';
 import 'features/product/di/product_injection.dart';
 import 'features/receipt/di/receipt_injection.dart';
 import 'features/scanner/di/scanner_injection.dart';
 import 'features/settings/di/settings_injection.dart';
+import 'features/settings/domain/use_cases/delete_all_records_use_case.dart';
 import 'features/settings/domain/use_cases/save_settings_use_case.dart';
 import 'features/settings/domain/use_cases/watch_settings_use_case.dart';
 import 'features/settings/presentation/bloc/settings_bloc/settings_bloc.dart';
@@ -62,6 +68,7 @@ void main() async {
   initExpenseFeature();
   initAnalyticsFeature();
   initScannerFeature();
+  initBackupFeature();
 
   // First-launch category seed (design_spendlens.md §7). THE GUARD IS
   // isEmpty && !dataCleared — never isEmpty alone, or a store the user
@@ -75,13 +82,24 @@ void main() async {
     dataCleared: initialSettings.dataCleared,
   );
 
-  // M4: the app-lifetime blocs (design_spendlens.md §5).
-  initAuthFeature();
+  // M9: the app-lifetime auth bloc (design_spendlens.md §5/§9). Firebase
+  // init failure is caught INSIDE initAuthFeature() — this never throws.
+  await initAuthFeature();
+
+  // M9: Apphud subscription check (design_spendlens.md §6/§9). An empty
+  // API key is a disabled feature — `init()` never throws.
+  final subscriptionRepository =
+      getIt<ISubscriptionRepository>() as ApphudSubscriptionRepository;
+  await subscriptionRepository.init(getIt<Env>());
 
   final settingsBloc = SettingsBloc(
     initialSettings: initialSettings,
     watchSettingsUseCase: getIt<WatchSettingsUseCase>(),
     saveSettingsUseCase: getIt<SaveSettingsUseCase>(),
+    deleteAllRecordsUseCase: getIt<DeleteAllRecordsUseCase>(),
+    expenseLocalRepository: getIt<IExpenseLocalRepository>(),
+    storeLocalRepository: getIt<IStoreLocalRepository>(),
+    categoryLocalRepository: getIt<ICategoryLocalRepository>(),
   )..add(const SettingsEvent.watch());
   getIt.registerLazySingleton<SettingsBloc>(() => settingsBloc);
 
@@ -95,7 +113,7 @@ void main() async {
   )..add(const StoresEvent.watch());
   getIt.registerLazySingleton<StoresBloc>(() => storesBloc);
 
-  final authBloc = getIt<AuthBloc>();
+  final authBloc = getIt<AuthBloc>()..add(const AuthEvent.watch());
 
   Bloc.observer = AppObserver.instance();
 

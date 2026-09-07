@@ -11,10 +11,8 @@ import '../../../../../../core/widgets/app_section_card.dart';
 import '../../../../../../core/widgets/app_svg_icon.dart';
 
 /// Profile artboard's "Keep your data safe" card — shown only when NOT
-/// signed in. Both sign-in buttons are wired to an info toast: real
-/// Google/Apple sign-in is M9 (design_spendlens.md §9/§10 — sign-in wiring
-/// with the template bugs fixed lands later), so this screen must not
-/// invent a working sign-in flow.
+/// signed in. Both buttons dispatch the real Google/Apple sign-in events
+/// (M9, design_spendlens.md §9 — template bugs 1–5 fixed).
 class KeepDataSafeCard extends StatelessWidget {
   final String deviceNoun;
   final VoidCallback onGoogle;
@@ -27,7 +25,7 @@ class KeepDataSafeCard extends StatelessWidget {
     required this.onApple,
   });
 
-  static const double _buttonHeight = 52.0;
+  static const double _buttonMinHeight = 52.0;
 
   @override
   Widget build(BuildContext context) {
@@ -53,60 +51,66 @@ class KeepDataSafeCard extends StatelessWidget {
           GestureDetector(
             onTap: onGoogle,
             behavior: HitTestBehavior.opaque,
-            child: AppContainer(
-              height: _buttonHeight,
-              color: AppColors.white.value,
-              border: Border.all(
-                color: AppColors.inkLight.value.withValues(alpha: 0.12),
-              ),
-              borderRadius: BorderRadius.circular(14.0),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 10.0,
-                children: [
-                  SvgPicture.asset(
-                    AppIcons.googleLogo,
-                    width: 18.0,
-                    height: 18.0,
-                  ),
-                  Text(
-                    lo.continueGoogle,
-                    style: textTheme.body17.copyWith(
-                      color: AppColors.inkLight.value,
-                      fontWeight: FontWeight.w600,
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: _buttonMinHeight),
+              child: AppContainer(
+                color: AppColors.white.value,
+                border: Border.all(
+                  color: AppColors.inkLight.value.withValues(alpha: 0.12),
+                ),
+                borderRadius: BorderRadius.circular(14.0),
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 10.0,
+                  children: [
+                    SvgPicture.asset(
+                      AppIcons.googleLogo,
+                      width: 18.0,
+                      height: 18.0,
                     ),
-                  ),
-                ],
+                    Text(
+                      lo.continueGoogle,
+                      style: textTheme.body17.copyWith(
+                        color: AppColors.inkLight.value,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
           GestureDetector(
             onTap: onApple,
             behavior: HitTestBehavior.opaque,
-            child: AppContainer(
-              height: _buttonHeight,
-              color: scheme.field,
-              border: Border.all(color: scheme.line2),
-              borderRadius: BorderRadius.circular(14.0),
-              alignment: Alignment.center,
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                spacing: 10.0,
-                children: [
-                  AppSvgIcon(
-                    asset: AppIcons.appleLogo,
-                    color: scheme.ink,
-                    size: 18.0,
-                  ),
-                  Text(
-                    lo.continueApple,
-                    style: textTheme.body17.copyWith(
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(minHeight: _buttonMinHeight),
+              child: AppContainer(
+                color: scheme.field,
+                border: Border.all(color: scheme.line2),
+                borderRadius: BorderRadius.circular(14.0),
+                alignment: Alignment.center,
+                padding: const EdgeInsets.symmetric(vertical: 8.0),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  spacing: 10.0,
+                  children: [
+                    AppSvgIcon(
+                      asset: AppIcons.appleLogo,
                       color: scheme.ink,
-                      fontWeight: FontWeight.w600,
+                      size: 18.0,
                     ),
-                  ),
-                ],
+                    Text(
+                      lo.continueApple,
+                      style: textTheme.body17.copyWith(
+                        color: scheme.ink,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),

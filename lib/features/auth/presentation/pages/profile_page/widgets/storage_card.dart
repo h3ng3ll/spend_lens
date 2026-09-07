@@ -3,15 +3,29 @@ import 'package:flutter/material.dart';
 import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../../core/resources/text/app_text_theme.dart';
+import '../../../../../../core/utils/app_limits.dart';
 import '../../../../../../core/widgets/app_section_card.dart';
 
-/// Profile artboard's Storage card. M5 has no real sign-in (M9), so the
-/// premium storage bar/toggle branch (`sc-if signedIn`) never renders here —
-/// only the local, unlimited-storage copy.
+/// Profile artboard's Storage card (`sc-if signedIn` branch,
+/// `SpendLens Prototype.dc.html`). Signed-out shows the local/unlimited
+/// copy; signed-in shows the free-tier cloud quota, sourced from
+/// [AppLimits] — never a hardcoded "100 MB" (design_spendlens.md §6/§9).
+///
+/// This app has no image-upload backend (Firebase here is Crashlytics +
+/// auth only — design_spendlens.md §1 Step 2), so there is no real "bytes
+/// used" figure to report; the design's `togglePremium`/`usedBarStyle`
+/// simulation is the explicitly-excluded prototype debug control
+/// (design_spendlens.md's "Deliberately not built" list) and is not
+/// reproduced here.
 class StorageCard extends StatelessWidget {
   final String deviceNoun;
+  final bool isSignedIn;
 
-  const StorageCard({super.key, required this.deviceNoun});
+  const StorageCard({
+    super.key,
+    required this.deviceNoun,
+    required this.isSignedIn,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -30,11 +44,11 @@ class StorageCard extends StatelessWidget {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                lo.storage,
+                isSignedIn ? lo.cloudStorage : lo.storage,
                 style: textTheme.subhead15.copyWith(color: scheme.ink),
               ),
               Text(
-                lo.unlimited,
+                isSignedIn ? AppLimits.freeCloudQuotaLabel : lo.unlimited,
                 style: textTheme.subhead15.copyWith(
                   color: scheme.sec,
                   fontFeatures: const [FontFeature.tabularFigures()],
@@ -43,7 +57,9 @@ class StorageCard extends StatelessWidget {
             ],
           ),
           Text(
-            lo.limitLocal(deviceNoun),
+            isSignedIn
+                ? lo.limitFree(AppLimits.freeCloudQuotaLabel)
+                : lo.limitLocal(deviceNoun),
             style: textTheme.footnote13.copyWith(color: scheme.ter),
           ),
         ],

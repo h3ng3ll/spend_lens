@@ -48,12 +48,10 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
     required this._storeLocalRepository,
   }) : super(const RecordDetailState()) {
     on<_Watch>(_onWatch);
+    on<_DeleteRecord>(_onDeleteRecord);
   }
 
-  Future<void> _onWatch(
-    _Watch event,
-    Emitter<RecordDetailState> emit,
-  ) async {
+  Future<void> _onWatch(_Watch event, Emitter<RecordDetailState> emit) async {
     emit(state.copyWith(status: ERecordDetailStatus.loading));
 
     await emit.forEach<RecordDetailSnapshot>(
@@ -85,5 +83,25 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
       if (expense.id == id) return expense;
     }
     return null;
+  }
+
+  /// Deletes [recordId] (`RecordDetailDeleteButton`'s delete action — used
+  /// to call `getIt<IExpenseLocalRepository>().delete(recordId)` directly
+  /// from the UI, fire-and-forget, a BLoC-layer violation). SUCCESS is not
+  /// signalled here: once the write lands, the reactive `_onWatch` stream
+  /// above already sees the record vanish and flips to `notFound`, which
+  /// `RecordDetailPage`'s `BlocListener` turns into the exit navigation.
+  /// This handler only surfaces a write FAILURE, via
+  /// [RecordDetailState.lastDeleteFailed].
+  Future<void> _onDeleteRecord(
+    _DeleteRecord event,
+    Emitter<RecordDetailState> emit,
+  ) async {
+    try {
+      await _expenseLocalRepository.delete(event.recordId);
+      emit(state.copyWith(lastDeleteFailed: false));
+    } catch (_) {
+      emit(state.copyWith(lastDeleteFailed: true));
+    }
   }
 }

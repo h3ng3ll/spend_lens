@@ -1021,6 +1021,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get tSaveFailed => 'No se pudo guardar el recibo. Inténtalo de nuevo.';
 
   @override
+  String get tSaveFailedGeneric => 'No se pudo guardar. Inténtalo de nuevo.';
+
+  @override
   String checkThis(String r, String q) {
     return 'Revisa · leído como \"$r\" · $q';
   }

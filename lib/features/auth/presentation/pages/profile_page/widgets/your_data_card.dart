@@ -6,9 +6,8 @@ import '../../../../../../core/widgets/app_section_card.dart';
 import '../../../../../../core/widgets/settings_row.dart';
 
 /// Profile artboard's "Your data" card — Export backup / Export spreadsheet
-/// / Import backup. Real export/import is `features/backup/`, explicitly
-/// M9 (design_spendlens.md's milestone table), so every row here shows an
-/// info toast rather than performing a real export.
+/// / Import backup, wired to the real `features/backup/` use cases (M9,
+/// design_spendlens.md §6/§9).
 class YourDataCard extends StatelessWidget {
   final VoidCallback onExportBackup;
   final VoidCallback onExportSheet;

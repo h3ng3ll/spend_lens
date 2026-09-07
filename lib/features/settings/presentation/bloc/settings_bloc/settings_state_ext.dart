@@ -9,6 +9,10 @@ extension SettingsStateX on SettingsState {
 
   bool get isFailed => status == ESettingsStatus.failed;
 
+  /// The most recent `deleteAll` write failed. A one-shot signal for a
+  /// `BlocListener` error toast.
+  bool get isDeleteAllFailed => lastDeleteAllFailed;
+
   /// The effective [Locale] to pass to `MaterialApp.locale`. `null` when the
   /// user has not chosen one — `MaterialApp` then resolves from the device,
   /// which is the desired "follow device" behavior (never defaulted to a

@@ -9,4 +9,8 @@ extension StoresStateX on StoresState {
   bool get isLoaded => status == EStoresStatus.loaded;
 
   bool get isFailed => status == EStoresStatus.failed;
+
+  /// The most recent quickCreate/create/delete write failed. A one-shot
+  /// signal for a `BlocListener` error toast.
+  bool get isWriteFailed => lastWriteFailed;
 }

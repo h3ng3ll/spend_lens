@@ -10,10 +10,6 @@ import '../../../../../core/services/scan_capability/e_scan_capability.dart';
 import '../../../../../core/services/scan_capability/i_scan_capability_service.dart';
 import '../../../../../core/services/ui_message_service.dart';
 import '../../../../../core/widgets/confirm_dialog.dart';
-import '../../../../category/domain/repositories/i_category_local_repository.dart';
-import '../../../../expense/domain/repositories/i_expense_local_repository.dart';
-import '../../../../store/domain/repositories/i_store_local_repository.dart';
-import '../../../domain/use_cases/delete_all_records_use_case.dart';
 import '../../bloc/settings_bloc/settings_bloc.dart';
 import '../../sheets/currency_sheet/currency_sheet.dart';
 import '../../sheets/language_sheet/language_sheet.dart';
@@ -45,7 +41,8 @@ class SettingsPage extends StatefulWidget {
 /// grants/revokes camera access from OS Settings after tapping "Open
 /// Settings"), so the row must re-read on resume rather than caching the
 /// value for the page's lifetime.
-class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver {
+class _SettingsPageState extends State<SettingsPage>
+    with WidgetsBindingObserver {
   static const Map<String, String> _languageLabels = {
     'en': 'English',
     'ro': 'Română',
@@ -100,32 +97,30 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
 
   void _onAbout(BuildContext context) => AboutPageRoute().push(context);
 
-  /// Sums the current record count across the datasets `DeleteAllRecordsUseCase`
-  /// clears, for the confirm dialog's `{n}` — a one-shot read feeding a
-  /// dialog's copy, not displayed bloc state, so `getAll()` here is not a
-  /// hive_rules.md §9 violation (that rule governs reactive screen state).
-  Future<int> _recordCount() async {
-    final expenses = await getIt<IExpenseLocalRepository>().getAll();
-    final stores = await getIt<IStoreLocalRepository>().getAll();
-    final categories = await getIt<ICategoryLocalRepository>().getAll();
-    return expenses.length + stores.length + categories.length;
-  }
+  /// `ConfirmDialog.onConfirm` is a plain `VoidCallback` (it must stay a
+  /// pure, synchronous business action per its own doc comment — see
+  /// `confirm_dialog.dart`), so this only dispatches the delete-all intent
+  /// — `SettingsBloc` owns the write, and the success/failure toasts live
+  /// in the `BlocListener`s below, never at the dispatch site.
+  void _onConfirmDeleteAll(BuildContext context) =>
+      context.read<SettingsBloc>().add(const SettingsEvent.deleteAll());
 
-  /// `ConfirmDialog.onConfirm` is a plain `VoidCallback` (it must stay a pure,
-  /// synchronous business action per its own doc comment — see
-  /// `confirm_dialog.dart`), so the success toast is chained with `.then(...)`
-  /// rather than awaited inline; `successMessage` is captured by the caller's
-  /// closure, so no mutable field is needed to carry it across the dialog's
-  /// lifetime.
-  void _onConfirmDeleteAll(String successMessage) {
-    getIt<DeleteAllRecordsUseCase>().call().then(
-      (_) => UiMessageService.showSuccess(successMessage),
+  /// Dispatches `loadRecordCount` and awaits the resolved count via the
+  /// bloc's own stream — `SettingsBloc` now owns the three-repository read
+  /// that used to be a UI-side `_recordCount()` method calling
+  /// `getIt<...Repository>().getAll()` directly.
+  Future<int> _recordCount(BuildContext context) async {
+    final bloc = context.read<SettingsBloc>();
+    bloc.add(const SettingsEvent.loadRecordCount());
+    final state = await bloc.stream.firstWhere(
+      (state) => state.recordCount != null,
     );
+    return state.recordCount!;
   }
 
   Future<void> _onDeleteAll(BuildContext context) async {
     final lo = AppLocalizations.of(context);
-    final n = await _recordCount();
+    final n = await _recordCount(context);
     if (!context.mounted) return;
 
     await ConfirmDialog.show(
@@ -134,54 +129,89 @@ class _SettingsPageState extends State<SettingsPage> with WidgetsBindingObserver
       body: lo.deleteAllBody(n, lo.thisDevice),
       confirmLabel: lo.deleteAllConfirm,
       cancelLabel: lo.cancel,
-      onConfirm: () => _onConfirmDeleteAll(lo.tDeletedAll),
+      onConfirm: () => _onConfirmDeleteAll(context),
     );
   }
+
+  bool _listenWhenDeleteAllFailed(
+    SettingsState previous,
+    SettingsState current,
+  ) {
+    return !previous.isDeleteAllFailed && current.isDeleteAllFailed;
+  }
+
+  void _onDeleteAllFailed(BuildContext context, SettingsState state) =>
+      UiMessageService.showError(
+        AppLocalizations.of(context).tSaveFailedGeneric,
+      );
+
+  bool _listenWhenDataCleared(SettingsState previous, SettingsState current) {
+    return !previous.settings.dataCleared && current.settings.dataCleared;
+  }
+
+  void _onDataCleared(BuildContext context, SettingsState state) =>
+      UiMessageService.showSuccess(AppLocalizations.of(context).tDeletedAll);
 
   @override
   Widget build(BuildContext context) {
     final scheme = AppColorScheme.of(context);
     final lo = AppLocalizations.of(context);
 
-    return Scaffold(
-      backgroundColor: scheme.bg,
-      body: SafeArea(
-        bottom: false,
-        child: BlocBuilder<SettingsBloc, SettingsState>(
-          builder: (context, state) => FutureBuilder<PackageInfo>(
-            future: PackageInfo.fromPlatform(),
-            builder: (context, packageSnapshot) {
-              final version = packageSnapshot.data?.version ?? '1.0';
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<SettingsBloc, SettingsState>(
+          listenWhen: _listenWhenDeleteAllFailed,
+          listener: _onDeleteAllFailed,
+        ),
+        // Success is read off the REACTIVE settings stream
+        // (`dataCleared` flipping true), not a `.then(...)` chained at the
+        // dispatch site — the write is confirmed landed, never assumed.
+        BlocListener<SettingsBloc, SettingsState>(
+          listenWhen: _listenWhenDataCleared,
+          listener: _onDataCleared,
+        ),
+      ],
+      child: Scaffold(
+        backgroundColor: scheme.bg,
+        body: SafeArea(
+          bottom: false,
+          child: BlocBuilder<SettingsBloc, SettingsState>(
+            builder: (context, state) => FutureBuilder<PackageInfo>(
+              future: PackageInfo.fromPlatform(),
+              builder: (context, packageSnapshot) {
+                final version = packageSnapshot.data?.version ?? '1.0';
 
-              return FutureBuilder<EScanCapability>(
-                future: _scanCapability,
-                builder: (context, capabilitySnapshot) {
-                  // No `??` fallback: a pending probe stays null so the row
-                  // shows "checking", not a fabricated concrete cause.
-                  final capability = capabilitySnapshot.data;
+                return FutureBuilder<EScanCapability>(
+                  future: _scanCapability,
+                  builder: (context, capabilitySnapshot) {
+                    // No `??` fallback: a pending probe stays null so the
+                    // row shows "checking", not a fabricated concrete
+                    // cause.
+                    final capability = capabilitySnapshot.data;
 
-                  return SettingsBody(
-                    state: state,
-                    languageLabel: state.settings.localeCode == null
-                        ? lo.language
-                        : (_languageLabels[state.settings.localeCode] ??
-                              state.settings.localeCode!),
-                    currencyLabel: state.settings.currencyCode,
-                    versionLabel: version,
-                    onProfile: () => _onProfile(context),
-                    onCurrency: () => _onCurrency(context),
-                    onCategories: () => _onCategories(context),
-                    onLanguage: () => _onLanguage(context),
-                    onToggleTheme: () => _onToggleTheme(context),
-                    onDeleteAll: () => _onDeleteAll(context),
-                    onPrivacy: () => _onPrivacy(context),
-                    onAbout: () => _onAbout(context),
-                    scanCapability: capability,
-                    onOpenScanSettings: _onOpenScanSettings,
-                  );
-                },
-              );
-            },
+                    return SettingsBody(
+                      state: state,
+                      languageLabel: state.settings.localeCode == null
+                          ? lo.language
+                          : (_languageLabels[state.settings.localeCode] ??
+                                state.settings.localeCode!),
+                      currencyLabel: state.settings.currencyCode,
+                      versionLabel: version,
+                      onProfile: () => _onProfile(context),
+                      onCurrency: () => _onCurrency(context),
+                      onCategories: () => _onCategories(context),
+                      onLanguage: () => _onLanguage(context),
+                      onToggleTheme: () => _onToggleTheme(context),
+                      onDeleteAll: () => _onDeleteAll(context),
+                      onPrivacy: () => _onPrivacy(context),
+                      onAbout: () => _onAbout(context),
+                      scanCapability: capability,
+                      onOpenScanSettings: _onOpenScanSettings,
+                    );
+                  },
+                );
+              },
+            ),
           ),
         ),
       ),

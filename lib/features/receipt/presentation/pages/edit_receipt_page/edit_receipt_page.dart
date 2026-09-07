@@ -7,6 +7,7 @@ import '../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/resources/text/app_text_theme.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
+import '../../../../../core/services/ui_message_service.dart';
 import '../../../../../core/widgets/app_container.dart';
 import '../../../../../core/widgets/gradient_cta_button.dart';
 import '../../../../../core/widgets/padding/horizontal_padding.dart';
@@ -41,6 +42,7 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
     receiptRepository: getIt<IReceiptLocalRepository>(),
     receiptItemRepository: getIt<IReceiptItemLocalRepository>(),
     productRepository: getIt<IProductLocalRepository>(),
+    storeRepository: getIt<IStoreLocalRepository>(),
   )..add(EditReceiptEvent.load(widget.receiptId));
 
   final Map<String, TextEditingController> _nameControllers = {};
@@ -91,9 +93,7 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
   Future<void> _onPickStore(BuildContext context) async {
     final pickedId = await ChooseStorePageRoute().push<String>(context);
     if (pickedId == null || !context.mounted) return;
-    final store = await getIt<IStoreLocalRepository>().getById(pickedId);
-    if (store == null) return;
-    _bloc.add(EditReceiptEvent.setStore(store.id, store.name));
+    _bloc.add(EditReceiptEvent.pickStore(pickedId));
   }
 
   void _onRemoveItem(String itemId) {
@@ -137,6 +137,16 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
             listenWhen: (previous, current) =>
                 !previous.isReady && current.isReady,
             listener: (context, state) => _onReadyForTheFirstTime(state),
+          ),
+          // A save that fails was previously silent — this is the same
+          // class of defect fixed on Review (`isFailed` reachable but
+          // nothing read it).
+          BlocListener<EditReceiptBloc, EditReceiptState>(
+            listenWhen: (previous, current) =>
+                !previous.isFailed && current.isFailed,
+            listener: (context, state) => UiMessageService.showError(
+              AppLocalizations.of(context).tSaveFailedGeneric,
+            ),
           ),
         ],
         child: _EditReceiptScaffold(
@@ -219,7 +229,10 @@ class _EditReceiptScaffold extends StatelessWidget {
     // deferred) — this widget only ever READS `state`/`printedTotalController`.
 
     if (!state.isReady && !state.isSaved) {
-      return Scaffold(backgroundColor: scheme.bg, body: const SizedBox.shrink());
+      return Scaffold(
+        backgroundColor: scheme.bg,
+        body: const SizedBox.shrink(),
+      );
     }
 
     return Scaffold(
@@ -367,12 +380,9 @@ class _EditReceiptScaffold extends StatelessWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 12.0,
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 12.0),
                             child: Row(
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   lo.itemsLabel,
@@ -419,14 +429,11 @@ class _EditReceiptScaffold extends StatelessWidget {
                                   onItemPriceChanged(item.id, value),
                             ),
                           Padding(
-                            padding: const EdgeInsets.symmetric(
-                              vertical: 14.0,
-                            ),
+                            padding: const EdgeInsets.symmetric(vertical: 14.0),
                             child: Row(
                               crossAxisAlignment: CrossAxisAlignment.baseline,
                               textBaseline: TextBaseline.alphabetic,
-                              mainAxisAlignment:
-                                  MainAxisAlignment.spaceBetween,
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
                               children: [
                                 Text(
                                   lo.itemsTotal,
@@ -473,9 +480,7 @@ class _EditReceiptScaffold extends StatelessWidget {
                             // height-ignores-textScaleFactor — this box
                             // hosts an editable text field, so MIN-HEIGHT
                             // only.
-                            constraints: const BoxConstraints(
-                              minHeight: 56.0,
-                            ),
+                            constraints: const BoxConstraints(minHeight: 56.0),
                             child: AppContainer(
                               color: scheme.field,
                               borderRadius: BorderRadius.circular(14.0),
@@ -488,23 +493,23 @@ class _EditReceiptScaffold extends StatelessWidget {
                                 children: [
                                   Expanded(
                                     child: TextField(
-                                    controller: printedTotalController,
-                                    keyboardType:
-                                        const TextInputType.numberWithOptions(
-                                          decimal: true,
-                                        ),
-                                    style: textTheme.screenTitle28.copyWith(
-                                      color: scheme.ink,
-                                      fontFeatures: const [
-                                        FontFeature.tabularFigures(),
-                                      ],
+                                      controller: printedTotalController,
+                                      keyboardType:
+                                          const TextInputType.numberWithOptions(
+                                            decimal: true,
+                                          ),
+                                      style: textTheme.screenTitle28.copyWith(
+                                        color: scheme.ink,
+                                        fontFeatures: const [
+                                          FontFeature.tabularFigures(),
+                                        ],
+                                      ),
+                                      decoration: const InputDecoration(
+                                        border: InputBorder.none,
+                                      ),
+                                      onChanged: onPrintedTotalChanged,
                                     ),
-                                    decoration: const InputDecoration(
-                                      border: InputBorder.none,
-                                    ),
-                                    onChanged: onPrintedTotalChanged,
                                   ),
-                                ),
                                   Text(
                                     'MDL',
                                     style: textTheme.subhead15.copyWith(

@@ -28,6 +28,9 @@ class ProfileIdentityColumn extends StatelessWidget {
 
     final statusLabel = state.isSignedIn ? lo.signedInGoogle : lo.notSignedIn;
     final statusColor = state.isSignedIn ? scheme.accent2 : scheme.sec;
+    final displayName = state.isSignedIn && state.email.isNotEmpty
+        ? state.email
+        : lo.localAccount;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -47,28 +50,33 @@ class ProfileIdentityColumn extends StatelessWidget {
           ),
         ),
         Text(
-          lo.localAccount,
+          displayName,
           style: textTheme.headline17Semi.copyWith(color: scheme.ink),
         ),
-        AppContainer(
-          height: 26.0,
-          color: statusColor.withValues(alpha: 0.12),
-          borderRadius: BorderRadius.circular(999.0),
-          padding: const EdgeInsets.symmetric(horizontal: 10.0),
-          alignment: Alignment.center,
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            spacing: 6.0,
-            children: [
-              CategoryDot(color: statusColor, size: 6.0),
-              Text(
-                statusLabel,
-                style: textTheme.footnote13.copyWith(
-                  color: statusColor,
-                  fontWeight: FontWeight.w600,
+        ConstrainedBox(
+          constraints: const BoxConstraints(minHeight: 26.0),
+          child: AppContainer(
+            color: statusColor.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(999.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 10.0,
+              vertical: 4.0,
+            ),
+            alignment: Alignment.center,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 6.0,
+              children: [
+                CategoryDot(color: statusColor, size: 6.0),
+                Text(
+                  statusLabel,
+                  style: textTheme.footnote13.copyWith(
+                    color: statusColor,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ],

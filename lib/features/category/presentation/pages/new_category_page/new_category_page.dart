@@ -2,17 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/di/injection.dart';
 import '../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/resources/text/app_text_theme.dart';
+import '../../../../../core/services/ui_message_service.dart';
 import '../../../../../core/widgets/gradient_cta_button.dart';
 import '../../../../../core/widgets/labeled_field.dart';
 import '../../../../../core/widgets/padding/horizontal_padding.dart';
 import '../../../../../core/widgets/sheet_close_header.dart';
-import '../../../domain/models/category/category.dart';
-import '../../../domain/models/category/next_custom_category_color.dart';
-import '../../../domain/repositories/i_category_local_repository.dart';
 import '../../bloc/categories_bloc/categories_bloc.dart';
 import 'widgets/new_category_name_field.dart';
 
@@ -67,27 +64,37 @@ class _NewCategoryPageState extends State<NewCategoryPage> {
 
   void _onNameChanged(String value) => setState(() => _name = value);
 
-  Future<void> _onCreate(BuildContext context) async {
+  /// Dispatches the create intent only — `CategoriesBloc` owns the write
+  /// and the id/color derivation. The `BlocListener` below pops with the
+  /// resulting id once [CategoriesState.lastCreatedId] arrives.
+  void _onCreate(BuildContext context) {
     final trimmed = _name.trim();
     if (trimmed.isEmpty) return;
-
-    final existingCategories = context.read<CategoriesBloc>().state.categories;
-    final customCount = existingCategories.where((c) => !c.isBuiltIn).length;
-    final now = DateTime.now();
-
-    final category = Category(
-      id: now.microsecondsSinceEpoch.toString(),
-      name: trimmed,
-      colorHex: nextCustomCategoryColorHex(customCount),
-      isBuiltIn: false,
-      updatedAt: now,
-    );
-
-    await getIt<ICategoryLocalRepository>().save(category);
-    if (!context.mounted) return;
-
-    context.pop(category.id);
+    context.read<CategoriesBloc>().add(CategoriesEvent.quickCreate(trimmed));
   }
+
+  bool _listenWhenCreated(CategoriesState previous, CategoriesState current) {
+    return current.lastCreatedId != null &&
+        previous.lastCreatedId != current.lastCreatedId;
+  }
+
+  void _onCreated(BuildContext context, CategoriesState state) {
+    final createdId = state.lastCreatedId;
+    if (createdId == null) return;
+    context.pop(createdId);
+  }
+
+  bool _listenWhenWriteFailed(
+    CategoriesState previous,
+    CategoriesState current,
+  ) {
+    return !previous.isWriteFailed && current.isWriteFailed;
+  }
+
+  void _onWriteFailed(BuildContext context, CategoriesState state) =>
+      UiMessageService.showError(
+        AppLocalizations.of(context).tSaveFailedGeneric,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -95,41 +102,53 @@ class _NewCategoryPageState extends State<NewCategoryPage> {
     final lo = AppLocalizations.of(context);
     final isEnabled = _name.trim().isNotEmpty;
 
-    return Scaffold(
-      backgroundColor: scheme.bg,
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(vertical: 24.0),
-          child: HorizontalPadding(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 18.0,
-              children: [
-                SheetCloseHeader(
-                  title: lo.newCategory,
-                  onClose: () => _onClose(context),
-                ),
-                LabeledField(
-                  label: lo.name,
-                  child: NewCategoryNameField(
-                    controller: _nameController,
-                    focusNode: _nameFocusNode,
-                    onChanged: _onNameChanged,
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<CategoriesBloc, CategoriesState>(
+          listenWhen: _listenWhenCreated,
+          listener: _onCreated,
+        ),
+        BlocListener<CategoriesBloc, CategoriesState>(
+          listenWhen: _listenWhenWriteFailed,
+          listener: _onWriteFailed,
+        ),
+      ],
+      child: Scaffold(
+        backgroundColor: scheme.bg,
+        body: SafeArea(
+          child: SingleChildScrollView(
+            padding: const EdgeInsets.symmetric(vertical: 24.0),
+            child: HorizontalPadding(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 18.0,
+                children: [
+                  SheetCloseHeader(
+                    title: lo.newCategory,
+                    onClose: () => _onClose(context),
                   ),
-                ),
-                Text(
-                  lo.newCatHint,
-                  style: AppTextTheme.of(context)
-                      .footnote13
-                      .copyWith(color: scheme.ter),
-                ),
-                GradientCtaButton(
-                  label: lo.createCategory,
-                  enabled: isEnabled,
-                  onTap: () => _onCreate(context),
-                ),
-              ],
+                  LabeledField(
+                    label: lo.name,
+                    child: NewCategoryNameField(
+                      controller: _nameController,
+                      focusNode: _nameFocusNode,
+                      onChanged: _onNameChanged,
+                    ),
+                  ),
+                  Text(
+                    lo.newCatHint,
+                    style: AppTextTheme.of(
+                      context,
+                    ).footnote13.copyWith(color: scheme.ter),
+                  ),
+                  GradientCtaButton(
+                    label: lo.createCategory,
+                    enabled: isEnabled,
+                    onTap: () => _onCreate(context),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

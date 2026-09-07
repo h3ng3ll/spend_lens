@@ -55,11 +55,14 @@ extension AuthEventPatterns on AuthEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Placeholder value)?  placeholder,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Watch value)?  watch,TResult Function( _SignInGoogle value)?  signInGoogle,TResult Function( _SignInApple value)?  signInApple,TResult Function( _SignOut value)?  signOut,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
-case _Placeholder() when placeholder != null:
-return placeholder(_that);case _:
+case _Watch() when watch != null:
+return watch(_that);case _SignInGoogle() when signInGoogle != null:
+return signInGoogle(_that);case _SignInApple() when signInApple != null:
+return signInApple(_that);case _SignOut() when signOut != null:
+return signOut(_that);case _:
   return orElse();
 
 }
@@ -77,11 +80,14 @@ return placeholder(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Placeholder value)  placeholder,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Watch value)  watch,required TResult Function( _SignInGoogle value)  signInGoogle,required TResult Function( _SignInApple value)  signInApple,required TResult Function( _SignOut value)  signOut,}){
 final _that = this;
 switch (_that) {
-case _Placeholder():
-return placeholder(_that);}
+case _Watch():
+return watch(_that);case _SignInGoogle():
+return signInGoogle(_that);case _SignInApple():
+return signInApple(_that);case _SignOut():
+return signOut(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -95,11 +101,14 @@ return placeholder(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Placeholder value)?  placeholder,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Watch value)?  watch,TResult? Function( _SignInGoogle value)?  signInGoogle,TResult? Function( _SignInApple value)?  signInApple,TResult? Function( _SignOut value)?  signOut,}){
 final _that = this;
 switch (_that) {
-case _Placeholder() when placeholder != null:
-return placeholder(_that);case _:
+case _Watch() when watch != null:
+return watch(_that);case _SignInGoogle() when signInGoogle != null:
+return signInGoogle(_that);case _SignInApple() when signInApple != null:
+return signInApple(_that);case _SignOut() when signOut != null:
+return signOut(_that);case _:
   return null;
 
 }
@@ -116,10 +125,13 @@ return placeholder(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  placeholder,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function()?  signInGoogle,TResult Function()?  signInApple,TResult Function()?  signOut,required TResult orElse(),}) {final _that = this;
 switch (_that) {
-case _Placeholder() when placeholder != null:
-return placeholder();case _:
+case _Watch() when watch != null:
+return watch();case _SignInGoogle() when signInGoogle != null:
+return signInGoogle();case _SignInApple() when signInApple != null:
+return signInApple();case _SignOut() when signOut != null:
+return signOut();case _:
   return orElse();
 
 }
@@ -137,10 +149,13 @@ return placeholder();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  placeholder,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function()  signInGoogle,required TResult Function()  signInApple,required TResult Function()  signOut,}) {final _that = this;
 switch (_that) {
-case _Placeholder():
-return placeholder();}
+case _Watch():
+return watch();case _SignInGoogle():
+return signInGoogle();case _SignInApple():
+return signInApple();case _SignOut():
+return signOut();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -154,10 +169,13 @@ return placeholder();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  placeholder,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function()?  signInGoogle,TResult? Function()?  signInApple,TResult? Function()?  signOut,}) {final _that = this;
 switch (_that) {
-case _Placeholder() when placeholder != null:
-return placeholder();case _:
+case _Watch() when watch != null:
+return watch();case _SignInGoogle() when signInGoogle != null:
+return signInGoogle();case _SignInApple() when signInApple != null:
+return signInApple();case _SignOut() when signOut != null:
+return signOut();case _:
   return null;
 
 }
@@ -168,8 +186,8 @@ return placeholder();case _:
 /// @nodoc
 
 
-class _Placeholder implements AuthEvent {
-  const _Placeholder();
+class _Watch implements AuthEvent {
+  const _Watch();
   
 
 
@@ -179,7 +197,7 @@ class _Placeholder implements AuthEvent {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Placeholder);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Watch);
 }
 
 
@@ -188,7 +206,103 @@ int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  return 'AuthEvent.placeholder()';
+  return 'AuthEvent.watch()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _SignInGoogle implements AuthEvent {
+  const _SignInGoogle();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SignInGoogle);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AuthEvent.signInGoogle()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _SignInApple implements AuthEvent {
+  const _SignInApple();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SignInApple);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AuthEvent.signInApple()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _SignOut implements AuthEvent {
+  const _SignOut();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SignOut);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'AuthEvent.signOut()';
 }
 
 
@@ -200,7 +314,11 @@ String toString() {
 /// @nodoc
 mixin _$AuthState {
 
- EAuthStatus get status; String get errorMessage;
+ EAuthStatus get status; String get errorMessage;/// `true` when signed in via Google, `false` for Apple/anonymous. Only
+/// meaningful when `status == EAuthStatus.signedIn`.
+ bool get isGoogleAccount;/// The signed-in user's email, for the Profile artboard's `account`
+/// row. Empty when signed out.
+ String get email;
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -211,16 +329,16 @@ $AuthStateCopyWith<AuthState> get copyWith => _$AuthStateCopyWithImpl<AuthState>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthState&&(identical(other.status, status) || other.status == status)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AuthState&&(identical(other.status, status) || other.status == status)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.isGoogleAccount, isGoogleAccount) || other.isGoogleAccount == isGoogleAccount)&&(identical(other.email, email) || other.email == email));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,errorMessage,isGoogleAccount,email);
 
 @override
 String toString() {
-  return 'AuthState(status: $status, errorMessage: $errorMessage)';
+  return 'AuthState(status: $status, errorMessage: $errorMessage, isGoogleAccount: $isGoogleAccount, email: $email)';
 }
 
 
@@ -231,7 +349,7 @@ abstract mixin class $AuthStateCopyWith<$Res>  {
   factory $AuthStateCopyWith(AuthState value, $Res Function(AuthState) _then) = _$AuthStateCopyWithImpl;
 @useResult
 $Res call({
- EAuthStatus status, String errorMessage
+ EAuthStatus status, String errorMessage, bool isGoogleAccount, String email
 });
 
 
@@ -248,10 +366,12 @@ class _$AuthStateCopyWithImpl<$Res>
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? errorMessage = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? errorMessage = null,Object? isGoogleAccount = null,Object? email = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as EAuthStatus,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String,isGoogleAccount: null == isGoogleAccount ? _self.isGoogleAccount : isGoogleAccount // ignore: cast_nullable_to_non_nullable
+as bool,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -334,10 +454,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EAuthStatus status,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EAuthStatus status,  String errorMessage,  bool isGoogleAccount,  String email)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AuthState() when $default != null:
-return $default(_that.status,_that.errorMessage);case _:
+return $default(_that.status,_that.errorMessage,_that.isGoogleAccount,_that.email);case _:
   return orElse();
 
 }
@@ -355,10 +475,10 @@ return $default(_that.status,_that.errorMessage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EAuthStatus status,  String errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EAuthStatus status,  String errorMessage,  bool isGoogleAccount,  String email)  $default,) {final _that = this;
 switch (_that) {
 case _AuthState():
-return $default(_that.status,_that.errorMessage);}
+return $default(_that.status,_that.errorMessage,_that.isGoogleAccount,_that.email);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -372,10 +492,10 @@ return $default(_that.status,_that.errorMessage);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EAuthStatus status,  String errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EAuthStatus status,  String errorMessage,  bool isGoogleAccount,  String email)?  $default,) {final _that = this;
 switch (_that) {
 case _AuthState() when $default != null:
-return $default(_that.status,_that.errorMessage);case _:
+return $default(_that.status,_that.errorMessage,_that.isGoogleAccount,_that.email);case _:
   return null;
 
 }
@@ -387,11 +507,17 @@ return $default(_that.status,_that.errorMessage);case _:
 
 
 class _AuthState implements AuthState {
-  const _AuthState({this.status = EAuthStatus.signedOut, this.errorMessage = ''});
+  const _AuthState({this.status = EAuthStatus.signedOut, this.errorMessage = '', this.isGoogleAccount = false, this.email = ''});
   
 
 @override@JsonKey() final  EAuthStatus status;
 @override@JsonKey() final  String errorMessage;
+/// `true` when signed in via Google, `false` for Apple/anonymous. Only
+/// meaningful when `status == EAuthStatus.signedIn`.
+@override@JsonKey() final  bool isGoogleAccount;
+/// The signed-in user's email, for the Profile artboard's `account`
+/// row. Empty when signed out.
+@override@JsonKey() final  String email;
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
@@ -403,16 +529,16 @@ _$AuthStateCopyWith<_AuthState> get copyWith => __$AuthStateCopyWithImpl<_AuthSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthState&&(identical(other.status, status) || other.status == status)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AuthState&&(identical(other.status, status) || other.status == status)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.isGoogleAccount, isGoogleAccount) || other.isGoogleAccount == isGoogleAccount)&&(identical(other.email, email) || other.email == email));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,errorMessage,isGoogleAccount,email);
 
 @override
 String toString() {
-  return 'AuthState(status: $status, errorMessage: $errorMessage)';
+  return 'AuthState(status: $status, errorMessage: $errorMessage, isGoogleAccount: $isGoogleAccount, email: $email)';
 }
 
 
@@ -423,7 +549,7 @@ abstract mixin class _$AuthStateCopyWith<$Res> implements $AuthStateCopyWith<$Re
   factory _$AuthStateCopyWith(_AuthState value, $Res Function(_AuthState) _then) = __$AuthStateCopyWithImpl;
 @override @useResult
 $Res call({
- EAuthStatus status, String errorMessage
+ EAuthStatus status, String errorMessage, bool isGoogleAccount, String email
 });
 
 
@@ -440,10 +566,12 @@ class __$AuthStateCopyWithImpl<$Res>
 
 /// Create a copy of AuthState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? errorMessage = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? errorMessage = null,Object? isGoogleAccount = null,Object? email = null,}) {
   return _then(_AuthState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as EAuthStatus,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String,isGoogleAccount: null == isGoogleAccount ? _self.isGoogleAccount : isGoogleAccount // ignore: cast_nullable_to_non_nullable
+as bool,email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

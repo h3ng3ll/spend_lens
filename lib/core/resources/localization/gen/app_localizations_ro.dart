@@ -1019,6 +1019,9 @@ class AppLocalizationsRo extends AppLocalizations {
   String get tSaveFailed => 'Bonul nu a putut fi salvat. Încearcă din nou.';
 
   @override
+  String get tSaveFailedGeneric => 'Salvarea a eșuat. Încearcă din nou.';
+
+  @override
   String checkThis(String r, String q) {
     return 'Verifică · citit ca „$r” · $q';
   }

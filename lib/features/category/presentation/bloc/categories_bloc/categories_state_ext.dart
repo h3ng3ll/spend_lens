@@ -9,4 +9,8 @@ extension CategoriesStateX on CategoriesState {
   bool get isLoaded => status == ECategoriesStatus.loaded;
 
   bool get isFailed => status == ECategoriesStatus.failed;
+
+  /// The most recent quickCreate/rename/delete write failed. A one-shot
+  /// signal for a `BlocListener` error toast.
+  bool get isWriteFailed => lastWriteFailed;
 }

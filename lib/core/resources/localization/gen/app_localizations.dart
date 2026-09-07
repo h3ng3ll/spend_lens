@@ -1722,6 +1722,12 @@ abstract class AppLocalizations {
   /// **'Couldn\'t save the receipt. Please try again.'**
   String get tSaveFailed;
 
+  /// No description provided for @tSaveFailedGeneric.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save. Please try again.'**
+  String get tSaveFailedGeneric;
+
   /// Auto-ported from i18n.js key "checkThis".
   ///
   /// In en, this message translates to:

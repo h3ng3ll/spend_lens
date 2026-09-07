@@ -7,6 +7,13 @@ sealed class EditReceiptEvent with _$EditReceiptEvent {
   /// explicitly). Dispatched once from `EditReceiptPage.initState`.
   const factory EditReceiptEvent.load(String receiptId) = _Load;
 
+  /// Resolves [storeId] against `IStoreLocalRepository` and applies it —
+  /// used to be a UI-side `getIt<IStoreLocalRepository>().getById(...)`
+  /// read in `EditReceiptPage._onPickStore` before dispatching `setStore`
+  /// directly; the bloc now owns the lookup so the UI only carries the
+  /// picked id forward.
+  const factory EditReceiptEvent.pickStore(String storeId) = _PickStore;
+
   const factory EditReceiptEvent.setStore(String storeId, String storeName) =
       _SetStore;
 
@@ -16,10 +23,8 @@ sealed class EditReceiptEvent with _$EditReceiptEvent {
   const factory EditReceiptEvent.setPrintedTotal(double? printedTotal) =
       _SetPrintedTotal;
 
-  const factory EditReceiptEvent.updateItemName(
-    String itemId,
-    String name,
-  ) = _UpdateItemName;
+  const factory EditReceiptEvent.updateItemName(String itemId, String name) =
+      _UpdateItemName;
 
   const factory EditReceiptEvent.updateItemQuantity(
     String itemId,

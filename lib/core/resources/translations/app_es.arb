@@ -269,6 +269,7 @@
   "saveReceipt": "Guardar ticket",
   "tSaved": "Ticket guardado · {a}",
   "tSaveFailed": "No se pudo guardar el recibo. Inténtalo de nuevo.",
+  "tSaveFailedGeneric": "No se pudo guardar. Inténtalo de nuevo.",
   "checkThis": "Revisa · leído como \"{r}\" · {q}",
   "readAs": "Leído como \"{r}\"",
   "lowConf": "baja confianza",

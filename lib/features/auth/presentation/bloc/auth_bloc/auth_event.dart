@@ -1,10 +1,16 @@
 part of 'auth_bloc.dart';
 
-/// M9 adds `signInGoogle` / `signInApple` / `signOut` events here, wired to
-/// `firebase_auth` per design_spendlens.md §9. M4 has no events yet — the
-/// bloc's only job right now is to exist and be resolvable as the
-/// app-lifetime `registerLazySingleton` the spec names.
+/// Intent events (BLoC rule A3.7) — the UI dispatches these and never
+/// branches on state to choose between them.
 @freezed
 sealed class AuthEvent with _$AuthEvent {
-  const factory AuthEvent.placeholder() = _Placeholder;
+  /// Dispatched once from `main()` (BLoC rule A3.8) to subscribe to
+  /// Firebase's own auth-state stream — never re-dispatched from a screen.
+  const factory AuthEvent.watch() = _Watch;
+
+  const factory AuthEvent.signInGoogle() = _SignInGoogle;
+
+  const factory AuthEvent.signInApple() = _SignInApple;
+
+  const factory AuthEvent.signOut() = _SignOut;
 }

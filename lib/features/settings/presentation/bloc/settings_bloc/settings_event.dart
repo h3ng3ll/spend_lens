@@ -36,4 +36,14 @@ sealed class SettingsEvent with _$SettingsEvent {
   /// state, so it belongs on this app-lifetime bloc rather than the
   /// screen-scoped `ScannerBloc`).
   const factory SettingsEvent.toggleFlashMode() = _ToggleFlashMode;
+
+  /// Loads the current record count across expenses/stores/categories, for
+  /// the delete-all confirm dialog's `{n}` copy. Dispatched by
+  /// `SettingsPage` right before showing that dialog.
+  const factory SettingsEvent.loadRecordCount() = _LoadRecordCount;
+
+  /// The destructive delete-all action (delete_all_records_rules.md).
+  /// Dispatched from the confirm dialog's `onConfirm` — a pure action, never
+  /// itself popping a route.
+  const factory SettingsEvent.deleteAll() = _DeleteAll;
 }

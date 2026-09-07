@@ -9,17 +9,20 @@ import '../../../bloc/auth_bloc/auth_bloc.dart';
 import 'keep_data_safe_card.dart';
 import 'profile_header_row.dart';
 import 'profile_identity_column.dart';
+import 'signed_in_account_card.dart';
 import 'storage_card.dart';
 import 'your_data_card.dart';
 
 /// Signed-out / signed-in presentation for `ProfilePage`
-/// (design_spendlens.md's Profile artboard). The signed-in-only rows
-/// (`account`/`plan`/`cloudSync`/`signOut`) are M9 — this milestone only has
-/// the `signedOut` branch reachable, so [KeepDataSafeCard] always shows.
+/// (design_spendlens.md's Profile artboard, `sc-if notSignedIn` /
+/// `sc-if signedIn` blocks). [SignedInAccountCard] carries the
+/// `account`/`plan`/`cloudSync`/`signOut` rows the design shows only once
+/// signed in.
 class ProfileBody extends StatelessWidget {
   final AuthState state;
   final VoidCallback onGoogle;
   final VoidCallback onApple;
+  final VoidCallback onSignOut;
   final VoidCallback onExportBackup;
   final VoidCallback onExportSheet;
   final VoidCallback onImportBackup;
@@ -29,6 +32,7 @@ class ProfileBody extends StatelessWidget {
     required this.state,
     required this.onGoogle,
     required this.onApple,
+    required this.onSignOut,
     required this.onExportBackup,
     required this.onExportSheet,
     required this.onImportBackup,
@@ -55,7 +59,12 @@ class ProfileBody extends StatelessWidget {
                 onGoogle: onGoogle,
                 onApple: onApple,
               ),
-            StorageCard(deviceNoun: lo.thisDevice),
+            if (state.isSignedIn)
+              SignedInAccountCard(
+                email: state.email,
+                onSignOut: onSignOut,
+              ),
+            StorageCard(deviceNoun: lo.thisDevice, isSignedIn: state.isSignedIn),
             SectionLabel(text: lo.yourData),
             YourDataCard(
               onExportBackup: onExportBackup,

@@ -659,6 +659,7 @@
   "saveReceipt": "Save Receipt",
   "tSaved": "Receipt saved · {a}",
   "tSaveFailed": "Couldn't save the receipt. Please try again.",
+  "tSaveFailedGeneric": "Couldn't save. Please try again.",
   "@tSaved": {
     "description": "Auto-ported from i18n.js key \"tSaved\".",
     "placeholders": {

@@ -2,17 +2,15 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../../core/di/injection.dart';
 import '../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../../../core/routes/presentation/error_message_widget.dart';
 import '../../../../../core/routes/presentation/loading_data_widget.dart';
+import '../../../../../core/services/ui_message_service.dart';
 import '../../../../../core/widgets/padding/horizontal_padding.dart';
 import '../../../../../core/widgets/sheet_close_header.dart';
-import '../../../domain/models/store/e_store_type.dart';
 import '../../../domain/models/store/store.dart';
-import '../../../domain/repositories/i_store_local_repository.dart';
 import '../../bloc/stores_bloc/stores_bloc.dart';
 import 'widgets/choose_store_body.dart';
 
@@ -62,28 +60,35 @@ class _ChooseStorePageState extends State<ChooseStorePage> {
     await NewStorePageRoute().push<String>(context);
   }
 
-  /// The Choose-store artboard's quick-create row: creates the typed query
-  /// as a new store directly (one repository write), then pops with its id
-  /// — the simpler of the two acceptable designs, avoiding a second
-  /// navigation into `NewStorePage` that would just re-collect the same text
-  /// the user already typed here.
-  Future<void> _onQuickCreate(BuildContext context) async {
+  /// The Choose-store artboard's quick-create row: dispatches the typed
+  /// query as an intent — `StoresBloc` owns the write. The `BlocListener`
+  /// below pops with the resulting id once [StoresState.lastCreatedId]
+  /// arrives.
+  void _onQuickCreate(BuildContext context) {
     final query = _searchController.text.trim();
     if (query.isEmpty) return;
-
-    final now = DateTime.now();
-    final store = Store(
-      id: now.microsecondsSinceEpoch.toString(),
-      name: query,
-      type: EStoreType.other,
-      updatedAt: now,
-    );
-
-    await getIt<IStoreLocalRepository>().save(store);
-    if (!context.mounted) return;
-
-    context.pop(store.id);
+    context.read<StoresBloc>().add(StoresEvent.quickCreate(query));
   }
+
+  bool _listenWhenCreated(StoresState previous, StoresState current) {
+    return current.lastCreatedId != null &&
+        previous.lastCreatedId != current.lastCreatedId;
+  }
+
+  void _onCreated(BuildContext context, StoresState state) {
+    final createdId = state.lastCreatedId;
+    if (createdId == null) return;
+    context.pop(createdId);
+  }
+
+  bool _listenWhenWriteFailed(StoresState previous, StoresState current) {
+    return !previous.isWriteFailed && current.isWriteFailed;
+  }
+
+  void _onWriteFailed(BuildContext context, StoresState state) =>
+      UiMessageService.showError(
+        AppLocalizations.of(context).tSaveFailedGeneric,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -91,37 +96,49 @@ class _ChooseStorePageState extends State<ChooseStorePage> {
     final lo = AppLocalizations.of(context);
     final state = context.watch<StoresBloc>().state;
 
-    return Scaffold(
-      backgroundColor: scheme.bg,
-      body: SafeArea(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(vertical: 12.0),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            spacing: 16.0,
-            children: [
-              HorizontalPadding(
-                child: SheetCloseHeader(
-                  title: lo.chooseStore,
-                  onClose: () => _onClose(context),
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<StoresBloc, StoresState>(
+          listenWhen: _listenWhenCreated,
+          listener: _onCreated,
+        ),
+        BlocListener<StoresBloc, StoresState>(
+          listenWhen: _listenWhenWriteFailed,
+          listener: _onWriteFailed,
+        ),
+      ],
+      child: Scaffold(
+        backgroundColor: scheme.bg,
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(vertical: 12.0),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              spacing: 16.0,
+              children: [
+                HorizontalPadding(
+                  child: SheetCloseHeader(
+                    title: lo.chooseStore,
+                    onClose: () => _onClose(context),
+                  ),
                 ),
-              ),
-              Expanded(
-                child: state.isInitial || state.isLoading
-                    ? const LoadingDataWidget()
-                    : state.isFailed
-                        ? ErrorMessageWidget(message: state.errorMessage)
-                        : ChooseStoreBody(
-                            stores: state.stores,
-                            selectedStoreId: null,
-                            searchController: _searchController,
-                            onQuickCreate: () => _onQuickCreate(context),
-                            onOpenNewStore: () => _onOpenNewStore(context),
-                            onPick: (store) => _onPick(context, store),
-                          ),
-              ),
-            ],
+                Expanded(
+                  child: state.isInitial || state.isLoading
+                      ? const LoadingDataWidget()
+                      : state.isFailed
+                      ? ErrorMessageWidget(message: state.errorMessage)
+                      : ChooseStoreBody(
+                          stores: state.stores,
+                          selectedStoreId: null,
+                          searchController: _searchController,
+                          onQuickCreate: () => _onQuickCreate(context),
+                          onOpenNewStore: () => _onOpenNewStore(context),
+                          onPick: (store) => _onPick(context, store),
+                        ),
+                ),
+              ],
+            ),
           ),
         ),
       ),

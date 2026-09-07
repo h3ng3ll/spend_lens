@@ -269,6 +269,7 @@
   "saveReceipt": "Beleg sichern",
   "tSaved": "Beleg gesichert · {a}",
   "tSaveFailed": "Der Beleg konnte nicht gespeichert werden. Bitte versuche es erneut.",
+  "tSaveFailedGeneric": "Speichern fehlgeschlagen. Bitte versuche es erneut.",
   "checkThis": "Prüfen · gelesen als „{r}“ · {q}",
   "readAs": "Gelesen als „{r}“",
   "lowConf": "geringe Sicherheit",

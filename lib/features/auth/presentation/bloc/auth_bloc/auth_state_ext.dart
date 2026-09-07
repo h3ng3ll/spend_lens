@@ -4,6 +4,8 @@ part of 'auth_bloc.dart';
 extension AuthStateX on AuthState {
   bool get isSignedOut => status == EAuthStatus.signedOut;
 
+  bool get isSigningIn => status == EAuthStatus.signingIn;
+
   bool get isSignedIn => status == EAuthStatus.signedIn;
 
   bool get isFailed => status == EAuthStatus.failed;

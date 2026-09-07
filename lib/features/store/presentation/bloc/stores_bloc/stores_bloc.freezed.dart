@@ -55,11 +55,14 @@ extension StoresEventPatterns on StoresEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Watch value)?  watch,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Watch value)?  watch,TResult Function( _QuickCreate value)?  quickCreate,TResult Function( _Create value)?  create,TResult Function( _Delete value)?  delete,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
-return watch(_that);case _:
+return watch(_that);case _QuickCreate() when quickCreate != null:
+return quickCreate(_that);case _Create() when create != null:
+return create(_that);case _Delete() when delete != null:
+return delete(_that);case _:
   return orElse();
 
 }
@@ -77,11 +80,14 @@ return watch(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Watch value)  watch,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Watch value)  watch,required TResult Function( _QuickCreate value)  quickCreate,required TResult Function( _Create value)  create,required TResult Function( _Delete value)  delete,}){
 final _that = this;
 switch (_that) {
 case _Watch():
-return watch(_that);}
+return watch(_that);case _QuickCreate():
+return quickCreate(_that);case _Create():
+return create(_that);case _Delete():
+return delete(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -95,11 +101,14 @@ return watch(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Watch value)?  watch,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Watch value)?  watch,TResult? Function( _QuickCreate value)?  quickCreate,TResult? Function( _Create value)?  create,TResult? Function( _Delete value)?  delete,}){
 final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
-return watch(_that);case _:
+return watch(_that);case _QuickCreate() when quickCreate != null:
+return quickCreate(_that);case _Create() when create != null:
+return create(_that);case _Delete() when delete != null:
+return delete(_that);case _:
   return null;
 
 }
@@ -116,10 +125,13 @@ return watch(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String name)?  quickCreate,TResult Function( String name,  String receiptAlias,  EStoreType type)?  create,TResult Function( String storeId)?  delete,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
-return watch();case _:
+return watch();case _QuickCreate() when quickCreate != null:
+return quickCreate(_that.name);case _Create() when create != null:
+return create(_that.name,_that.receiptAlias,_that.type);case _Delete() when delete != null:
+return delete(_that.storeId);case _:
   return orElse();
 
 }
@@ -137,10 +149,13 @@ return watch();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String name)  quickCreate,required TResult Function( String name,  String receiptAlias,  EStoreType type)  create,required TResult Function( String storeId)  delete,}) {final _that = this;
 switch (_that) {
 case _Watch():
-return watch();}
+return watch();case _QuickCreate():
+return quickCreate(_that.name);case _Create():
+return create(_that.name,_that.receiptAlias,_that.type);case _Delete():
+return delete(_that.storeId);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -154,10 +169,13 @@ return watch();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String name)?  quickCreate,TResult? Function( String name,  String receiptAlias,  EStoreType type)?  create,TResult? Function( String storeId)?  delete,}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
-return watch();case _:
+return watch();case _QuickCreate() when quickCreate != null:
+return quickCreate(_that.name);case _Create() when create != null:
+return create(_that.name,_that.receiptAlias,_that.type);case _Delete() when delete != null:
+return delete(_that.storeId);case _:
   return null;
 
 }
@@ -198,9 +216,217 @@ String toString() {
 
 
 /// @nodoc
+
+
+class _QuickCreate implements StoresEvent {
+  const _QuickCreate(this.name);
+  
+
+ final  String name;
+
+/// Create a copy of StoresEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$QuickCreateCopyWith<_QuickCreate> get copyWith => __$QuickCreateCopyWithImpl<_QuickCreate>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _QuickCreate&&(identical(other.name, name) || other.name == name));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,name);
+
+@override
+String toString() {
+  return 'StoresEvent.quickCreate(name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$QuickCreateCopyWith<$Res> implements $StoresEventCopyWith<$Res> {
+  factory _$QuickCreateCopyWith(_QuickCreate value, $Res Function(_QuickCreate) _then) = __$QuickCreateCopyWithImpl;
+@useResult
+$Res call({
+ String name
+});
+
+
+
+
+}
+/// @nodoc
+class __$QuickCreateCopyWithImpl<$Res>
+    implements _$QuickCreateCopyWith<$Res> {
+  __$QuickCreateCopyWithImpl(this._self, this._then);
+
+  final _QuickCreate _self;
+  final $Res Function(_QuickCreate) _then;
+
+/// Create a copy of StoresEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? name = null,}) {
+  return _then(_QuickCreate(
+null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _Create implements StoresEvent {
+  const _Create({required this.name, required this.receiptAlias, required this.type});
+  
+
+ final  String name;
+ final  String receiptAlias;
+ final  EStoreType type;
+
+/// Create a copy of StoresEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CreateCopyWith<_Create> get copyWith => __$CreateCopyWithImpl<_Create>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Create&&(identical(other.name, name) || other.name == name)&&(identical(other.receiptAlias, receiptAlias) || other.receiptAlias == receiptAlias)&&(identical(other.type, type) || other.type == type));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,name,receiptAlias,type);
+
+@override
+String toString() {
+  return 'StoresEvent.create(name: $name, receiptAlias: $receiptAlias, type: $type)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CreateCopyWith<$Res> implements $StoresEventCopyWith<$Res> {
+  factory _$CreateCopyWith(_Create value, $Res Function(_Create) _then) = __$CreateCopyWithImpl;
+@useResult
+$Res call({
+ String name, String receiptAlias, EStoreType type
+});
+
+
+
+
+}
+/// @nodoc
+class __$CreateCopyWithImpl<$Res>
+    implements _$CreateCopyWith<$Res> {
+  __$CreateCopyWithImpl(this._self, this._then);
+
+  final _Create _self;
+  final $Res Function(_Create) _then;
+
+/// Create a copy of StoresEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? name = null,Object? receiptAlias = null,Object? type = null,}) {
+  return _then(_Create(
+name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,receiptAlias: null == receiptAlias ? _self.receiptAlias : receiptAlias // ignore: cast_nullable_to_non_nullable
+as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as EStoreType,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _Delete implements StoresEvent {
+  const _Delete(this.storeId);
+  
+
+ final  String storeId;
+
+/// Create a copy of StoresEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DeleteCopyWith<_Delete> get copyWith => __$DeleteCopyWithImpl<_Delete>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Delete&&(identical(other.storeId, storeId) || other.storeId == storeId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,storeId);
+
+@override
+String toString() {
+  return 'StoresEvent.delete(storeId: $storeId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$DeleteCopyWith<$Res> implements $StoresEventCopyWith<$Res> {
+  factory _$DeleteCopyWith(_Delete value, $Res Function(_Delete) _then) = __$DeleteCopyWithImpl;
+@useResult
+$Res call({
+ String storeId
+});
+
+
+
+
+}
+/// @nodoc
+class __$DeleteCopyWithImpl<$Res>
+    implements _$DeleteCopyWith<$Res> {
+  __$DeleteCopyWithImpl(this._self, this._then);
+
+  final _Delete _self;
+  final $Res Function(_Delete) _then;
+
+/// Create a copy of StoresEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? storeId = null,}) {
+  return _then(_Delete(
+null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
 mixin _$StoresState {
 
- EStoresStatus get status; List<Store> get stores; String get errorMessage;
+ EStoresStatus get status; List<Store> get stores; String get errorMessage;/// The id of the store most recently created by `quickCreate`/`create`.
+/// A one-shot signal a `BlocListener` consumes to pop the picker/create
+/// screen with the new id — never read to derive displayed state.
+ String? get lastCreatedId;/// Whether the most recent write (quickCreate/create/delete) failed. A
+/// one-shot signal for an error-toast listener — never read to derive
+/// displayed state.
+ bool get lastWriteFailed;
 /// Create a copy of StoresState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -211,16 +437,16 @@ $StoresStateCopyWith<StoresState> get copyWith => _$StoresStateCopyWithImpl<Stor
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StoresState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.stores, stores)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StoresState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.stores, stores)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.lastCreatedId, lastCreatedId) || other.lastCreatedId == lastCreatedId)&&(identical(other.lastWriteFailed, lastWriteFailed) || other.lastWriteFailed == lastWriteFailed));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(stores),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(stores),errorMessage,lastCreatedId,lastWriteFailed);
 
 @override
 String toString() {
-  return 'StoresState(status: $status, stores: $stores, errorMessage: $errorMessage)';
+  return 'StoresState(status: $status, stores: $stores, errorMessage: $errorMessage, lastCreatedId: $lastCreatedId, lastWriteFailed: $lastWriteFailed)';
 }
 
 
@@ -231,7 +457,7 @@ abstract mixin class $StoresStateCopyWith<$Res>  {
   factory $StoresStateCopyWith(StoresState value, $Res Function(StoresState) _then) = _$StoresStateCopyWithImpl;
 @useResult
 $Res call({
- EStoresStatus status, List<Store> stores, String errorMessage
+ EStoresStatus status, List<Store> stores, String errorMessage, String? lastCreatedId, bool lastWriteFailed
 });
 
 
@@ -248,12 +474,14 @@ class _$StoresStateCopyWithImpl<$Res>
 
 /// Create a copy of StoresState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? stores = null,Object? errorMessage = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? stores = null,Object? errorMessage = null,Object? lastCreatedId = freezed,Object? lastWriteFailed = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as EStoresStatus,stores: null == stores ? _self.stores : stores // ignore: cast_nullable_to_non_nullable
 as List<Store>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String,
+as String,lastCreatedId: freezed == lastCreatedId ? _self.lastCreatedId : lastCreatedId // ignore: cast_nullable_to_non_nullable
+as String?,lastWriteFailed: null == lastWriteFailed ? _self.lastWriteFailed : lastWriteFailed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -335,10 +563,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EStoresStatus status,  List<Store> stores,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EStoresStatus status,  List<Store> stores,  String errorMessage,  String? lastCreatedId,  bool lastWriteFailed)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StoresState() when $default != null:
-return $default(_that.status,_that.stores,_that.errorMessage);case _:
+return $default(_that.status,_that.stores,_that.errorMessage,_that.lastCreatedId,_that.lastWriteFailed);case _:
   return orElse();
 
 }
@@ -356,10 +584,10 @@ return $default(_that.status,_that.stores,_that.errorMessage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EStoresStatus status,  List<Store> stores,  String errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EStoresStatus status,  List<Store> stores,  String errorMessage,  String? lastCreatedId,  bool lastWriteFailed)  $default,) {final _that = this;
 switch (_that) {
 case _StoresState():
-return $default(_that.status,_that.stores,_that.errorMessage);}
+return $default(_that.status,_that.stores,_that.errorMessage,_that.lastCreatedId,_that.lastWriteFailed);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -373,10 +601,10 @@ return $default(_that.status,_that.stores,_that.errorMessage);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EStoresStatus status,  List<Store> stores,  String errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EStoresStatus status,  List<Store> stores,  String errorMessage,  String? lastCreatedId,  bool lastWriteFailed)?  $default,) {final _that = this;
 switch (_that) {
 case _StoresState() when $default != null:
-return $default(_that.status,_that.stores,_that.errorMessage);case _:
+return $default(_that.status,_that.stores,_that.errorMessage,_that.lastCreatedId,_that.lastWriteFailed);case _:
   return null;
 
 }
@@ -388,7 +616,7 @@ return $default(_that.status,_that.stores,_that.errorMessage);case _:
 
 
 class _StoresState implements StoresState {
-  const _StoresState({this.status = EStoresStatus.initial, final  List<Store> stores = const <Store>[], this.errorMessage = ''}): _stores = stores;
+  const _StoresState({this.status = EStoresStatus.initial, final  List<Store> stores = const <Store>[], this.errorMessage = '', this.lastCreatedId, this.lastWriteFailed = false}): _stores = stores;
   
 
 @override@JsonKey() final  EStoresStatus status;
@@ -400,6 +628,14 @@ class _StoresState implements StoresState {
 }
 
 @override@JsonKey() final  String errorMessage;
+/// The id of the store most recently created by `quickCreate`/`create`.
+/// A one-shot signal a `BlocListener` consumes to pop the picker/create
+/// screen with the new id — never read to derive displayed state.
+@override final  String? lastCreatedId;
+/// Whether the most recent write (quickCreate/create/delete) failed. A
+/// one-shot signal for an error-toast listener — never read to derive
+/// displayed state.
+@override@JsonKey() final  bool lastWriteFailed;
 
 /// Create a copy of StoresState
 /// with the given fields replaced by the non-null parameter values.
@@ -411,16 +647,16 @@ _$StoresStateCopyWith<_StoresState> get copyWith => __$StoresStateCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StoresState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._stores, _stores)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _StoresState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._stores, _stores)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.lastCreatedId, lastCreatedId) || other.lastCreatedId == lastCreatedId)&&(identical(other.lastWriteFailed, lastWriteFailed) || other.lastWriteFailed == lastWriteFailed));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_stores),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_stores),errorMessage,lastCreatedId,lastWriteFailed);
 
 @override
 String toString() {
-  return 'StoresState(status: $status, stores: $stores, errorMessage: $errorMessage)';
+  return 'StoresState(status: $status, stores: $stores, errorMessage: $errorMessage, lastCreatedId: $lastCreatedId, lastWriteFailed: $lastWriteFailed)';
 }
 
 
@@ -431,7 +667,7 @@ abstract mixin class _$StoresStateCopyWith<$Res> implements $StoresStateCopyWith
   factory _$StoresStateCopyWith(_StoresState value, $Res Function(_StoresState) _then) = __$StoresStateCopyWithImpl;
 @override @useResult
 $Res call({
- EStoresStatus status, List<Store> stores, String errorMessage
+ EStoresStatus status, List<Store> stores, String errorMessage, String? lastCreatedId, bool lastWriteFailed
 });
 
 
@@ -448,12 +684,14 @@ class __$StoresStateCopyWithImpl<$Res>
 
 /// Create a copy of StoresState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? stores = null,Object? errorMessage = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? stores = null,Object? errorMessage = null,Object? lastCreatedId = freezed,Object? lastWriteFailed = null,}) {
   return _then(_StoresState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as EStoresStatus,stores: null == stores ? _self._stores : stores // ignore: cast_nullable_to_non_nullable
 as List<Store>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
-as String,
+as String,lastCreatedId: freezed == lastCreatedId ? _self.lastCreatedId : lastCreatedId // ignore: cast_nullable_to_non_nullable
+as String?,lastWriteFailed: null == lastWriteFailed ? _self.lastWriteFailed : lastWriteFailed // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

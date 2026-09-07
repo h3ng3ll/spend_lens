@@ -55,11 +55,12 @@ extension EditReceiptEventPatterns on EditReceiptEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Load value)?  load,TResult Function( _SetStore value)?  setStore,TResult Function( _SetPurchasedAt value)?  setPurchasedAt,TResult Function( _SetPrintedTotal value)?  setPrintedTotal,TResult Function( _UpdateItemName value)?  updateItemName,TResult Function( _UpdateItemQuantity value)?  updateItemQuantity,TResult Function( _UpdateItemPrice value)?  updateItemPrice,TResult Function( _RemoveItem value)?  removeItem,TResult Function( _AddItem value)?  addItem,TResult Function( _Save value)?  save,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Load value)?  load,TResult Function( _PickStore value)?  pickStore,TResult Function( _SetStore value)?  setStore,TResult Function( _SetPurchasedAt value)?  setPurchasedAt,TResult Function( _SetPrintedTotal value)?  setPrintedTotal,TResult Function( _UpdateItemName value)?  updateItemName,TResult Function( _UpdateItemQuantity value)?  updateItemQuantity,TResult Function( _UpdateItemPrice value)?  updateItemPrice,TResult Function( _RemoveItem value)?  removeItem,TResult Function( _AddItem value)?  addItem,TResult Function( _Save value)?  save,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Load() when load != null:
-return load(_that);case _SetStore() when setStore != null:
+return load(_that);case _PickStore() when pickStore != null:
+return pickStore(_that);case _SetStore() when setStore != null:
 return setStore(_that);case _SetPurchasedAt() when setPurchasedAt != null:
 return setPurchasedAt(_that);case _SetPrintedTotal() when setPrintedTotal != null:
 return setPrintedTotal(_that);case _UpdateItemName() when updateItemName != null:
@@ -86,11 +87,12 @@ return save(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Load value)  load,required TResult Function( _SetStore value)  setStore,required TResult Function( _SetPurchasedAt value)  setPurchasedAt,required TResult Function( _SetPrintedTotal value)  setPrintedTotal,required TResult Function( _UpdateItemName value)  updateItemName,required TResult Function( _UpdateItemQuantity value)  updateItemQuantity,required TResult Function( _UpdateItemPrice value)  updateItemPrice,required TResult Function( _RemoveItem value)  removeItem,required TResult Function( _AddItem value)  addItem,required TResult Function( _Save value)  save,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Load value)  load,required TResult Function( _PickStore value)  pickStore,required TResult Function( _SetStore value)  setStore,required TResult Function( _SetPurchasedAt value)  setPurchasedAt,required TResult Function( _SetPrintedTotal value)  setPrintedTotal,required TResult Function( _UpdateItemName value)  updateItemName,required TResult Function( _UpdateItemQuantity value)  updateItemQuantity,required TResult Function( _UpdateItemPrice value)  updateItemPrice,required TResult Function( _RemoveItem value)  removeItem,required TResult Function( _AddItem value)  addItem,required TResult Function( _Save value)  save,}){
 final _that = this;
 switch (_that) {
 case _Load():
-return load(_that);case _SetStore():
+return load(_that);case _PickStore():
+return pickStore(_that);case _SetStore():
 return setStore(_that);case _SetPurchasedAt():
 return setPurchasedAt(_that);case _SetPrintedTotal():
 return setPrintedTotal(_that);case _UpdateItemName():
@@ -113,11 +115,12 @@ return save(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Load value)?  load,TResult? Function( _SetStore value)?  setStore,TResult? Function( _SetPurchasedAt value)?  setPurchasedAt,TResult? Function( _SetPrintedTotal value)?  setPrintedTotal,TResult? Function( _UpdateItemName value)?  updateItemName,TResult? Function( _UpdateItemQuantity value)?  updateItemQuantity,TResult? Function( _UpdateItemPrice value)?  updateItemPrice,TResult? Function( _RemoveItem value)?  removeItem,TResult? Function( _AddItem value)?  addItem,TResult? Function( _Save value)?  save,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Load value)?  load,TResult? Function( _PickStore value)?  pickStore,TResult? Function( _SetStore value)?  setStore,TResult? Function( _SetPurchasedAt value)?  setPurchasedAt,TResult? Function( _SetPrintedTotal value)?  setPrintedTotal,TResult? Function( _UpdateItemName value)?  updateItemName,TResult? Function( _UpdateItemQuantity value)?  updateItemQuantity,TResult? Function( _UpdateItemPrice value)?  updateItemPrice,TResult? Function( _RemoveItem value)?  removeItem,TResult? Function( _AddItem value)?  addItem,TResult? Function( _Save value)?  save,}){
 final _that = this;
 switch (_that) {
 case _Load() when load != null:
-return load(_that);case _SetStore() when setStore != null:
+return load(_that);case _PickStore() when pickStore != null:
+return pickStore(_that);case _SetStore() when setStore != null:
 return setStore(_that);case _SetPurchasedAt() when setPurchasedAt != null:
 return setPurchasedAt(_that);case _SetPrintedTotal() when setPrintedTotal != null:
 return setPrintedTotal(_that);case _UpdateItemName() when updateItemName != null:
@@ -143,10 +146,11 @@ return save(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String receiptId)?  load,TResult Function( String storeId,  String storeName)?  setStore,TResult Function( DateTime purchasedAt)?  setPurchasedAt,TResult Function( double? printedTotal)?  setPrintedTotal,TResult Function( String itemId,  String name)?  updateItemName,TResult Function( String itemId,  double quantity)?  updateItemQuantity,TResult Function( String itemId,  double lineTotal)?  updateItemPrice,TResult Function( String itemId)?  removeItem,TResult Function()?  addItem,TResult Function()?  save,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String receiptId)?  load,TResult Function( String storeId)?  pickStore,TResult Function( String storeId,  String storeName)?  setStore,TResult Function( DateTime purchasedAt)?  setPurchasedAt,TResult Function( double? printedTotal)?  setPrintedTotal,TResult Function( String itemId,  String name)?  updateItemName,TResult Function( String itemId,  double quantity)?  updateItemQuantity,TResult Function( String itemId,  double lineTotal)?  updateItemPrice,TResult Function( String itemId)?  removeItem,TResult Function()?  addItem,TResult Function()?  save,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Load() when load != null:
-return load(_that.receiptId);case _SetStore() when setStore != null:
+return load(_that.receiptId);case _PickStore() when pickStore != null:
+return pickStore(_that.storeId);case _SetStore() when setStore != null:
 return setStore(_that.storeId,_that.storeName);case _SetPurchasedAt() when setPurchasedAt != null:
 return setPurchasedAt(_that.purchasedAt);case _SetPrintedTotal() when setPrintedTotal != null:
 return setPrintedTotal(_that.printedTotal);case _UpdateItemName() when updateItemName != null:
@@ -173,10 +177,11 @@ return save();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String receiptId)  load,required TResult Function( String storeId,  String storeName)  setStore,required TResult Function( DateTime purchasedAt)  setPurchasedAt,required TResult Function( double? printedTotal)  setPrintedTotal,required TResult Function( String itemId,  String name)  updateItemName,required TResult Function( String itemId,  double quantity)  updateItemQuantity,required TResult Function( String itemId,  double lineTotal)  updateItemPrice,required TResult Function( String itemId)  removeItem,required TResult Function()  addItem,required TResult Function()  save,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String receiptId)  load,required TResult Function( String storeId)  pickStore,required TResult Function( String storeId,  String storeName)  setStore,required TResult Function( DateTime purchasedAt)  setPurchasedAt,required TResult Function( double? printedTotal)  setPrintedTotal,required TResult Function( String itemId,  String name)  updateItemName,required TResult Function( String itemId,  double quantity)  updateItemQuantity,required TResult Function( String itemId,  double lineTotal)  updateItemPrice,required TResult Function( String itemId)  removeItem,required TResult Function()  addItem,required TResult Function()  save,}) {final _that = this;
 switch (_that) {
 case _Load():
-return load(_that.receiptId);case _SetStore():
+return load(_that.receiptId);case _PickStore():
+return pickStore(_that.storeId);case _SetStore():
 return setStore(_that.storeId,_that.storeName);case _SetPurchasedAt():
 return setPurchasedAt(_that.purchasedAt);case _SetPrintedTotal():
 return setPrintedTotal(_that.printedTotal);case _UpdateItemName():
@@ -199,10 +204,11 @@ return save();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String receiptId)?  load,TResult? Function( String storeId,  String storeName)?  setStore,TResult? Function( DateTime purchasedAt)?  setPurchasedAt,TResult? Function( double? printedTotal)?  setPrintedTotal,TResult? Function( String itemId,  String name)?  updateItemName,TResult? Function( String itemId,  double quantity)?  updateItemQuantity,TResult? Function( String itemId,  double lineTotal)?  updateItemPrice,TResult? Function( String itemId)?  removeItem,TResult? Function()?  addItem,TResult? Function()?  save,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String receiptId)?  load,TResult? Function( String storeId)?  pickStore,TResult? Function( String storeId,  String storeName)?  setStore,TResult? Function( DateTime purchasedAt)?  setPurchasedAt,TResult? Function( double? printedTotal)?  setPrintedTotal,TResult? Function( String itemId,  String name)?  updateItemName,TResult? Function( String itemId,  double quantity)?  updateItemQuantity,TResult? Function( String itemId,  double lineTotal)?  updateItemPrice,TResult? Function( String itemId)?  removeItem,TResult? Function()?  addItem,TResult? Function()?  save,}) {final _that = this;
 switch (_that) {
 case _Load() when load != null:
-return load(_that.receiptId);case _SetStore() when setStore != null:
+return load(_that.receiptId);case _PickStore() when pickStore != null:
+return pickStore(_that.storeId);case _SetStore() when setStore != null:
 return setStore(_that.storeId,_that.storeName);case _SetPurchasedAt() when setPurchasedAt != null:
 return setPurchasedAt(_that.purchasedAt);case _SetPrintedTotal() when setPrintedTotal != null:
 return setPrintedTotal(_that.printedTotal);case _UpdateItemName() when updateItemName != null:
@@ -278,6 +284,72 @@ class __$LoadCopyWithImpl<$Res>
 @pragma('vm:prefer-inline') $Res call({Object? receiptId = null,}) {
   return _then(_Load(
 null == receiptId ? _self.receiptId : receiptId // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _PickStore implements EditReceiptEvent {
+  const _PickStore(this.storeId);
+  
+
+ final  String storeId;
+
+/// Create a copy of EditReceiptEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PickStoreCopyWith<_PickStore> get copyWith => __$PickStoreCopyWithImpl<_PickStore>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PickStore&&(identical(other.storeId, storeId) || other.storeId == storeId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,storeId);
+
+@override
+String toString() {
+  return 'EditReceiptEvent.pickStore(storeId: $storeId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PickStoreCopyWith<$Res> implements $EditReceiptEventCopyWith<$Res> {
+  factory _$PickStoreCopyWith(_PickStore value, $Res Function(_PickStore) _then) = __$PickStoreCopyWithImpl;
+@useResult
+$Res call({
+ String storeId
+});
+
+
+
+
+}
+/// @nodoc
+class __$PickStoreCopyWithImpl<$Res>
+    implements _$PickStoreCopyWith<$Res> {
+  __$PickStoreCopyWithImpl(this._self, this._then);
+
+  final _PickStore _self;
+  final $Res Function(_PickStore) _then;
+
+/// Create a copy of EditReceiptEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? storeId = null,}) {
+  return _then(_PickStore(
+null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

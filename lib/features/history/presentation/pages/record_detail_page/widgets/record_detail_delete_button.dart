@@ -1,30 +1,32 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../../core/di/injection.dart';
 import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../../core/resources/text/app_text_theme.dart';
-import '../../../../../../core/utils/extensions/go_router_x.dart';
+import '../../../../../../core/services/ui_message_service.dart';
 import '../../../../../../core/widgets/app_container.dart';
 import '../../../../../../core/widgets/confirm_dialog.dart';
-import '../../../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../../bloc/record_detail_bloc/record_detail_bloc.dart';
 
 /// The destructive delete-expense control (design_spendlens.md — Record
 /// detail artboard's `dDelete` row).
 ///
-/// CHRONIC BUG GUARD
-/// (`db:handler-pops-and-listener-pops-destructive-confirm-pops-twice`):
-/// [ConfirmDialog] pops its OWN route exactly once, internally, from its
-/// `_onConfirm`/`_onCancel`. The `onConfirm` callback passed to it here is
-/// therefore a PURE action — delete the expense, and record a local
-/// `confirmed` flag — and never itself pops the dialog route. This screen's
-/// own exit is a SEPARATE, deliberate second pop of a DIFFERENT route
-/// (the detail page itself), performed only after `ConfirmDialog.show(...)`'s
-/// returned future completes (i.e. after the dialog has already closed
-/// itself) AND only when `confirmed` is true — two pops of two distinct
-/// routes, never a double-pop of one. Cancel correctly leaves the detail
-/// page open, because the dialog's future resolves on cancel too and
-/// `confirmed` stays false in that case.
+/// The actual delete write and its outcome are owned by [RecordDetailBloc]
+/// now (BLoC-layer violation fix — this widget used to call
+/// `getIt<IExpenseLocalRepository>().delete(...)` directly, fire-and-forget,
+/// from inside `onConfirm`). [ConfirmDialog] still pops its OWN route
+/// exactly once, internally, from its `_onConfirm`/`_onCancel` — the
+/// `onConfirm` callback passed to it here is a PURE action: dispatch the
+/// delete intent, never itself pop a route
+/// (`db:handler-pops-and-listener-pops-destructive-confirm-pops-twice`).
+///
+/// SUCCESS never navigates from here: once the write lands, this record
+/// drops out of the reactive stream `RecordDetailBloc._onWatch` combines,
+/// which already flips it to `ERecordDetailStatus.notFound` —
+/// `RecordDetailPage`'s `BlocListener` on that transition is what actually
+/// exits the detail page. This widget only surfaces FAILURE, via its own
+/// `BlocListener` on [RecordDetailState.isDeleteFailed].
 class RecordDetailDeleteButton extends StatelessWidget {
   final String recordId;
 
@@ -32,8 +34,7 @@ class RecordDetailDeleteButton extends StatelessWidget {
 
   Future<void> _onDelete(BuildContext context) async {
     final lo = AppLocalizations.of(context);
-
-    var confirmed = false;
+    final bloc = context.read<RecordDetailBloc>();
 
     await ConfirmDialog.show(
       context,
@@ -41,20 +42,21 @@ class RecordDetailDeleteButton extends StatelessWidget {
       body: lo.deleteExpenseConfirmBody,
       confirmLabel: lo.deleteExpense,
       cancelLabel: lo.cancel,
-      onConfirm: () {
-        confirmed = true;
-        getIt<IExpenseLocalRepository>().delete(recordId);
-      },
+      onConfirm: () => bloc.add(RecordDetailEvent.deleteRecord(recordId)),
     );
-
-    if (!confirmed) return;
-
-    // The dialog above has already popped ITSELF (see class doc comment).
-    // This is the detail page's own, separate exit — a second pop of a
-    // DIFFERENT route, performed only now that the dialog is confirmed gone.
-    if (!context.mounted) return;
-    context.goBack();
   }
+
+  bool _listenWhenDeleteFailed(
+    RecordDetailState previous,
+    RecordDetailState current,
+  ) {
+    return !previous.isDeleteFailed && current.isDeleteFailed;
+  }
+
+  void _onDeleteFailed(BuildContext context, RecordDetailState state) =>
+      UiMessageService.showError(
+        AppLocalizations.of(context).tSaveFailedGeneric,
+      );
 
   @override
   Widget build(BuildContext context) {
@@ -62,20 +64,24 @@ class RecordDetailDeleteButton extends StatelessWidget {
     final textTheme = AppTextTheme.of(context);
     final lo = AppLocalizations.of(context);
 
-    return GestureDetector(
-      onTap: () => _onDelete(context),
-      child: AppContainer(
-        height: 64.0,
-        width: double.infinity,
-        color: scheme.warnTint,
-        border: Border.all(color: scheme.warn, width: 1.0),
-        borderRadius: BorderRadius.circular(18.0),
-        alignment: Alignment.center,
-        child: Text(
-          lo.deleteExpense,
-          style: textTheme.headline17.copyWith(
-            color: scheme.warn,
-            fontWeight: FontWeight.w600,
+    return BlocListener<RecordDetailBloc, RecordDetailState>(
+      listenWhen: _listenWhenDeleteFailed,
+      listener: _onDeleteFailed,
+      child: GestureDetector(
+        onTap: () => _onDelete(context),
+        child: AppContainer(
+          height: 64.0,
+          width: double.infinity,
+          color: scheme.warnTint,
+          border: Border.all(color: scheme.warn, width: 1.0),
+          borderRadius: BorderRadius.circular(18.0),
+          alignment: Alignment.center,
+          child: Text(
+            lo.deleteExpense,
+            style: textTheme.headline17.copyWith(
+              color: scheme.warn,
+              fontWeight: FontWeight.w600,
+            ),
           ),
         ),
       ),

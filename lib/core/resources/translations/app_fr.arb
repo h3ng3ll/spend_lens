@@ -269,6 +269,7 @@
   "saveReceipt": "Enregistrer le ticket",
   "tSaved": "Ticket enregistré · {a}",
   "tSaveFailed": "Impossible d'enregistrer le ticket. Réessayez.",
+  "tSaveFailedGeneric": "Impossible d'enregistrer. Réessayez.",
   "checkThis": "À vérifier · lu comme « {r} » · {q}",
   "readAs": "Lu comme « {r} »",
   "lowConf": "faible confiance",
