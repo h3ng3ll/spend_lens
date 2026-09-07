@@ -2,47 +2,87 @@ import 'package:flutter/material.dart';
 
 import 'app_text_style.dart';
 
-/// M1 minimal text theme covering only the styles the copied `core/` widgets
-/// reference. M2 replaces this with the full design-role-named scale from
-/// design_spendlens.md §4.3.
+/// The full design-role-named type scale (design_spendlens.md §4.3), exposed
+/// as a [ThemeExtension] so widgets read it via `AppTextTheme.of(context)`
+/// rather than a raw enum lookup.
 class AppTextTheme extends ThemeExtension<AppTextTheme> {
-  final TextStyle regular12;
-  final TextStyle regular14;
-  final TextStyle medium12;
-  final TextStyle medium14;
-  final TextStyle bold20;
+  final TextStyle hero44;
+  final TextStyle heroCurrency22;
+  final TextStyle screenTitle28;
+  final TextStyle detailAmount40;
+  final TextStyle statValue20;
+  final TextStyle headline17;
+  final TextStyle headline17Semi;
+  final TextStyle body17;
+  final TextStyle subhead15;
+  final TextStyle footnote13;
+  final TextStyle sectionLabel12;
+  final TextStyle tabLabel10;
+  final TextStyle amountInput32;
 
   const AppTextTheme._({
-    required this.regular12,
-    required this.regular14,
-    required this.medium12,
-    required this.medium14,
-    required this.bold20,
+    required this.hero44,
+    required this.heroCurrency22,
+    required this.screenTitle28,
+    required this.detailAmount40,
+    required this.statValue20,
+    required this.headline17,
+    required this.headline17Semi,
+    required this.body17,
+    required this.subhead15,
+    required this.footnote13,
+    required this.sectionLabel12,
+    required this.tabLabel10,
+    required this.amountInput32,
   });
 
   /// Base app text theme.
   factory AppTextTheme.base() => AppTextTheme._(
-        regular12: AppTextStyle.regular12.value,
-        regular14: AppTextStyle.regular14.value,
-        medium12: AppTextStyle.medium12.value,
-        medium14: AppTextStyle.medium14.value,
-        bold20: AppTextStyle.bold20.value,
+        hero44: AppTextStyle.hero44.value,
+        heroCurrency22: AppTextStyle.heroCurrency22.value,
+        screenTitle28: AppTextStyle.screenTitle28.value,
+        detailAmount40: AppTextStyle.detailAmount40.value,
+        statValue20: AppTextStyle.statValue20.value,
+        headline17: AppTextStyle.headline17.value,
+        headline17Semi: AppTextStyle.headline17Semi.value,
+        body17: AppTextStyle.body17.value,
+        subhead15: AppTextStyle.subhead15.value,
+        footnote13: AppTextStyle.footnote13.value,
+        sectionLabel12: AppTextStyle.sectionLabel12.value,
+        tabLabel10: AppTextStyle.tabLabel10.value,
+        amountInput32: AppTextStyle.amountInput32.value,
       );
 
   @override
   AppTextTheme copyWith({
-    TextStyle? regular12,
-    TextStyle? regular14,
-    TextStyle? medium12,
-    TextStyle? medium14,
-    TextStyle? bold20,
+    TextStyle? hero44,
+    TextStyle? heroCurrency22,
+    TextStyle? screenTitle28,
+    TextStyle? detailAmount40,
+    TextStyle? statValue20,
+    TextStyle? headline17,
+    TextStyle? headline17Semi,
+    TextStyle? body17,
+    TextStyle? subhead15,
+    TextStyle? footnote13,
+    TextStyle? sectionLabel12,
+    TextStyle? tabLabel10,
+    TextStyle? amountInput32,
   }) {
     return AppTextTheme._(
-      regular12: regular12 ?? this.regular12,
-      regular14: regular14 ?? this.regular14,
-      medium12: medium12 ?? this.medium12,
-      medium14: medium14 ?? this.medium14,
-      bold20: bold20 ?? this.bold20,
+      hero44: hero44 ?? this.hero44,
+      heroCurrency22: heroCurrency22 ?? this.heroCurrency22,
+      screenTitle28: screenTitle28 ?? this.screenTitle28,
+      detailAmount40: detailAmount40 ?? this.detailAmount40,
+      statValue20: statValue20 ?? this.statValue20,
+      headline17: headline17 ?? this.headline17,
+      headline17Semi: headline17Semi ?? this.headline17Semi,
+      body17: body17 ?? this.body17,
+      subhead15: subhead15 ?? this.subhead15,
+      footnote13: footnote13 ?? this.footnote13,
+      sectionLabel12: sectionLabel12 ?? this.sectionLabel12,
+      tabLabel10: tabLabel10 ?? this.tabLabel10,
+      amountInput32: amountInput32 ?? this.amountInput32,
     );
   }
 
@@ -56,11 +96,19 @@ class AppTextTheme extends ThemeExtension<AppTextTheme> {
     }
 
     return copyWith(
-      regular12: TextStyle.lerp(regular12, other.regular12, t),
-      regular14: TextStyle.lerp(regular14, other.regular14, t),
-      medium12: TextStyle.lerp(medium12, other.medium12, t),
-      medium14: TextStyle.lerp(medium14, other.medium14, t),
-      bold20: TextStyle.lerp(bold20, other.bold20, t),
+      hero44: TextStyle.lerp(hero44, other.hero44, t),
+      heroCurrency22: TextStyle.lerp(heroCurrency22, other.heroCurrency22, t),
+      screenTitle28: TextStyle.lerp(screenTitle28, other.screenTitle28, t),
+      detailAmount40: TextStyle.lerp(detailAmount40, other.detailAmount40, t),
+      statValue20: TextStyle.lerp(statValue20, other.statValue20, t),
+      headline17: TextStyle.lerp(headline17, other.headline17, t),
+      headline17Semi: TextStyle.lerp(headline17Semi, other.headline17Semi, t),
+      body17: TextStyle.lerp(body17, other.body17, t),
+      subhead15: TextStyle.lerp(subhead15, other.subhead15, t),
+      footnote13: TextStyle.lerp(footnote13, other.footnote13, t),
+      sectionLabel12: TextStyle.lerp(sectionLabel12, other.sectionLabel12, t),
+      tabLabel10: TextStyle.lerp(tabLabel10, other.tabLabel10, t),
+      amountInput32: TextStyle.lerp(amountInput32, other.amountInput32, t),
     );
   }
 

@@ -74,7 +74,7 @@ class BuildImage extends StatelessWidget {
         width: 40,
         height: 40,
         colorFilter: ColorFilter.mode(
-          colorScheme.onPrimary.withValues(alpha: 0.6),
+          colorScheme.ink.withValues(alpha: 0.6),
           BlendMode.srcIn,
         ),
       ),

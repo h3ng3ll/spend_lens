@@ -2,18 +2,19 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
-/// Named gradients.
+/// Named gradients (design_spendlens.md §4.2/§4.3).
 ///
-/// M1 keeps one placeholder gradient so `AppFab` compiles. M2 replaces this
-/// with the design's single normalized `accentGradient` (135°,
-/// `#C4B5FD → #8EE3F5`, design_spendlens.md §4.2).
+/// The design's two prototype gradient variants are normalized to ONE
+/// `accentGradient` (135°, `#C4B5FD → #8EE3F5`). `#A78BFA`/`#67E8F9` survive
+/// only as the Food/Transport category hues in `AppColors`, where they
+/// genuinely are category colours rather than brand gradient stops.
 abstract class AppGradients {
-  static LinearGradient bluePurple = LinearGradient(
+  static LinearGradient accentGradient = LinearGradient(
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
     colors: [
-      AppColors.accent.value,
       AppColors.accentDark.value,
+      AppColors.accent2Dark.value,
     ],
   );
 }

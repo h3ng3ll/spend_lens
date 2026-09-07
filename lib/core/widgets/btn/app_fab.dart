@@ -30,7 +30,7 @@ class AppFab extends StatelessWidget {
       child: Ink(
         decoration: BoxDecoration(
           shape: BoxShape.circle,
-          gradient: AppGradients.bluePurple,
+          gradient: AppGradients.accentGradient,
         ),
         child: Container(
           alignment: Alignment.center,

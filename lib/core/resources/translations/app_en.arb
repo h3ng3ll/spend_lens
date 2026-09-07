@@ -1,0 +1,688 @@
+{
+  "@@locale": "en",
+  "deleteAllTitle": "Delete all data?",
+  "deleteAllBody": "This removes {n} records, receipt photos, stores and categories from {device}. Cloud backups are not affected. This cannot be undone.",
+  "@deleteAllBody": {
+    "description": "Auto-ported from i18n.js key \"deleteAllBody\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "deleteAllConfirm": "Delete everything",
+  "tDeletedAll": "All data deleted",
+  "renameCategory": "Rename category",
+  "catRenamed": "Renamed to {n}",
+  "@catRenamed": {
+    "description": "Auto-ported from i18n.js key \"catRenamed\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "newCategory": "New category",
+  "createCategory": "Create category",
+  "newCatPh": "New category name",
+  "searchCatPh": "Search or type a new category",
+  "newCatHint": "New category · appears in every category picker",
+  "catNote": "Built-in categories cannot be deleted. Custom categories can be removed while unused.",
+  "catDefault": "Built-in",
+  "catCustom": "Custom · unused",
+  "catUsed": "Custom · {n} records",
+  "@catUsed": {
+    "description": "Auto-ported from i18n.js key \"catUsed\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "catCreated": "{n} created",
+  "@catCreated": {
+    "description": "Auto-ported from i18n.js key \"catCreated\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "catDeleted": "{n} deleted",
+  "@catDeleted": {
+    "description": "Auto-ported from i18n.js key \"catDeleted\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "noStore": "No store",
+  "deleteStore": "Delete store",
+  "deleteStoreNote": "Only possible while no receipts are linked.",
+  "storeDeleted": "{n} deleted",
+  "@storeDeleted": {
+    "description": "Auto-ported from i18n.js key \"storeDeleted\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "tabHome": "Home",
+  "tabAnalytics": "Analytics",
+  "tabStores": "Stores",
+  "tabHistory": "History",
+  "tabSettings": "Settings",
+  "settings": "Settings",
+  "currency": "Currency",
+  "categories": "Categories",
+  "language": "Language",
+  "appearance": "Appearance",
+  "deleteAll": "Delete all data",
+  "privacy": "Privacy",
+  "about": "About SpendLens",
+  "done": "Done",
+  "langNote": "Changes the app language. Receipts keep their original text.",
+  "currencyNote": "Used for totals and analytics. Receipts keep their printed currency.",
+  "splashTag": "Your receipts, understood.",
+  "onDevice": "Everything stays on {device}",
+  "@onDevice": {
+    "description": "Auto-ported from i18n.js key \"onDevice\".",
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "skip": "Skip",
+  "noAccount": "No account",
+  "noUpload": "No upload",
+  "offline": "Offline",
+  "yourCurrency": "Your currency",
+  "continue_": "Continue",
+  "getStarted": "Get Started",
+  "onb0Title": "Know where your money goes.",
+  "onb0Point0": "Every receipt becomes structured spending",
+  "onb0Point1": "Categories and totals, no typing",
+  "onb0Point2": "Prices tracked over time",
+  "onb1Title": "Scan receipts in seconds.",
+  "onb1Point0": "Point the camera, the receipt is found",
+  "onb1Point1": "Text is read on your iPhone",
+  "onb1Point2": "Products and prices extracted automatically",
+  "onb2Title": "Your data stays on your device.",
+  "onb2Point0": "Local-first, works offline",
+  "onb2Point1": "No account required",
+  "onb2Point2": "Cloud sync can be enabled later",
+  "spentThisMonth": "spent this month",
+  "vs": "vs {m}",
+  "@vs": {
+    "description": "Auto-ported from i18n.js key \"vs\".",
+    "placeholders": {
+      "m": {
+        "type": "String"
+      }
+    }
+  },
+  "scanReceipt": "Scan Receipt",
+  "addCash": "Add Cash Expense",
+  "all": "All",
+  "recent": "Recent",
+  "seeAll": "See all",
+  "onDeviceShort": "On device",
+  "synced": "Synced",
+  "average": "Average",
+  "purchases": "Purchases",
+  "thisMonth": "this month",
+  "cash": "Cash",
+  "ofSpending": "of spending",
+  "insights": "Insights",
+  "cashVsReceipts": "Cash vs receipts",
+  "receiptsLower": "receipts",
+  "cashLower": "cash",
+  "period": "Period",
+  "periodRange": "Records from {a} to {b}",
+  "@periodRange": {
+    "description": "Auto-ported from i18n.js key \"periodRange\".",
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfToast": "{m} report · PDF ready to share",
+  "@pdfToast": {
+    "description": "Auto-ported from i18n.js key \"pdfToast\".",
+    "placeholders": {
+      "m": {
+        "type": "String"
+      }
+    }
+  },
+  "purchase1": "{n} purchase",
+  "@purchase1": {
+    "description": "Auto-ported from i18n.js key \"purchase1\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "purchaseN": "{n} purchases",
+  "@purchaseN": {
+    "description": "Auto-ported from i18n.js key \"purchaseN\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "top": "top",
+  "ins1": "Food represents {p}% of your spending.",
+  "@ins1": {
+    "description": "Auto-ported from i18n.js key \"ins1\".",
+    "placeholders": {
+      "p": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "ins2": "{category} spending {direction} {percent}% this month.",
+  "@ins2": {
+    "description": "Auto-ported from i18n.js key \"ins2\".",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "direction": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "ins3": "Your average purchase increased from {a} to {b} {c}.",
+  "@ins3": {
+    "description": "Auto-ported from i18n.js key \"ins3\".",
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      },
+      "c": {
+        "type": "String"
+      }
+    }
+  },
+  "insA1": "{category} represented {percent}% of your spending.",
+  "@insA1": {
+    "description": "Auto-ported from i18n.js key \"insA1\".",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "insA2": "{category} spending fell {percent}% in {month}.",
+  "@insA2": {
+    "description": "Auto-ported from i18n.js key \"insA2\".",
+    "placeholders": {
+      "category": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "month": {
+        "type": "String"
+      }
+    }
+  },
+  "insA3": "Your average purchase was 157 {c}.",
+  "@insA3": {
+    "description": "Auto-ported from i18n.js key \"insA3\".",
+    "placeholders": {
+      "c": {
+        "type": "String"
+      }
+    }
+  },
+  "catFood": "Food",
+  "catTransport": "Transport",
+  "catHousehold": "Household",
+  "catRestaurantsCoffee": "Restaurants & Coffee",
+  "catRestaurants": "Restaurants",
+  "catHealth": "Health",
+  "catOther": "Other",
+  "months0": "January",
+  "months1": "February",
+  "months2": "March",
+  "months3": "April",
+  "months4": "May",
+  "months5": "June",
+  "months6": "July",
+  "months7": "August",
+  "months8": "September",
+  "months9": "October",
+  "months10": "November",
+  "months11": "December",
+  "monthsShort0": "Jan",
+  "monthsShort1": "Feb",
+  "monthsShort2": "Mar",
+  "monthsShort3": "Apr",
+  "monthsShort4": "May",
+  "monthsShort5": "Jun",
+  "monthsShort6": "Jul",
+  "monthsShort7": "Aug",
+  "monthsShort8": "Sep",
+  "monthsShort9": "Oct",
+  "monthsShort10": "Nov",
+  "monthsShort11": "Dec",
+  "today": "Today",
+  "yesterday": "Yesterday",
+  "receipt": "Receipt",
+  "cashType": "Cash",
+  "receipts": "Receipts",
+  "newStore": "New store",
+  "storesIntro": "Built automatically from your receipts. Open a store to see its products and how their prices compare elsewhere.",
+  "visits": "Visits",
+  "spent": "Spent",
+  "products": "Products",
+  "productsHere": "Products bought here",
+  "cmpNote": "Comparisons use your own receipts from the last 60 days, not live store prices.",
+  "storeMeta": "{v} visits · {p} products",
+  "@storeMeta": {
+    "description": "Auto-ported from i18n.js key \"storeMeta\".",
+    "placeholders": {
+      "v": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "p": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "storeEmpty": "{t} · no receipts yet",
+  "@storeEmpty": {
+    "description": "Auto-ported from i18n.js key \"storeEmpty\".",
+    "placeholders": {
+      "t": {
+        "type": "String"
+      }
+    }
+  },
+  "bought": "Bought {n}×",
+  "@bought": {
+    "description": "Auto-ported from i18n.js key \"bought\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "byWeight": "by weight",
+  "cheapestOf": "Cheapest of {n} stores",
+  "@cheapestOf": {
+    "description": "Auto-ported from i18n.js key \"cheapestOf\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "cheaperBy": "{s} {p} · cheaper by {d}",
+  "@cheaperBy": {
+    "description": "Auto-ported from i18n.js key \"cheaperBy\".",
+    "placeholders": {
+      "s": {
+        "type": "String"
+      },
+      "p": {
+        "type": "int",
+        "format": "decimalPattern"
+      },
+      "d": {
+        "type": "String"
+      }
+    }
+  },
+  "cheaperHere": "{s} {p} /kg · cheaper here",
+  "@cheaperHere": {
+    "description": "Auto-ported from i18n.js key \"cheaperHere\".",
+    "placeholders": {
+      "s": {
+        "type": "String"
+      },
+      "p": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "onlyHere": "Only bought here",
+  "storeTypeSupermarket": "Supermarket",
+  "storeTypeMarket": "Market",
+  "storeTypePharmacy": "Pharmacy",
+  "storeTypeCafe": "Café",
+  "storeTypeOther": "Other",
+  "storeTypeStore": "Store",
+  "chooseStore": "Choose store",
+  "searchStorePh": "Search or type a new store",
+  "create": "Create",
+  "newStoreHint": "New store · future receipts will link to it",
+  "noMatch": "No matching store yet",
+  "createNewStore": "Create new store",
+  "createNewStoreSub": "Name, receipt alias and type",
+  "cancel": "Cancel",
+  "newStoreNote": "Receipts whose store name matches will be linked here automatically.",
+  "name": "Name",
+  "namePh": "e.g. Nr.1, Green Hills",
+  "alias": "Also appears on receipts as",
+  "aliasPh": "Optional · e.g. NR1 SRL",
+  "type": "Type",
+  "createStore": "Create store",
+  "storeCreated": "{n} created and selected",
+  "@storeCreated": {
+    "description": "Auto-ported from i18n.js key \"storeCreated\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "storeAdded": "{n} added · receipts will link automatically",
+  "@storeAdded": {
+    "description": "Auto-ported from i18n.js key \"storeAdded\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "searchPh": "Search receipts, products, stores",
+  "profile": "Profile",
+  "keepSafe": "Keep your data safe",
+  "keepSafeBody": "Your receipts live only on {device}. Sign in to back them up and sync across devices. Nothing is uploaded until you do.",
+  "@keepSafeBody": {
+    "description": "Auto-ported from i18n.js key \"keepSafeBody\".",
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "continueGoogle": "Continue with Google",
+  "continueApple": "Continue with Apple",
+  "account": "Account",
+  "plan": "Plan",
+  "cloudSync": "Cloud sync",
+  "upToDate": "Up to date",
+  "signOut": "Sign out",
+  "yourData": "Your data",
+  "exportBackup": "Export backup",
+  "exportSheet": "Export spreadsheet",
+  "importBackup": "Import backup",
+  "exportNote": "Exports are shared through the iOS share sheet. Imports are validated before anything is restored.",
+  "localAccount": "Local account",
+  "notSignedIn": "Not signed in · on device only",
+  "signedInGoogle": "Signed in with Google",
+  "storage": "Storage",
+  "cloudStorage": "Cloud storage",
+  "unlimited": "Unlimited · on device",
+  "storageOf": "{a} of {b}",
+  "@storageOf": {
+    "description": "Auto-ported from i18n.js key \"of\".",
+    "placeholders": {
+      "a": {
+        "type": "String"
+      },
+      "b": {
+        "type": "String"
+      }
+    }
+  },
+  "limitFree": "Receipt photos and data are backed up to your account. Free accounts include 100 MB.",
+  "limitPremium": "Premium: {quota} of cloud storage, unlimited history and multi-device sync.",
+  "@limitPremium": {
+    "description": "Auto-ported from i18n.js key \"limitPremium\".",
+    "placeholders": {
+      "quota": {
+        "type": "String"
+      }
+    }
+  },
+  "limitLocal": "Everything is stored on {device} with no limit. Sign in to back it up.",
+  "@limitLocal": {
+    "description": "Auto-ported from i18n.js key \"limitLocal\".",
+    "placeholders": {
+      "device": {
+        "type": "String"
+      }
+    }
+  },
+  "free": "Free",
+  "premium": "Premium",
+  "toPremium": "Upgrade to Premium · {quota} cloud storage",
+  "@toPremium": {
+    "description": "Auto-ported from i18n.js key \"toPremium\".",
+    "placeholders": {
+      "quota": {
+        "type": "String"
+      }
+    }
+  },
+  "tPremiumOn": "Premium activated · {quota}",
+  "@tPremiumOn": {
+    "description": "Auto-ported from i18n.js key \"tPremiumOn\".",
+    "placeholders": {
+      "quota": {
+        "type": "String"
+      }
+    }
+  },
+  "tPremiumOff": "Back on Free plan · {quota}",
+  "@tPremiumOff": {
+    "description": "Auto-ported from i18n.js key \"tPremiumOff\".",
+    "placeholders": {
+      "quota": {
+        "type": "String"
+      }
+    }
+  },
+  "tSignedIn": "Signed in · sync enabled",
+  "tSignedOut": "Signed out · data kept on device",
+  "tBackup": "Backup ready · {filename}",
+  "@tBackup": {
+    "description": "Auto-ported from i18n.js key \"tBackup\".",
+    "placeholders": {
+      "filename": {
+        "type": "String"
+      }
+    }
+  },
+  "tCsv": "Spreadsheet ready · {count} rows",
+  "@tCsv": {
+    "description": "Auto-ported from i18n.js key \"tCsv\".",
+    "placeholders": {
+      "count": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "tImport": "Choose a backup file to validate",
+  "dark": "Dark",
+  "light": "Light",
+  "edit": "Edit",
+  "note": "Note",
+  "receiptPhoto": "Receipt photo",
+  "view": "View",
+  "retake": "Retake",
+  "chooseLibrary": "Choose from library",
+  "share": "Share",
+  "cashExpense": "Cash expense",
+  "deleteReceipt": "Delete receipt",
+  "deleteExpense": "Delete expense",
+  "items": "{n} items",
+  "@items": {
+    "description": "Auto-ported from i18n.js key \"items\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "photoStored": "receipt photo · stored on device",
+  "photoUpdated": "receipt photo · updated just now",
+  "photoTitle": "{n} · receipt",
+  "@photoTitle": {
+    "description": "Auto-ported from i18n.js key \"photoTitle\".",
+    "placeholders": {
+      "n": {
+        "type": "int",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "tRetake": "Camera opens to retake · photo replaced",
+  "tLibrary": "Photo replaced from library",
+  "tShare": "Sharing receipt photo…",
+  "tOpenReceipt": "Open the receipt to correct items",
+  "tDeleted": "{t} deleted · {a}",
+  "@tDeleted": {
+    "description": "Auto-ported from i18n.js key \"tDeleted\".",
+    "placeholders": {
+      "t": {
+        "type": "String"
+      },
+      "a": {
+        "type": "String"
+      }
+    }
+  },
+  "expense": "Expense",
+  "amount": "Amount",
+  "category": "Category",
+  "optional": "Optional",
+  "date": "Date",
+  "save": "Save",
+  "tCashAdded": "{a} added",
+  "@tCashAdded": {
+    "description": "Auto-ported from i18n.js key \"tCashAdded\".",
+    "placeholders": {
+      "a": {
+        "type": "String"
+      }
+    }
+  },
+  "receiptDetected": "Receipt detected",
+  "looking": "Looking for a receipt…",
+  "holdStill": "Hold still",
+  "capturing": "Capturing…",
+  "keepInFrame": "Keep the whole receipt inside the frame",
+  "autoCapture": "Capturing automatically",
+  "flashAuto": "Auto",
+  "flashOn": "On",
+  "flashOff": "Off",
+  "steps0": "Detecting receipt",
+  "steps1": "Reading text",
+  "steps2": "Finding products",
+  "steps3": "Checking prices",
+  "reviewReceipt": "Review receipt",
+  "autoDetected": "Auto-detected",
+  "addItem": "Add item",
+  "qty": "Qty",
+  "total": "Total",
+  "usedForPrice": "used for price history",
+  "subtotal": "Subtotal",
+  "discount": "Discount",
+  "itemsMatch": "Items add up to the printed total",
+  "itemsDiffer": "Items differ from printed total by {d}",
+  "@itemsDiffer": {
+    "description": "Auto-ported from i18n.js key \"itemsDiffer\".",
+    "placeholders": {
+      "d": {
+        "type": "String"
+      }
+    }
+  },
+  "blurry": "Blurry or cut off? Retake the photo and the receipt is read again.",
+  "correct": "Correct",
+  "saveReceipt": "Save Receipt",
+  "tSaved": "Receipt saved · {a}",
+  "@tSaved": {
+    "description": "Auto-ported from i18n.js key \"tSaved\".",
+    "placeholders": {
+      "a": {
+        "type": "String"
+      }
+    }
+  },
+  "checkThis": "Check this · read as \"{r}\" · {q}",
+  "@checkThis": {
+    "description": "Auto-ported from i18n.js key \"checkThis\".",
+    "placeholders": {
+      "r": {
+        "type": "String"
+      },
+      "q": {
+        "type": "String"
+      }
+    }
+  },
+  "readAs": "Read as \"{r}\"",
+  "@readAs": {
+    "description": "Auto-ported from i18n.js key \"readAs\".",
+    "placeholders": {
+      "r": {
+        "type": "String"
+      }
+    }
+  },
+  "lowConf": "low confidence",
+  "addedManually": "added manually",
+  "correctReceipt": "Correct receipt",
+  "editIntro": "Anything read incorrectly can be fixed here. The original receipt text stays attached for price history.",
+  "store": "Store",
+  "change": "Change",
+  "time": "Time",
+  "itemsLabel": "Items",
+  "price": "Price",
+  "itemsTotal": "Items total",
+  "printedTotal": "Printed total",
+  "applyCorrections": "Apply corrections",
+  "thisDevice": "this device",
+  "trendIncreased": "increased",
+  "trendDecreased": "decreased"
+}

@@ -24,8 +24,8 @@ class CustomTextBtn extends StatelessWidget {
       child: child ??
           Text(
             text!,
-            style: textTheme.medium14.copyWith(
-              color: colorScheme.secondary,
+            style: textTheme.subhead15.copyWith(
+              color: colorScheme.sec,
             ),
           ),
     );

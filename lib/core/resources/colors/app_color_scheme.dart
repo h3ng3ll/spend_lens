@@ -2,141 +2,343 @@ import 'package:flutter/material.dart';
 
 import 'app_colors.dart';
 
-/// App color scheme.
+/// App color scheme (design_spendlens.md §4.2).
 ///
-/// M1 ships a correct minimal skeleton so both themes render distinctly and
-/// `AppColorScheme.of` never throws. Template bugs fixed here (per
-/// design_spendlens.md §9): the dark factory is a real dark palette, not an
-/// all-white stub; `of()` throws a plain English message, not Russian.
-/// M2 extends this to the full ~26-field set from design_spendlens.md §4.2.
+/// ~26 semantic fields mapped 1:1 to the two verified CSS token strings in
+/// `assets/SpendLens design system/SpendLens Prototype.dc.html` — light at
+/// line 779, dark at line 780. Both `.light()` and `.dark()` are real,
+/// distinct palettes (template bug fixed: the old dark factory was an
+/// all-white stub); `of()` throws a plain English message, not Russian
+/// (§9 bug 8).
+///
+/// `trendUp` / `trendDown` are their OWN semantic pair — never reuse `error`.
+/// Design rule verified at line 716/717: amber (`--warn`) when spending rose,
+/// green (`#6EE7B7`, identical in both themes) when it fell. Never red.
 @immutable
 class AppColorScheme extends ThemeExtension<AppColorScheme> {
-  /// The base color for app.
-  final Color primary;
+  // ── Surfaces ──────────────────────────────────────────────────────────
+  /// `--bg` — the app background, behind all scrollable content.
+  final Color bg;
 
-  /// The color of the elements that appears on top of a [primary].
-  final Color onPrimary;
+  /// `--card` — translucent card fill (glass cards over the background glow).
+  final Color card;
 
-  /// A secondary color for the app.
-  final Color secondary;
+  /// `--card-solid` — opaque card fill, used where a card must not show the
+  /// background glow through it.
+  final Color cardSolid;
 
-  /// The color of the elements that appears on top of a [secondary].
-  final Color onSecondary;
+  /// `--sheet` — bottom sheet / modal surface.
+  final Color sheet;
 
-  /// The color of inactive icon (in buttons/switchers... etc)
-  final Color inactiveSecondary;
+  // ── Hairlines / dividers ─────────────────────────────────────────────
+  /// `--line` — the default hairline/divider.
+  final Color line;
 
-  /// Surface colors affect surfaces of components, such as cards, sheets, and menus.
-  final Color surface;
+  /// `--line2` — a slightly stronger hairline (card borders).
+  final Color line2;
 
-  /// The color of the elements that appears on top of a [surface].
-  final Color onSurface;
+  // ── Form fields ──────────────────────────────────────────────────────
+  /// `--field` — default input/field fill.
+  final Color field;
 
-  /// The background color appears behind scrollable content.
-  final Color background;
+  /// `--field2` — a stronger field fill (e.g. the active tab/segment).
+  final Color field2;
 
-  /// The color of the elements that appears on top of a [background].
-  final Color onBackground;
+  /// `--field-dim` — the dimmest field fill (rarely-emphasized rows).
+  final Color fieldDim;
 
-  /// Color for showing errors.
+  // ── Text ─────────────────────────────────────────────────────────────
+  /// `--ink` — primary on-surface text.
+  final Color ink;
+
+  /// `--sec` — secondary text.
+  final Color sec;
+
+  /// `--ter` — tertiary text (meta lines, hints).
+  final Color ter;
+
+  /// `--dim` — dimmed/disabled text.
+  final Color dim;
+
+  /// `--onaccent` — text/icon painted on top of a SOLID accent fill.
+  final Color onAccent;
+
+  // ── Chrome ───────────────────────────────────────────────────────────
+  /// `--bar` — the translucent tab-bar / bottom-pill background.
+  final Color bar;
+
+  /// `--toastbg` — the toast pill background.
+  final Color toastBg;
+
+  /// `--toastink` — the toast pill text/icon color.
+  final Color toastInk;
+
+  // ── Accent / brand ───────────────────────────────────────────────────
+  /// `--accent` — the primary brand accent (violet family).
+  final Color accent;
+
+  /// `--accent2` — the secondary brand accent (teal/cyan family).
+  final Color accent2;
+
+  /// `--accent-tint` — `accent` at low alpha, for selected-wash fills.
+  final Color accentTint;
+
+  /// `--accent-line` — `accent` at a stronger alpha, for a wash's border.
+  final Color accentLine;
+
+  /// `--accent2-tint` — `accent2` at low alpha, for selected-wash fills.
+  final Color accent2Tint;
+
+  // ── Warn / trend ─────────────────────────────────────────────────────
+  /// `--warn` — destructive actions AND trend-up (spending rose). Amber, not
+  /// red — never confuse with `error` semantics.
+  final Color warn;
+
+  /// `--warn-tint` — `warn` at low alpha.
+  final Color warnTint;
+
+  /// Trend-up text color (spending rose this period). Equal to [warn] but
+  /// kept as its own field per design_spendlens.md §4.2 — never reuse
+  /// [error] for a spending increase.
+  final Color trendUp;
+
+  /// Trend-down text color (spending fell this period). `#6EE7B7`, identical
+  /// in both themes (verified at line 716/717).
+  final Color trendDown;
+
+  // ── Status ───────────────────────────────────────────────────────────
+  /// Semantic error color. Distinct from [warn]: [warn] is the destructive/
+  /// trend-up brand token, [error] is reserved for genuine failure states
+  /// (form validation, network errors) so the two vocabularies never merge.
   final Color error;
 
-  /// The color of the elements that appears on top of a [error].
+  /// The color of content painted on top of [error].
   final Color onError;
 
-  /// Color for showing selected items.
-  final Color selectedItem;
-
-  /// Color for showing unselected items.
-  final Color unselectedItem;
-
-  final Color onSurfaceVariant;
-
   const AppColorScheme._({
-    required this.primary,
-    required this.onPrimary,
-    required this.secondary,
-    required this.onSecondary,
-    required this.inactiveSecondary,
-    required this.surface,
-    required this.onSurface,
-    required this.background,
-    required this.onBackground,
+    required this.bg,
+    required this.card,
+    required this.cardSolid,
+    required this.sheet,
+    required this.line,
+    required this.line2,
+    required this.field,
+    required this.field2,
+    required this.fieldDim,
+    required this.ink,
+    required this.sec,
+    required this.ter,
+    required this.dim,
+    required this.onAccent,
+    required this.bar,
+    required this.toastBg,
+    required this.toastInk,
+    required this.accent,
+    required this.accent2,
+    required this.accentTint,
+    required this.accentLine,
+    required this.accent2Tint,
+    required this.warn,
+    required this.warnTint,
+    required this.trendUp,
+    required this.trendDown,
     required this.error,
     required this.onError,
-    required this.selectedItem,
-    required this.unselectedItem,
-    required this.onSurfaceVariant,
   });
 
-  /// Light theme of the app.
-  factory AppColorScheme.light() => AppColorScheme._(
-        primary: AppColors.accentDark.value,
-        onPrimary: AppColors.white.value,
-        secondary: AppColors.neutral900.value,
-        onSecondary: AppColors.white.value,
-        inactiveSecondary: AppColors.neutral100.value,
-        surface: AppColors.white.value,
-        onSurface: AppColors.neutral900.value,
-        background: AppColors.neutralWhite.value,
-        onBackground: AppColors.neutral900.value,
-        error: AppColors.warn.value,
-        onError: AppColors.white.value,
-        selectedItem: AppColors.accentDark.value,
-        unselectedItem: AppColors.neutral100.value,
-        onSurfaceVariant: AppColors.neutral900.value.withValues(alpha: 0.6),
+  /// Light theme — CSS token string verified at
+  /// `SpendLens Prototype.dc.html` line 779.
+  factory AppColorScheme.light() {
+    const ink = AppColors.inkLight;
+    const accent = AppColors.accentLight;
+    const accent2 = AppColors.accent2Light;
+    const warn = AppColors.warnLight;
+
+    return AppColorScheme._(
+      bg: AppColors.bgLight.value,
+      card: AppColors.white.value.withValues(alpha: 0.78),
+      cardSolid: AppColors.cardSolidLight.value,
+      sheet: AppColors.sheetLight.value,
+      line: ink.value.withValues(alpha: 0.08),
+      line2: ink.value.withValues(alpha: 0.12),
+      field: ink.value.withValues(alpha: 0.06),
+      field2: ink.value.withValues(alpha: 0.12),
+      fieldDim: ink.value.withValues(alpha: 0.03),
+      ink: ink.value,
+      sec: AppColors.secLight.value,
+      ter: AppColors.terLight.value,
+      dim: AppColors.dimLight.value,
+      onAccent: AppColors.onAccentLight.value,
+      bar: AppColors.white.value.withValues(alpha: 0.78),
+      toastBg: ink.value.withValues(alpha: 0.92),
+      toastInk: AppColors.toastInkLight.value,
+      accent: accent.value,
+      accent2: accent2.value,
+      accentTint: accent.value.withValues(alpha: 0.10),
+      accentLine: accent.value.withValues(alpha: 0.3),
+      accent2Tint: accent2.value.withValues(alpha: 0.10),
+      warn: warn.value,
+      warnTint: warn.value.withValues(alpha: 0.10),
+      trendUp: warn.value,
+      trendDown: AppColors.trendDown.value,
+      error: warn.value,
+      onError: AppColors.white.value,
+    );
+  }
+
+  /// Dark theme — CSS token string verified at
+  /// `SpendLens Prototype.dc.html` line 780.
+  factory AppColorScheme.dark() {
+    const ink = AppColors.inkDark;
+    const accent = AppColors.accentDark;
+    const accent2 = AppColors.accent2Dark;
+    const warn = AppColors.warnDark;
+
+    return AppColorScheme._(
+      bg: AppColors.bgDark.value,
+      card: AppColors.white.value.withValues(alpha: 0.06),
+      cardSolid: AppColors.cardSolidDark.value,
+      sheet: AppColors.sheetDark.value,
+      line: AppColors.white.value.withValues(alpha: 0.11),
+      line2: AppColors.white.value.withValues(alpha: 0.12),
+      field: AppColors.white.value.withValues(alpha: 0.08),
+      field2: AppColors.white.value.withValues(alpha: 0.14),
+      fieldDim: AppColors.white.value.withValues(alpha: 0.03),
+      ink: ink.value,
+      sec: AppColors.secDark.value,
+      ter: AppColors.terDark.value,
+      dim: AppColors.dimDark.value,
+      onAccent: AppColors.onAccentDark.value,
+      bar: AppColors.cardSolidDark.value.withValues(alpha: 0.7),
+      toastBg: AppColors.cardSolidDark.value.withValues(alpha: 0.92),
+      toastInk: AppColors.toastInkDark.value,
+      accent: accent.value,
+      accent2: accent2.value,
+      accentTint: accent.value.withValues(alpha: 0.14),
+      accentLine: accent.value.withValues(alpha: 0.3),
+      accent2Tint: accent2.value.withValues(alpha: 0.14),
+      warn: warn.value,
+      warnTint: warn.value.withValues(alpha: 0.14),
+      trendUp: warn.value,
+      trendDown: AppColors.trendDown.value,
+      error: warn.value,
+      onError: AppColors.bgDark.value,
+    );
+  }
+
+  /// Resolves a category's hue by its i18n key. Falls back to
+  /// [AppColors.categoryOther] for an unrecognized id, matching the design's
+  /// own catch-all category.
+  static Color categoryColor(String categoryId) {
+    switch (categoryId) {
+      case 'Food':
+        return AppColors.categoryFood.value;
+      case 'Transport':
+        return AppColors.categoryTransport.value;
+      case 'Household':
+        return AppColors.categoryHousehold.value;
+      case 'Restaurants & Coffee':
+      case 'Restaurants':
+        return AppColors.categoryRestaurantsCoffee.value;
+      case 'Health':
+        return AppColors.categoryHealth.value;
+      case 'Shopping':
+        return AppColors.categoryShopping.value;
+      case 'Entertainment':
+        return AppColors.categoryEntertainment.value;
+      case 'Utilities':
+        return AppColors.categoryUtilities.value;
+      case 'Travel':
+        return AppColors.categoryTravel.value;
+      case 'Education':
+        return AppColors.categoryEducation.value;
+      case 'Personal Care':
+        return AppColors.categoryPersonalCare.value;
+      case 'Other':
+      default:
+        return AppColors.categoryOther.value;
+    }
+  }
+
+  /// The single normalized brand gradient (135°, `#C4B5FD → #8EE3F5`),
+  /// exposed here (rather than only in `AppGradients`) so screens reading
+  /// `AppColorScheme.of(context)` can theme-vary it if a future design
+  /// revision ever wants a light-mode variant.
+  LinearGradient get accentGradient => LinearGradient(
+        begin: Alignment.topLeft,
+        end: Alignment.bottomRight,
+        colors: [AppColors.accentDark.value, AppColors.accent2Dark.value],
       );
 
-  /// Dark theme of the app.
-  factory AppColorScheme.dark() => AppColorScheme._(
-        primary: AppColors.accent.value,
-        onPrimary: AppColors.neutral900.value,
-        secondary: AppColors.white.value,
-        onSecondary: AppColors.neutral900.value,
-        inactiveSecondary: AppColors.neutral800.value,
-        surface: AppColors.neutral800.value,
-        onSurface: AppColors.white.value,
-        background: AppColors.neutral900.value,
-        onBackground: AppColors.white.value,
-        error: AppColors.warn.value,
-        onError: AppColors.white.value,
-        selectedItem: AppColors.accent.value,
-        unselectedItem: AppColors.neutral800.value,
-        onSurfaceVariant: AppColors.white.value.withValues(alpha: 0.6),
-      );
+  /// The design's radial background glow layers (verified at line 778/779 —
+  /// `--glow`), expressed as stacked [BoxShadow]-free radial gradients a
+  /// screen composes behind its content. Kept theme-aware: the dark glow is
+  /// stronger (28%/16% alpha) than the light glow (16%/12% alpha).
+  List<Color> get glowLayers => [
+        AppColors.accentDark.value,
+        AppColors.accent2Dark.value,
+      ];
 
   @override
   AppColorScheme copyWith({
-    Color? primary,
-    Color? onPrimary,
-    Color? secondary,
-    Color? onSecondary,
-    Color? inactiveSecondary,
-    Color? surface,
-    Color? onSurface,
-    Color? background,
-    Color? onBackground,
+    Color? bg,
+    Color? card,
+    Color? cardSolid,
+    Color? sheet,
+    Color? line,
+    Color? line2,
+    Color? field,
+    Color? field2,
+    Color? fieldDim,
+    Color? ink,
+    Color? sec,
+    Color? ter,
+    Color? dim,
+    Color? onAccent,
+    Color? bar,
+    Color? toastBg,
+    Color? toastInk,
+    Color? accent,
+    Color? accent2,
+    Color? accentTint,
+    Color? accentLine,
+    Color? accent2Tint,
+    Color? warn,
+    Color? warnTint,
+    Color? trendUp,
+    Color? trendDown,
     Color? error,
     Color? onError,
-    Color? selectedItem,
-    Color? unselectedItem,
-    Color? onSurfaceVariant,
   }) {
     return AppColorScheme._(
-      primary: primary ?? this.primary,
-      onPrimary: onPrimary ?? this.onPrimary,
-      secondary: secondary ?? this.secondary,
-      onSecondary: onSecondary ?? this.onSecondary,
-      inactiveSecondary: inactiveSecondary ?? this.inactiveSecondary,
-      surface: surface ?? this.surface,
-      onSurface: onSurface ?? this.onSurface,
-      background: background ?? this.background,
-      onBackground: onBackground ?? this.onBackground,
+      bg: bg ?? this.bg,
+      card: card ?? this.card,
+      cardSolid: cardSolid ?? this.cardSolid,
+      sheet: sheet ?? this.sheet,
+      line: line ?? this.line,
+      line2: line2 ?? this.line2,
+      field: field ?? this.field,
+      field2: field2 ?? this.field2,
+      fieldDim: fieldDim ?? this.fieldDim,
+      ink: ink ?? this.ink,
+      sec: sec ?? this.sec,
+      ter: ter ?? this.ter,
+      dim: dim ?? this.dim,
+      onAccent: onAccent ?? this.onAccent,
+      bar: bar ?? this.bar,
+      toastBg: toastBg ?? this.toastBg,
+      toastInk: toastInk ?? this.toastInk,
+      accent: accent ?? this.accent,
+      accent2: accent2 ?? this.accent2,
+      accentTint: accentTint ?? this.accentTint,
+      accentLine: accentLine ?? this.accentLine,
+      accent2Tint: accent2Tint ?? this.accent2Tint,
+      warn: warn ?? this.warn,
+      warnTint: warnTint ?? this.warnTint,
+      trendUp: trendUp ?? this.trendUp,
+      trendDown: trendDown ?? this.trendDown,
       error: error ?? this.error,
       onError: onError ?? this.onError,
-      selectedItem: selectedItem ?? this.selectedItem,
-      unselectedItem: unselectedItem ?? this.unselectedItem,
-      onSurfaceVariant: onSurfaceVariant ?? this.onSurfaceVariant,
     );
   }
 
@@ -148,24 +350,34 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
     if (other is! AppColorScheme) return this;
 
     return copyWith(
-      primary: Color.lerp(primary, other.primary, t),
-      onPrimary: Color.lerp(onPrimary, other.onPrimary, t),
-      secondary: Color.lerp(secondary, other.secondary, t),
-      onSecondary: Color.lerp(onSecondary, other.onSecondary, t),
-      inactiveSecondary: Color.lerp(
-        inactiveSecondary,
-        other.inactiveSecondary,
-        t,
-      ),
-      surface: Color.lerp(surface, other.surface, t),
-      onSurface: Color.lerp(onSurface, other.onSurface, t),
-      background: Color.lerp(background, other.background, t),
-      onBackground: Color.lerp(onBackground, other.onBackground, t),
+      bg: Color.lerp(bg, other.bg, t),
+      card: Color.lerp(card, other.card, t),
+      cardSolid: Color.lerp(cardSolid, other.cardSolid, t),
+      sheet: Color.lerp(sheet, other.sheet, t),
+      line: Color.lerp(line, other.line, t),
+      line2: Color.lerp(line2, other.line2, t),
+      field: Color.lerp(field, other.field, t),
+      field2: Color.lerp(field2, other.field2, t),
+      fieldDim: Color.lerp(fieldDim, other.fieldDim, t),
+      ink: Color.lerp(ink, other.ink, t),
+      sec: Color.lerp(sec, other.sec, t),
+      ter: Color.lerp(ter, other.ter, t),
+      dim: Color.lerp(dim, other.dim, t),
+      onAccent: Color.lerp(onAccent, other.onAccent, t),
+      bar: Color.lerp(bar, other.bar, t),
+      toastBg: Color.lerp(toastBg, other.toastBg, t),
+      toastInk: Color.lerp(toastInk, other.toastInk, t),
+      accent: Color.lerp(accent, other.accent, t),
+      accent2: Color.lerp(accent2, other.accent2, t),
+      accentTint: Color.lerp(accentTint, other.accentTint, t),
+      accentLine: Color.lerp(accentLine, other.accentLine, t),
+      accent2Tint: Color.lerp(accent2Tint, other.accent2Tint, t),
+      warn: Color.lerp(warn, other.warn, t),
+      warnTint: Color.lerp(warnTint, other.warnTint, t),
+      trendUp: Color.lerp(trendUp, other.trendUp, t),
+      trendDown: Color.lerp(trendDown, other.trendDown, t),
       error: Color.lerp(error, other.error, t),
       onError: Color.lerp(onError, other.onError, t),
-      selectedItem: Color.lerp(selectedItem, other.selectedItem, t),
-      unselectedItem: Color.lerp(unselectedItem, other.unselectedItem, t),
-      onSurfaceVariant: Color.lerp(onSurfaceVariant, other.onSurfaceVariant, t),
     );
   }
 

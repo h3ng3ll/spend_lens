@@ -39,7 +39,7 @@ class CustomChip extends StatelessWidget {
             : selected
                 ? null
                 : AppColors.white.value,
-        gradient: !selected ? null : AppGradients.bluePurple,
+        gradient: !selected ? null : AppGradients.accentGradient,
         child: label,
       ),
     );

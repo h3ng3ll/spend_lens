@@ -39,7 +39,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   @override
   Widget build(BuildContext context) {
     final colorScheme = AppColorScheme.of(context);
-    final iconColor = colorScheme.onPrimary;
+    final iconColor = colorScheme.ink;
 
     return AppBar(
       leadingWidth: leadingWidth,

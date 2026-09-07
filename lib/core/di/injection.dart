@@ -12,11 +12,14 @@ final getIt = GetIt.instance;
 /// app has no Firestore sync, no Realtime Database, no push messaging.
 /// Firebase here (M9) is Crashlytics + optional auth only.
 ///
-/// M1 registers only what compiles today (`LoggerService`, the single
-/// concrete `Env`). Later milestones add: `SettingsBloc` / `CategoriesBloc` /
-/// `StoresBloc` / `AuthBloc` / `SubscriptionBloc` (registerLazySingleton,
-/// dispatched from `main()`), repositories (M3+), and the 13 feature slices'
-/// own `init*Feature(getIt)` calls (M4+, per design_spendlens.md §5).
+/// M1 registered only what compiled then (`LoggerService`, the single
+/// concrete `Env`). M2 adds the settings slice's own `initSettingsFeature()`
+/// call (see `main.dart` — it runs separately because it returns the
+/// resolved `AppSettings` value `main()` needs to seed `SettingsBloc` before
+/// `runApp`). Later milestones add: `CategoriesBloc` / `StoresBloc` /
+/// `AuthBloc` / `SubscriptionBloc` (registerLazySingleton, dispatched from
+/// `main()`), repositories (M3+), and the remaining feature slices' own
+/// `init*Feature(getIt)` calls (M4+, per design_spendlens.md §5).
 Future<void> initDependencies() async {
   getIt.registerLazySingleton(() => LoggerService());
 

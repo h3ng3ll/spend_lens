@@ -15,11 +15,14 @@ class $AssetsIconsGen {
   /// File path: assets/icons/arrow_left_outlined.svg
   String get arrowLeftOutlined => 'assets/icons/arrow_left_outlined.svg';
 
+  /// File path: assets/icons/check.svg
+  String get check => 'assets/icons/check.svg';
+
   /// File path: assets/icons/user.svg
   String get user => 'assets/icons/user.svg';
 
   /// List of all assets
-  List<String> get values => [arrowLeftOutlined, user];
+  List<String> get values => [arrowLeftOutlined, check, user];
 }
 
 abstract final class Assets {

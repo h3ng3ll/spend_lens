@@ -49,7 +49,7 @@ final class UiMessageService {
   }) async {
     _show(
       message,
-      background: AppColors.neutral800.value,
+      background: AppColors.cardSolidDark.value,
       duration: duration,
     );
   }

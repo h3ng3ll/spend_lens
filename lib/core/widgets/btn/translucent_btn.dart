@@ -35,8 +35,8 @@ class TranslucentBtn extends StatelessWidget {
     final isActive = onPressed != null;
 
     final color = isActive
-        ? colorScheme.onPrimary
-        : colorScheme.onPrimary.withValues(
+        ? colorScheme.ink
+        : colorScheme.ink.withValues(
             alpha: 0.4,
           );
 
@@ -62,7 +62,7 @@ class TranslucentBtn extends StatelessWidget {
           },
         ),
         foregroundColor: WidgetStateProperty.all(
-          colorScheme.onPrimary,
+          colorScheme.ink,
         ),
         shadowColor: WidgetStateProperty.all(
           AppColors.transparent.value,
@@ -94,7 +94,7 @@ class TranslucentBtn extends StatelessWidget {
           ? child
           : Text(
               text!,
-              style: textTheme.regular14.copyWith(
+              style: textTheme.subhead15.copyWith(
                 color: color,
               ),
             ),

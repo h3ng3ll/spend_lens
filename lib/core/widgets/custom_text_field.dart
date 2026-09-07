@@ -103,8 +103,8 @@ class CustomTextField extends StatelessWidget {
       readOnly: readOnly,
       maxLines: maxLines,
       style: style ??
-          textTheme.regular12.copyWith(
-            color: colorScheme.secondary,
+          textTheme.body17.copyWith(
+            color: colorScheme.ink,
             wordSpacing: 2.0,
           ),
       scrollController: scrollController,
@@ -134,7 +134,7 @@ class CustomTextField extends StatelessWidget {
           ) {
             return CupertinoButton(
               borderRadius: null,
-              color: colorScheme.secondary,
+              color: colorScheme.sec,
               onPressed: buttonItem.onPressed,
               padding: const EdgeInsets.all(10.0),
               pressedOpacity: 0.7,
@@ -144,7 +144,7 @@ class CustomTextField extends StatelessWidget {
                     context,
                     buttonItem,
                   ),
-                  style: textTheme.regular14.copyWith(
+                  style: textTheme.body17.copyWith(
                     color: AppColors.black.value,
                     wordSpacing: 2.0,
                   ),
@@ -170,7 +170,7 @@ class CustomTextField extends StatelessWidget {
               vertical: 7.0,
             ),
         hintStyle: hintStyle ??
-            textTheme.regular12.copyWith(
+            textTheme.body17.copyWith(
               color: AppColors.white.value.withValues(
                 alpha: 0.6,
               ),
@@ -189,7 +189,7 @@ class CustomTextField extends StatelessWidget {
         border: border ??
             OutlineInputBorder(
               borderSide: BorderSide(
-                color: colorScheme.primary,
+                color: colorScheme.accent,
               ),
               borderRadius: borderRadius,
             ),
@@ -208,7 +208,7 @@ class CustomTextField extends StatelessWidget {
               ),
               borderRadius: borderRadius,
             ),
-        errorStyle: textTheme.regular14.copyWith(
+        errorStyle: textTheme.body17.copyWith(
           color: colorScheme.onError,
         ),
         prefix: prefix,

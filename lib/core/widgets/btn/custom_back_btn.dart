@@ -43,7 +43,7 @@ class CustomBackBtn extends StatelessWidget {
           width: width ?? 30.0,
           height: height ?? 30.0,
           colorFilter: ColorFilter.mode(
-            colorScheme.secondary,
+            colorScheme.ink,
             BlendMode.srcIn,
           ),
         ),
