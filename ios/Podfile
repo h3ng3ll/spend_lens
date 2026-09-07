@@ -1,5 +1,17 @@
-# Uncomment this line to define a global platform for your project
-# platform :ios, '13.0'
+# EXPLICIT — never left commented out, because CocoaPods then silently
+# assumes iOS 13.0 and the pod install fails on a dependency floor.
+#
+# 15.5 is the HIGHEST floor among this app's plugins, not the first one the
+# error message happens to name:
+#   google_mlkit_* (text_recognition/commons/document_scanner)  15.5  <-- binding
+#   firebase_auth / firebase_core / firebase_crashlytics        15.0
+#   apphud                                                      15.0
+#   google_sign_in_ios 13.0 · permission_handler_apple 12.0 · sign_in_with_apple 12.0
+#
+# Setting only the 15.0 that CocoaPods reported first would clear THIS error
+# and fail again on the next pod install — the same partial-rollout shape that
+# bit the Android minSdk fix (apphud's floor of 26) earlier in this build.
+platform :ios, '15.5'
 
 # CocoaPods analytics sends network stats synchronously affecting flutter build latency.
 ENV['COCOAPODS_DISABLE_STATS'] = 'true'
