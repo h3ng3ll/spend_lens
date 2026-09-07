@@ -646,3 +646,32 @@ probe awaited with no bound. Worth attributing if the Developer confirms it.
   a negative-control check and had done one (via `git stash`, which reverted whole files
   and happened to trip the two sites whose call shape the regex DID match). A
   single-site, surgical break is the sharper instrument, and it is what exposed this.
+- ⛔ **UPDATE — a THIRD mechanism, found by attacking the REPAIRED gate.** My two fixes
+  (regex + scan anchor) were both correct and still left the gate partially vacuous. A
+  surgical break of exactly one `.timeout(...)` per file, one file at a time, gave:
+  `method_channel_receipt_detector` RED · `scan_capability_service` RED ·
+  `method_channel_ocr_service` RED · `camera_preview_layer` RED ·
+  ⛔ **`apphud_subscription_repository` GREEN** · ⛔ **`google_sign_in_service` GREEN**.
+  **Root cause was SCOPE, not syntax:** the pattern list was still
+  `['invokeMethod', 'availableCameras']`, and `Apphud.start`,
+  `Apphud.hasPremiumAccess` and `GoogleSignIn.initialize` tunnel to a native channel
+  *inside the plugin*, so the literal `invokeMethod` never appears in our source.
+  ⭐ **The gate was blind to precisely the two calls it had been written in response to** —
+  the ones that actually hung this app. Fixed by extracting `_kBoundedCallPatterns` and
+  adding those shapes; the same surgical sweep now turns all 6 files RED, and the gate
+  covers 8 sites (from 0 → 6 → 8 across the three repairs).
+- ⛔ **So this ONE gate failed three times, by three different mechanisms, with one
+  consequence:** unreachable path → zero matched sites → out-of-scope call shapes. Each
+  repair was correct and each left a hole.
+- ⭐ **SHARPENED LESSON (supersedes "test your gate"):** *a gate must be broken at EVERY
+  site it claims to cover, not at one, and the negative control must be SURGICAL.* Two
+  independent coarse controls failed identically here — a `git stash` that reverted whole
+  files, and a shell loop that silently modified nothing because zsh did not word-split an
+  unquoted variable. ⛔ **An unverified negative control is indistinguishable from a
+  passing one.** Both were caught only by checking `git status` and the `.timeout(` count
+  rather than trusting the loop's own output.
+- **Cross-project applicability:** nothing here is SpendLens-specific. Source-scanning
+  gates are grep-based by construction (this repo's own rules note comments are stripped
+  before matching), so the whole family fails this way: a pattern that matches nothing, a
+  scan window that truncates, or a pattern list that omits the very call shape the gate
+  exists to police.
