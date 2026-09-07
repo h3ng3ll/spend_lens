@@ -28,6 +28,7 @@
     }
   },
   "newCategory": "New category",
+  "categoryEmpty": "No categories yet",
   "createCategory": "Create category",
   "newCatPh": "New category name",
   "searchCatPh": "Search or type a new category",
@@ -90,7 +91,7 @@
   "appearance": "Appearance",
   "deleteAll": "Delete all data",
   "privacy": "Privacy",
-  "about": "About SpendLens",
+  "about": "About",
   "done": "Done",
   "langNote": "Changes the app language. Receipts keep their original text.",
   "currencyNote": "Used for totals and analytics. Receipts keep their printed currency.",

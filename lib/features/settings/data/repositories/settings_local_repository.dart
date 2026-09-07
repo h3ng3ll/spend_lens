@@ -21,16 +21,16 @@ class SettingsLocalRepository implements ISettingsLocalRepository {
   @override
   Future<AppSettings> get() async {
     final box = await _box;
-    return box.get(ISettingsLocalRepository.settingsKey) ??
-        const AppSettings();
+    return box.get(ISettingsLocalRepository.settingsKey) ?? const AppSettings();
   }
 
   @override
   Stream<AppSettings> watch() async* {
     final box = await _box;
-    yield box.get(ISettingsLocalRepository.settingsKey) ??
-        const AppSettings();
-    yield* box.watch(key: ISettingsLocalRepository.settingsKey).map(
+    yield box.get(ISettingsLocalRepository.settingsKey) ?? const AppSettings();
+    yield* box
+        .watch(key: ISettingsLocalRepository.settingsKey)
+        .map(
           (_) =>
               box.get(ISettingsLocalRepository.settingsKey) ??
               const AppSettings(),

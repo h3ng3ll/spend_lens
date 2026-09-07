@@ -49,10 +49,7 @@ class CurrencyOptionRow extends StatelessWidget {
                   AppIcons.check,
                   width: 20.0,
                   height: 20.0,
-                  colorFilter: ColorFilter.mode(
-                    scheme.accent,
-                    BlendMode.srcIn,
-                  ),
+                  colorFilter: ColorFilter.mode(scheme.accent, BlendMode.srcIn),
                 ),
             ],
           ),

@@ -44,6 +44,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get newCategory => 'Nueva categoría';
 
   @override
+  String get categoryEmpty => 'Aún no hay categorías';
+
+  @override
   String get createCategory => 'Crear categoría';
 
   @override
@@ -152,7 +155,7 @@ class AppLocalizationsEs extends AppLocalizations {
   String get privacy => 'Privacidad';
 
   @override
-  String get about => 'Acerca de SpendLens';
+  String get about => 'Acerca de';
 
   @override
   String get done => 'Listo';

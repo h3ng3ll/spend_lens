@@ -38,27 +38,23 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     required this._watchSettingsUseCase,
     required this._saveSettingsUseCase,
   }) : super(
-          SettingsState(
-            status: ESettingsStatus.ready,
-            settings: initialSettings,
-          ),
-        ) {
+         SettingsState(
+           status: ESettingsStatus.ready,
+           settings: initialSettings,
+         ),
+       ) {
     on<_Watch>(_onWatch);
     on<_SetLocale>(_onSetLocale);
     on<_SetCurrency>(_onSetCurrency);
     on<_ToggleTheme>(_onToggleTheme);
+    on<_CompleteOnboarding>(_onCompleteOnboarding);
   }
 
-  Future<void> _onWatch(
-    _Watch event,
-    Emitter<SettingsState> emit,
-  ) async {
+  Future<void> _onWatch(_Watch event, Emitter<SettingsState> emit) async {
     await emit.forEach<AppSettings>(
       _watchSettingsUseCase(),
-      onData: (settings) => state.copyWith(
-        status: ESettingsStatus.ready,
-        settings: settings,
-      ),
+      onData: (settings) =>
+          state.copyWith(status: ESettingsStatus.ready, settings: settings),
       onError: (error, stackTrace) => state.copyWith(
         status: ESettingsStatus.failed,
         errorMessage: error.toString(),
@@ -97,6 +93,17 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
         : EAppThemeMode.dark;
     final updated = state.settings.copyWith(themeMode: next);
 
+    emit(state.copyWith(settings: updated));
+    await _saveSettingsUseCase(updated);
+  }
+
+  Future<void> _onCompleteOnboarding(
+    _CompleteOnboarding event,
+    Emitter<SettingsState> emit,
+  ) async {
+    if (state.settings.onboardingCompleted) return;
+
+    final updated = state.settings.copyWith(onboardingCompleted: true);
     emit(state.copyWith(settings: updated));
     await _saveSettingsUseCase(updated);
   }

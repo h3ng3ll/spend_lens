@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:go_router/go_router.dart';
 
 import 'core/bloc/app_observer.dart';
 import 'core/di/injection.dart';
@@ -8,11 +9,15 @@ import 'core/hive/hive_initializer.dart';
 import 'core/resources/app_locale.dart';
 import 'core/resources/app_theme.dart';
 import 'core/resources/localization/gen/app_localizations.dart';
+import 'core/routes/init_router/init_router.dart';
 import 'core/services/ui_message_service.dart';
 import 'features/analytics/di/analytics_injection.dart';
+import 'features/auth/di/auth_injection.dart';
+import 'features/auth/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'features/category/di/category_injection.dart';
 import 'features/category/domain/repositories/i_category_local_repository.dart';
 import 'features/category/domain/use_cases/seed_categories_use_case.dart';
+import 'features/category/presentation/bloc/categories_bloc/categories_bloc.dart';
 import 'features/expense/di/expense_injection.dart';
 import 'features/product/di/product_injection.dart';
 import 'features/receipt/di/receipt_injection.dart';
@@ -21,18 +26,21 @@ import 'features/settings/domain/use_cases/save_settings_use_case.dart';
 import 'features/settings/domain/use_cases/watch_settings_use_case.dart';
 import 'features/settings/presentation/bloc/settings_bloc/settings_bloc.dart';
 import 'features/store/di/store_injection.dart';
+import 'features/store/domain/repositories/i_store_local_repository.dart';
+import 'features/store/presentation/bloc/stores_bloc/stores_bloc.dart';
 
-final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
-
-/// M2 bootstrap: Hive + DI + `.env` load, both themes wired, `SettingsBloc`
-/// seeded SYNCHRONOUSLY before `runApp` (recorded global bug
-/// `splash-first-frame-default-theme-async-settings` — the persisted
-/// locale/theme MUST be resolved before the first frame, never left to
-/// arrive only via an awaited stream after the app is already showing).
+/// M4 bootstrap: the router lands (design_spendlens.md §5, 13 brick slices +
+/// rename pass + one build_runner; DI resolves) and the four app-lifetime
+/// blocs the spec names — `SettingsBloc` (M2), `CategoriesBloc`,
+/// `StoresBloc`, `AuthBloc` — are all `registerLazySingleton` and dispatched
+/// exactly once, HERE, never re-dispatched from a screen's `initState`
+/// (BLoC rule A3.8). `SubscriptionBloc` is NOT registered yet — it lives
+/// under `core/services/subscription/` and lands at M9 with the real Apphud
+/// wiring (design_spendlens.md §6), so registering an empty shell of it now
+/// would be dead infrastructure.
 ///
-/// No router yet (lands in M5 with `go_router_builder`); no splash/
-/// onboarding (M10); no Firebase (M9, Crashlytics + optional auth only) —
-/// see design_spendlens.md §10 for the full phasing table.
+/// No splash/onboarding native assets yet (M10) — see `splash_page.dart`'s
+/// doc comment for the exact M4→M10 boundary.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
@@ -45,8 +53,7 @@ void main() async {
   // never left for an async fetch to deliver after the first frame.
   final initialSettings = await initSettingsFeature();
 
-  // M3: the remaining 6 data-layer slices. Each registers a repository only
-  // — blocs land in M4/M5 (design_spendlens.md §5).
+  // M3: the remaining data-layer slices. Each registers a repository only.
   await initCategoryFeature();
   initStoreFeature();
   initProductFeature();
@@ -66,6 +73,9 @@ void main() async {
     dataCleared: initialSettings.dataCleared,
   );
 
+  // M4: the app-lifetime blocs (design_spendlens.md §5).
+  initAuthFeature();
+
   final settingsBloc = SettingsBloc(
     initialSettings: initialSettings,
     watchSettingsUseCase: getIt<WatchSettingsUseCase>(),
@@ -73,26 +83,68 @@ void main() async {
   )..add(const SettingsEvent.watch());
   getIt.registerLazySingleton<SettingsBloc>(() => settingsBloc);
 
+  final categoriesBloc = CategoriesBloc(
+    categoryLocalRepository: getIt<ICategoryLocalRepository>(),
+  )..add(const CategoriesEvent.watch());
+  getIt.registerLazySingleton<CategoriesBloc>(() => categoriesBloc);
+
+  final storesBloc = StoresBloc(
+    storeLocalRepository: getIt<IStoreLocalRepository>(),
+  )..add(const StoresEvent.watch());
+  getIt.registerLazySingleton<StoresBloc>(() => storesBloc);
+
+  final authBloc = getIt<AuthBloc>();
+
   Bloc.observer = AppObserver.instance();
+
+  final router = initRouter(
+    refreshListenable: GoRouterRefreshListenable(
+      settingsBloc.stream.map((state) => state.settings.onboardingCompleted),
+      onboardingCompleted: initialSettings.onboardingCompleted,
+    ),
+  );
 
   UiMessageService.attach(rootNavigatorKey);
 
-  runApp(SpendLensApp(settingsBloc: settingsBloc));
+  runApp(
+    SpendLensApp(
+      settingsBloc: settingsBloc,
+      categoriesBloc: categoriesBloc,
+      storesBloc: storesBloc,
+      authBloc: authBloc,
+      router: router,
+    ),
+  );
 }
 
 class SpendLensApp extends StatelessWidget {
   final SettingsBloc settingsBloc;
+  final CategoriesBloc categoriesBloc;
+  final StoresBloc storesBloc;
+  final AuthBloc authBloc;
+  final GoRouter router;
 
-  const SpendLensApp({super.key, required this.settingsBloc});
+  const SpendLensApp({
+    super.key,
+    required this.settingsBloc,
+    required this.categoriesBloc,
+    required this.storesBloc,
+    required this.authBloc,
+    required this.router,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<SettingsBloc>.value(
-      value: settingsBloc,
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider<SettingsBloc>.value(value: settingsBloc),
+        BlocProvider<CategoriesBloc>.value(value: categoriesBloc),
+        BlocProvider<StoresBloc>.value(value: storesBloc),
+        BlocProvider<AuthBloc>.value(value: authBloc),
+      ],
       child: BlocBuilder<SettingsBloc, SettingsState>(
         builder: (context, state) {
-          return MaterialApp(
-            navigatorKey: rootNavigatorKey,
+          return MaterialApp.router(
             debugShowCheckedModeBanner: false,
             theme: AppThemeData.light,
             darkTheme: AppThemeData.dark,
@@ -108,22 +160,10 @@ class SpendLensApp extends StatelessWidget {
             locale: state.resolvedLocale,
             localizationsDelegates: AppLocalizations.localizationsDelegates,
             supportedLocales: AppLocale.supportedLocales,
-            home: const _BootstrapScreen(),
+            routerConfig: router,
           );
         },
       ),
-    );
-  }
-}
-
-/// Placeholder home until the router (M5) and splash/onboarding (M10) land.
-class _BootstrapScreen extends StatelessWidget {
-  const _BootstrapScreen();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Scaffold(
-      body: SizedBox.shrink(),
     );
   }
 }

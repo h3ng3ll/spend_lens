@@ -44,6 +44,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get newCategory => 'Новая категория';
 
   @override
+  String get categoryEmpty => 'Пока нет категорий';
+
+  @override
   String get createCategory => 'Создать категорию';
 
   @override
@@ -151,7 +154,7 @@ class AppLocalizationsRu extends AppLocalizations {
   String get privacy => 'Конфиденциальность';
 
   @override
-  String get about => 'О SpendLens';
+  String get about => 'О приложении';
 
   @override
   String get done => 'Готово';

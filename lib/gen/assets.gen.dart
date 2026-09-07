@@ -18,11 +18,39 @@ class $AssetsIconsGen {
   /// File path: assets/icons/check.svg
   String get check => 'assets/icons/check.svg';
 
+  /// File path: assets/icons/plus.svg
+  String get plus => 'assets/icons/plus.svg';
+
+  /// File path: assets/icons/tab_analytics.svg
+  String get tabAnalytics => 'assets/icons/tab_analytics.svg';
+
+  /// File path: assets/icons/tab_history.svg
+  String get tabHistory => 'assets/icons/tab_history.svg';
+
+  /// File path: assets/icons/tab_home.svg
+  String get tabHome => 'assets/icons/tab_home.svg';
+
+  /// File path: assets/icons/tab_settings.svg
+  String get tabSettings => 'assets/icons/tab_settings.svg';
+
+  /// File path: assets/icons/tab_stores.svg
+  String get tabStores => 'assets/icons/tab_stores.svg';
+
   /// File path: assets/icons/user.svg
   String get user => 'assets/icons/user.svg';
 
   /// List of all assets
-  List<String> get values => [arrowLeftOutlined, check, user];
+  List<String> get values => [
+    arrowLeftOutlined,
+    check,
+    plus,
+    tabAnalytics,
+    tabHistory,
+    tabHome,
+    tabSettings,
+    tabStores,
+    user,
+  ];
 }
 
 abstract final class Assets {

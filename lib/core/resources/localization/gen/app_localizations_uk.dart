@@ -44,6 +44,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get newCategory => 'Нова категорія';
 
   @override
+  String get categoryEmpty => 'Поки що немає категорій';
+
+  @override
   String get createCategory => 'Створити категорію';
 
   @override
@@ -152,7 +155,7 @@ class AppLocalizationsUk extends AppLocalizations {
   String get privacy => 'Конфіденційність';
 
   @override
-  String get about => 'Про SpendLens';
+  String get about => 'Про застосунок';
 
   @override
   String get done => 'Готово';

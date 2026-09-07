@@ -28,23 +28,21 @@ class LanguageSheet extends StatelessWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (sheetContext) => BlocProvider.value(
-        value: bloc,
-        child: const LanguageSheet(),
-      ),
+      builder: (sheetContext) =>
+          BlocProvider.value(value: bloc, child: const LanguageSheet()),
     );
   }
 
   List<LanguageOption> _options(AppLocalizations lo) => [
-        LanguageOption(code: null, label: lo.language),
-        const LanguageOption(code: 'en', label: 'English'),
-        const LanguageOption(code: 'ro', label: 'Română'),
-        const LanguageOption(code: 'ru', label: 'Русский'),
-        const LanguageOption(code: 'uk', label: 'Українська'),
-        const LanguageOption(code: 'es', label: 'Español'),
-        const LanguageOption(code: 'de', label: 'Deutsch'),
-        const LanguageOption(code: 'fr', label: 'Français'),
-      ];
+    LanguageOption(code: null, label: lo.language),
+    const LanguageOption(code: 'en', label: 'English'),
+    const LanguageOption(code: 'ro', label: 'Română'),
+    const LanguageOption(code: 'ru', label: 'Русский'),
+    const LanguageOption(code: 'uk', label: 'Українська'),
+    const LanguageOption(code: 'es', label: 'Español'),
+    const LanguageOption(code: 'de', label: 'Deutsch'),
+    const LanguageOption(code: 'fr', label: 'Français'),
+  ];
 
   void _onSelect(BuildContext context, String? code) {
     context.read<SettingsBloc>().add(SettingsEvent.setLocale(code: code));
@@ -60,9 +58,7 @@ class LanguageSheet extends StatelessWidget {
     return SafeArea(
       child: AppContainer(
         color: scheme.sheet,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(24.0),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24.0)),
         child: BlocBuilder<SettingsBloc, SettingsState>(
           builder: (context, state) {
             final options = _options(lo);

@@ -44,6 +44,9 @@ class AppLocalizationsRo extends AppLocalizations {
   String get newCategory => 'Categorie nouă';
 
   @override
+  String get categoryEmpty => 'Nicio categorie încă';
+
+  @override
   String get createCategory => 'Creează categoria';
 
   @override
@@ -151,7 +154,7 @@ class AppLocalizationsRo extends AppLocalizations {
   String get privacy => 'Confidențialitate';
 
   @override
-  String get about => 'Despre SpendLens';
+  String get about => 'Despre aplicație';
 
   @override
   String get done => 'Gata';

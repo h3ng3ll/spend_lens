@@ -8,8 +8,4 @@
 /// `hive_adapters.dart` exists (per hive_rules.md); M2's minimal
 /// `AppSettings` box (below) already stores it, so the adapter is registered
 /// now rather than left for M3 to discover.
-enum EAppThemeMode {
-  system,
-  light,
-  dark,
-}
+enum EAppThemeMode { system, light, dark }

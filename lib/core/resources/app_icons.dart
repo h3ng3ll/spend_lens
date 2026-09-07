@@ -11,4 +11,12 @@ abstract class AppIcons {
   static const arrowLeftOutlined = '${_path}arrow_left_outlined$_ext';
   static const user = '${_path}user$_ext';
   static const check = '${_path}check$_ext';
+
+  // M4: the 5-tab shell pill (design_spendlens.md §5).
+  static const tabHome = '${_path}tab_home$_ext';
+  static const tabAnalytics = '${_path}tab_analytics$_ext';
+  static const tabStores = '${_path}tab_stores$_ext';
+  static const tabHistory = '${_path}tab_history$_ext';
+  static const tabSettings = '${_path}tab_settings$_ext';
+  static const plus = '${_path}plus$_ext';
 }

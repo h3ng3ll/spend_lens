@@ -18,8 +18,8 @@ extension SettingsStateX on SettingsState {
 
   /// The effective [ThemeMode] to pass to `MaterialApp.themeMode`.
   ThemeMode get resolvedThemeMode => switch (settings.themeMode) {
-        EAppThemeMode.system => ThemeMode.system,
-        EAppThemeMode.light => ThemeMode.light,
-        EAppThemeMode.dark => ThemeMode.dark,
-      };
+    EAppThemeMode.system => ThemeMode.system,
+    EAppThemeMode.light => ThemeMode.light,
+    EAppThemeMode.dark => ThemeMode.dark,
+  };
 }

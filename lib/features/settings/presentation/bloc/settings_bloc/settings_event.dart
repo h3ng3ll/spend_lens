@@ -10,18 +10,21 @@ sealed class SettingsEvent with _$SettingsEvent {
   /// Sets the interface language. `code == null` means "follow the device
   /// locale". UI dispatches the user's pick directly — this is a selection,
   /// not a toggle, so it legitimately carries a payload.
-  const factory SettingsEvent.setLocale({
-    required String? code,
-  }) = _SetLocale;
+  const factory SettingsEvent.setLocale({required String? code}) = _SetLocale;
 
   /// Sets the display currency code (e.g. `'MDL'`, `'EUR'`).
-  const factory SettingsEvent.setCurrency({
-    required String code,
-  }) = _SetCurrency;
+  const factory SettingsEvent.setCurrency({required String code}) =
+      _SetCurrency;
 
   /// Toggle intent — NO payload. The handler reads `state.settings.themeMode`
   /// and flips it internally (BLoC rule A3.11): light ↔ dark. `system` is
   /// reachable only as the pre-first-choice default, never re-selected by
   /// this toggle.
   const factory SettingsEvent.toggleTheme() = _ToggleTheme;
+
+  /// Persists that onboarding finished. Dispatched by the Onboarding Get
+  /// Started action (M4 router plumbing only — the real multi-step
+  /// onboarding UI is M10); `redirect` in `init_router.dart` reads
+  /// `settings.onboardingCompleted` to decide Splash → Onboarding vs. Home.
+  const factory SettingsEvent.completeOnboarding() = _CompleteOnboarding;
 }

@@ -25,10 +25,7 @@ class SeedCategoriesUseCase {
   /// [dataCleared] is false. No-ops otherwise — in particular, a store the
   /// user deliberately cleared (`dataCleared == true`) is left empty even
   /// though it is also `isEmpty`.
-  Future<void> call({
-    required bool isEmpty,
-    required bool dataCleared,
-  }) async {
+  Future<void> call({required bool isEmpty, required bool dataCleared}) async {
     if (!isEmpty || dataCleared) {
       return;
     }
@@ -45,12 +42,12 @@ class SeedCategoriesUseCase {
     final now = DateTime.now();
 
     Category builtIn(String nameKey, AppColors color) => Category(
-          id: nameKey,
-          name: nameKey,
-          colorHex: _toHex(color.value.toARGB32()),
-          isBuiltIn: true,
-          updatedAt: now,
-        );
+      id: nameKey,
+      name: nameKey,
+      colorHex: _toHex(color.value.toARGB32()),
+      isBuiltIn: true,
+      updatedAt: now,
+    );
 
     return [
       builtIn('catFood', AppColors.categoryFood),

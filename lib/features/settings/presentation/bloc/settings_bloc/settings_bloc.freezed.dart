@@ -55,14 +55,15 @@ extension SettingsEventPatterns on SettingsEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Watch value)?  watch,TResult Function( _SetLocale value)?  setLocale,TResult Function( _SetCurrency value)?  setCurrency,TResult Function( _ToggleTheme value)?  toggleTheme,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Watch value)?  watch,TResult Function( _SetLocale value)?  setLocale,TResult Function( _SetCurrency value)?  setCurrency,TResult Function( _ToggleTheme value)?  toggleTheme,TResult Function( _CompleteOnboarding value)?  completeOnboarding,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch(_that);case _SetLocale() when setLocale != null:
 return setLocale(_that);case _SetCurrency() when setCurrency != null:
 return setCurrency(_that);case _ToggleTheme() when toggleTheme != null:
-return toggleTheme(_that);case _:
+return toggleTheme(_that);case _CompleteOnboarding() when completeOnboarding != null:
+return completeOnboarding(_that);case _:
   return orElse();
 
 }
@@ -80,14 +81,15 @@ return toggleTheme(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Watch value)  watch,required TResult Function( _SetLocale value)  setLocale,required TResult Function( _SetCurrency value)  setCurrency,required TResult Function( _ToggleTheme value)  toggleTheme,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Watch value)  watch,required TResult Function( _SetLocale value)  setLocale,required TResult Function( _SetCurrency value)  setCurrency,required TResult Function( _ToggleTheme value)  toggleTheme,required TResult Function( _CompleteOnboarding value)  completeOnboarding,}){
 final _that = this;
 switch (_that) {
 case _Watch():
 return watch(_that);case _SetLocale():
 return setLocale(_that);case _SetCurrency():
 return setCurrency(_that);case _ToggleTheme():
-return toggleTheme(_that);}
+return toggleTheme(_that);case _CompleteOnboarding():
+return completeOnboarding(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -101,14 +103,15 @@ return toggleTheme(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Watch value)?  watch,TResult? Function( _SetLocale value)?  setLocale,TResult? Function( _SetCurrency value)?  setCurrency,TResult? Function( _ToggleTheme value)?  toggleTheme,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Watch value)?  watch,TResult? Function( _SetLocale value)?  setLocale,TResult? Function( _SetCurrency value)?  setCurrency,TResult? Function( _ToggleTheme value)?  toggleTheme,TResult? Function( _CompleteOnboarding value)?  completeOnboarding,}){
 final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch(_that);case _SetLocale() when setLocale != null:
 return setLocale(_that);case _SetCurrency() when setCurrency != null:
 return setCurrency(_that);case _ToggleTheme() when toggleTheme != null:
-return toggleTheme(_that);case _:
+return toggleTheme(_that);case _CompleteOnboarding() when completeOnboarding != null:
+return completeOnboarding(_that);case _:
   return null;
 
 }
@@ -125,13 +128,14 @@ return toggleTheme(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String? code)?  setLocale,TResult Function( String code)?  setCurrency,TResult Function()?  toggleTheme,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String? code)?  setLocale,TResult Function( String code)?  setCurrency,TResult Function()?  toggleTheme,TResult Function()?  completeOnboarding,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _SetLocale() when setLocale != null:
 return setLocale(_that.code);case _SetCurrency() when setCurrency != null:
 return setCurrency(_that.code);case _ToggleTheme() when toggleTheme != null:
-return toggleTheme();case _:
+return toggleTheme();case _CompleteOnboarding() when completeOnboarding != null:
+return completeOnboarding();case _:
   return orElse();
 
 }
@@ -149,13 +153,14 @@ return toggleTheme();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String? code)  setLocale,required TResult Function( String code)  setCurrency,required TResult Function()  toggleTheme,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String? code)  setLocale,required TResult Function( String code)  setCurrency,required TResult Function()  toggleTheme,required TResult Function()  completeOnboarding,}) {final _that = this;
 switch (_that) {
 case _Watch():
 return watch();case _SetLocale():
 return setLocale(_that.code);case _SetCurrency():
 return setCurrency(_that.code);case _ToggleTheme():
-return toggleTheme();}
+return toggleTheme();case _CompleteOnboarding():
+return completeOnboarding();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -169,13 +174,14 @@ return toggleTheme();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String? code)?  setLocale,TResult? Function( String code)?  setCurrency,TResult? Function()?  toggleTheme,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String? code)?  setLocale,TResult? Function( String code)?  setCurrency,TResult? Function()?  toggleTheme,TResult? Function()?  completeOnboarding,}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _SetLocale() when setLocale != null:
 return setLocale(_that.code);case _SetCurrency() when setCurrency != null:
 return setCurrency(_that.code);case _ToggleTheme() when toggleTheme != null:
-return toggleTheme();case _:
+return toggleTheme();case _CompleteOnboarding() when completeOnboarding != null:
+return completeOnboarding();case _:
   return null;
 
 }
@@ -371,6 +377,38 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'SettingsEvent.toggleTheme()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class _CompleteOnboarding implements SettingsEvent {
+  const _CompleteOnboarding();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CompleteOnboarding);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'SettingsEvent.completeOnboarding()';
 }
 
 

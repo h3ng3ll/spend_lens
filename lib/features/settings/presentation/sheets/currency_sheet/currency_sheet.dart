@@ -22,10 +22,8 @@ class CurrencySheet extends StatelessWidget {
     return showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
-      builder: (sheetContext) => BlocProvider.value(
-        value: bloc,
-        child: const CurrencySheet(),
-      ),
+      builder: (sheetContext) =>
+          BlocProvider.value(value: bloc, child: const CurrencySheet()),
     );
   }
 
@@ -52,9 +50,7 @@ class CurrencySheet extends StatelessWidget {
     return SafeArea(
       child: AppContainer(
         color: scheme.sheet,
-        borderRadius: const BorderRadius.vertical(
-          top: Radius.circular(24.0),
-        ),
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24.0)),
         child: BlocBuilder<SettingsBloc, SettingsState>(
           builder: (context, state) {
             final selectedCode = state.settings.currencyCode;

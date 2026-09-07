@@ -150,6 +150,12 @@ abstract class AppLocalizations {
   /// **'New category'**
   String get newCategory;
 
+  /// No description provided for @categoryEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No categories yet'**
+  String get categoryEmpty;
+
   /// No description provided for @createCategory.
   ///
   /// In en, this message translates to:
@@ -309,7 +315,7 @@ abstract class AppLocalizations {
   /// No description provided for @about.
   ///
   /// In en, this message translates to:
-  /// **'About SpendLens'**
+  /// **'About'**
   String get about;
 
   /// No description provided for @done.
