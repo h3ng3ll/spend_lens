@@ -103,7 +103,52 @@ flutter:
   assets:
     - assets/icons/
     - assets/legal/
+    - assets/launcher/
+    - assets/splash/
     - path: .env
       platforms:
         - ios
         - android
+
+# PLACEHOLDER app icon + native splash (design_spendlens.md §12 — real assets
+# are a user-supplied item, not yet provided). `assets/launcher/icon.png` /
+# `icon_foreground.png` / `icon_background.png` and
+# `assets/splash/splash_glyph.png` are generated placeholders: a receipt
+# glyph in the app's own accent gradient (AppColors.accentDark/accent2Dark),
+# NOT the stock Flutter logo and NOT another product's artwork. Replace all
+# four source PNGs with the real design assets when supplied, then re-run
+# both generators below.
+flutter_launcher_icons:
+  android: "launcher_icon"
+  ios: true
+  image_path: "assets/launcher/icon.png"
+  # Android adaptive icon (API 26+) — a flat dark background matching the
+  # app's dark default (AppColors.bgDark, #0A0E1F) behind an inset,
+  # gradient-filled glyph, so the OS mask never clips the artwork.
+  adaptive_icon_background: "assets/launcher/icon_background.png"
+  adaptive_icon_foreground: "assets/launcher/icon_foreground.png"
+  min_sdk_android: 21
+  remove_alpha_ios: true
+
+# CHRONIC BUG GUARD (`db:android12-splash-icon-falls-back-to-stock-flutter-
+# launcher-icon`, 9/10 sessions): Android 12+ ignores the pre-31
+# drawable*/launch_background.xml path entirely and falls back to
+# `@mipmap/ic_launcher` unless `android_12.image` is set explicitly — so
+# BOTH the base `image` AND `android_12.image` are configured below, never
+# just one. `color`/`color_dark` match AppColors.bgDark in both branches
+# (`sig:native-launch-background-is-template-white-in-a-dark-only-app`) —
+# this app ships dark-only, so light and dark splash colors are identical by
+# design, not an oversight.
+flutter_native_splash:
+  color: "#0A0E1F"
+  color_dark: "#0A0E1F"
+  image: assets/splash/splash_glyph.png
+  image_dark: assets/splash/splash_glyph.png
+  android_12:
+    color: "#0A0E1F"
+    color_dark: "#0A0E1F"
+    image: assets/splash/splash_glyph.png
+    image_dark: assets/splash/splash_glyph.png
+  android: true
+  ios: true
+  web: false

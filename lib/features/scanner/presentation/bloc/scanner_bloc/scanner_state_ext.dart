@@ -13,4 +13,13 @@ extension ScannerStateX on ScannerState {
   bool get isFailed => status == EScannerStatus.failed;
 
   bool get isReady => status == EScannerStatus.ready;
+
+  /// True for every in-progress phase — the minimum `isLoading` contract
+  /// (A3 rule 9) mapped onto this bloc's multi-phase status enum, which has
+  /// no single generic "loading" value of its own.
+  bool get isLoading =>
+      status == EScannerStatus.searching ||
+      status == EScannerStatus.detected ||
+      status == EScannerStatus.capturing ||
+      status == EScannerStatus.processing;
 }

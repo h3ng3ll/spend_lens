@@ -6,7 +6,7 @@ extension StoresStateX on StoresState {
 
   bool get isLoading => status == EStoresStatus.loading;
 
-  bool get isLoaded => status == EStoresStatus.loaded;
+  bool get isReady => status == EStoresStatus.loaded;
 
   bool get isFailed => status == EStoresStatus.failed;
 

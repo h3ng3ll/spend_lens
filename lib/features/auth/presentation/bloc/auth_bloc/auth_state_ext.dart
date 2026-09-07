@@ -9,4 +9,11 @@ extension AuthStateX on AuthState {
   bool get isSignedIn => status == EAuthStatus.signedIn;
 
   bool get isFailed => status == EAuthStatus.failed;
+
+  /// Alias for [isSigningIn] — the minimum `isLoading` contract (A3 rule 9).
+  bool get isLoading => isSigningIn;
+
+  /// Alias for [isSignedIn] — the minimum `isReady`/`isSuccess` contract
+  /// (A3 rule 9).
+  bool get isReady => isSignedIn;
 }

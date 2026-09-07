@@ -6,7 +6,7 @@ extension HistoryStateX on HistoryState {
 
   bool get isLoading => status == EHistoryStatus.loading;
 
-  bool get isLoaded => status == EHistoryStatus.loaded;
+  bool get isReady => status == EHistoryStatus.loaded;
 
   bool get isFailed => status == EHistoryStatus.failed;
 }

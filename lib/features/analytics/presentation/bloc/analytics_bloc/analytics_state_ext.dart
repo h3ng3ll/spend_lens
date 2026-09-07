@@ -6,7 +6,7 @@ extension AnalyticsStateX on AnalyticsState {
 
   bool get isLoading => status == EAnalyticsStatus.loading;
 
-  bool get isLoaded => status == EAnalyticsStatus.loaded;
+  bool get isReady => status == EAnalyticsStatus.loaded;
 
   bool get isFailed => status == EAnalyticsStatus.failed;
 
@@ -15,5 +15,5 @@ extension AnalyticsStateX on AnalyticsState {
   /// absent data mapped to `failed` strands first-launch users on a
   /// permanent, self-reinforcing error screen). `watchAll()` emitting an
   /// empty list is a normal, successful read, not a failure.
-  bool get isEmpty => isLoaded && (snapshot?.expenses.isEmpty ?? true);
+  bool get isEmpty => isReady && (snapshot?.expenses.isEmpty ?? true);
 }

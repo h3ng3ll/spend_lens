@@ -9,7 +9,7 @@
     <application
         android:label="spend_lens"
         android:name="${applicationName}"
-        android:icon="@mipmap/ic_launcher">
+        android:icon="@mipmap/launcher_icon">
         <!-- Bundles the ML Kit Latin text-recognition model into the APK at
              install time instead of downloading it on first use — a
              downloaded model would fail on a first launch in airplane mode,

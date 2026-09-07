@@ -1,6 +1,8 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:go_router/go_router.dart';
 
 import 'core/bloc/app_observer.dart';
@@ -35,6 +37,7 @@ import 'features/settings/presentation/bloc/settings_bloc/settings_bloc.dart';
 import 'features/store/di/store_injection.dart';
 import 'features/store/domain/repositories/i_store_local_repository.dart';
 import 'features/store/presentation/bloc/stores_bloc/stores_bloc.dart';
+import 'firebase_options.dart';
 
 /// M4 bootstrap: the router lands (design_spendlens.md §5, 13 brick slices +
 /// rename pass + one build_runner; DI resolves) and the four app-lifetime
@@ -46,11 +49,19 @@ import 'features/store/presentation/bloc/stores_bloc/stores_bloc.dart';
 /// wiring (design_spendlens.md §6), so registering an empty shell of it now
 /// would be dead infrastructure.
 ///
-/// No splash/onboarding native assets yet (M10) — see `splash_page.dart`'s
-/// doc comment for the exact M4→M10 boundary.
+/// M10: the native splash is preserved here and released exactly once, from
+/// `SplashPage.initState()` (`~/.claude/rules/splash_screen_rules.md`) —
+/// this file calls `preserve()` and ONLY `preserve()`; `remove()` lives
+/// solely in the splash page.
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
+  final widgetsBinding = WidgetsFlutterBinding.ensureInitialized();
+  FlutterNativeSplash.preserve(
+    widgetsBinding: widgetsBinding,
+  );
 
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
   await dotenv.load(fileName: '.env');
 
   await initHive();
@@ -157,10 +168,18 @@ class SpendLensApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MultiBlocProvider(
       providers: [
-        BlocProvider<SettingsBloc>.value(value: settingsBloc),
-        BlocProvider<CategoriesBloc>.value(value: categoriesBloc),
-        BlocProvider<StoresBloc>.value(value: storesBloc),
-        BlocProvider<AuthBloc>.value(value: authBloc),
+        BlocProvider<SettingsBloc>.value(
+          value: settingsBloc,
+        ),
+        BlocProvider<CategoriesBloc>.value(
+          value: categoriesBloc,
+        ),
+        BlocProvider<StoresBloc>.value(
+          value: storesBloc,
+        ),
+        BlocProvider<AuthBloc>.value(
+          value: authBloc,
+        ),
       ],
       child: BlocBuilder<SettingsBloc, SettingsState>(
         builder: (context, state) {

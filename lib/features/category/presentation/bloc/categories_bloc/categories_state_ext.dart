@@ -6,7 +6,7 @@ extension CategoriesStateX on CategoriesState {
 
   bool get isLoading => status == ECategoriesStatus.loading;
 
-  bool get isLoaded => status == ECategoriesStatus.loaded;
+  bool get isReady => status == ECategoriesStatus.loaded;
 
   bool get isFailed => status == ECategoriesStatus.failed;
 
