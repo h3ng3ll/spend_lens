@@ -18,6 +18,14 @@ import 'i_subscription_repository.dart';
 /// must never depend on a reachable subscription backend.
 const Duration _kStartTimeout = Duration(seconds: 5);
 
+/// How long `Apphud.hasPremiumAccess()` may take before this repository
+/// gives up on it. Lower risk than [_kStartTimeout] — this call is guarded
+/// by [_started] and already falls back to `false` on any thrown error —
+/// but it is the SAME unbounded-native-await shape as every other site in
+/// this class, so it gets the same bound rather than being the one call
+/// left unguarded.
+const Duration _kPremiumCheckTimeout = Duration(seconds: 5);
+
 class ApphudSubscriptionRepository implements ISubscriptionRepository {
   final LoggerService _loggerService;
   bool _started = false;
@@ -64,7 +72,14 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
   Future<bool> hasPremiumAccess() async {
     if (!_started) return false;
     try {
-      return await Apphud.hasPremiumAccess();
+      return await Apphud.hasPremiumAccess().timeout(_kPremiumCheckTimeout);
+    } on TimeoutException {
+      _loggerService.warning(
+        'Apphud.hasPremiumAccess did not complete within '
+        '${_kPremiumCheckTimeout.inSeconds}s — treating as no premium '
+        'access.',
+      );
+      return false;
     } catch (e) {
       _loggerService.warning('Apphud.hasPremiumAccess failed: $e');
       return false;

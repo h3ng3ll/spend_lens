@@ -1,8 +1,19 @@
+import 'dart:async';
+
 import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../logger_service.dart';
 import '../../utils/env/env.dart';
+
+/// How long `GoogleSignIn.initialize` may take before this service gives
+/// up on it. `main()` awaits `initAuthFeature()` → `init(env)` → this call
+/// BEFORE `runApp`, the exact same unbounded-native-await-before-first-
+/// frame shape as `Apphud.start`
+/// (`sig:unbounded-third-party-sdk-await-before-runapp-hangs-first-frame`)
+/// — a plugin channel call this Dart code cannot otherwise cap must never
+/// be allowed to block launch indefinitely.
+const Duration _kInitializeTimeout = Duration(seconds: 5);
 
 /// Thin wrapper around `google_sign_in`'s singleton `GoogleSignIn.instance`,
 /// exposing the one ID token stream `FirebaseAuthRepository` needs
@@ -55,10 +66,16 @@ class GoogleSignInService {
     }
 
     try {
-      await _googleSignIn.initialize(
-        serverClientId: env.googleServerClientId,
-      );
+      await _googleSignIn
+          .initialize(serverClientId: env.googleServerClientId)
+          .timeout(_kInitializeTimeout);
       _initialized = true;
+    } on TimeoutException {
+      _loggerService.warning(
+        'GoogleSignInService.init did not complete within '
+        '${_kInitializeTimeout.inSeconds}s — treating Google sign-in as '
+        'disabled.',
+      );
     } catch (e) {
       if (kDebugMode) {
         _loggerService.warning('GoogleSignInService.init failed: $e');

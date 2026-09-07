@@ -1,14 +1,30 @@
+import 'dart:async';
+
 import 'package:camera/camera.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../../core/di/injection.dart';
 import '../../../../../../core/resources/colors/app_colors.dart';
+import '../../../../../../core/services/logger_service.dart';
 import '../../../../../settings/domain/models/app_settings/e_flash_mode.dart';
 import '../../../../presentation/bloc/scanner_bloc/scanner_bloc.dart';
 import 'scanner_capture_flash.dart';
 import 'scanner_corner_overlay.dart';
 import 'scanner_scan_line.dart';
 import 'scanner_shutter_button.dart';
+
+/// How long `availableCameras()` / `CameraController.initialize()` may run
+/// before this widget gives up on camera setup and reports a
+/// [ScannerEvent.failed]. Bound for the same reason `Apphud.start` and the
+/// scan-capability hardware probe are timeout-bound
+/// (`sig:unbounded-third-party-sdk-await-before-runapp-hangs-first-frame`):
+/// this is a SECOND, independent call site to the same plugin — the
+/// scan-capability probe checks capability before the scanner even opens,
+/// this one actually sets up the camera session once it does, and an
+/// unbounded await here previously made Home's "Scan Receipt" CTA appear
+/// dead.
+const Duration _kCameraSetupTimeout = Duration(seconds: 5);
 
 /// Owns ONLY the camera-plugin concerns that are genuinely tied to this
 /// widget's own mount/dispose lifecycle (design_spendlens.md §8): the
@@ -95,8 +111,14 @@ class _CameraPreviewLayerState extends State<CameraPreviewLayer> {
   Future<void> _initCamera() async {
     List<CameraDescription> cameras;
     try {
-      cameras = await availableCameras();
+      cameras = await availableCameras().timeout(_kCameraSetupTimeout);
     } on CameraException {
+      cameras = const [];
+    } on TimeoutException {
+      getIt<LoggerService>().warning(
+        'CameraPreviewLayer.availableCameras did not complete within '
+        '${_kCameraSetupTimeout.inSeconds}s — reporting no_camera.',
+      );
       cameras = const [];
     }
     if (cameras.isEmpty) {
@@ -117,8 +139,18 @@ class _CameraPreviewLayerState extends State<CameraPreviewLayer> {
     );
 
     try {
-      await controller.initialize();
+      await controller.initialize().timeout(_kCameraSetupTimeout);
     } on CameraException {
+      if (!mounted) return;
+      context.read<ScannerBloc>().add(
+        const ScannerEvent.failed('camera_init_failed'),
+      );
+      return;
+    } on TimeoutException {
+      getIt<LoggerService>().warning(
+        'CameraPreviewLayer.controller.initialize did not complete within '
+        '${_kCameraSetupTimeout.inSeconds}s — reporting camera_init_failed.',
+      );
       if (!mounted) return;
       context.read<ScannerBloc>().add(
         const ScannerEvent.failed('camera_init_failed'),

@@ -41,9 +41,12 @@ Future<void> initDependencies() async {
 
   // M7: the single channel contract (design_spendlens.md §6), identical on
   // both platforms — no `Platform.isX` branch anywhere above this line.
-  getIt.registerLazySingleton<OcrService>(() => MethodChannelOcrService());
+  getIt.registerLazySingleton<OcrService>(
+    () => MethodChannelOcrService(loggerService: getIt<LoggerService>()),
+  );
   getIt.registerLazySingleton<IReceiptDetector>(
-    () => MethodChannelReceiptDetector(),
+    () =>
+        MethodChannelReceiptDetector(loggerService: getIt<LoggerService>()),
   );
 
   // M7: lives in core because two unrelated consumers read it — the Home

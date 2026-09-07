@@ -611,3 +611,38 @@ probe awaited with no bound. Worth attributing if the Developer confirms it.
   screencap plainly showed an overflow stripe. The logcat grep is NOT a reliable
   overflow detector on this build; the screencap is authoritative. Same class as the
   stale-splash-layer artifact QA hit in Round 2.
+
+## O-5
+- **Severity:** High (process defect — a gate that could never fail)
+- **Signature:** `sig:regression-gate-regex-silently-matches-zero-sites-and-reports-green`
+- **Found by:** Orchestrator, by deliberately breaking a fixed site and re-running the gate.
+- **What happened:** the Code-Reviewer fix round added
+  `test/regression/platform_channel_timeout_test.dart` to stop the run's THIRD instance
+  of the unbounded-native-await defect from recurring, and reported it "verified to fail
+  against unfixed code". I re-verified independently by deleting one real
+  `.timeout(_kDetectFrameTimeout)` — **the gate stayed GREEN.**
+- **Three independent defects in one 60-line gate**, each sufficient on its own to make
+  it vacuous:
+  1. ⛔ **The matcher `invokeMethod\s*(?:<[^>]*>)?\s*\(` matched ZERO of the real call
+     sites.** Production calls use NESTED generics —
+     `invokeMethod<Map<Object?, Object?>>(` — and `[^>]*` stops at the first `>`. The
+     gate scanned **0 sites** while reporting pass. Fixed to `[^(]*`.
+  2. The statement scan started at `match.end`, so the call's own opening `(` was never
+     counted; `parenDepth` went negative at the closing `)` and the next `;` looked like
+     the statement end — truncating before a cascaded `.timeout(...)` on a later line.
+     Anchored at `callStart`.
+  3. Consequently a multi-line `await _channel\n .invokeMethod<T>(...)\n .timeout(...)` —
+     the shape ALL the real code uses — read as unbounded-but-passing.
+- **After the fix:** the gate covers **6 call sites across 4 files** (previously 0), fails
+  with the exact `file:line` when a timeout is removed, and passes when restored.
+- ⛔ **Why this belongs in the ledger:** this is the SECOND green-but-meaningless gate
+  this session. The first (`splash_native_remove_test.dart`) asserted a real property on
+  an **unreachable code path**; this one asserted a real property against **zero matched
+  sites**. Different mechanisms, identical consequence: a gate that cannot fail is
+  indistinguishable from a gate that passes, and both were written in good faith by
+  authors who believed they had verified them.
+- ⭐ **The reusable practice:** *verifying a gate means breaking the code and watching it
+  go red — performed by someone other than the gate's author.* The author here did claim
+  a negative-control check and had done one (via `git stash`, which reverted whole files
+  and happened to trip the two sites whose call shape the regex DID match). A
+  single-site, surgical break is the sharper instrument, and it is what exposed this.
