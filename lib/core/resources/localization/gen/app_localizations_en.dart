@@ -378,8 +378,8 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String insA3(String c) {
-    return 'Your average purchase was 157 $c.';
+  String insA3(String value, String c) {
+    return 'Your average purchase was $value $c.';
   }
 
   @override
@@ -762,8 +762,9 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
-  String get limitFree =>
-      'Receipt photos and data are backed up to your account. Free accounts include 100 MB.';
+  String limitFree(String quota) {
+    return 'Receipt photos and data are backed up to your account. Free accounts include $quota.';
+  }
 
   @override
   String limitPremium(String quota) {
@@ -1147,4 +1148,25 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get recordNotFoundBody => 'It may have been deleted.';
+
+  @override
+  String get priceHistoryTitle => 'Price history';
+
+  @override
+  String priceHistoryChangeLabel(String direction, String percent) {
+    return '$direction $percent% since first tracked';
+  }
+
+  @override
+  String get priceHistoryNoDataTitle => 'No price history yet';
+
+  @override
+  String get priceHistoryNoDataBody =>
+      'Scan a receipt with this product to start tracking its price over time.';
+
+  @override
+  String get priceHistoryNotFoundTitle => 'This product no longer exists.';
+
+  @override
+  String get priceHistoryNotFoundBody => 'It may have been deleted.';
 }

@@ -93,7 +93,7 @@
   "ins3": "Dein durchschnittlicher Einkauf stieg von {a} auf {b} {c}.",
   "insA1": "{category} machten {percent}% deiner Ausgaben aus.",
   "insA2": "{category}ausgaben sanken im {month} um {percent}%.",
-  "insA3": "Dein durchschnittlicher Einkauf lag bei 157 {c}.",
+  "insA3": "Dein durchschnittlicher Einkauf lag bei {value} {c}.",
   "catFood": "Lebensmittel",
   "catTransport": "Verkehr",
   "catHousehold": "Haushalt",
@@ -199,7 +199,7 @@
   "cloudStorage": "Cloud-Speicher",
   "unlimited": "Unbegrenzt · auf dem Gerät",
   "storageOf": "{a} von {b}",
-  "limitFree": "Belegfotos und Daten werden in deinem Konto gesichert. Kostenlos sind 100 MB.",
+  "limitFree": "Belegfotos und Daten werden in deinem Konto gesichert. Kostenlos sind {quota}.",
   "limitPremium": "Premium: {quota} Cloud-Speicher, unbegrenzter Verlauf und Multi-Geräte-Sync.",
   "limitLocal": "Alles wird ohne Limit auf {device} gespeichert. Melde dich an, um zu sichern.",
   "free": "Kostenlos",
@@ -316,5 +316,11 @@
   "recordNotFound": "Dieser Eintrag existiert nicht mehr.",
   "editComingSoon": "Die Bearbeitung folgt in einem späteren Update.",
   "historyAllRecords": "Alle Einträge",
-  "recordNotFoundBody": "Er wurde möglicherweise gelöscht."
+  "recordNotFoundBody": "Er wurde möglicherweise gelöscht.",
+  "priceHistoryTitle": "Preisverlauf",
+  "priceHistoryChangeLabel": "{direction} um {percent}% seit der ersten Erfassung",
+  "priceHistoryNoDataTitle": "Noch kein Preisverlauf",
+  "priceHistoryNoDataBody": "Scanne einen Beleg mit diesem Produkt, um seinen Preis im Zeitverlauf zu verfolgen.",
+  "priceHistoryNotFoundTitle": "Dieses Produkt existiert nicht mehr.",
+  "priceHistoryNotFoundBody": "Es wurde möglicherweise gelöscht."
 }

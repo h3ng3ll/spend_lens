@@ -382,8 +382,8 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
-  String insA3(String c) {
-    return 'Середня покупка була 157 $c.';
+  String insA3(String value, String c) {
+    return 'Середня покупка була $value $c.';
   }
 
   @override
@@ -767,8 +767,9 @@ class AppLocalizationsUk extends AppLocalizations {
   }
 
   @override
-  String get limitFree =>
-      'Фото чеків і дані зберігаються в акаунт. Безкоштовно — 100 МБ.';
+  String limitFree(String quota) {
+    return 'Фото чеків і дані зберігаються в акаунт. Безкоштовно — 100 МБ.';
+  }
 
   @override
   String limitPremium(String quota) {
@@ -1154,4 +1155,25 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get recordNotFoundBody => 'Можливо, її було видалено.';
+
+  @override
+  String get priceHistoryTitle => 'Історія ціни';
+
+  @override
+  String priceHistoryChangeLabel(String direction, String percent) {
+    return '$direction на $percent% від початку відстеження';
+  }
+
+  @override
+  String get priceHistoryNoDataTitle => 'Ще немає історії ціни';
+
+  @override
+  String get priceHistoryNoDataBody =>
+      'Відскануйте чек із цим товаром, щоб почати відстежувати його ціну з часом.';
+
+  @override
+  String get priceHistoryNotFoundTitle => 'Цей товар більше не існує.';
+
+  @override
+  String get priceHistoryNotFoundBody => 'Можливо, його було видалено.';
 }

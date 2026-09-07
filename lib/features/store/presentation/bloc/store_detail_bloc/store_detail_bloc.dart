@@ -2,7 +2,9 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../../core/utils/combine_latest_streams.dart';
+import '../../../../analytics/domain/repositories/i_price_observation_local_repository.dart';
 import '../../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../domain/models/store/store.dart';
 import '../../../domain/models/store_detail_snapshot/store_detail_snapshot.dart';
 import '../../../domain/repositories/i_store_local_repository.dart';
@@ -30,12 +32,16 @@ part 'store_detail_bloc.freezed.dart';
 class StoreDetailBloc extends Bloc<StoreDetailEvent, StoreDetailState> {
   final IStoreLocalRepository _storeLocalRepository;
   final IExpenseLocalRepository _expenseLocalRepository;
+  final IProductLocalRepository _productLocalRepository;
+  final IPriceObservationLocalRepository _priceObservationLocalRepository;
   final String storeId;
 
   StoreDetailBloc({
     required this.storeId,
     required this._storeLocalRepository,
     required this._expenseLocalRepository,
+    required this._productLocalRepository,
+    required this._priceObservationLocalRepository,
   }) : super(const StoreDetailState()) {
     on<_Watch>(_onWatch);
   }
@@ -44,12 +50,17 @@ class StoreDetailBloc extends Bloc<StoreDetailEvent, StoreDetailState> {
     emit(state.copyWith(status: EStoreDetailStatus.loading));
 
     await emit.forEach<StoreDetailSnapshot>(
-      combineLatest2(
+      combineLatest4(
         _storeLocalRepository.watchAll(),
         _expenseLocalRepository.watchAll(),
-        (stores, expenses) => StoreDetailSnapshot(
+        _productLocalRepository.watchAll(),
+        _priceObservationLocalRepository.watchAll(),
+        (stores, expenses, products, priceObservations) => StoreDetailSnapshot(
           store: _findStore(stores, storeId),
           expenses: expenses,
+          products: products,
+          priceObservations: priceObservations,
+          stores: stores,
         ),
       ),
       onData: (snapshot) => snapshot.store == null

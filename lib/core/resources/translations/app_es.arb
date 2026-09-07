@@ -93,7 +93,7 @@
   "ins3": "Tu compra media subió de {a} a {b} {c}.",
   "insA1": "{category} fue el {percent}% de tu gasto.",
   "insA2": "El gasto en {category} bajó un {percent}% en {month}.",
-  "insA3": "Tu compra media fue 157 {c}.",
+  "insA3": "Tu compra media fue {value} {c}.",
   "catFood": "Alimentación",
   "catTransport": "Transporte",
   "catHousehold": "Hogar",
@@ -199,7 +199,7 @@
   "cloudStorage": "Almacenamiento en la nube",
   "unlimited": "Ilimitado · en el dispositivo",
   "storageOf": "{a} de {b}",
-  "limitFree": "Fotos y datos se respaldan en tu cuenta. Las cuentas gratis incluyen 100 MB.",
+  "limitFree": "Fotos y datos se respaldan en tu cuenta. Las cuentas gratis incluyen {quota}.",
   "limitPremium": "Premium: {quota} en la nube, historial ilimitado y sincronización multidispositivo.",
   "limitLocal": "Todo se guarda en {device} sin límite. Inicia sesión para respaldar.",
   "free": "Gratis",
@@ -316,5 +316,11 @@
   "recordNotFound": "Este registro ya no existe.",
   "editComingSoon": "La edición llegará en una futura actualización.",
   "historyAllRecords": "Todos los registros",
-  "recordNotFoundBody": "Puede que se haya eliminado."
+  "recordNotFoundBody": "Puede que se haya eliminado.",
+  "priceHistoryTitle": "Historial de precios",
+  "priceHistoryChangeLabel": "{direction} {percent}% desde el primer seguimiento",
+  "priceHistoryNoDataTitle": "Aún no hay historial de precios",
+  "priceHistoryNoDataBody": "Escanea un recibo con este producto para empezar a seguir su precio en el tiempo.",
+  "priceHistoryNotFoundTitle": "Este producto ya no existe.",
+  "priceHistoryNotFoundBody": "Puede que se haya eliminado."
 }

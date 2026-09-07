@@ -381,8 +381,8 @@ class AppLocalizationsRo extends AppLocalizations {
   }
 
   @override
-  String insA3(String c) {
-    return 'Cumpărătura medie a fost 157 $c.';
+  String insA3(String value, String c) {
+    return 'Cumpărătura medie a fost $value $c.';
   }
 
   @override
@@ -766,8 +766,9 @@ class AppLocalizationsRo extends AppLocalizations {
   }
 
   @override
-  String get limitFree =>
-      'Pozele și datele sunt salvate în contul tău. Conturile gratuite includ 100 MB.';
+  String limitFree(String quota) {
+    return 'Pozele și datele sunt salvate în contul tău. Conturile gratuite includ $quota.';
+  }
 
   @override
   String limitPremium(String quota) {
@@ -1153,4 +1154,25 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get recordNotFoundBody => 'Este posibil să fi fost ștearsă.';
+
+  @override
+  String get priceHistoryTitle => 'Istoric preț';
+
+  @override
+  String priceHistoryChangeLabel(String direction, String percent) {
+    return '$direction $percent% de la prima urmărire';
+  }
+
+  @override
+  String get priceHistoryNoDataTitle => 'Încă niciun istoric de preț';
+
+  @override
+  String get priceHistoryNoDataBody =>
+      'Scanează un bon cu acest produs pentru a începe să-i urmărești prețul în timp.';
+
+  @override
+  String get priceHistoryNotFoundTitle => 'Acest produs nu mai există.';
+
+  @override
+  String get priceHistoryNotFoundBody => 'Este posibil să fi fost șters.';
 }

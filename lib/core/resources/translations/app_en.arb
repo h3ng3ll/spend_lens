@@ -267,10 +267,13 @@
       }
     }
   },
-  "insA3": "Your average purchase was 157 {c}.",
+  "insA3": "Your average purchase was {value} {c}.",
   "@insA3": {
-    "description": "Auto-ported from i18n.js key \"insA3\".",
+    "description": "Auto-ported from i18n.js key \"insA3\". Fixed M6 deviation: the literal 157 was hardcoded in every language; now a real {value} placeholder.",
     "placeholders": {
+      "value": {
+        "type": "String"
+      },
       "c": {
         "type": "String"
       }
@@ -484,7 +487,7 @@
       }
     }
   },
-  "limitFree": "Receipt photos and data are backed up to your account. Free accounts include 100 MB.",
+  "limitFree": "Receipt photos and data are backed up to your account. Free accounts include {quota}.",
   "limitPremium": "Premium: {quota} of cloud storage, unlimited history and multi-device sync.",
   "@limitPremium": {
     "description": "Auto-ported from i18n.js key \"limitPremium\".",
@@ -730,5 +733,29 @@
   "recordNotFound": "This record no longer exists.",
   "editComingSoon": "Editing arrives in a later update.",
   "historyAllRecords": "All records",
-  "recordNotFoundBody": "It may have been deleted."
+  "recordNotFoundBody": "It may have been deleted.",
+  "priceHistoryTitle": "Price history",
+  "priceHistoryChangeLabel": "{direction} {percent}% since first tracked",
+  "@priceHistoryChangeLabel": {
+    "description": "M6: price-history page's overall first-to-last change line.",
+    "placeholders": {
+      "direction": {
+        "type": "String"
+      },
+      "percent": {
+        "type": "String"
+      }
+    }
+  },
+  "priceHistoryNoDataTitle": "No price history yet",
+  "priceHistoryNoDataBody": "Scan a receipt with this product to start tracking its price over time.",
+  "priceHistoryNotFoundTitle": "This product no longer exists.",
+  "priceHistoryNotFoundBody": "It may have been deleted.",
+  "@limitFree": {
+    "placeholders": {
+      "quota": {
+        "type": "String"
+      }
+    }
+  }
 }

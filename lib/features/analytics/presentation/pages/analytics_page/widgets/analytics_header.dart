@@ -18,6 +18,11 @@ import '../../../../../../core/widgets/app_svg_icon.dart';
 /// (recorded global bug: a stub handler that only echoes its own label is
 /// indistinguishable from doing real work — this one is honest about being
 /// unavailable, not a disguised no-op).
+/// Unscaled base height for the export pill; multiplied by the text scaler
+/// at build time so the label cannot clip (recorded bug
+/// `developer-derived-fixed-dp-cell-height-ignores-textScaleFactor`).
+const double _baseExportChipHeight = 36.0;
+
 class AnalyticsHeader extends StatelessWidget {
   const AnalyticsHeader({super.key});
 
@@ -32,6 +37,9 @@ class AnalyticsHeader extends StatelessWidget {
     final scheme = AppColorScheme.of(context);
     final textTheme = AppTextTheme.of(context);
     final lo = AppLocalizations.of(context);
+    final pdfChipHeight = MediaQuery.textScalerOf(
+      context,
+    ).scale(_baseExportChipHeight);
 
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -43,7 +51,7 @@ class AnalyticsHeader extends StatelessWidget {
         GestureDetector(
           onTap: () => _onExportPdf(context),
           child: AppContainer(
-            height: 36.0,
+            height: pdfChipHeight,
             color: scheme.card,
             border: Border.all(color: scheme.line, width: 1.0),
             borderRadius: BorderRadius.circular(999.0),

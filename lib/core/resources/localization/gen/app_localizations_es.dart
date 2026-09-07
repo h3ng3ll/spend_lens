@@ -383,8 +383,8 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String insA3(String c) {
-    return 'Tu compra media fue 157 $c.';
+  String insA3(String value, String c) {
+    return 'Tu compra media fue $value $c.';
   }
 
   @override
@@ -768,8 +768,9 @@ class AppLocalizationsEs extends AppLocalizations {
   }
 
   @override
-  String get limitFree =>
-      'Fotos y datos se respaldan en tu cuenta. Las cuentas gratis incluyen 100 MB.';
+  String limitFree(String quota) {
+    return 'Fotos y datos se respaldan en tu cuenta. Las cuentas gratis incluyen $quota.';
+  }
 
   @override
   String limitPremium(String quota) {
@@ -1154,4 +1155,25 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get recordNotFoundBody => 'Puede que se haya eliminado.';
+
+  @override
+  String get priceHistoryTitle => 'Historial de precios';
+
+  @override
+  String priceHistoryChangeLabel(String direction, String percent) {
+    return '$direction $percent% desde el primer seguimiento';
+  }
+
+  @override
+  String get priceHistoryNoDataTitle => 'Aún no hay historial de precios';
+
+  @override
+  String get priceHistoryNoDataBody =>
+      'Escanea un recibo con este producto para empezar a seguir su precio en el tiempo.';
+
+  @override
+  String get priceHistoryNotFoundTitle => 'Este producto ya no existe.';
+
+  @override
+  String get priceHistoryNotFoundBody => 'Puede que se haya eliminado.';
 }

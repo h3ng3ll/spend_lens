@@ -93,7 +93,7 @@
   "ins3": "Средняя покупка выросла с {a} до {b} {c}.",
   "insA1": "{category} составили {percent}% расходов.",
   "insA2": "Расходы на {category} снизились на {percent}% в {month}.",
-  "insA3": "Средняя покупка была 157 {c}.",
+  "insA3": "Средняя покупка была {value} {c}.",
   "catFood": "Продукты",
   "catTransport": "Транспорт",
   "catHousehold": "Дом",
@@ -316,5 +316,11 @@
   "recordNotFound": "Эта запись больше не существует.",
   "editComingSoon": "Редактирование появится в одном из следующих обновлений.",
   "historyAllRecords": "Все записи",
-  "recordNotFoundBody": "Возможно, она была удалена."
+  "recordNotFoundBody": "Возможно, она была удалена.",
+  "priceHistoryTitle": "История цены",
+  "priceHistoryChangeLabel": "{direction} на {percent}% с начала отслеживания",
+  "priceHistoryNoDataTitle": "Пока нет истории цены",
+  "priceHistoryNoDataBody": "Отсканируйте чек с этим товаром, чтобы начать отслеживать его цену со временем.",
+  "priceHistoryNotFoundTitle": "Этот товар больше не существует.",
+  "priceHistoryNotFoundBody": "Возможно, он был удалён."
 }

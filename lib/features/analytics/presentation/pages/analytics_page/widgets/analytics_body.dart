@@ -5,8 +5,13 @@ import '../../../../../../core/resources/localization/gen/app_localizations.dart
 import '../../../../../../core/utils/selected_period.dart';
 import '../../../../../../core/widgets/app_empty_state.dart';
 import '../../../../../../core/widgets/padding/horizontal_padding.dart';
-import '../../../../../category/domain/models/category/category_display_x.dart';
+import '../../../../../category/domain/models/category/category.dart';
+import '../../../../domain/calculator/analytics_calculator.dart';
+import '../../../../domain/insights/analytics_insight_generator.dart';
+import '../../../../domain/models/monthly_summary/monthly_summary.dart';
 import '../../../bloc/analytics_bloc/analytics_bloc.dart';
+import '../analytics_category_breakdown_row.dart';
+import '../analytics_insight_resolver.dart';
 import '../analytics_view_helpers.dart';
 import 'analytics_cash_receipt_split_card.dart';
 import 'analytics_category_breakdown_card.dart';
@@ -15,17 +20,20 @@ import 'analytics_insights_card.dart';
 import 'analytics_period_pill.dart';
 import 'analytics_stat_row.dart';
 import 'analytics_stat_tile.dart';
+import 'analytics_total_delta.dart';
 import 'analytics_total_hero.dart';
 
 /// Populated / empty presentation for `AnalyticsPage`
 /// (`SpendLens Prototype.dc.html`, `data-screen-label="Analytics"`).
 ///
-/// Renders the FULL visual layout against whatever `AnalyticsBloc` streams
-/// today (Expenses + Categories); the M6 deterministic calculator and
-/// parameterized insight generator are NOT built here — every value on this
-/// screen is a simple, honest aggregate (sum/count/average/share) computed
-/// directly from the raw list via the pure functions in
-/// `analytics_view_helpers.dart` (design_spendlens.md §10).
+/// M6: every figure is now produced by the deterministic engine in
+/// `features/analytics/domain/` — `buildMonthlySummary` (totals,
+/// previous-month comparison, % change, average, per-category share/count,
+/// cash-vs-receipt split) and `generateInsights` (ARB key + params pairs,
+/// resolved to strings only here via `analytics_insight_resolver.dart`).
+/// `analytics_view_helpers.dart`'s remaining functions (`expensesInPeriod`,
+/// `minSelectableMonth`) are still used for period-sheet plumbing that is
+/// genuinely UI-local, not analytics math.
 class AnalyticsBody extends StatelessWidget {
   final AnalyticsState state;
   final SelectedPeriod selectedPeriod;
@@ -49,8 +57,9 @@ class AnalyticsBody extends StatelessWidget {
     final categories = snapshot?.categories ?? const [];
 
     final periodExpenses = expensesInPeriod(allExpenses, selectedPeriod);
+    final monthLabels = _fullMonthLabels(lo);
     final periodLabel =
-        '${_fullMonthLabels(lo)[selectedPeriod.month]} ${selectedPeriod.year}';
+        '${monthLabels[selectedPeriod.month]} ${selectedPeriod.year}';
 
     if (periodExpenses.isEmpty) {
       return SingleChildScrollView(
@@ -83,16 +92,37 @@ class AnalyticsBody extends StatelessWidget {
       );
     }
 
-    final total = totalAmount(periodExpenses);
-    final average = averageAmount(periodExpenses);
-    final cashPercent = (cashShare(periodExpenses) * 100).round();
-    final rows = categoryBreakdown(periodExpenses, categories);
-    final top = topCategory(periodExpenses, categories);
+    final summary = buildMonthlySummary(
+      allExpenses: allExpenses,
+      categories: categories,
+      year: selectedPeriod.year,
+      month: selectedPeriod.month,
+      displayCurrencyCode: currencyCode,
+    );
 
-    final insights = <String>[
-      if (top != null && top.sharePercent > 0)
-        lo.insA1(top.category.displayName(lo), top.sharePercent.round()),
-    ];
+    final isCurrentMonth = selectedPeriod == SelectedPeriod.now();
+    final topShare = summary.categoryShares.isEmpty
+        ? null
+        : summary.categoryShares.first;
+
+    final insights = topShare == null
+        ? const <String>[]
+        : generateInsights(
+                summary: summary,
+                isCurrentMonth: isCurrentMonth,
+                topCategoryId: topShare.categoryId,
+                previousMonthAverageDisplay: null,
+                currentMonthAverageDisplay: summary.averagePurchase
+                    .round()
+                    .toString(),
+              )
+              .map(
+                (insight) => resolveAnalyticsInsight(lo, categories, insight),
+              )
+              .toList();
+
+    final rows = _resolveCategoryRows(summary, categories);
+    final percentChange = summary.percentChangeVsPreviousMonth;
 
     return SingleChildScrollView(
       child: HorizontalPadding(
@@ -105,24 +135,39 @@ class AnalyticsBody extends StatelessWidget {
             children: [
               const AnalyticsHeader(),
               AnalyticsPeriodPill(label: periodLabel, onTap: onOpenPeriod),
-              AnalyticsTotalHero(
-                totalText: total.round().toString(),
-                currencyCode: currencyCode,
+              Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 10.0,
+                children: [
+                  AnalyticsTotalHero(
+                    totalText: summary.total.round().toString(),
+                    currencyCode: currencyCode,
+                  ),
+                  if (percentChange != null)
+                    AnalyticsTotalDelta(
+                      percentChange: percentChange,
+                      previousMonthLabel:
+                          monthLabels[selectedPeriod.month == 0
+                              ? 11
+                              : selectedPeriod.month - 1],
+                    ),
+                ],
               ),
               AnalyticsStatRow(
                 average: AnalyticsStatTile(
                   label: lo.average,
-                  value: average.round().toString(),
+                  value: summary.averagePurchase.round().toString(),
                   caption: currencyCode,
                 ),
                 purchases: AnalyticsStatTile(
                   label: lo.purchases,
-                  value: periodExpenses.length.toString(),
+                  value: summary.purchaseCount.toString(),
                   caption: lo.thisMonth,
                 ),
                 cash: AnalyticsStatTile(
                   label: lo.cash,
-                  value: '$cashPercent%',
+                  value: '${(summary.cashShare * 100).round()}%',
                   caption: lo.ofSpending,
                 ),
               ),
@@ -130,13 +175,41 @@ class AnalyticsBody extends StatelessWidget {
                 rows: rows,
                 currencyCode: currencyCode,
               ),
-              AnalyticsCashReceiptSplitCard(cashSharePercent: cashPercent),
+              AnalyticsCashReceiptSplitCard(
+                cashSharePercent: (summary.cashShare * 100).round(),
+              ),
               AnalyticsInsightsCard(insights: insights),
             ],
           ),
         ),
       ),
     );
+  }
+
+  List<AnalyticsCategoryBreakdownRow> _resolveCategoryRows(
+    MonthlySummary summary,
+    List<Category> categories,
+  ) {
+    final rows = <AnalyticsCategoryBreakdownRow>[];
+    for (final share in summary.categoryShares) {
+      final category = _findCategory(categories, share.categoryId);
+      if (category == null) continue;
+      rows.add(
+        AnalyticsCategoryBreakdownRow(
+          category: category,
+          amount: share.amount,
+          sharePercent: share.sharePercent,
+        ),
+      );
+    }
+    return rows;
+  }
+
+  Category? _findCategory(List<Category> categories, String categoryId) {
+    for (final category in categories) {
+      if (category.id == categoryId) return category;
+    }
+    return null;
   }
 
   List<String> _fullMonthLabels(AppLocalizations lo) => [

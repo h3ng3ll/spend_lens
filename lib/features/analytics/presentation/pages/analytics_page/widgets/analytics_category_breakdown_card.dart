@@ -5,7 +5,7 @@ import '../../../../../../core/utils/extensions/color_ext.dart';
 import '../../../../../../core/widgets/app_section_card.dart';
 import '../../../../../../core/widgets/section_label.dart';
 import '../../../../../category/domain/models/category/category_display_x.dart';
-import '../analytics_view_helpers.dart';
+import '../analytics_category_breakdown_row.dart';
 import 'analytics_category_row.dart';
 
 /// The per-category breakdown card — SectionLabel + one [AnalyticsCategoryRow]

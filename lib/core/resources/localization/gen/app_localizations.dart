@@ -666,11 +666,11 @@ abstract class AppLocalizations {
   /// **'{category} spending fell {percent}% in {month}.'**
   String insA2(String category, int percent, String month);
 
-  /// Auto-ported from i18n.js key "insA3".
+  /// Auto-ported from i18n.js key "insA3". Fixed M6 deviation: the literal 157 was hardcoded in every language; now a real {value} placeholder.
   ///
   /// In en, this message translates to:
-  /// **'Your average purchase was 157 {c}.'**
-  String insA3(String c);
+  /// **'Your average purchase was {value} {c}.'**
+  String insA3(String value, String c);
 
   /// No description provided for @catFood.
   ///
@@ -1305,8 +1305,8 @@ abstract class AppLocalizations {
   /// No description provided for @limitFree.
   ///
   /// In en, this message translates to:
-  /// **'Receipt photos and data are backed up to your account. Free accounts include 100 MB.'**
-  String get limitFree;
+  /// **'Receipt photos and data are backed up to your account. Free accounts include {quota}.'**
+  String limitFree(String quota);
 
   /// Auto-ported from i18n.js key "limitPremium".
   ///
@@ -1967,6 +1967,42 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'It may have been deleted.'**
   String get recordNotFoundBody;
+
+  /// No description provided for @priceHistoryTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Price history'**
+  String get priceHistoryTitle;
+
+  /// M6: price-history page's overall first-to-last change line.
+  ///
+  /// In en, this message translates to:
+  /// **'{direction} {percent}% since first tracked'**
+  String priceHistoryChangeLabel(String direction, String percent);
+
+  /// No description provided for @priceHistoryNoDataTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No price history yet'**
+  String get priceHistoryNoDataTitle;
+
+  /// No description provided for @priceHistoryNoDataBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a receipt with this product to start tracking its price over time.'**
+  String get priceHistoryNoDataBody;
+
+  /// No description provided for @priceHistoryNotFoundTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'This product no longer exists.'**
+  String get priceHistoryNotFoundTitle;
+
+  /// No description provided for @priceHistoryNotFoundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It may have been deleted.'**
+  String get priceHistoryNotFoundBody;
 }
 
 class _AppLocalizationsDelegate

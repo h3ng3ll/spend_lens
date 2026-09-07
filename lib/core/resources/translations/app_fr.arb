@@ -93,7 +93,7 @@
   "ins3": "Votre achat moyen est passé de {a} à {b} {c}.",
   "insA1": "{category} représentait {percent}% de vos dépenses.",
   "insA2": "Les dépenses {category} ont baissé de {percent}% en {month}.",
-  "insA3": "Votre achat moyen était de 157 {c}.",
+  "insA3": "Votre achat moyen était de {value} {c}.",
   "catFood": "Alimentation",
   "catTransport": "Transport",
   "catHousehold": "Maison",
@@ -316,5 +316,11 @@
   "recordNotFound": "Cet enregistrement n'existe plus.",
   "editComingSoon": "La modification arrivera dans une prochaine mise à jour.",
   "historyAllRecords": "Tous les enregistrements",
-  "recordNotFoundBody": "Il a peut-être été supprimé."
+  "recordNotFoundBody": "Il a peut-être été supprimé.",
+  "priceHistoryTitle": "Historique des prix",
+  "priceHistoryChangeLabel": "{direction} de {percent}% depuis le premier suivi",
+  "priceHistoryNoDataTitle": "Aucun historique de prix pour le moment",
+  "priceHistoryNoDataBody": "Scannez un reçu avec ce produit pour commencer à suivre son prix dans le temps.",
+  "priceHistoryNotFoundTitle": "Ce produit n'existe plus.",
+  "priceHistoryNotFoundBody": "Il a peut-être été supprimé."
 }

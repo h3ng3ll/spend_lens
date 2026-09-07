@@ -10,6 +10,10 @@ import '../../../../../../core/widgets/app_svg_icon.dart';
 /// row) — shows the currently-selected month/year; tapping it is the
 /// caller's job (opens `PeriodSheet`, owned by `AnalyticsPage` since the
 /// selection is UI-local state, not bloc state).
+/// Unscaled base heights; multiplied by the text scaler at build time.
+const double _basePillHeight = 40.0;
+const double _baseIconBoxSize = 28.0;
+
 class AnalyticsPeriodPill extends StatelessWidget {
   final String label;
   final VoidCallback onTap;
@@ -25,12 +29,19 @@ class AnalyticsPeriodPill extends StatelessWidget {
     final scheme = AppColorScheme.of(context);
     final textTheme = AppTextTheme.of(context);
 
+    // Scaled, never fixed: a 40dp pill clips `headline17Semi` at textScale 2.0
+    // (recorded bug `developer-derived-fixed-dp-cell-height-ignores-
+    // textScaleFactor`). The icon box scales with it so the pill stays round.
+    final scaler = MediaQuery.textScalerOf(context);
+    final pillHeight = scaler.scale(_basePillHeight);
+    final iconBoxSize = scaler.scale(_baseIconBoxSize);
+
     return Align(
       alignment: Alignment.centerLeft,
       child: GestureDetector(
         onTap: onTap,
         child: AppContainer(
-          height: 40.0,
+          height: pillHeight,
           color: scheme.card,
           border: Border.all(color: scheme.line, width: 1.0),
           borderRadius: BorderRadius.circular(12.0),
@@ -44,8 +55,8 @@ class AnalyticsPeriodPill extends StatelessWidget {
                 style: textTheme.headline17Semi.copyWith(color: scheme.ink),
               ),
               AppContainer(
-                width: 28.0,
-                height: 28.0,
+                width: iconBoxSize,
+                height: iconBoxSize,
                 color: scheme.field,
                 borderRadius: BorderRadius.circular(8.0),
                 child: Center(

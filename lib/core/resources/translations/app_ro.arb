@@ -93,7 +93,7 @@
   "ins3": "Cumpărătura medie a crescut de la {a} la {b} {c}.",
   "insA1": "{category} au reprezentat {percent}% din cheltuieli.",
   "insA2": "Cheltuielile {category} au scăzut cu {percent}% în {month}.",
-  "insA3": "Cumpărătura medie a fost 157 {c}.",
+  "insA3": "Cumpărătura medie a fost {value} {c}.",
   "catFood": "Alimente",
   "catTransport": "Transport",
   "catHousehold": "Casă",
@@ -199,7 +199,7 @@
   "cloudStorage": "Stocare cloud",
   "unlimited": "Nelimitat · pe dispozitiv",
   "storageOf": "{a} din {b}",
-  "limitFree": "Pozele și datele sunt salvate în contul tău. Conturile gratuite includ 100 MB.",
+  "limitFree": "Pozele și datele sunt salvate în contul tău. Conturile gratuite includ {quota}.",
   "limitPremium": "Premium: {quota} stocare cloud, istoric nelimitat și sincronizare multi-dispozitiv.",
   "limitLocal": "Totul este stocat pe {device}, fără limită. Conectează-te pentru backup.",
   "free": "Gratuit",
@@ -316,5 +316,11 @@
   "recordNotFound": "Această înregistrare nu mai există.",
   "editComingSoon": "Editarea va fi disponibilă într-o actualizare viitoare.",
   "historyAllRecords": "Toate înregistrările",
-  "recordNotFoundBody": "Este posibil să fi fost ștearsă."
+  "recordNotFoundBody": "Este posibil să fi fost ștearsă.",
+  "priceHistoryTitle": "Istoric preț",
+  "priceHistoryChangeLabel": "{direction} {percent}% de la prima urmărire",
+  "priceHistoryNoDataTitle": "Încă niciun istoric de preț",
+  "priceHistoryNoDataBody": "Scanează un bon cu acest produs pentru a începe să-i urmărești prețul în timp.",
+  "priceHistoryNotFoundTitle": "Acest produs nu mai există.",
+  "priceHistoryNotFoundBody": "Este posibil să fi fost șters."
 }

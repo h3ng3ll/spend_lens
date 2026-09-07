@@ -6,7 +6,9 @@ import '../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../core/routes/presentation/error_message_widget.dart';
 import '../../../../../core/routes/presentation/loading_data_widget.dart';
 import '../../../../../core/utils/extensions/go_router_x.dart';
+import '../../../../analytics/domain/repositories/i_price_observation_local_repository.dart';
 import '../../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../bloc/store_detail_bloc/store_detail_bloc.dart';
 import '../../../domain/repositories/i_store_local_repository.dart';
 import 'widgets/store_detail_body.dart';
@@ -36,6 +38,9 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
     storeId: widget.storeId,
     storeLocalRepository: getIt<IStoreLocalRepository>(),
     expenseLocalRepository: getIt<IExpenseLocalRepository>(),
+    productLocalRepository: getIt<IProductLocalRepository>(),
+    priceObservationLocalRepository:
+        getIt<IPriceObservationLocalRepository>(),
   )..add(const StoreDetailEvent.watch());
 
   @override
