@@ -11,4 +11,6 @@ extension ScannerStateX on ScannerState {
   bool get isProcessing => status == EScannerStatus.processing;
 
   bool get isFailed => status == EScannerStatus.failed;
+
+  bool get isReady => status == EScannerStatus.ready;
 }

@@ -38,7 +38,10 @@ class ScannerStepRow extends StatelessWidget {
 
     final labelColor = isDone || isCurrent ? scheme.ink : scheme.dim;
     final labelStyle = isCurrent
-        ? textTheme.body17.copyWith(color: labelColor, fontWeight: FontWeight.w600)
+        ? textTheme.body17.copyWith(
+            color: labelColor,
+            fontWeight: FontWeight.w600,
+          )
         : textTheme.body17.copyWith(color: labelColor);
 
     return Row(

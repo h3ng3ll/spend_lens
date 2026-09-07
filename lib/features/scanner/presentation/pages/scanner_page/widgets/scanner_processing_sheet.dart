@@ -56,10 +56,7 @@ class ScannerProcessingSheet extends StatelessWidget {
             offset: const Offset(0.0, -20.0),
           ),
         ],
-        padding: EdgeInsets.only(
-          top: 24.0,
-          bottom: 56.0 + bottomInset,
-        ),
+        padding: EdgeInsets.only(top: 24.0, bottom: 56.0 + bottomInset),
         child: HorizontalPadding(
           child: Column(
             mainAxisSize: MainAxisSize.min,

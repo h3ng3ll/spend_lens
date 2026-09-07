@@ -4,6 +4,12 @@ import 'package:bloc/bloc.dart';
 import 'package:flutter/material.dart' show Rect;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../../core/services/ocr/i_receipt_detector.dart';
+import '../../../../../core/services/ocr/ocr_service.dart';
+import '../../../domain/i_receipt_parse_pipeline.dart';
+import '../../../domain/pending_receipt_draft_store.dart';
+import '../../../domain/receipt_parse_pipeline.dart';
+
 part 'scanner_event.dart';
 
 part 'scanner_state.dart';
@@ -12,49 +18,101 @@ part 'scanner_state_ext.dart';
 
 part 'scanner_bloc.freezed.dart';
 
-/// Screen-scoped bloc (design_spendlens.md §5: `registerFactory`, built in
-/// `ScannerPage.initState`, closed in `dispose` — never `main()`, per BLoC
-/// rule A3.8).
+/// Screen-scoped bloc (design_spendlens.md §5: `registerFactory` semantics
+/// — built by hand in `ScannerPage.initState`, closed in `dispose`, never
+/// resolved from `getIt`/registered in `main()`, per BLoC rule A3.8).
 ///
-/// Drives the scanner's four sub-states as ONE route
-/// (design_spendlens.md §5 — `EScannerStatus {searching, detected,
-/// capturing, processing, failed}`). Every transition is fired by a REAL
-/// event from the widget that owns the camera + pipeline orchestration
-/// (`ScannerBody`/`CameraPreviewLayer`) — this bloc holds NO timer of its
-/// own and never calls `add()` from inside a handler (BLoC rule A3.10):
-/// the caller sequences one `processingStepCompleted()` dispatch per
-/// completed real pipeline stage.
+/// Drives the scanner's sub-states as ONE route (design_spendlens.md §5 —
+/// `EScannerStatus {searching, detected, capturing, processing, failed,
+/// ready}`) AND owns the entire scanning pipeline: the real
+/// [IReceiptDetector], [OcrService] and [IReceiptParsePipeline] calls live
+/// here, not in the widget. The UI dispatches intent events only
+/// ([ScannerEvent.previewFrame], [ScannerEvent.capture],
+/// [ScannerEvent.captureCompleted]) — it never decides whether/when to call
+/// a service, per BLoC rule A3.7. The widget retains only what is
+/// genuinely tied to its own mount/dispose lifecycle: the `CameraController`
+/// itself, the `CameraPreview`, and the `startImageStream` subscription.
+///
+/// This bloc holds NO timer of its own and never calls `add()` from inside
+/// a handler (BLoC rule A3.10): [_onCaptureCompleted] runs all 4 pipeline
+/// stages and emits one `processingStep` advance per stage, in a single
+/// sequential handler — never a self-dispatched follow-up event.
 ///
 /// design_spendlens.md §8 — the prototype's fixed timer chain
 /// (1800/3300/3800/4900/6000/6900/7600 ms) is a SIMULATION and is never
-/// ported as behavior here.
+/// ported as behavior here; every transition below still only advances when
+/// the real, awaited call behind it actually completes.
 class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
-  static const _totalProcessingSteps = 4;
+  /// The minimum gap between two detector calls while previewing —
+  /// bounds the analysis rate independently of the camera's own frame
+  /// rate. A THROTTLE on how often the detector is invoked, never a driver
+  /// of a state transition itself (design_spendlens.md §8).
+  static const _detectionMinInterval = Duration(milliseconds: 700);
 
-  ScannerBloc() : super(const ScannerState()) {
+  final IReceiptDetector _receiptDetector;
+  final OcrService _ocrService;
+  final IReceiptParsePipeline _parsePipeline;
+  final PendingReceiptDraftStore _draftStore;
+
+  bool _isDetecting = false;
+  DateTime? _lastDetectionAttempt;
+
+  ScannerBloc({
+    required this._receiptDetector,
+    required this._ocrService,
+    required this._parsePipeline,
+    required this._draftStore,
+  }) : super(const ScannerState()) {
     on<_Reset>(_onReset);
-    on<_Detected>(_onDetected);
+    on<_PreviewFrame>(_onPreviewFrame);
     on<_Capture>(_onCapture);
     on<_CaptureCompleted>(_onCaptureCompleted);
-    on<_ProcessingStepCompleted>(_onProcessingStepCompleted);
     on<_Failed>(_onFailed);
   }
 
+  /// A fresh attempt is starting — the previous failed parse (if any) is
+  /// superseded, not carried forward. This does NOT violate "never discard
+  /// the captured image" (spec §66): that guarantee protects a failed scan
+  /// the user has not yet retried or exited, not a scan the user has
+  /// explicitly asked to redo.
   void _onReset(_Reset event, Emitter<ScannerState> emit) {
+    _draftStore.clear();
     emit(const ScannerState());
   }
 
-  /// Fired by the camera preview's own periodic call to
-  /// `IReceiptDetector.detectReceiptRect` actually returning bounds — never
-  /// a timer.
-  void _onDetected(_Detected event, Emitter<ScannerState> emit) {
+  /// The UI's raw "a frame arrived" intent. This handler owns the rate
+  /// limit AND the real detector call — the UI no longer calls
+  /// [IReceiptDetector.detectReceiptRect] itself. Frames arrive far faster
+  /// than the app can (or should) analyze them, so [_detectionMinInterval]
+  /// throttles how often the REAL call below is made; it never substitutes
+  /// for the call completing.
+  Future<void> _onPreviewFrame(
+    _PreviewFrame event,
+    Emitter<ScannerState> emit,
+  ) async {
     if (state.status != EScannerStatus.searching) return;
-    emit(
-      state.copyWith(
-        status: EScannerStatus.detected,
-        detectedBounds: event.bounds,
-      ),
-    );
+    if (_isDetecting) return;
+
+    final now = DateTime.now();
+    final last = _lastDetectionAttempt;
+    if (last != null && now.difference(last) < _detectionMinInterval) return;
+    _lastDetectionAttempt = now;
+
+    _isDetecting = true;
+    try {
+      final bounds = await _receiptDetector.detectReceiptRect(event.imageBytes);
+      if (state.status != EScannerStatus.searching) return;
+      if (bounds != null) {
+        emit(
+          state.copyWith(
+            status: EScannerStatus.detected,
+            detectedBounds: bounds,
+          ),
+        );
+      }
+    } finally {
+      _isDetecting = false;
+    }
   }
 
   /// Fired by auto-capture (a stable detection held) or a shutter tap. A
@@ -71,28 +129,70 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
     emit(state.copyWith(status: EScannerStatus.capturing));
   }
 
-  /// Fired when `CameraController.takePicture()` actually completes.
-  void _onCaptureCompleted(
+  /// Fired when `CameraController.takePicture()` actually completes. Runs
+  /// the 4 real processing stages in sequence from THIS single handler,
+  /// emitting exactly ONE `processingStep` advance per stage as it actually
+  /// finishes (design_spendlens.md §8) — never via a self-dispatched
+  /// `add()` (BLoC rule A3.10). Detection failure never blocks OCR (§24) —
+  /// a `null` rect proceeds with the ORIGINAL image, not a cropped one.
+  Future<void> _onCaptureCompleted(
     _CaptureCompleted event,
     Emitter<ScannerState> emit,
-  ) {
+  ) async {
     if (state.status != EScannerStatus.capturing) return;
-    emit(state.copyWith(status: EScannerStatus.processing, processingStep: 0));
-  }
+    final bytes = event.imageBytes;
 
-  /// Fired once per completed real pipeline stage (detect/crop → OCR →
-  /// parse+normalize → price lookup). The caller never says which step —
-  /// only that "the current one finished" — so this handler owns the
-  /// counting, matching how [_totalProcessingSteps] is the only place the
-  /// step count is named.
-  void _onProcessingStepCompleted(
-    _ProcessingStepCompleted event,
-    Emitter<ScannerState> emit,
-  ) {
+    emit(state.copyWith(status: EScannerStatus.processing, processingStep: 0));
+
+    // Step 1 — Detecting receipt (detect/crop).
+    final rect = await _receiptDetector.detectReceiptRect(bytes);
+    final workingBytes = rect == null
+        ? bytes
+        : await _receiptDetector.cropPerspective(bytes, rect);
     if (state.status != EScannerStatus.processing) return;
-    final next = state.processingStep + 1;
-    if (next > _totalProcessingSteps) return;
-    emit(state.copyWith(processingStep: next));
+    emit(state.copyWith(processingStep: 1));
+
+    // Step 2 — Reading text (OCR).
+    final blocks = await _ocrService.recognizeText(workingBytes);
+    if (state.status != EScannerStatus.processing) return;
+    emit(state.copyWith(processingStep: 2));
+
+    // Step 3 — Finding products (parse + normalize). The ORIGINAL captured
+    // bytes (never the cropped/working copy) are what get attached to the
+    // draft — the design keeps the actual capture for Review's photo card
+    // and the scan-failed sheet, never a perspective-corrected substitute.
+    final pipeline = _parsePipeline;
+    if (pipeline is ReceiptParsePipeline) {
+      pipeline.attachImageBytes(bytes);
+    }
+    final productCount = await _parsePipeline.findProducts(blocks);
+    if (state.status != EScannerStatus.processing) return;
+    emit(state.copyWith(processingStep: 3));
+
+    // Step 4 — Checking prices (price-history lookup).
+    await _parsePipeline.checkPrices(productCount);
+    if (state.status != EScannerStatus.processing) return;
+    emit(state.copyWith(processingStep: 4));
+
+    // A parse that found nothing usable at all (no items AND no total) is
+    // the scan-failed state — never a generic error (design_spendlens.md
+    // §8/§66) — and the captured image is NEVER discarded on that path
+    // (the draft store already holds it, and the failed sub-state's Retry/
+    // Enter Manually sheet reads it from there). A usable parse advances to
+    // `ready`, which the UI's `BlocListener` turns into the real
+    // `ReviewPageRoute` navigation (a UI concern this bloc cannot perform).
+    final draft = _draftStore.current;
+    if (draft == null || draft.parsedReceipt.isUnusable) {
+      emit(
+        state.copyWith(
+          status: EScannerStatus.failed,
+          errorMessage: 'unusable_scan',
+        ),
+      );
+      return;
+    }
+
+    emit(state.copyWith(status: EScannerStatus.ready));
   }
 
   void _onFailed(_Failed event, Emitter<ScannerState> emit) {

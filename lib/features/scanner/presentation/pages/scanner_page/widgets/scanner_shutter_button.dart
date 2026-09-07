@@ -97,7 +97,9 @@ class _ScannerShutterButtonState extends State<ScannerShutterButton>
               height: _ringSize,
               shape: BoxShape.circle,
               border: Border.all(
-                color: widget.isDetected ? scheme.accent : AppColors.white.value,
+                color: widget.isDetected
+                    ? scheme.accent
+                    : AppColors.white.value,
                 width: 4.0,
               ),
               alignment: Alignment.center,

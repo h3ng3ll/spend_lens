@@ -55,15 +55,14 @@ extension ScannerEventPatterns on ScannerEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Reset value)?  reset,TResult Function( _Detected value)?  detected,TResult Function( _Capture value)?  capture,TResult Function( _CaptureCompleted value)?  captureCompleted,TResult Function( _ProcessingStepCompleted value)?  processingStepCompleted,TResult Function( _Failed value)?  failed,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Reset value)?  reset,TResult Function( _PreviewFrame value)?  previewFrame,TResult Function( _Capture value)?  capture,TResult Function( _CaptureCompleted value)?  captureCompleted,TResult Function( _Failed value)?  failed,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Reset() when reset != null:
-return reset(_that);case _Detected() when detected != null:
-return detected(_that);case _Capture() when capture != null:
+return reset(_that);case _PreviewFrame() when previewFrame != null:
+return previewFrame(_that);case _Capture() when capture != null:
 return capture(_that);case _CaptureCompleted() when captureCompleted != null:
-return captureCompleted(_that);case _ProcessingStepCompleted() when processingStepCompleted != null:
-return processingStepCompleted(_that);case _Failed() when failed != null:
+return captureCompleted(_that);case _Failed() when failed != null:
 return failed(_that);case _:
   return orElse();
 
@@ -82,15 +81,14 @@ return failed(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Reset value)  reset,required TResult Function( _Detected value)  detected,required TResult Function( _Capture value)  capture,required TResult Function( _CaptureCompleted value)  captureCompleted,required TResult Function( _ProcessingStepCompleted value)  processingStepCompleted,required TResult Function( _Failed value)  failed,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Reset value)  reset,required TResult Function( _PreviewFrame value)  previewFrame,required TResult Function( _Capture value)  capture,required TResult Function( _CaptureCompleted value)  captureCompleted,required TResult Function( _Failed value)  failed,}){
 final _that = this;
 switch (_that) {
 case _Reset():
-return reset(_that);case _Detected():
-return detected(_that);case _Capture():
+return reset(_that);case _PreviewFrame():
+return previewFrame(_that);case _Capture():
 return capture(_that);case _CaptureCompleted():
-return captureCompleted(_that);case _ProcessingStepCompleted():
-return processingStepCompleted(_that);case _Failed():
+return captureCompleted(_that);case _Failed():
 return failed(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -105,15 +103,14 @@ return failed(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Reset value)?  reset,TResult? Function( _Detected value)?  detected,TResult? Function( _Capture value)?  capture,TResult? Function( _CaptureCompleted value)?  captureCompleted,TResult? Function( _ProcessingStepCompleted value)?  processingStepCompleted,TResult? Function( _Failed value)?  failed,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Reset value)?  reset,TResult? Function( _PreviewFrame value)?  previewFrame,TResult? Function( _Capture value)?  capture,TResult? Function( _CaptureCompleted value)?  captureCompleted,TResult? Function( _Failed value)?  failed,}){
 final _that = this;
 switch (_that) {
 case _Reset() when reset != null:
-return reset(_that);case _Detected() when detected != null:
-return detected(_that);case _Capture() when capture != null:
+return reset(_that);case _PreviewFrame() when previewFrame != null:
+return previewFrame(_that);case _Capture() when capture != null:
 return capture(_that);case _CaptureCompleted() when captureCompleted != null:
-return captureCompleted(_that);case _ProcessingStepCompleted() when processingStepCompleted != null:
-return processingStepCompleted(_that);case _Failed() when failed != null:
+return captureCompleted(_that);case _Failed() when failed != null:
 return failed(_that);case _:
   return null;
 
@@ -131,14 +128,13 @@ return failed(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  reset,TResult Function( Rect bounds)?  detected,TResult Function()?  capture,TResult Function( Uint8List imageBytes)?  captureCompleted,TResult Function()?  processingStepCompleted,TResult Function( String reason)?  failed,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  reset,TResult Function( Uint8List imageBytes)?  previewFrame,TResult Function()?  capture,TResult Function( Uint8List imageBytes)?  captureCompleted,TResult Function( String reason)?  failed,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Reset() when reset != null:
-return reset();case _Detected() when detected != null:
-return detected(_that.bounds);case _Capture() when capture != null:
+return reset();case _PreviewFrame() when previewFrame != null:
+return previewFrame(_that.imageBytes);case _Capture() when capture != null:
 return capture();case _CaptureCompleted() when captureCompleted != null:
-return captureCompleted(_that.imageBytes);case _ProcessingStepCompleted() when processingStepCompleted != null:
-return processingStepCompleted();case _Failed() when failed != null:
+return captureCompleted(_that.imageBytes);case _Failed() when failed != null:
 return failed(_that.reason);case _:
   return orElse();
 
@@ -157,14 +153,13 @@ return failed(_that.reason);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  reset,required TResult Function( Rect bounds)  detected,required TResult Function()  capture,required TResult Function( Uint8List imageBytes)  captureCompleted,required TResult Function()  processingStepCompleted,required TResult Function( String reason)  failed,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  reset,required TResult Function( Uint8List imageBytes)  previewFrame,required TResult Function()  capture,required TResult Function( Uint8List imageBytes)  captureCompleted,required TResult Function( String reason)  failed,}) {final _that = this;
 switch (_that) {
 case _Reset():
-return reset();case _Detected():
-return detected(_that.bounds);case _Capture():
+return reset();case _PreviewFrame():
+return previewFrame(_that.imageBytes);case _Capture():
 return capture();case _CaptureCompleted():
-return captureCompleted(_that.imageBytes);case _ProcessingStepCompleted():
-return processingStepCompleted();case _Failed():
+return captureCompleted(_that.imageBytes);case _Failed():
 return failed(_that.reason);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -179,14 +174,13 @@ return failed(_that.reason);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  reset,TResult? Function( Rect bounds)?  detected,TResult? Function()?  capture,TResult? Function( Uint8List imageBytes)?  captureCompleted,TResult? Function()?  processingStepCompleted,TResult? Function( String reason)?  failed,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  reset,TResult? Function( Uint8List imageBytes)?  previewFrame,TResult? Function()?  capture,TResult? Function( Uint8List imageBytes)?  captureCompleted,TResult? Function( String reason)?  failed,}) {final _that = this;
 switch (_that) {
 case _Reset() when reset != null:
-return reset();case _Detected() when detected != null:
-return detected(_that.bounds);case _Capture() when capture != null:
+return reset();case _PreviewFrame() when previewFrame != null:
+return previewFrame(_that.imageBytes);case _Capture() when capture != null:
 return capture();case _CaptureCompleted() when captureCompleted != null:
-return captureCompleted(_that.imageBytes);case _ProcessingStepCompleted() when processingStepCompleted != null:
-return processingStepCompleted();case _Failed() when failed != null:
+return captureCompleted(_that.imageBytes);case _Failed() when failed != null:
 return failed(_that.reason);case _:
   return null;
 
@@ -230,43 +224,43 @@ String toString() {
 /// @nodoc
 
 
-class _Detected implements ScannerEvent {
-  const _Detected(this.bounds);
+class _PreviewFrame implements ScannerEvent {
+  const _PreviewFrame(this.imageBytes);
   
 
- final  Rect bounds;
+ final  Uint8List imageBytes;
 
 /// Create a copy of ScannerEvent
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
-_$DetectedCopyWith<_Detected> get copyWith => __$DetectedCopyWithImpl<_Detected>(this, _$identity);
+_$PreviewFrameCopyWith<_PreviewFrame> get copyWith => __$PreviewFrameCopyWithImpl<_PreviewFrame>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Detected&&(identical(other.bounds, bounds) || other.bounds == bounds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _PreviewFrame&&const DeepCollectionEquality().equals(other.imageBytes, imageBytes));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,bounds);
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(imageBytes));
 
 @override
 String toString() {
-  return 'ScannerEvent.detected(bounds: $bounds)';
+  return 'ScannerEvent.previewFrame(imageBytes: $imageBytes)';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class _$DetectedCopyWith<$Res> implements $ScannerEventCopyWith<$Res> {
-  factory _$DetectedCopyWith(_Detected value, $Res Function(_Detected) _then) = __$DetectedCopyWithImpl;
+abstract mixin class _$PreviewFrameCopyWith<$Res> implements $ScannerEventCopyWith<$Res> {
+  factory _$PreviewFrameCopyWith(_PreviewFrame value, $Res Function(_PreviewFrame) _then) = __$PreviewFrameCopyWithImpl;
 @useResult
 $Res call({
- Rect bounds
+ Uint8List imageBytes
 });
 
 
@@ -274,19 +268,19 @@ $Res call({
 
 }
 /// @nodoc
-class __$DetectedCopyWithImpl<$Res>
-    implements _$DetectedCopyWith<$Res> {
-  __$DetectedCopyWithImpl(this._self, this._then);
+class __$PreviewFrameCopyWithImpl<$Res>
+    implements _$PreviewFrameCopyWith<$Res> {
+  __$PreviewFrameCopyWithImpl(this._self, this._then);
 
-  final _Detected _self;
-  final $Res Function(_Detected) _then;
+  final _PreviewFrame _self;
+  final $Res Function(_PreviewFrame) _then;
 
 /// Create a copy of ScannerEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? bounds = null,}) {
-  return _then(_Detected(
-null == bounds ? _self.bounds : bounds // ignore: cast_nullable_to_non_nullable
-as Rect,
+@pragma('vm:prefer-inline') $Res call({Object? imageBytes = null,}) {
+  return _then(_PreviewFrame(
+null == imageBytes ? _self.imageBytes : imageBytes // ignore: cast_nullable_to_non_nullable
+as Uint8List,
   ));
 }
 
@@ -390,38 +384,6 @@ as Uint8List,
 
 
 }
-
-/// @nodoc
-
-
-class _ProcessingStepCompleted implements ScannerEvent {
-  const _ProcessingStepCompleted();
-  
-
-
-
-
-
-
-@override
-bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ProcessingStepCompleted);
-}
-
-
-@override
-int get hashCode => runtimeType.hashCode;
-
-@override
-String toString() {
-  return 'ScannerEvent.processingStepCompleted()';
-}
-
-
-}
-
-
-
 
 /// @nodoc
 
