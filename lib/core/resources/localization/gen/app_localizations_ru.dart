@@ -31,13 +31,8 @@ class AppLocalizationsRu extends AppLocalizations {
   String get renameCategory => 'Переименовать категорию';
 
   @override
-  String catRenamed(int n) {
-    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
-      localeName,
-    );
-    final String nString = nNumberFormat.format(n);
-
-    return 'Переименована в $nString';
+  String catRenamed(String n) {
+    return 'Переименована в $n';
   }
 
   @override
@@ -155,6 +150,10 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get about => 'О приложении';
+
+  @override
+  String get aboutDescription =>
+      'Локальный трекер расходов. Сканируйте чеки или добавляйте наличные траты и смотрите, куда уходят деньги — всё хранится на этом устройстве.';
 
   @override
   String get done => 'Готово';
@@ -295,6 +294,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String periodRange(String a, String b) {
     return 'Записи с $a по $b';
   }
+
+  @override
+  String get pdf => 'PDF';
+
+  @override
+  String get pdfExportUnavailable =>
+      'Экспорт в PDF появится в одном из следующих обновлений.';
+
+  @override
+  String get signInComingSoon =>
+      'Вход в аккаунт появится в одном из следующих обновлений.';
+
+  @override
+  String get exportComingSoon =>
+      'Экспорт и импорт появятся в одном из следующих обновлений.';
 
   @override
   String pdfToast(String m) {
@@ -503,6 +517,13 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get storesIntro =>
       'Создаётся автоматически из чеков. Откройте магазин, чтобы увидеть товары и сравнение цен.';
+
+  @override
+  String get storesEmptyTitle => 'Пока нет магазинов';
+
+  @override
+  String get storesEmptyBody =>
+      'Добавьте магазин, чтобы отслеживать, где вы покупаете, и сравнивать цены.';
 
   @override
   String get visits => 'Визиты';
@@ -887,6 +908,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get amount => 'Сумма';
 
   @override
+  String get enterValidAmount => 'Введите корректную сумму';
+
+  @override
   String get category => 'Категория';
 
   @override
@@ -1044,4 +1068,88 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get trendDecreased => 'снизились';
+
+  @override
+  String get homeNoExpensesTitle => 'Пока нет расходов';
+
+  @override
+  String get homeNoExpensesBody =>
+      'Отсканируйте несколько чеков, чтобы увидеть структуру расходов.';
+
+  @override
+  String get scanFirstReceipt => 'Отсканировать первый чек';
+
+  @override
+  String get scanComingSoon =>
+      'Сканирование появится в одном из следующих обновлений';
+
+  @override
+  String get historyNoRecordsTitle => 'Пока нет записей';
+
+  @override
+  String get historyNoRecordsBody =>
+      'Отсканируйте чек или добавьте наличный расход, чтобы увидеть его здесь.';
+
+  @override
+  String get historyNoMatchTitle => 'Совпадений не найдено';
+
+  @override
+  String get historyNoMatchBody => 'Попробуйте другой запрос или фильтр.';
+
+  @override
+  String get filterAll => 'Все';
+
+  @override
+  String get filterReceipts => 'Чеки';
+
+  @override
+  String get filterCash => 'Наличные';
+
+  @override
+  String get storeNoProductsYet => 'Пока нет товаров';
+
+  @override
+  String get storeNoProductsYetBody =>
+      'Отсканируйте чек из этого магазина, чтобы увидеть здесь товары и сравнение цен.';
+
+  @override
+  String get deleteCategory => 'Удалить категорию';
+
+  @override
+  String deleteCategoryConfirm(String n) {
+    return 'Удалить «$n»? Это действие нельзя отменить.';
+  }
+
+  @override
+  String get scanFailedTitle => 'Не удалось чётко распознать чек.';
+
+  @override
+  String get scanFailedTips =>
+      'Попробуйте:\n• Улучшить освещение\n• Разгладить чек\n• Держать весь чек в кадре';
+
+  @override
+  String get tryAgain => 'Повторить';
+
+  @override
+  String get enterManually => 'Ввести вручную';
+
+  @override
+  String get deleteExpenseConfirmTitle => 'Удалить этот расход?';
+
+  @override
+  String get deleteExpenseConfirmBody =>
+      'Это навсегда удалит расход из истории. Отменить это действие нельзя.';
+
+  @override
+  String get recordNotFound => 'Эта запись больше не существует.';
+
+  @override
+  String get editComingSoon =>
+      'Редактирование появится в одном из следующих обновлений.';
+
+  @override
+  String get historyAllRecords => 'Все записи';
+
+  @override
+  String get recordNotFoundBody => 'Возможно, она была удалена.';
 }

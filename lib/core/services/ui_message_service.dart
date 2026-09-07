@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../resources/colors/app_colors.dart';
-import '../widgets/app_container.dart';
+import '../widgets/app_toast.dart';
 
 /// App-wide toast messaging.
 ///
@@ -13,10 +12,12 @@ import '../widgets/app_container.dart';
 /// with a single-entry queue, keeping the exact static API
 /// (`showError`/`showInfo`/`showSuccess`) so call sites never change.
 ///
-/// M1 ships a minimal, working pill (no queue starvation, no leaked
-/// overlays). M2 swaps the rendered widget for the design's full
-/// `core/widgets/app_toast.dart` (44 dp pill, gradient dot, 24 px backdrop
-/// blur, 2200 ms) without touching this API.
+/// M5 renders the designed `core/widgets/app_toast.dart` (44 dp pill,
+/// gradient dot, 24 px backdrop blur, 2200 ms) — the message content is the
+/// only thing that varies between `showError`/`showInfo`/`showSuccess`; the
+/// design carries no separate error/success color variant for the pill
+/// itself (verified: `SpendLens Prototype.dc.html`'s "TOAST" block has a
+/// single fixed `--toastbg`/`--toastink` pair, never a per-severity color).
 final class UiMessageService {
   UiMessageService._();
 
@@ -36,50 +37,31 @@ final class UiMessageService {
     String message, {
     Duration duration = _defaultDuration,
   }) async {
-    _show(
-      message,
-      background: AppColors.warnDark.value,
-      duration: duration,
-    );
+    _show(message, duration: duration);
   }
 
   static Future<void> showInfo(
     String message, {
     Duration duration = _defaultDuration,
   }) async {
-    _show(
-      message,
-      background: AppColors.cardSolidDark.value,
-      duration: duration,
-    );
+    _show(message, duration: duration);
   }
 
   static Future<void> showSuccess(
     String message, {
     Duration duration = _defaultDuration,
   }) async {
-    _show(
-      message,
-      background: AppColors.accentDark.value,
-      duration: duration,
-    );
+    _show(message, duration: duration);
   }
 
-  static void _show(
-    String message, {
-    required Color background,
-    required Duration duration,
-  }) {
+  static void _show(String message, {required Duration duration}) {
     final overlayState = _navigatorKey?.currentState?.overlay;
     if (overlayState == null) return;
 
     _currentEntry?.remove();
 
     final entry = OverlayEntry(
-      builder: (context) => _ToastPill(
-        message: message,
-        background: background,
-      ),
+      builder: (context) => AppToast(message: message),
     );
     _currentEntry = entry;
     overlayState.insert(entry);
@@ -90,44 +72,5 @@ final class UiMessageService {
         _currentEntry = null;
       }
     });
-  }
-}
-
-class _ToastPill extends StatelessWidget {
-  final String message;
-  final Color background;
-
-  const _ToastPill({
-    required this.message,
-    required this.background,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Positioned(
-      left: 16.0,
-      right: 16.0,
-      bottom: 48.0,
-      child: Material(
-        color: AppColors.transparent.value,
-        child: SafeArea(
-          child: AppContainer(
-            padding: const EdgeInsets.symmetric(
-              horizontal: 16.0,
-              vertical: 12.0,
-            ),
-            color: background,
-            borderRadius: BorderRadius.circular(22.0),
-            child: Text(
-              message,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                color: AppColors.white.value,
-              ),
-            ),
-          ),
-        ),
-      ),
-    );
   }
 }

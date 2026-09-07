@@ -226,34 +226,60 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
     );
   }
 
-  /// Resolves a category's hue by its i18n key. Falls back to
-  /// [AppColors.categoryOther] for an unrecognized id, matching the design's
-  /// own catch-all category.
+  /// Resolves a category's hue by its id.
+  ///
+  /// A built-in [Category]'s `id`/`name` is the i18n key it was seeded with
+  /// (`SeedCategoriesUseCase` sets `id: nameKey`, e.g. `'catFood'`) — NOT the
+  /// English display string. This resolver accepts BOTH forms:
+  /// - the `catXxx` seed-key form (`'catFood'`, `'catRestaurantsCoffee'`, …),
+  ///   which is what every built-in [Category.id] actually is, and
+  /// - the English canonical form (`'Food'`, `'Restaurants & Coffee'`,
+  ///   `'Restaurants'`), kept for any caller that already resolved a display
+  ///   name before reaching here.
+  ///
+  /// Recorded defect (found during M5): every `catXxx`-keyed lookup used to
+  /// fall through to the `default` branch and silently render
+  /// [AppColors.categoryOther] for all 12 built-in categories — this method
+  /// is the fix, not a new feature. A custom (user-created) category's id is
+  /// never one of these keys and correctly falls through to the same
+  /// catch-all, matching the design's own fallback.
   static Color categoryColor(String categoryId) {
     switch (categoryId) {
+      case 'catFood':
       case 'Food':
         return AppColors.categoryFood.value;
+      case 'catTransport':
       case 'Transport':
         return AppColors.categoryTransport.value;
+      case 'catHousehold':
       case 'Household':
         return AppColors.categoryHousehold.value;
+      case 'catRestaurantsCoffee':
       case 'Restaurants & Coffee':
       case 'Restaurants':
         return AppColors.categoryRestaurantsCoffee.value;
+      case 'catHealth':
       case 'Health':
         return AppColors.categoryHealth.value;
+      case 'catShopping':
       case 'Shopping':
         return AppColors.categoryShopping.value;
+      case 'catEntertainment':
       case 'Entertainment':
         return AppColors.categoryEntertainment.value;
+      case 'catUtilities':
       case 'Utilities':
         return AppColors.categoryUtilities.value;
+      case 'catTravel':
       case 'Travel':
         return AppColors.categoryTravel.value;
+      case 'catEducation':
       case 'Education':
         return AppColors.categoryEducation.value;
+      case 'catPersonalCare':
       case 'Personal Care':
         return AppColors.categoryPersonalCare.value;
+      case 'catOther':
       case 'Other':
       default:
         return AppColors.categoryOther.value;

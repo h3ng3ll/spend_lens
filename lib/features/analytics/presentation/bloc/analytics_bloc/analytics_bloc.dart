@@ -1,8 +1,10 @@
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../../expense/domain/models/expense/expense.dart';
+import '../../../../../core/utils/combine_latest_streams.dart';
+import '../../../../category/domain/repositories/i_category_local_repository.dart';
 import '../../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../../domain/models/analytics_snapshot.dart';
 
 part 'analytics_event.dart';
 
@@ -16,26 +18,38 @@ part 'analytics_bloc.freezed.dart';
 /// `AnalyticsPage.initState`, closed in `dispose` — never `main()`, per BLoC
 /// rule A3.8).
 ///
-/// Reactive, not static (hive_rules.md §6): subscribes to
-/// [IExpenseLocalRepository.watchAll] — Expenses are computed FROM, never
-/// stored as the source of truth for anything else (spec §49). The real
-/// calculator/insight generator (M6) consume this same stream; M4 only
-/// proves the wiring.
+/// Reactive, not static (hive_rules.md §6/§10): combines expenses +
+/// categories into ONE [AnalyticsSnapshot] stream via `combineLatest2` and
+/// subscribes with a SINGLE `emit.forEach` — never parallel `emit.forEach`
+/// calls, never a Dart record type for the combined value. Follows the
+/// exact shape `HomeBloc` established. Expenses/Categories are computed
+/// FROM here, never stored as the source of truth for anything else (spec
+/// §49). The M5 screen computes simple aggregates (sums, counts, shares)
+/// directly from this raw snapshot via plain functions — the deterministic
+/// calculator + parameterized insight generator are M6.
 class AnalyticsBloc extends Bloc<AnalyticsEvent, AnalyticsState> {
   final IExpenseLocalRepository _expenseLocalRepository;
+  final ICategoryLocalRepository _categoryLocalRepository;
 
-  AnalyticsBloc({required this._expenseLocalRepository})
-    : super(const AnalyticsState()) {
+  AnalyticsBloc({
+    required this._expenseLocalRepository,
+    required this._categoryLocalRepository,
+  }) : super(const AnalyticsState()) {
     on<_Watch>(_onWatch);
   }
 
   Future<void> _onWatch(_Watch event, Emitter<AnalyticsState> emit) async {
     emit(state.copyWith(status: EAnalyticsStatus.loading));
 
-    await emit.forEach<List<Expense>>(
-      _expenseLocalRepository.watchAll(),
-      onData: (expenses) =>
-          state.copyWith(status: EAnalyticsStatus.loaded, expenses: expenses),
+    await emit.forEach<AnalyticsSnapshot>(
+      combineLatest2(
+        _expenseLocalRepository.watchAll(),
+        _categoryLocalRepository.watchAll(),
+        (expenses, categories) =>
+            AnalyticsSnapshot(expenses: expenses, categories: categories),
+      ),
+      onData: (snapshot) =>
+          state.copyWith(status: EAnalyticsStatus.loaded, snapshot: snapshot),
       onError: (error, stackTrace) => state.copyWith(
         status: EAnalyticsStatus.failed,
         errorMessage: error.toString(),

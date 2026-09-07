@@ -22,8 +22,7 @@
     "description": "Auto-ported from i18n.js key \"catRenamed\".",
     "placeholders": {
       "n": {
-        "type": "int",
-        "format": "decimalPattern"
+        "type": "String"
       }
     }
   },
@@ -92,6 +91,7 @@
   "deleteAll": "Delete all data",
   "privacy": "Privacy",
   "about": "About",
+  "aboutDescription": "A local-first expense tracker. Scan receipts or add cash expenses, and see where your money goes — all stored on this device.",
   "done": "Done",
   "langNote": "Changes the app language. Receipts keep their original text.",
   "currencyNote": "Used for totals and analytics. Receipts keep their printed currency.",
@@ -163,6 +163,10 @@
       }
     }
   },
+  "pdf": "PDF",
+  "pdfExportUnavailable": "PDF export arrives in a later update.",
+  "signInComingSoon": "Sign-in arrives in a later update.",
+  "exportComingSoon": "Export and import arrive in a later update.",
   "pdfToast": "{m} report · PDF ready to share",
   "@pdfToast": {
     "description": "Auto-ported from i18n.js key \"pdfToast\".",
@@ -316,6 +320,8 @@
   "receipts": "Receipts",
   "newStore": "New store",
   "storesIntro": "Built automatically from your receipts. Open a store to see its products and how their prices compare elsewhere.",
+  "storesEmptyTitle": "No stores yet",
+  "storesEmptyBody": "Add a store to start tracking where you shop and how prices compare.",
   "visits": "Visits",
   "spent": "Spent",
   "products": "Products",
@@ -600,6 +606,7 @@
   },
   "expense": "Expense",
   "amount": "Amount",
+  "enterValidAmount": "Enter a valid amount",
   "category": "Category",
   "optional": "Optional",
   "date": "Date",
@@ -691,5 +698,37 @@
   "applyCorrections": "Apply corrections",
   "thisDevice": "this device",
   "trendIncreased": "increased",
-  "trendDecreased": "decreased"
+  "trendDecreased": "decreased",
+  "homeNoExpensesTitle": "No expenses yet",
+  "homeNoExpensesBody": "Scan a few receipts to see your spending patterns.",
+  "scanFirstReceipt": "Scan your first receipt",
+  "scanComingSoon": "Scanning arrives in a later update",
+  "historyNoRecordsTitle": "No records yet",
+  "historyNoRecordsBody": "Scan a receipt or add a cash expense to see it here.",
+  "historyNoMatchTitle": "No matching records",
+  "historyNoMatchBody": "Try a different search or filter.",
+  "filterAll": "All",
+  "filterReceipts": "Receipts",
+  "filterCash": "Cash",
+  "storeNoProductsYet": "No products yet",
+  "storeNoProductsYetBody": "Scan a receipt from this store to see products and price comparisons here.",
+  "deleteCategory": "Delete category",
+  "deleteCategoryConfirm": "Delete \"{n}\"? This cannot be undone.",
+  "@deleteCategoryConfirm": {
+    "placeholders": {
+      "n": {
+        "type": "String"
+      }
+    }
+  },
+  "scanFailedTitle": "We couldn't read this receipt clearly.",
+  "scanFailedTips": "Try:\n• Move to better lighting\n• Flatten the receipt\n• Keep the whole receipt inside the frame",
+  "tryAgain": "Try Again",
+  "enterManually": "Enter Manually",
+  "deleteExpenseConfirmTitle": "Delete this expense?",
+  "deleteExpenseConfirmBody": "This permanently removes this expense from your history. This can't be undone.",
+  "recordNotFound": "This record no longer exists.",
+  "editComingSoon": "Editing arrives in a later update.",
+  "historyAllRecords": "All records",
+  "recordNotFoundBody": "It may have been deleted."
 }

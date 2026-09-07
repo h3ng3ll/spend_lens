@@ -31,13 +31,8 @@ class AppLocalizationsDe extends AppLocalizations {
   String get renameCategory => 'Kategorie umbenennen';
 
   @override
-  String catRenamed(int n) {
-    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
-      localeName,
-    );
-    final String nString = nNumberFormat.format(n);
-
-    return 'Umbenannt in $nString';
+  String catRenamed(String n) {
+    return 'Umbenannt in $n';
   }
 
   @override
@@ -156,6 +151,10 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get about => 'Über die App';
+
+  @override
+  String get aboutDescription =>
+      'Ein lokaler Ausgaben-Tracker. Scanne Belege oder erfasse Barausgaben und sieh, wohin dein Geld geht — alles wird auf diesem Gerät gespeichert.';
 
   @override
   String get done => 'Fertig';
@@ -296,6 +295,21 @@ class AppLocalizationsDe extends AppLocalizations {
   String periodRange(String a, String b) {
     return 'Einträge von $a bis $b';
   }
+
+  @override
+  String get pdf => 'PDF';
+
+  @override
+  String get pdfExportUnavailable =>
+      'PDF-Export folgt in einem späteren Update.';
+
+  @override
+  String get signInComingSoon =>
+      'Die Anmeldung folgt in einem späteren Update.';
+
+  @override
+  String get exportComingSoon =>
+      'Export und Import folgen in einem späteren Update.';
 
   @override
   String pdfToast(String m) {
@@ -504,6 +518,13 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get storesIntro =>
       'Automatisch aus deinen Belegen erstellt. Öffne einen Laden für Produkte und Preisvergleiche.';
+
+  @override
+  String get storesEmptyTitle => 'Noch keine Geschäfte';
+
+  @override
+  String get storesEmptyBody =>
+      'Füge ein Geschäft hinzu, um zu verfolgen, wo du einkaufst, und Preise zu vergleichen.';
 
   @override
   String get visits => 'Besuche';
@@ -888,6 +909,9 @@ class AppLocalizationsDe extends AppLocalizations {
   String get amount => 'Betrag';
 
   @override
+  String get enterValidAmount => 'Gib einen gültigen Betrag ein';
+
+  @override
   String get category => 'Kategorie';
 
   @override
@@ -1045,4 +1069,89 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get trendDecreased => 'sanken um';
+
+  @override
+  String get homeNoExpensesTitle => 'Noch keine Ausgaben';
+
+  @override
+  String get homeNoExpensesBody =>
+      'Scanne ein paar Belege, um deine Ausgabenmuster zu sehen.';
+
+  @override
+  String get scanFirstReceipt => 'Ersten Beleg scannen';
+
+  @override
+  String get scanComingSoon => 'Das Scannen kommt in einem späteren Update';
+
+  @override
+  String get historyNoRecordsTitle => 'Noch keine Einträge';
+
+  @override
+  String get historyNoRecordsBody =>
+      'Scanne einen Beleg oder füge eine Barausgabe hinzu, um sie hier zu sehen.';
+
+  @override
+  String get historyNoMatchTitle => 'Keine Treffer';
+
+  @override
+  String get historyNoMatchBody =>
+      'Versuche eine andere Suche oder einen anderen Filter.';
+
+  @override
+  String get filterAll => 'Alle';
+
+  @override
+  String get filterReceipts => 'Belege';
+
+  @override
+  String get filterCash => 'Bar';
+
+  @override
+  String get storeNoProductsYet => 'Noch keine Produkte';
+
+  @override
+  String get storeNoProductsYetBody =>
+      'Scanne einen Beleg dieses Ladens, um hier Produkte und Preisvergleiche zu sehen.';
+
+  @override
+  String get deleteCategory => 'Kategorie löschen';
+
+  @override
+  String deleteCategoryConfirm(String n) {
+    return '„$n\" löschen? Dies kann nicht rückgängig gemacht werden.';
+  }
+
+  @override
+  String get scanFailedTitle =>
+      'Dieser Beleg konnte nicht klar gelesen werden.';
+
+  @override
+  String get scanFailedTips =>
+      'Versuche:\n• Besseres Licht\n• Beleg glätten\n• Den ganzen Beleg im Rahmen halten';
+
+  @override
+  String get tryAgain => 'Erneut versuchen';
+
+  @override
+  String get enterManually => 'Manuell eingeben';
+
+  @override
+  String get deleteExpenseConfirmTitle => 'Diese Ausgabe löschen?';
+
+  @override
+  String get deleteExpenseConfirmBody =>
+      'Dies entfernt die Ausgabe dauerhaft aus deinem Verlauf. Dies kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get recordNotFound => 'Dieser Eintrag existiert nicht mehr.';
+
+  @override
+  String get editComingSoon =>
+      'Die Bearbeitung folgt in einem späteren Update.';
+
+  @override
+  String get historyAllRecords => 'Alle Einträge';
+
+  @override
+  String get recordNotFoundBody => 'Er wurde möglicherweise gelöscht.';
 }

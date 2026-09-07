@@ -200,7 +200,7 @@ String toString() {
 /// @nodoc
 mixin _$HistoryState {
 
- EHistoryStatus get status; List<Expense> get expenses; String get errorMessage;
+ EHistoryStatus get status; HistorySnapshot? get snapshot; String get errorMessage;
 /// Create a copy of HistoryState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -211,16 +211,16 @@ $HistoryStateCopyWith<HistoryState> get copyWith => _$HistoryStateCopyWithImpl<H
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is HistoryState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.expenses, expenses)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is HistoryState&&(identical(other.status, status) || other.status == status)&&(identical(other.snapshot, snapshot) || other.snapshot == snapshot)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(expenses),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,snapshot,errorMessage);
 
 @override
 String toString() {
-  return 'HistoryState(status: $status, expenses: $expenses, errorMessage: $errorMessage)';
+  return 'HistoryState(status: $status, snapshot: $snapshot, errorMessage: $errorMessage)';
 }
 
 
@@ -231,7 +231,7 @@ abstract mixin class $HistoryStateCopyWith<$Res>  {
   factory $HistoryStateCopyWith(HistoryState value, $Res Function(HistoryState) _then) = _$HistoryStateCopyWithImpl;
 @useResult
 $Res call({
- EHistoryStatus status, List<Expense> expenses, String errorMessage
+ EHistoryStatus status, HistorySnapshot? snapshot, String errorMessage
 });
 
 
@@ -248,11 +248,11 @@ class _$HistoryStateCopyWithImpl<$Res>
 
 /// Create a copy of HistoryState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? expenses = null,Object? errorMessage = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? snapshot = freezed,Object? errorMessage = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as EHistoryStatus,expenses: null == expenses ? _self.expenses : expenses // ignore: cast_nullable_to_non_nullable
-as List<Expense>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as EHistoryStatus,snapshot: freezed == snapshot ? _self.snapshot : snapshot // ignore: cast_nullable_to_non_nullable
+as HistorySnapshot?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -335,10 +335,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EHistoryStatus status,  List<Expense> expenses,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EHistoryStatus status,  HistorySnapshot? snapshot,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _HistoryState() when $default != null:
-return $default(_that.status,_that.expenses,_that.errorMessage);case _:
+return $default(_that.status,_that.snapshot,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -356,10 +356,10 @@ return $default(_that.status,_that.expenses,_that.errorMessage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EHistoryStatus status,  List<Expense> expenses,  String errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EHistoryStatus status,  HistorySnapshot? snapshot,  String errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _HistoryState():
-return $default(_that.status,_that.expenses,_that.errorMessage);}
+return $default(_that.status,_that.snapshot,_that.errorMessage);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -373,10 +373,10 @@ return $default(_that.status,_that.expenses,_that.errorMessage);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EHistoryStatus status,  List<Expense> expenses,  String errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EHistoryStatus status,  HistorySnapshot? snapshot,  String errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _HistoryState() when $default != null:
-return $default(_that.status,_that.expenses,_that.errorMessage);case _:
+return $default(_that.status,_that.snapshot,_that.errorMessage);case _:
   return null;
 
 }
@@ -388,17 +388,11 @@ return $default(_that.status,_that.expenses,_that.errorMessage);case _:
 
 
 class _HistoryState implements HistoryState {
-  const _HistoryState({this.status = EHistoryStatus.initial, final  List<Expense> expenses = const <Expense>[], this.errorMessage = ''}): _expenses = expenses;
+  const _HistoryState({this.status = EHistoryStatus.initial, this.snapshot, this.errorMessage = ''});
   
 
 @override@JsonKey() final  EHistoryStatus status;
- final  List<Expense> _expenses;
-@override@JsonKey() List<Expense> get expenses {
-  if (_expenses is EqualUnmodifiableListView) return _expenses;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_expenses);
-}
-
+@override final  HistorySnapshot? snapshot;
 @override@JsonKey() final  String errorMessage;
 
 /// Create a copy of HistoryState
@@ -411,16 +405,16 @@ _$HistoryStateCopyWith<_HistoryState> get copyWith => __$HistoryStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HistoryState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._expenses, _expenses)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _HistoryState&&(identical(other.status, status) || other.status == status)&&(identical(other.snapshot, snapshot) || other.snapshot == snapshot)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_expenses),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,snapshot,errorMessage);
 
 @override
 String toString() {
-  return 'HistoryState(status: $status, expenses: $expenses, errorMessage: $errorMessage)';
+  return 'HistoryState(status: $status, snapshot: $snapshot, errorMessage: $errorMessage)';
 }
 
 
@@ -431,7 +425,7 @@ abstract mixin class _$HistoryStateCopyWith<$Res> implements $HistoryStateCopyWi
   factory _$HistoryStateCopyWith(_HistoryState value, $Res Function(_HistoryState) _then) = __$HistoryStateCopyWithImpl;
 @override @useResult
 $Res call({
- EHistoryStatus status, List<Expense> expenses, String errorMessage
+ EHistoryStatus status, HistorySnapshot? snapshot, String errorMessage
 });
 
 
@@ -448,11 +442,11 @@ class __$HistoryStateCopyWithImpl<$Res>
 
 /// Create a copy of HistoryState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? expenses = null,Object? errorMessage = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? snapshot = freezed,Object? errorMessage = null,}) {
   return _then(_HistoryState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as EHistoryStatus,expenses: null == expenses ? _self._expenses : expenses // ignore: cast_nullable_to_non_nullable
-as List<Expense>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as EHistoryStatus,snapshot: freezed == snapshot ? _self.snapshot : snapshot // ignore: cast_nullable_to_non_nullable
+as HistorySnapshot?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

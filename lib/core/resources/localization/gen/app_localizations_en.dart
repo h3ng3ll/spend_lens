@@ -31,13 +31,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get renameCategory => 'Rename category';
 
   @override
-  String catRenamed(int n) {
-    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
-      localeName,
-    );
-    final String nString = nNumberFormat.format(n);
-
-    return 'Renamed to $nString';
+  String catRenamed(String n) {
+    return 'Renamed to $n';
   }
 
   @override
@@ -155,6 +150,10 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get about => 'About';
+
+  @override
+  String get aboutDescription =>
+      'A local-first expense tracker. Scan receipts or add cash expenses, and see where your money goes — all stored on this device.';
 
   @override
   String get done => 'Done';
@@ -295,6 +294,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String periodRange(String a, String b) {
     return 'Records from $a to $b';
   }
+
+  @override
+  String get pdf => 'PDF';
+
+  @override
+  String get pdfExportUnavailable => 'PDF export arrives in a later update.';
+
+  @override
+  String get signInComingSoon => 'Sign-in arrives in a later update.';
+
+  @override
+  String get exportComingSoon => 'Export and import arrive in a later update.';
 
   @override
   String pdfToast(String m) {
@@ -503,6 +514,13 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get storesIntro =>
       'Built automatically from your receipts. Open a store to see its products and how their prices compare elsewhere.';
+
+  @override
+  String get storesEmptyTitle => 'No stores yet';
+
+  @override
+  String get storesEmptyBody =>
+      'Add a store to start tracking where you shop and how prices compare.';
 
   @override
   String get visits => 'Visits';
@@ -887,6 +905,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get amount => 'Amount';
 
   @override
+  String get enterValidAmount => 'Enter a valid amount';
+
+  @override
   String get category => 'Category';
 
   @override
@@ -1044,4 +1065,86 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get trendDecreased => 'decreased';
+
+  @override
+  String get homeNoExpensesTitle => 'No expenses yet';
+
+  @override
+  String get homeNoExpensesBody =>
+      'Scan a few receipts to see your spending patterns.';
+
+  @override
+  String get scanFirstReceipt => 'Scan your first receipt';
+
+  @override
+  String get scanComingSoon => 'Scanning arrives in a later update';
+
+  @override
+  String get historyNoRecordsTitle => 'No records yet';
+
+  @override
+  String get historyNoRecordsBody =>
+      'Scan a receipt or add a cash expense to see it here.';
+
+  @override
+  String get historyNoMatchTitle => 'No matching records';
+
+  @override
+  String get historyNoMatchBody => 'Try a different search or filter.';
+
+  @override
+  String get filterAll => 'All';
+
+  @override
+  String get filterReceipts => 'Receipts';
+
+  @override
+  String get filterCash => 'Cash';
+
+  @override
+  String get storeNoProductsYet => 'No products yet';
+
+  @override
+  String get storeNoProductsYetBody =>
+      'Scan a receipt from this store to see products and price comparisons here.';
+
+  @override
+  String get deleteCategory => 'Delete category';
+
+  @override
+  String deleteCategoryConfirm(String n) {
+    return 'Delete \"$n\"? This cannot be undone.';
+  }
+
+  @override
+  String get scanFailedTitle => 'We couldn\'t read this receipt clearly.';
+
+  @override
+  String get scanFailedTips =>
+      'Try:\n• Move to better lighting\n• Flatten the receipt\n• Keep the whole receipt inside the frame';
+
+  @override
+  String get tryAgain => 'Try Again';
+
+  @override
+  String get enterManually => 'Enter Manually';
+
+  @override
+  String get deleteExpenseConfirmTitle => 'Delete this expense?';
+
+  @override
+  String get deleteExpenseConfirmBody =>
+      'This permanently removes this expense from your history. This can\'t be undone.';
+
+  @override
+  String get recordNotFound => 'This record no longer exists.';
+
+  @override
+  String get editComingSoon => 'Editing arrives in a later update.';
+
+  @override
+  String get historyAllRecords => 'All records';
+
+  @override
+  String get recordNotFoundBody => 'It may have been deleted.';
 }

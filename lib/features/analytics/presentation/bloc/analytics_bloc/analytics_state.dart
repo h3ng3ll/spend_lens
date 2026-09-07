@@ -6,7 +6,7 @@ enum EAnalyticsStatus { initial, loading, loaded, failed }
 sealed class AnalyticsState with _$AnalyticsState {
   const factory AnalyticsState({
     @Default(EAnalyticsStatus.initial) EAnalyticsStatus status,
-    @Default(<Expense>[]) List<Expense> expenses,
+    AnalyticsSnapshot? snapshot,
     @Default('') String errorMessage,
   }) = _AnalyticsState;
 }

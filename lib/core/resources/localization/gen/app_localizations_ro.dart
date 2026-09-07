@@ -31,13 +31,8 @@ class AppLocalizationsRo extends AppLocalizations {
   String get renameCategory => 'Redenumește categoria';
 
   @override
-  String catRenamed(int n) {
-    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
-      localeName,
-    );
-    final String nString = nNumberFormat.format(n);
-
-    return 'Redenumită în $nString';
+  String catRenamed(String n) {
+    return 'Redenumită în $n';
   }
 
   @override
@@ -155,6 +150,10 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get about => 'Despre aplicație';
+
+  @override
+  String get aboutDescription =>
+      'O aplicație de urmărire a cheltuielilor, local-first. Scanează bonuri sau adaugă cheltuieli în numerar și vezi unde îți duci banii — totul stocat pe acest dispozitiv.';
 
   @override
   String get done => 'Gata';
@@ -295,6 +294,21 @@ class AppLocalizationsRo extends AppLocalizations {
   String periodRange(String a, String b) {
     return 'Înregistrări din $a până în $b';
   }
+
+  @override
+  String get pdf => 'PDF';
+
+  @override
+  String get pdfExportUnavailable =>
+      'Exportul PDF va fi disponibil într-o actualizare viitoare.';
+
+  @override
+  String get signInComingSoon =>
+      'Autentificarea va fi disponibilă într-o actualizare viitoare.';
+
+  @override
+  String get exportComingSoon =>
+      'Exportul și importul vor fi disponibile într-o actualizare viitoare.';
 
   @override
   String pdfToast(String m) {
@@ -503,6 +517,13 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get storesIntro =>
       'Creat automat din bonurile tale. Deschide un magazin pentru produse și comparații de preț.';
+
+  @override
+  String get storesEmptyTitle => 'Încă niciun magazin';
+
+  @override
+  String get storesEmptyBody =>
+      'Adaugă un magazin ca să urmărești unde cumperi și cum se compară prețurile.';
 
   @override
   String get visits => 'Vizite';
@@ -888,6 +909,9 @@ class AppLocalizationsRo extends AppLocalizations {
   String get amount => 'Sumă';
 
   @override
+  String get enterValidAmount => 'Introdu o sumă validă';
+
+  @override
   String get category => 'Categorie';
 
   @override
@@ -1045,4 +1069,88 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get trendDecreased => 'scăzut';
+
+  @override
+  String get homeNoExpensesTitle => 'Încă nicio cheltuială';
+
+  @override
+  String get homeNoExpensesBody =>
+      'Scanează câteva bonuri pentru a-ți vedea tiparele de cheltuieli.';
+
+  @override
+  String get scanFirstReceipt => 'Scanează primul bon';
+
+  @override
+  String get scanComingSoon =>
+      'Scanarea va fi disponibilă într-o actualizare viitoare';
+
+  @override
+  String get historyNoRecordsTitle => 'Încă nicio înregistrare';
+
+  @override
+  String get historyNoRecordsBody =>
+      'Scanează un bon sau adaugă o cheltuială cash pentru a o vedea aici.';
+
+  @override
+  String get historyNoMatchTitle => 'Nicio înregistrare potrivită';
+
+  @override
+  String get historyNoMatchBody => 'Încearcă altă căutare sau alt filtru.';
+
+  @override
+  String get filterAll => 'Toate';
+
+  @override
+  String get filterReceipts => 'Bonuri';
+
+  @override
+  String get filterCash => 'Cash';
+
+  @override
+  String get storeNoProductsYet => 'Încă niciun produs';
+
+  @override
+  String get storeNoProductsYetBody =>
+      'Scanează un bon de la acest magazin ca să vezi produsele și comparațiile de preț aici.';
+
+  @override
+  String get deleteCategory => 'Șterge categoria';
+
+  @override
+  String deleteCategoryConfirm(String n) {
+    return 'Ștergi „$n”? Această acțiune nu poate fi anulată.';
+  }
+
+  @override
+  String get scanFailedTitle => 'Nu am putut citi clar acest bon.';
+
+  @override
+  String get scanFailedTips =>
+      'Încearcă:\n• Mută-te la o lumină mai bună\n• Aplatizează bonul\n• Ține tot bonul în cadru';
+
+  @override
+  String get tryAgain => 'Încearcă din nou';
+
+  @override
+  String get enterManually => 'Introdu manual';
+
+  @override
+  String get deleteExpenseConfirmTitle => 'Ștergi această cheltuială?';
+
+  @override
+  String get deleteExpenseConfirmBody =>
+      'Aceasta elimină definitiv cheltuiala din istoric. Nu poate fi anulată.';
+
+  @override
+  String get recordNotFound => 'Această înregistrare nu mai există.';
+
+  @override
+  String get editComingSoon =>
+      'Editarea va fi disponibilă într-o actualizare viitoare.';
+
+  @override
+  String get historyAllRecords => 'Toate înregistrările';
+
+  @override
+  String get recordNotFoundBody => 'Este posibil să fi fost ștearsă.';
 }

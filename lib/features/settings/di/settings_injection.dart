@@ -1,7 +1,11 @@
 import '../../../core/di/injection.dart';
+import '../../category/domain/repositories/i_category_local_repository.dart';
+import '../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../store/domain/repositories/i_store_local_repository.dart';
 import '../data/repositories/settings_local_repository.dart';
 import '../domain/models/app_settings/app_settings.dart';
 import '../domain/repositories/i_settings_local_repository.dart';
+import '../domain/use_cases/delete_all_records_use_case.dart';
 import '../domain/use_cases/get_settings_use_case.dart';
 import '../domain/use_cases/save_settings_use_case.dart';
 import '../domain/use_cases/watch_settings_use_case.dart';
@@ -28,6 +32,20 @@ Future<AppSettings> initSettingsFeature() async {
   );
   getIt.registerLazySingleton(
     () => SaveSettingsUseCase(getIt<ISettingsLocalRepository>()),
+  );
+
+  // Resolved lazily: `getIt<T>()` inside the factory below only runs when
+  // `DeleteAllRecordsUseCase` is actually requested (Settings screen, well
+  // after `main()` has registered the expense/store/category repositories),
+  // never at registration time here — so registration order relative to
+  // those `init*Feature()` calls in `main()` does not matter.
+  getIt.registerLazySingleton(
+    () => DeleteAllRecordsUseCase(
+      expenseLocalRepository: getIt<IExpenseLocalRepository>(),
+      storeLocalRepository: getIt<IStoreLocalRepository>(),
+      categoryLocalRepository: getIt<ICategoryLocalRepository>(),
+      settingsLocalRepository: getIt<ISettingsLocalRepository>(),
+    ),
   );
 
   return getIt<GetSettingsUseCase>().call();

@@ -142,7 +142,7 @@ abstract class AppLocalizations {
   ///
   /// In en, this message translates to:
   /// **'Renamed to {n}'**
-  String catRenamed(int n);
+  String catRenamed(String n);
 
   /// No description provided for @newCategory.
   ///
@@ -317,6 +317,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'About'**
   String get about;
+
+  /// No description provided for @aboutDescription.
+  ///
+  /// In en, this message translates to:
+  /// **'A local-first expense tracker. Scan receipts or add cash expenses, and see where your money goes — all stored on this device.'**
+  String get aboutDescription;
 
   /// No description provided for @done.
   ///
@@ -581,6 +587,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Records from {a} to {b}'**
   String periodRange(String a, String b);
+
+  /// No description provided for @pdf.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF'**
+  String get pdf;
+
+  /// No description provided for @pdfExportUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'PDF export arrives in a later update.'**
+  String get pdfExportUnavailable;
+
+  /// No description provided for @signInComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign-in arrives in a later update.'**
+  String get signInComingSoon;
+
+  /// No description provided for @exportComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Export and import arrive in a later update.'**
+  String get exportComingSoon;
 
   /// Auto-ported from i18n.js key "pdfToast".
   ///
@@ -905,6 +935,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Built automatically from your receipts. Open a store to see its products and how their prices compare elsewhere.'**
   String get storesIntro;
+
+  /// No description provided for @storesEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No stores yet'**
+  String get storesEmptyTitle;
+
+  /// No description provided for @storesEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a store to start tracking where you shop and how prices compare.'**
+  String get storesEmptyBody;
 
   /// No description provided for @visits.
   ///
@@ -1476,6 +1518,12 @@ abstract class AppLocalizations {
   /// **'Amount'**
   String get amount;
 
+  /// No description provided for @enterValidAmount.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter a valid amount'**
+  String get enterValidAmount;
+
   /// No description provided for @category.
   ///
   /// In en, this message translates to:
@@ -1769,6 +1817,156 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'decreased'**
   String get trendDecreased;
+
+  /// No description provided for @homeNoExpensesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No expenses yet'**
+  String get homeNoExpensesTitle;
+
+  /// No description provided for @homeNoExpensesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a few receipts to see your spending patterns.'**
+  String get homeNoExpensesBody;
+
+  /// No description provided for @scanFirstReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan your first receipt'**
+  String get scanFirstReceipt;
+
+  /// No description provided for @scanComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Scanning arrives in a later update'**
+  String get scanComingSoon;
+
+  /// No description provided for @historyNoRecordsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No records yet'**
+  String get historyNoRecordsTitle;
+
+  /// No description provided for @historyNoRecordsBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a receipt or add a cash expense to see it here.'**
+  String get historyNoRecordsBody;
+
+  /// No description provided for @historyNoMatchTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching records'**
+  String get historyNoMatchTitle;
+
+  /// No description provided for @historyNoMatchBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different search or filter.'**
+  String get historyNoMatchBody;
+
+  /// No description provided for @filterAll.
+  ///
+  /// In en, this message translates to:
+  /// **'All'**
+  String get filterAll;
+
+  /// No description provided for @filterReceipts.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipts'**
+  String get filterReceipts;
+
+  /// No description provided for @filterCash.
+  ///
+  /// In en, this message translates to:
+  /// **'Cash'**
+  String get filterCash;
+
+  /// No description provided for @storeNoProductsYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No products yet'**
+  String get storeNoProductsYet;
+
+  /// No description provided for @storeNoProductsYetBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a receipt from this store to see products and price comparisons here.'**
+  String get storeNoProductsYetBody;
+
+  /// No description provided for @deleteCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete category'**
+  String get deleteCategory;
+
+  /// No description provided for @deleteCategoryConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete \"{n}\"? This cannot be undone.'**
+  String deleteCategoryConfirm(String n);
+
+  /// No description provided for @scanFailedTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'We couldn\'t read this receipt clearly.'**
+  String get scanFailedTitle;
+
+  /// No description provided for @scanFailedTips.
+  ///
+  /// In en, this message translates to:
+  /// **'Try:\n• Move to better lighting\n• Flatten the receipt\n• Keep the whole receipt inside the frame'**
+  String get scanFailedTips;
+
+  /// No description provided for @tryAgain.
+  ///
+  /// In en, this message translates to:
+  /// **'Try Again'**
+  String get tryAgain;
+
+  /// No description provided for @enterManually.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter Manually'**
+  String get enterManually;
+
+  /// No description provided for @deleteExpenseConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete this expense?'**
+  String get deleteExpenseConfirmTitle;
+
+  /// No description provided for @deleteExpenseConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently removes this expense from your history. This can\'t be undone.'**
+  String get deleteExpenseConfirmBody;
+
+  /// No description provided for @recordNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'This record no longer exists.'**
+  String get recordNotFound;
+
+  /// No description provided for @editComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing arrives in a later update.'**
+  String get editComingSoon;
+
+  /// No description provided for @historyAllRecords.
+  ///
+  /// In en, this message translates to:
+  /// **'All records'**
+  String get historyAllRecords;
+
+  /// No description provided for @recordNotFoundBody.
+  ///
+  /// In en, this message translates to:
+  /// **'It may have been deleted.'**
+  String get recordNotFoundBody;
 }
 
 class _AppLocalizationsDelegate

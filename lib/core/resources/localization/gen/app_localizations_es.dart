@@ -31,13 +31,8 @@ class AppLocalizationsEs extends AppLocalizations {
   String get renameCategory => 'Renombrar categoría';
 
   @override
-  String catRenamed(int n) {
-    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
-      localeName,
-    );
-    final String nString = nNumberFormat.format(n);
-
-    return 'Renombrada a $nString';
+  String catRenamed(String n) {
+    return 'Renombrada a $n';
   }
 
   @override
@@ -156,6 +151,10 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get about => 'Acerca de';
+
+  @override
+  String get aboutDescription =>
+      'Un rastreador de gastos local. Escanea recibos o añade gastos en efectivo y descubre en qué se va tu dinero — todo se guarda en este dispositivo.';
 
   @override
   String get done => 'Listo';
@@ -297,6 +296,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String periodRange(String a, String b) {
     return 'Registros de $a a $b';
   }
+
+  @override
+  String get pdf => 'PDF';
+
+  @override
+  String get pdfExportUnavailable =>
+      'La exportación a PDF llegará en una futura actualización.';
+
+  @override
+  String get signInComingSoon =>
+      'El inicio de sesión llegará en una futura actualización.';
+
+  @override
+  String get exportComingSoon =>
+      'La exportación e importación llegarán en una futura actualización.';
 
   @override
   String pdfToast(String m) {
@@ -505,6 +519,13 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get storesIntro =>
       'Creado automáticamente a partir de tus tickets. Abre una tienda para ver sus productos y comparar precios.';
+
+  @override
+  String get storesEmptyTitle => 'Aún no hay tiendas';
+
+  @override
+  String get storesEmptyBody =>
+      'Añade una tienda para hacer seguimiento de dónde compras y comparar precios.';
 
   @override
   String get visits => 'Visitas';
@@ -890,6 +911,9 @@ class AppLocalizationsEs extends AppLocalizations {
   String get amount => 'Importe';
 
   @override
+  String get enterValidAmount => 'Introduce un importe válido';
+
+  @override
   String get category => 'Categoría';
 
   @override
@@ -1047,4 +1071,87 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get trendDecreased => 'bajó';
+
+  @override
+  String get homeNoExpensesTitle => 'Aún no hay gastos';
+
+  @override
+  String get homeNoExpensesBody =>
+      'Escanea algunos recibos para ver tus patrones de gasto.';
+
+  @override
+  String get scanFirstReceipt => 'Escanea tu primer recibo';
+
+  @override
+  String get scanComingSoon => 'El escaneo llegará en una futura actualización';
+
+  @override
+  String get historyNoRecordsTitle => 'Aún no hay registros';
+
+  @override
+  String get historyNoRecordsBody =>
+      'Escanea un recibo o añade un gasto en efectivo para verlo aquí.';
+
+  @override
+  String get historyNoMatchTitle => 'Sin coincidencias';
+
+  @override
+  String get historyNoMatchBody => 'Prueba otra búsqueda o filtro.';
+
+  @override
+  String get filterAll => 'Todos';
+
+  @override
+  String get filterReceipts => 'Recibos';
+
+  @override
+  String get filterCash => 'Efectivo';
+
+  @override
+  String get storeNoProductsYet => 'Aún no hay productos';
+
+  @override
+  String get storeNoProductsYetBody =>
+      'Escanea un recibo de esta tienda para ver aquí los productos y las comparaciones de precio.';
+
+  @override
+  String get deleteCategory => 'Eliminar categoría';
+
+  @override
+  String deleteCategoryConfirm(String n) {
+    return '¿Eliminar \"$n\"? Esta acción no se puede deshacer.';
+  }
+
+  @override
+  String get scanFailedTitle => 'No pudimos leer este recibo con claridad.';
+
+  @override
+  String get scanFailedTips =>
+      'Prueba:\n• Mejorar la iluminación\n• Aplanar el recibo\n• Mantener todo el recibo dentro del marco';
+
+  @override
+  String get tryAgain => 'Reintentar';
+
+  @override
+  String get enterManually => 'Ingresar manualmente';
+
+  @override
+  String get deleteExpenseConfirmTitle => '¿Eliminar este gasto?';
+
+  @override
+  String get deleteExpenseConfirmBody =>
+      'Esto elimina permanentemente el gasto de tu historial. No se puede deshacer.';
+
+  @override
+  String get recordNotFound => 'Este registro ya no existe.';
+
+  @override
+  String get editComingSoon =>
+      'La edición llegará en una futura actualización.';
+
+  @override
+  String get historyAllRecords => 'Todos los registros';
+
+  @override
+  String get recordNotFoundBody => 'Puede que se haya eliminado.';
 }

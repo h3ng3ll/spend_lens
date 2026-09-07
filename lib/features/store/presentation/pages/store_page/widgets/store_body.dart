@@ -3,43 +3,49 @@ import 'package:flutter/material.dart';
 import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../../core/resources/text/app_text_theme.dart';
+import '../../../../../../core/widgets/app_empty_state.dart';
 import '../../../../../../core/widgets/padding/horizontal_padding.dart';
-import '../../../bloc/stores_bloc/stores_bloc.dart';
+import '../../../../../../core/resources/app_icons.dart';
+import '../../../../domain/models/store_page_snapshot/store_page_snapshot.dart';
+import 'store_list_card.dart';
 
-/// Populated / empty presentation for `StorePage` (M4 minimal placeholder —
-/// the real cards + price-comparison rows are M5).
+/// Populated / empty presentation for `StorePage`
+/// (design_spendlens.md's Stores artboard, `noStoreSel` branch).
 class StoreBody extends StatelessWidget {
-  final StoresState state;
+  final StorePageSnapshot? snapshot;
 
-  const StoreBody({super.key, required this.state});
+  const StoreBody({super.key, this.snapshot});
 
   @override
   Widget build(BuildContext context) {
-    final scheme = AppColorScheme.of(context);
     final textTheme = AppTextTheme.of(context);
+    final scheme = AppColorScheme.of(context);
     final lo = AppLocalizations.of(context);
 
-    if (state.stores.isEmpty) {
-      return Center(
-        child: Text(
-          lo.storesIntro,
-          textAlign: TextAlign.center,
-          style: textTheme.body17.copyWith(color: scheme.sec),
-        ),
-      );
-    }
+    final stores = snapshot?.stores ?? const [];
+    final expenses = snapshot?.expenses ?? const [];
 
-    return HorizontalPadding(
-      child: ListView.builder(
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
-        itemCount: state.stores.length,
-        itemBuilder: (context, index) {
-          final store = state.stores[index];
-          return Text(
-            store.name,
-            style: textTheme.body17.copyWith(color: scheme.ink),
-          );
-        },
+    return SingleChildScrollView(
+      child: HorizontalPadding(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          spacing: 16.0,
+          children: [
+            Text(
+              lo.storesIntro,
+              style: textTheme.footnote13.copyWith(color: scheme.ter),
+            ),
+            if (stores.isEmpty)
+              AppEmptyState(
+                icon: AppIcons.store,
+                title: lo.storesEmptyTitle,
+                body: lo.storesEmptyBody,
+              )
+            else
+              StoreListCard(stores: stores, expenses: expenses),
+          ],
+        ),
       ),
     );
   }

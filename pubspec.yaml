@@ -102,6 +102,7 @@ flutter:
 
   assets:
     - assets/icons/
+    - assets/legal/
     - path: .env
       platforms:
         - ios

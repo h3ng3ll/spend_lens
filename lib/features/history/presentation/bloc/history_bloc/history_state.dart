@@ -6,7 +6,7 @@ enum EHistoryStatus { initial, loading, loaded, failed }
 sealed class HistoryState with _$HistoryState {
   const factory HistoryState({
     @Default(EHistoryStatus.initial) EHistoryStatus status,
-    @Default(<Expense>[]) List<Expense> expenses,
+    HistorySnapshot? snapshot,
     @Default('') String errorMessage,
   }) = _HistoryState;
 }

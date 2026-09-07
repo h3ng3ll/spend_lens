@@ -200,7 +200,7 @@ String toString() {
 /// @nodoc
 mixin _$AnalyticsState {
 
- EAnalyticsStatus get status; List<Expense> get expenses; String get errorMessage;
+ EAnalyticsStatus get status; AnalyticsSnapshot? get snapshot; String get errorMessage;
 /// Create a copy of AnalyticsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -211,16 +211,16 @@ $AnalyticsStateCopyWith<AnalyticsState> get copyWith => _$AnalyticsStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnalyticsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other.expenses, expenses)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AnalyticsState&&(identical(other.status, status) || other.status == status)&&(identical(other.snapshot, snapshot) || other.snapshot == snapshot)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(expenses),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,snapshot,errorMessage);
 
 @override
 String toString() {
-  return 'AnalyticsState(status: $status, expenses: $expenses, errorMessage: $errorMessage)';
+  return 'AnalyticsState(status: $status, snapshot: $snapshot, errorMessage: $errorMessage)';
 }
 
 
@@ -231,7 +231,7 @@ abstract mixin class $AnalyticsStateCopyWith<$Res>  {
   factory $AnalyticsStateCopyWith(AnalyticsState value, $Res Function(AnalyticsState) _then) = _$AnalyticsStateCopyWithImpl;
 @useResult
 $Res call({
- EAnalyticsStatus status, List<Expense> expenses, String errorMessage
+ EAnalyticsStatus status, AnalyticsSnapshot? snapshot, String errorMessage
 });
 
 
@@ -248,11 +248,11 @@ class _$AnalyticsStateCopyWithImpl<$Res>
 
 /// Create a copy of AnalyticsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? expenses = null,Object? errorMessage = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? snapshot = freezed,Object? errorMessage = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as EAnalyticsStatus,expenses: null == expenses ? _self.expenses : expenses // ignore: cast_nullable_to_non_nullable
-as List<Expense>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as EAnalyticsStatus,snapshot: freezed == snapshot ? _self.snapshot : snapshot // ignore: cast_nullable_to_non_nullable
+as AnalyticsSnapshot?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -335,10 +335,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EAnalyticsStatus status,  List<Expense> expenses,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EAnalyticsStatus status,  AnalyticsSnapshot? snapshot,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AnalyticsState() when $default != null:
-return $default(_that.status,_that.expenses,_that.errorMessage);case _:
+return $default(_that.status,_that.snapshot,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -356,10 +356,10 @@ return $default(_that.status,_that.expenses,_that.errorMessage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EAnalyticsStatus status,  List<Expense> expenses,  String errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EAnalyticsStatus status,  AnalyticsSnapshot? snapshot,  String errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _AnalyticsState():
-return $default(_that.status,_that.expenses,_that.errorMessage);}
+return $default(_that.status,_that.snapshot,_that.errorMessage);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -373,10 +373,10 @@ return $default(_that.status,_that.expenses,_that.errorMessage);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EAnalyticsStatus status,  List<Expense> expenses,  String errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EAnalyticsStatus status,  AnalyticsSnapshot? snapshot,  String errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _AnalyticsState() when $default != null:
-return $default(_that.status,_that.expenses,_that.errorMessage);case _:
+return $default(_that.status,_that.snapshot,_that.errorMessage);case _:
   return null;
 
 }
@@ -388,17 +388,11 @@ return $default(_that.status,_that.expenses,_that.errorMessage);case _:
 
 
 class _AnalyticsState implements AnalyticsState {
-  const _AnalyticsState({this.status = EAnalyticsStatus.initial, final  List<Expense> expenses = const <Expense>[], this.errorMessage = ''}): _expenses = expenses;
+  const _AnalyticsState({this.status = EAnalyticsStatus.initial, this.snapshot, this.errorMessage = ''});
   
 
 @override@JsonKey() final  EAnalyticsStatus status;
- final  List<Expense> _expenses;
-@override@JsonKey() List<Expense> get expenses {
-  if (_expenses is EqualUnmodifiableListView) return _expenses;
-  // ignore: implicit_dynamic_type
-  return EqualUnmodifiableListView(_expenses);
-}
-
+@override final  AnalyticsSnapshot? snapshot;
 @override@JsonKey() final  String errorMessage;
 
 /// Create a copy of AnalyticsState
@@ -411,16 +405,16 @@ _$AnalyticsStateCopyWith<_AnalyticsState> get copyWith => __$AnalyticsStateCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AnalyticsState&&(identical(other.status, status) || other.status == status)&&const DeepCollectionEquality().equals(other._expenses, _expenses)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AnalyticsState&&(identical(other.status, status) || other.status == status)&&(identical(other.snapshot, snapshot) || other.snapshot == snapshot)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,const DeepCollectionEquality().hash(_expenses),errorMessage);
+int get hashCode => Object.hash(runtimeType,status,snapshot,errorMessage);
 
 @override
 String toString() {
-  return 'AnalyticsState(status: $status, expenses: $expenses, errorMessage: $errorMessage)';
+  return 'AnalyticsState(status: $status, snapshot: $snapshot, errorMessage: $errorMessage)';
 }
 
 
@@ -431,7 +425,7 @@ abstract mixin class _$AnalyticsStateCopyWith<$Res> implements $AnalyticsStateCo
   factory _$AnalyticsStateCopyWith(_AnalyticsState value, $Res Function(_AnalyticsState) _then) = __$AnalyticsStateCopyWithImpl;
 @override @useResult
 $Res call({
- EAnalyticsStatus status, List<Expense> expenses, String errorMessage
+ EAnalyticsStatus status, AnalyticsSnapshot? snapshot, String errorMessage
 });
 
 
@@ -448,11 +442,11 @@ class __$AnalyticsStateCopyWithImpl<$Res>
 
 /// Create a copy of AnalyticsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? expenses = null,Object? errorMessage = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? snapshot = freezed,Object? errorMessage = null,}) {
   return _then(_AnalyticsState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as EAnalyticsStatus,expenses: null == expenses ? _self._expenses : expenses // ignore: cast_nullable_to_non_nullable
-as List<Expense>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as EAnalyticsStatus,snapshot: freezed == snapshot ? _self.snapshot : snapshot // ignore: cast_nullable_to_non_nullable
+as AnalyticsSnapshot?,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

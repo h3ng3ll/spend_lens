@@ -1,8 +1,16 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../../core/di/injection.dart';
 import '../../../../../core/resources/colors/app_color_scheme.dart';
-import '../../../../../core/resources/text/app_text_theme.dart';
-import '../../../../../core/widgets/custom_app_bar.dart';
+import '../../../../../core/routes/presentation/error_message_widget.dart';
+import '../../../../../core/routes/presentation/loading_data_widget.dart';
+import '../../../../../core/utils/extensions/go_router_x.dart';
+import '../../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../bloc/store_detail_bloc/store_detail_bloc.dart';
+import '../../../domain/repositories/i_store_local_repository.dart';
+import 'widgets/store_detail_body.dart';
+import 'widgets/store_detail_header.dart';
 
 /// `StoreDetailPageRoute` (design_spendlens.md §5) — a TOP-LEVEL push above
 /// the shell (`parentNavigatorKey: rootNavigatorKey`), never a branch-2
@@ -11,26 +19,86 @@ import '../../../../../core/widgets/custom_app_bar.dart';
 /// shell's `builder` (see `root_page.dart`), and a root-navigator push sits
 /// above the whole shell widget, so it is absent here by construction.
 ///
-/// M4 minimal placeholder — the visits/spend/products stats and the
-/// cross-store price-comparison rows (design_spendlens.md §"Conflicts
-/// resolved" → Price history) are M5/M6.
-class StoreDetailPage extends StatelessWidget {
+/// [StoreDetailBloc] is screen-scoped (`registerFactory` semantics): built
+/// here in `initState`, closed in `dispose` — never registered in `main()`
+/// (BLoC rule A3.8).
+class StoreDetailPage extends StatefulWidget {
   final String storeId;
 
   const StoreDetailPage({super.key, required this.storeId});
 
   @override
+  State<StoreDetailPage> createState() => _StoreDetailPageState();
+}
+
+class _StoreDetailPageState extends State<StoreDetailPage> {
+  late final StoreDetailBloc _storeDetailBloc = StoreDetailBloc(
+    storeId: widget.storeId,
+    storeLocalRepository: getIt<IStoreLocalRepository>(),
+    expenseLocalRepository: getIt<IExpenseLocalRepository>(),
+  )..add(const StoreDetailEvent.watch());
+
+  @override
+  void dispose() {
+    _storeDetailBloc.close();
+    super.dispose();
+  }
+
+  void _onClose() {
+    context.goBack();
+  }
+
+  bool _listenWhenNotFound(
+    StoreDetailState previous,
+    StoreDetailState current,
+  ) {
+    return !previous.isNotFound && current.isNotFound;
+  }
+
+  void _onNotFound(BuildContext context, StoreDetailState state) {
+    context.goBack();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final scheme = AppColorScheme.of(context);
-    final textTheme = AppTextTheme.of(context);
 
     return Scaffold(
       backgroundColor: scheme.bg,
-      appBar: const CustomAppBar(),
-      body: Center(
-        child: Text(
-          storeId,
-          style: textTheme.body17.copyWith(color: scheme.ink),
+      body: BlocProvider<StoreDetailBloc>.value(
+        value: _storeDetailBloc,
+        child: SafeArea(
+          child: BlocConsumer<StoreDetailBloc, StoreDetailState>(
+            listenWhen: _listenWhenNotFound,
+            listener: _onNotFound,
+            builder: (context, state) {
+              if (state.isFailed) {
+                return Column(
+                  children: [
+                    StoreDetailHeader(storeName: '', onClose: _onClose),
+                    Expanded(
+                      child: ErrorMessageWidget(message: state.errorMessage),
+                    ),
+                  ],
+                );
+              }
+              if (state.isReady && state.snapshot?.store != null) {
+                return StoreDetailBody(
+                  snapshot: state.snapshot!,
+                  onClose: _onClose,
+                );
+              }
+              // Covers isInitial, isLoading and isNotFound (the listener
+              // above navigates away on isNotFound; this frame still needs
+              // something non-crashing to paint before that pop lands).
+              return Column(
+                children: [
+                  StoreDetailHeader(storeName: '', onClose: _onClose),
+                  const Expanded(child: LoadingDataWidget()),
+                ],
+              );
+            },
+          ),
         ),
       ),
     );

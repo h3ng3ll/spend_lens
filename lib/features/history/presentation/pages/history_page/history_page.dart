@@ -7,7 +7,9 @@ import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/routes/presentation/error_message_widget.dart';
 import '../../../../../core/routes/presentation/loading_data_widget.dart';
 import '../../../../../core/widgets/custom_app_bar.dart';
+import '../../../../category/domain/repositories/i_category_local_repository.dart';
 import '../../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../../../store/domain/repositories/i_store_local_repository.dart';
 import '../../bloc/history_bloc/history_bloc.dart';
 import 'widgets/history_body.dart';
 
@@ -27,6 +29,8 @@ class HistoryPage extends StatefulWidget {
 class _HistoryPageState extends State<HistoryPage> {
   late final HistoryBloc _historyBloc = HistoryBloc(
     expenseLocalRepository: getIt<IExpenseLocalRepository>(),
+    categoryLocalRepository: getIt<ICategoryLocalRepository>(),
+    storeLocalRepository: getIt<IStoreLocalRepository>(),
   )..add(const HistoryEvent.watch());
 
   @override
