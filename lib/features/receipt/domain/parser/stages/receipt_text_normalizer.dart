@@ -16,7 +16,33 @@ class ReceiptTextNormalizer {
   /// later stage needs to read.
   String normalizeLine(String raw) {
     final withoutNoise = raw.replaceAll(RegExp(r'[_~`]'), ' ');
-    return withoutNoise.replaceAll(RegExp(r'\s+'), ' ').trim();
+    final collapsed = withoutNoise.replaceAll(RegExp(r'\s+'), ' ').trim();
+    return _closeDecimalGaps(collapsed);
+  }
+
+  /// Removes whitespace that OCR injects AROUND a decimal separator, so a
+  /// split money token reads as one number again:
+  ///
+  ///   `206. 11`  -> `206.11`
+  ///   `165. 40`  -> `165.40`
+  ///   `39. 60`   -> `39.60`
+  ///
+  /// This is load-bearing, not cosmetic. The price token pattern requires
+  /// digits IMMEDIATELY after the separator, so it could not match
+  /// `206. 11` at all and fell back to the bare trailing integer — the
+  /// printed total 206.11 was read as **11.00**, while the item lines
+  /// (whose own totals OCR happened to print unsplit) summed to the
+  /// correct 206.11. The result was a receipt whose subtotal exceeded its
+  /// total twentyfold.
+  ///
+  /// Only a digit-separator-digit sequence is joined, so ordinary prose
+  /// punctuation (`str. Vasile`, `af. fiert`) is untouched — those have a
+  /// letter, not a digit, on at least one side.
+  String _closeDecimalGaps(String line) {
+    return line.replaceAllMapped(
+      RegExp(r'(\d)\s*([.,])\s*(\d)'),
+      (match) => '${match[1]}${match[2]}${match[3]}',
+    );
   }
 
   /// Fixes OCR character confusions that occur INSIDE a numeric token —
