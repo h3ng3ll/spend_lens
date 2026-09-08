@@ -53,6 +53,13 @@ class MethodChannelReceiptDetector implements IReceiptDetector {
           .timeout(_kDetectFrameTimeout);
       if (raw == null) return null;
 
+      // TEMPORARY DIAGNOSTIC — delete alongside OCR_DIAG. A bogus crop here
+      // silently discards the total/items before OCR ever sees them.
+      _loggerService.info(
+        'CROP_DIAG rect=${raw['left']},${raw['top']} '
+        '${raw['width']}x${raw['height']}',
+      );
+
       return Rect.fromLTWH(
         (raw['left'] as num?)?.toDouble() ?? 0.0,
         (raw['top'] as num?)?.toDouble() ?? 0.0,

@@ -26,6 +26,17 @@ import 'scanner_shutter_button.dart';
 /// dead.
 const Duration _kCameraSetupTimeout = Duration(seconds: 5);
 
+/// Minimum gap between two preview frames being turned into a bloc event.
+///
+/// This is a MEMORY bound, not a detection-rate preference — see
+/// `_CameraPreviewLayerState._onPreviewFrame`. It mirrors `ScannerBloc`'s
+/// own `_detectionMinInterval` (700 ms) so a frame that the bloc would
+/// throttle away is never allocated into an event in the first place.
+/// Keeping it slightly SHORTER than the bloc's interval means this guard
+/// only ever drops frames the bloc was going to discard anyway, so it can
+/// never starve detection.
+const Duration _kFrameDispatchMinInterval = Duration(milliseconds: 600);
+
 /// Owns ONLY the camera-plugin concerns that are genuinely tied to this
 /// widget's own mount/dispose lifecycle (design_spendlens.md §8): the
 /// [CameraController], the [CameraPreview] surface, and the
@@ -65,16 +76,55 @@ class CameraPreviewLayer extends StatefulWidget {
   State<CameraPreviewLayer> createState() => _CameraPreviewLayerState();
 }
 
-class _CameraPreviewLayerState extends State<CameraPreviewLayer> {
+class _CameraPreviewLayerState extends State<CameraPreviewLayer>
+    with WidgetsBindingObserver {
   CameraController? _controller;
   bool _isStreamingForDetection = false;
   bool _isCapturing = false;
+  bool _isInitializing = false;
   EScannerStatus? _lastStatus;
+  DateTime? _lastFrameDispatch;
 
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _lastStatus = widget.state.status;
+    _initCamera();
+  }
+
+  /// Re-acquires the camera on resume.
+  ///
+  /// Two things make this necessary rather than defensive:
+  ///
+  /// 1. **The permission race.** Answering the OS camera prompt backgrounds
+  ///    the app. If `_initCamera` ran before the grant, it failed or timed
+  ///    out — and because it only ever ran once from `initState`, nothing
+  ///    retried it. The symptom was a scanner that showed a black screen on
+  ///    first launch and worked on the second, when permission was already
+  ///    granted.
+  /// 2. **Android reclaims the camera** from a backgrounded app, so a
+  ///    controller that was working before a background is dead after it.
+  ///
+  /// Only re-inits when there is no live controller, so an ordinary resume
+  /// with a healthy session is left completely alone.
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState appLifecycleState) {
+    super.didChangeAppLifecycleState(appLifecycleState);
+    if (appLifecycleState != AppLifecycleState.resumed) return;
+
+    final controller = _controller;
+    if (controller != null && controller.value.isInitialized) return;
+
+    // Clear a `failed` left over from the pre-grant attempt BEFORE retrying:
+    // the failed sheet is showing and the state machine is parked, so a
+    // successful re-init would otherwise acquire a working camera that the
+    // user still cannot see past the sheet. `reset` returns the bloc to
+    // `searching`, which is also what re-arms the detection stream.
+    if (widget.state.isFailed) {
+      context.read<ScannerBloc>().add(const ScannerEvent.reset());
+    }
+
     _initCamera();
   }
 
@@ -103,12 +153,28 @@ class _CameraPreviewLayerState extends State<CameraPreviewLayer> {
 
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
     _stopDetectionStream();
     _controller?.dispose();
     super.dispose();
   }
 
   Future<void> _initCamera() async {
+    // Re-entrancy guard: `didChangeAppLifecycleState` can fire a resume
+    // while the `initState` attempt is still awaiting the plugin, and two
+    // concurrent setups would race to assign `_controller` — leaking the
+    // loser and leaving the stream attached to a disposed session.
+    if (_isInitializing) return;
+    _isInitializing = true;
+
+    try {
+      await _setUpCamera();
+    } finally {
+      _isInitializing = false;
+    }
+  }
+
+  Future<void> _setUpCamera() async {
     List<CameraDescription> cameras;
     try {
       cameras = await availableCameras().timeout(_kCameraSetupTimeout);
@@ -217,12 +283,33 @@ class _CameraPreviewLayerState extends State<CameraPreviewLayer> {
     }
   }
 
-  /// Forwards the frame's bytes to the bloc as a raw intent — no rate
-  /// limiting and no detector call here. [ScannerBloc._onPreviewFrame] owns
-  /// both; this widget only knows a frame arrived.
+  /// Forwards the frame's bytes to the bloc as a raw intent — the bloc owns
+  /// the detector call and remains the authority on detection timing.
+  ///
+  /// OOM GUARD — do not remove the interval check below. The bloc's own
+  /// throttle runs INSIDE its handler, which is too late to bound memory:
+  /// bloc processes events sequentially, so every frame arriving while one
+  /// `detectReceiptRect` is awaited is QUEUED, and each queued event retains
+  /// a full-resolution plane buffer. At `ResolutionPreset.high` that is
+  /// ~2 MB per frame at ~30 fps — about 62 MB/s of retained bytes — which
+  /// crossed iOS's 2098 MB high-watermark limit in roughly half a minute of
+  /// pointing the scanner at anything (`EXC_RESOURCE RESOURCE_TYPE_MEMORY`,
+  /// crashing inside `_platform_memmove`).
+  ///
+  /// Dropping the frame HERE means the buffer is never copied into an event
+  /// and never enqueued, so the queue cannot grow. This duplicates the
+  /// bloc's interval deliberately: the bloc's copy decides *when detection
+  /// runs*, this one decides *what is allowed to allocate*.
   void _onPreviewFrame(CameraImage image) {
     if (_isCapturing) return;
     if (!mounted || widget.state.status != EScannerStatus.searching) return;
+
+    final now = DateTime.now();
+    final last = _lastFrameDispatch;
+    if (last != null && now.difference(last) < _kFrameDispatchMinInterval) {
+      return;
+    }
+    _lastFrameDispatch = now;
 
     final plane = image.planes.isEmpty ? null : image.planes.first;
     if (plane == null) return;
@@ -278,7 +365,17 @@ class _CameraPreviewLayerState extends State<CameraPreviewLayer> {
         if (controller != null && controller.value.isInitialized)
           CameraPreview(controller)
         else
-          ColoredBox(color: AppColors.black.value),
+          // Not a bare black box: camera setup can take a moment (and on a
+          // first run it waits behind the OS permission prompt), and an
+          // unadorned black screen is indistinguishable from a hung app.
+          // The failure states get their own sheet; this only covers the
+          // legitimate "still acquiring" window.
+          ColoredBox(
+            color: AppColors.black.value,
+            child: state.isFailed
+                ? null
+                : const Center(child: CircularProgressIndicator()),
+          ),
         if (state.isSearching) const ScannerScanLine(),
         if (state.isSearching || state.isDetected)
           ScannerCornerOverlay(

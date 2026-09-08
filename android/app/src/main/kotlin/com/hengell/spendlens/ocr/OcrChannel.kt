@@ -3,6 +3,7 @@ package com.hengell.spendlens.ocr
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
+import android.graphics.Matrix
 import android.graphics.Rect
 import android.util.Log
 import com.google.mlkit.vision.common.InputImage
@@ -14,8 +15,6 @@ import io.flutter.plugin.common.MethodChannel
 import io.flutter.plugin.common.MethodChannel.MethodCallHandler
 import io.flutter.plugin.common.MethodChannel.Result
 import java.io.ByteArrayOutputStream
-import java.util.concurrent.CountDownLatch
-import java.util.concurrent.TimeUnit
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
@@ -50,11 +49,6 @@ class OcrChannel : FlutterPlugin, MethodCallHandler {
   companion object {
     const val CHANNEL_NAME = "com.hengell.spendlens/ocr"
     private const val TAG = "OcrChannel"
-
-    /** ML Kit / bitmap-decode calls run in the background; this bounds how
-     * long a single native call may block the platform-channel executor
-     * before giving up and surfacing a legitimate "not found"/failure. */
-    private const val NATIVE_CALL_TIMEOUT_SECONDS = 15L
 
     /** Border-scan tuning — a logic constant, not a UI literal (A7). */
     private const val EDGE_LUMINANCE_DELTA_THRESHOLD = 40
@@ -110,9 +104,25 @@ class OcrChannel : FlutterPlugin, MethodCallHandler {
     }
 
     val image = InputImage.fromBitmap(bitmap, 0)
-    val latch = CountDownLatch(1)
-    var blocks: List<Map<String, Any>> = emptyList()
 
+    // Reply from INSIDE the listeners — never by blocking this thread on a
+    // CountDownLatch.
+    //
+    // DEADLOCK (fixed): this handler runs on the main/UI thread, and ML Kit
+    // delivers `addOnSuccessListener` on that SAME main thread by default.
+    // A `latch.await(...)` here therefore blocked the very thread the
+    // callback needed in order to run, so the latch could never count down.
+    // ML Kit's worker finished correctly ("OCR process succeeded via
+    // visionkit pipeline" in logcat) and the callback simply sat queued
+    // behind the blocked thread until the Dart side's own 10s timeout fired
+    // and reported "no text blocks" — every single scan, on a decode that
+    // had actually SUCCEEDED. The native latch was 15s vs Dart's 10s, so
+    // Dart always lost the race and the native timeout was never even
+    // reached.
+    //
+    // `result.success` is called exactly once on every path: the two
+    // listeners are mutually exclusive, so no "reply already submitted"
+    // error is possible.
     recognizer
       .process(image)
       .addOnSuccessListener { visionText ->
@@ -132,16 +142,12 @@ class OcrChannel : FlutterPlugin, MethodCallHandler {
             )
           }
         }
-        blocks = output
-        latch.countDown()
+        result.success(output)
       }
       .addOnFailureListener { error ->
         Log.w(TAG, "recognizeText failed: ${error.message}")
-        latch.countDown()
+        result.success(emptyList<Map<String, Any>>())
       }
-
-    latch.await(NATIVE_CALL_TIMEOUT_SECONDS, TimeUnit.SECONDS)
-    result.success(blocks)
   }
 
   private fun handleDetectReceiptRect(call: MethodCall, result: Result) {
@@ -200,13 +206,143 @@ class OcrChannel : FlutterPlugin, MethodCallHandler {
     }
   }
 
+  /// Decodes [bytes] AND applies the JPEG's EXIF orientation.
+  ///
+  /// `BitmapFactory` ignores the EXIF `Orientation` tag entirely, so a photo
+  /// taken in portrait comes back as the sensor's native LANDSCAPE buffer
+  /// (1920x1080) with the receipt lying on its side. ML Kit then reads every
+  /// line correctly but reports bounding boxes in that rotated space, and the
+  /// parser's line grouper — which defines "same printed line" as "similar Y,
+  /// ordered by X" — sees the receipt's COLUMN axis as its row axis. The
+  /// visible symptom was "TOTAL LEI" and "206.11" arriving as two blocks that
+  /// never joined into one line, so no total and no items were ever resolved
+  /// and a perfectly readable receipt reported `unusable_scan`.
+  ///
+  /// Rotating here fixes it once, for every consumer of this channel
+  /// (recognizeText, detectReceiptRect, cropPerspective), rather than
+  /// teaching each parser stage about orientation.
   private fun decodeBitmap(bytes: ByteArray): Bitmap? {
     return try {
-      BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+      val decoded = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
+        ?: return null
+
+      val degrees = exifRotationDegrees(bytes)
+      if (degrees == 0) return decoded
+
+      val matrix = Matrix().apply { postRotate(degrees.toFloat()) }
+      val rotated = Bitmap.createBitmap(
+        decoded,
+        0,
+        0,
+        decoded.width,
+        decoded.height,
+        matrix,
+        true,
+      )
+      if (rotated != decoded) decoded.recycle()
+      rotated
     } catch (error: OutOfMemoryError) {
       Log.w(TAG, "decodeBitmap OOM: ${error.message}")
       null
     }
+  }
+
+  /// Reads the EXIF `Orientation` tag (0x0112) straight out of the JPEG
+  /// byte stream and maps it to clockwise degrees.
+  ///
+  /// Parsed inline rather than via `androidx.exifinterface`: that artifact is
+  /// not a dependency of this module, and the only tag needed is a single
+  /// SHORT in the first IFD. Any malformed/absent tag yields 0, which is the
+  /// same "leave the bitmap alone" behaviour as before this method existed.
+  private fun exifRotationDegrees(bytes: ByteArray): Int {
+    try {
+      if (bytes.size < 4) return 0
+      // SOI marker — not a JPEG, nothing to read.
+      if ((bytes[0].toInt() and 0xFF) != 0xFF ||
+        (bytes[1].toInt() and 0xFF) != 0xD8
+      ) {
+        return 0
+      }
+
+      var offset = 2
+      while (offset + 4 <= bytes.size) {
+        if ((bytes[offset].toInt() and 0xFF) != 0xFF) return 0
+        val marker = bytes[offset + 1].toInt() and 0xFF
+        val segmentLength =
+          ((bytes[offset + 2].toInt() and 0xFF) shl 8) or
+            (bytes[offset + 3].toInt() and 0xFF)
+        if (segmentLength < 2) return 0
+
+        // APP1 carries the Exif payload.
+        if (marker == 0xE1) {
+          val exifStart = offset + 4
+          if (exifStart + 6 > bytes.size) return 0
+          val header = String(bytes, exifStart, 4, Charsets.US_ASCII)
+          if (header != "Exif") return 0
+          return readOrientation(bytes, exifStart + 6)
+        }
+
+        // 0xD8/0xD9 carry no length; 0xDA starts scan data (no EXIF beyond).
+        if (marker == 0xDA) return 0
+        offset += 2 + segmentLength
+      }
+      return 0
+    } catch (error: RuntimeException) {
+      Log.w(TAG, "exifRotationDegrees failed: ${error.message}")
+      return 0
+    }
+  }
+
+  private fun readOrientation(bytes: ByteArray, tiffStart: Int): Int {
+    if (tiffStart + 8 > bytes.size) return 0
+
+    val littleEndian = when (
+      ((bytes[tiffStart].toInt() and 0xFF) shl 8) or
+        (bytes[tiffStart + 1].toInt() and 0xFF)
+    ) {
+      0x4949 -> true // "II"
+      0x4D4D -> false // "MM"
+      else -> return 0
+    }
+
+    fun short(at: Int): Int {
+      if (at + 2 > bytes.size) return -1
+      val a = bytes[at].toInt() and 0xFF
+      val b = bytes[at + 1].toInt() and 0xFF
+      return if (littleEndian) (b shl 8) or a else (a shl 8) or b
+    }
+
+    fun int(at: Int): Int {
+      if (at + 4 > bytes.size) return -1
+      val a = bytes[at].toInt() and 0xFF
+      val b = bytes[at + 1].toInt() and 0xFF
+      val c = bytes[at + 2].toInt() and 0xFF
+      val d = bytes[at + 3].toInt() and 0xFF
+      return if (littleEndian) {
+        (d shl 24) or (c shl 16) or (b shl 8) or a
+      } else {
+        (a shl 24) or (b shl 16) or (c shl 8) or d
+      }
+    }
+
+    val ifdOffset = int(tiffStart + 4)
+    if (ifdOffset < 0) return 0
+    val ifdStart = tiffStart + ifdOffset
+    val entryCount = short(ifdStart)
+    if (entryCount < 0) return 0
+
+    for (i in 0 until entryCount) {
+      val entry = ifdStart + 2 + (i * 12)
+      if (short(entry) == 0x0112) {
+        return when (short(entry + 8)) {
+          3 -> 180
+          6 -> 90
+          8 -> 270
+          else -> 0
+        }
+      }
+    }
+    return 0
   }
 
   /**
@@ -248,6 +384,23 @@ class OcrChannel : FlutterPlugin, MethodCallHandler {
     val area = (rectRight - rectLeft).toLong() * (rectBottom - rectTop).toLong()
     val frameArea = width.toLong() * height.toLong()
     if (area < frameArea * MIN_RECEIPT_AREA_FRACTION) return null
+
+    // Reject a LANDSCAPE rect. This scan samples only the middle row and the
+    // middle column, which cannot bound a tall narrow receipt photographed on
+    // a textured surface: the mid-row finds the paper's left/right edges
+    // correctly, but the mid-column finds contrast INSIDE the printed text,
+    // so the resulting rect is a wide short band through the receipt's middle.
+    // It then passed the area gate (0.42 of frame > 0.15) and cropped away
+    // both "TOTAL LEI" and every item line, leaving OCR real text that
+    // contained no total and no items — reported downstream as
+    // `unusable_scan` on a perfectly good photo.
+    //
+    // A receipt is always TALLER than it is wide, so a landscape result is
+    // proof the scan failed rather than a detection to trust.
+    // design_spendlens.md §24: returning null here is a LEGITIMATE outcome —
+    // the Dart side proceeds on the ORIGINAL, uncropped image, which is
+    // strictly better than proceeding on a confidently wrong crop.
+    if (rectRight - rectLeft >= rectBottom - rectTop) return null
 
     return Rect(rectLeft, rectTop, rectRight, rectBottom)
   }

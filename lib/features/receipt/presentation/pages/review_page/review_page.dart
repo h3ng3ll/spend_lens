@@ -54,11 +54,33 @@ class _ReviewPageState extends State<ReviewPage> {
     return created;
   }
 
-  void _onBack() => context.pop();
+  /// `context.pop()` ONLY when there is something to pop.
+  ///
+  /// The scanner reaches Review with `.go()` — deliberately, so the user
+  /// cannot back into a stale scanner session — which REPLACES the route
+  /// stack. `pop()` then has no target and does nothing at all, leaving the
+  /// user stuck on this screen. Falling back to an explicit destination is
+  /// what makes the control actually work on that (normal) entry path.
+  void _onBack() {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    HomePageRoute().go(context);
+  }
 
+  /// Discards the pending draft and returns to the scanner for a fresh
+  /// capture. Uses the same pop-or-navigate fallback as [_onBack]: on the
+  /// `.go()` entry path there is nothing to pop, and a dead "Retake" is
+  /// exactly the dead end spec §66 forbids.
   void _onRetake() {
     getIt<PendingReceiptDraftStore>().clear();
-    context.pop();
+
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    const ScannerPageRoute().go(context);
   }
 
   void _onStartEditItem(String itemId) =>

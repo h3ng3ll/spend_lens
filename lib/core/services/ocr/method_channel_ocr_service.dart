@@ -68,7 +68,7 @@ class MethodChannelOcrService implements OcrService {
           .timeout(_kOcrChannelTimeout);
       if (result == null) return const [];
 
-      return result
+      final blocks = result
           .whereType<Map<Object?, Object?>>()
           .map(
             (raw) => OcrTextBlock(
@@ -83,6 +83,19 @@ class MethodChannelOcrService implements OcrService {
             ),
           )
           .toList(growable: false);
+
+      // TEMPORARY DIAGNOSTIC — delete once the parser is tuned against a
+      // real receipt. Logs what OCR actually returned, because
+      // `unusable_scan` cannot distinguish "OCR read nothing" from "OCR
+      // read fine but no line matched a total keyword or item shape".
+      _loggerService.info(
+        'OCR_DIAG count=${blocks.length}\n'
+        '${blocks.map((b) => '  y=${b.boundingBox.top.toStringAsFixed(0)} '
+            'x=${b.boundingBox.left.toStringAsFixed(0)} '
+            '"${b.text}"').join('\n')}',
+      );
+
+      return blocks;
     } on TimeoutException {
       _loggerService.warning(
         'MethodChannelOcrService.recognizeText did not complete within '

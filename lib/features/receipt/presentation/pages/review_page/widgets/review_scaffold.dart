@@ -16,6 +16,7 @@ import 'review_header.dart';
 import 'review_items_card.dart';
 import 'review_store_card.dart';
 import 'review_totals_card.dart';
+import 'review_failed_state.dart';
 
 /// The Review screen's scaffold — one widget per file (`developer.md` A2).
 /// Reads [ReviewBloc] and [CategoriesBloc] state only; every mutation is
@@ -59,8 +60,25 @@ class ReviewScaffold extends StatelessWidget {
     final state = context.watch<ReviewBloc>().state;
     final categories = context.watch<CategoriesBloc>().state.categories;
 
+    // A non-ready state is NEVER an empty screen. This used to return
+    // `SizedBox.shrink()` for every status that was not ready/saved, which
+    // made a failed load (an unusable parse, a cleared draft) render a
+    // literally blank page with no spinner, no message and no way out —
+    // and because the scanner reaches this route with `.go()`, the stack was
+    // replaced, so there was nothing left to pop back to either. The user
+    // was stranded on black.
+    if (state.isFailed) {
+      return Scaffold(
+        backgroundColor: scheme.bg,
+        body: ReviewFailedState(onRetake: onRetake),
+      );
+    }
+
     if (!state.isReady && !state.isSaved) {
-      return Scaffold(backgroundColor: scheme.bg, body: const SizedBox.shrink());
+      return Scaffold(
+        backgroundColor: scheme.bg,
+        body: const Center(child: CircularProgressIndicator()),
+      );
     }
 
     final category = _findCategory(categories, state.categoryId);
@@ -112,8 +130,9 @@ class ReviewScaffold extends StatelessWidget {
                       isReconciled: state.isReconciled,
                       matchLabel: lo.itemsMatch,
                       mismatchLabel: lo.itemsDiffer(
-                        (state.reconciliationDifference ?? 0.0)
-                            .toStringAsFixed(2),
+                        (state.reconciliationDifference ?? 0.0).toStringAsFixed(
+                          2,
+                        ),
                       ),
                     ),
                     ReviewCategoryCard(
