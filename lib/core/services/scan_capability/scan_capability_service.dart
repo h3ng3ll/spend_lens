@@ -25,6 +25,13 @@ const Duration _kHardwareProbeTimeout = Duration(seconds: 5);
 /// would otherwise be misreported as [EScanCapability.noCamera] rather than
 /// the real [EScanCapability.permissionDenied] cause.
 ///
+/// Three entry points, one mapping ([_resolve]): [check] is a pure read
+/// (safe to call on every lifecycle resume), [requestPermission] always
+/// prompts, and [checkOrRequest] reads first and prompts only while the OS
+/// still treats the permission as askable. A user gesture wants the last of
+/// those — see [IScanCapabilityService.checkOrRequest] for why "ask exactly
+/// once" is delegated to the OS rather than tracked by a persisted flag.
+///
 /// This class never branches on `Platform.isX` (design_spendlens.md §6) —
 /// every signal it reads (`permission_handler`'s status, `camera`'s device
 /// enumeration, [OcrService.isAvailable]) is itself platform-agnostic at the
@@ -36,23 +43,37 @@ class ScanCapabilityService implements IScanCapabilityService {
   const ScanCapabilityService(this._ocrService);
 
   @override
-  Future<EScanCapability> check() async {
-    final status = await ph.Permission.camera.status;
-
-    if (status.isPermanentlyDenied) {
-      return EScanCapability.permissionPermanentlyDenied;
-    }
-    if (status.isDenied || status.isRestricted) {
-      return EScanCapability.permissionDenied;
-    }
-
-    return _checkHardwareAndOcr();
-  }
+  Future<EScanCapability> check() async =>
+      _resolve(await ph.Permission.camera.status);
 
   @override
-  Future<EScanCapability> requestPermission() async {
-    final status = await ph.Permission.camera.request();
+  Future<EScanCapability> requestPermission() async =>
+      _resolve(await ph.Permission.camera.request());
 
+  @override
+  Future<EScanCapability> checkOrRequest() async {
+    final status = await ph.Permission.camera.status;
+
+    // `isDenied` covers BOTH "never asked" and "asked once, refused" — the
+    // two are indistinguishable from Dart, and deliberately so: on iOS
+    // `AVAuthorizationStatusNotDetermined` maps to `denied`, and on Android
+    // the denied/permanentlyDenied split is resolved natively from
+    // `shouldShowRequestPermissionRationale`. Requesting is therefore the
+    // ONLY way to learn which one it was, and it is safe: a request from a
+    // genuinely unaskable state resolves immediately without a dialog.
+    //
+    // `isRestricted` is excluded — that is a parental/MDM policy block, not
+    // a user decision, and no prompt can lift it.
+    if (status.isDenied) {
+      return _resolve(await ph.Permission.camera.request());
+    }
+
+    return _resolve(status);
+  }
+
+  /// The single permission-status → capability mapping, shared by all three
+  /// entry points so they can never disagree about what a status means.
+  Future<EScanCapability> _resolve(ph.PermissionStatus status) async {
     if (status.isPermanentlyDenied) {
       return EScanCapability.permissionPermanentlyDenied;
     }

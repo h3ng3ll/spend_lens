@@ -895,6 +895,16 @@ class AppLocalizationsRo extends AppLocalizations {
   String get chooseLibrary => 'Alege din galerie';
 
   @override
+  String get pickImageFailed => 'Imaginea nu a putut fi deschisă';
+
+  @override
+  String get receiptPhotoEmptyTitle => 'Încă nicio fotografie';
+
+  @override
+  String get receiptPhotoEmptyBody =>
+      'Alege o fotografie a acestui bon din galerie.';
+
+  @override
   String get share => 'Trimite';
 
   @override

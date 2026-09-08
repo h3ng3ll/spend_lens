@@ -888,6 +888,16 @@ class AppLocalizationsEs extends AppLocalizations {
   String get chooseLibrary => 'Elegir de la galería';
 
   @override
+  String get pickImageFailed => 'No se pudo abrir la imagen';
+
+  @override
+  String get receiptPhotoEmptyTitle => 'Aún no hay foto';
+
+  @override
+  String get receiptPhotoEmptyBody =>
+      'Elige una foto de este recibo de tu galería.';
+
+  @override
   String get share => 'Compartir';
 
   @override

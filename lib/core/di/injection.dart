@@ -6,6 +6,8 @@ import '../services/ocr/i_receipt_detector.dart';
 import '../services/ocr/method_channel_ocr_service.dart';
 import '../services/ocr/method_channel_receipt_detector.dart';
 import '../services/ocr/ocr_service.dart';
+import '../services/permission_requester.dart';
+import '../services/receipt_image_store/receipt_image_store.dart';
 import '../services/scan_capability/i_scan_capability_service.dart';
 import '../services/scan_capability/scan_capability_service.dart';
 import '../services/subscription/apphud_subscription_repository.dart';
@@ -54,6 +56,18 @@ Future<void> initDependencies() async {
   // (design_spendlens.md §6).
   getIt.registerLazySingleton<IScanCapabilityService>(
     () => ScanCapabilityService(getIt<OcrService>()),
+  );
+
+  // Stateless filesystem helper for receipt photos. Registered so the
+  // gallery-pick path and `ReviewBloc` share ONE instance instead of each
+  // default-constructing its own.
+  getIt.registerLazySingleton(() => const ReceiptImageStore());
+
+  // registerLazySingleton, never a factory: `isPicking` is a process-wide
+  // re-entrancy guard, and a factory would hand each call site a fresh
+  // `false` — silently deleting the double-pick protection.
+  getIt.registerLazySingleton(
+    () => PermissionRequester(getIt<IScanCapabilityService>()),
   );
 
   // M9: Apphud-only subscription repository (design_spendlens.md §6/§9).

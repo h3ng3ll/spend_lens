@@ -1416,6 +1416,24 @@ abstract class AppLocalizations {
   /// **'Choose from library'**
   String get chooseLibrary;
 
+  /// No description provided for @pickImageFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t open the image'**
+  String get pickImageFailed;
+
+  /// No description provided for @receiptPhotoEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No photo yet'**
+  String get receiptPhotoEmptyTitle;
+
+  /// No description provided for @receiptPhotoEmptyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a photo of this receipt from your library.'**
+  String get receiptPhotoEmptyBody;
+
   /// No description provided for @share.
   ///
   /// In en, this message translates to:

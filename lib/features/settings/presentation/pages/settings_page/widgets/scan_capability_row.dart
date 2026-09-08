@@ -13,9 +13,11 @@ import '../../../../../../core/widgets/settings_row.dart';
 /// camera" / "OCR unavailable" are legitimate capability states, not
 /// failures.
 ///
-/// On [EScanCapability.permissionPermanentlyDenied] the row exposes an
-/// "Open Settings" action — the only recovery path once the OS has
-/// permanently blocked the permission prompt.
+/// On either permission state ([EScanCapability.permissionDenied] and
+/// [EScanCapability.permissionPermanentlyDenied]) the row exposes an
+/// "Open Settings" action. The handler prompts while the OS still allows it
+/// and falls back to OS Settings otherwise, so the recoverable state is not
+/// left as un-actionable text.
 class ScanCapabilityRow extends StatelessWidget {
   /// `null` while the capability probe is still in flight. Rendered as a
   /// neutral "checking" state — never defaulted to a concrete cause, which
@@ -47,8 +49,15 @@ class ScanCapabilityRow extends StatelessWidget {
     final textTheme = AppTextTheme.of(context);
     final lo = AppLocalizations.of(context);
 
+    // Both permission states get the action, not just the permanently-denied
+    // one: `permissionDenied` is the MORE recoverable of the two (the OS may
+    // still prompt), so leaving it as dead text was the worse of the two
+    // dead ends — the row stated a problem the user had no way to act on.
+    // `onOpenSettings` prompts first and only falls back to OS Settings, so
+    // one label and one callback serve both.
     final isBlocked =
-        capability == EScanCapability.permissionPermanentlyDenied;
+        capability == EScanCapability.permissionPermanentlyDenied ||
+        capability == EScanCapability.permissionDenied;
     // A pending probe is neither good news nor a warning: keep it secondary
     // so an amber "problem" colour never appears for an unknown state.
     final statusColor = switch (capability) {

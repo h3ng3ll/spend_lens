@@ -78,8 +78,27 @@ class _SettingsPageState extends State<SettingsPage>
     }
   }
 
+  /// Recovers from a non-[EScanCapability.supported] scanning state.
+  ///
+  /// Prompting is tried FIRST and OS Settings is only the fallback: while the
+  /// permission is still askable, sending the user out to Settings is a
+  /// needless detour, and on a fresh install it is also misleading — iOS has
+  /// no camera row for this app until the native request has actually run
+  /// once. `checkOrRequest()` prompts only when the OS says it still can, so
+  /// a genuinely blocked permission falls straight through to
+  /// `openAppSettings()`.
   Future<void> _onOpenScanSettings() async {
-    await getIt<IScanCapabilityService>().openAppSettings();
+    final capabilityService = getIt<IScanCapabilityService>();
+    final capability = await capabilityService.checkOrRequest();
+
+    if (capability != EScanCapability.supported) {
+      await capabilityService.openAppSettings();
+    }
+
+    if (!mounted) return;
+    setState(() {
+      _scanCapability = capabilityService.check();
+    });
   }
 
   void _onLanguage(BuildContext context) => LanguageSheet.show(context);

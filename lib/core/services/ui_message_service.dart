@@ -82,10 +82,15 @@ final class UiMessageService {
     overlayState.insert(entry);
 
     Future.delayed(duration, () {
+      // Guarded on `identical`, NOT unconditional: a second toast within
+      // `duration` already removed this entry at the `_currentEntry?.remove()`
+      // above, and `OverlayEntry.remove()` asserts the entry is still
+      // installed — so removing it again crashed in debug. Two toasts in
+      // quick succession is ordinary (a tap that both fails a check and
+      // reports why), not an edge case.
+      if (!identical(_currentEntry, entry)) return;
       entry.remove();
-      if (identical(_currentEntry, entry)) {
-        _currentEntry = null;
-      }
+      _currentEntry = null;
     });
   }
 }

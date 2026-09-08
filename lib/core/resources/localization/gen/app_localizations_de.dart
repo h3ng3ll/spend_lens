@@ -886,6 +886,16 @@ class AppLocalizationsDe extends AppLocalizations {
   String get chooseLibrary => 'Aus Mediathek';
 
   @override
+  String get pickImageFailed => 'Bild konnte nicht geöffnet werden';
+
+  @override
+  String get receiptPhotoEmptyTitle => 'Noch kein Foto';
+
+  @override
+  String get receiptPhotoEmptyBody =>
+      'Wähle ein Foto dieses Belegs aus deiner Mediathek.';
+
+  @override
   String get share => 'Teilen';
 
   @override

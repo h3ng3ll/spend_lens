@@ -903,6 +903,15 @@ class AppLocalizationsRu extends AppLocalizations {
   String get chooseLibrary => 'Из галереи';
 
   @override
+  String get pickImageFailed => 'Не удалось открыть изображение';
+
+  @override
+  String get receiptPhotoEmptyTitle => 'Фото пока нет';
+
+  @override
+  String get receiptPhotoEmptyBody => 'Выберите фото этого чека из галереи.';
+
+  @override
   String get share => 'Поделиться';
 
   @override

@@ -888,6 +888,16 @@ class AppLocalizationsFr extends AppLocalizations {
   String get chooseLibrary => 'Depuis la photothèque';
 
   @override
+  String get pickImageFailed => 'Impossible d\'ouvrir l\'image';
+
+  @override
+  String get receiptPhotoEmptyTitle => 'Pas encore de photo';
+
+  @override
+  String get receiptPhotoEmptyBody =>
+      'Choisissez une photo de ce ticket dans votre photothèque.';
+
+  @override
   String get share => 'Partager';
 
   @override

@@ -18,6 +18,11 @@ import 'app_container.dart';
 /// wrapped in [SafeArea] so the bottom system inset is respected on every
 /// device.
 ///
+/// Wraps its content in a transparent [Material]: it is inserted directly
+/// into the ROOT navigator's overlay, where there is no `Scaffold` and hence
+/// no `Material` ancestor, and un-parented `Text` renders with the default
+/// debug style instead of the designed pill.
+///
 /// Purely presentational — [UiMessageService] owns the overlay lifecycle
 /// (insert/remove/duration/queueing); this widget only renders one message.
 class AppToast extends StatelessWidget {
@@ -36,40 +41,51 @@ class AppToast extends StatelessWidget {
       bottom: 124.0,
       child: IgnorePointer(
         child: SafeArea(
-          child: Center(
-            // `AppContainer`'s own `clipBehavior` (default `Clip.antiAlias`)
-            // constrains the `BackdropFilter` to the pill's rounded shape —
-            // no `ClipRRect` needed (hard ban, per CLAUDE.md).
-            child: AppContainer(
-              height: 44.0,
-              color: scheme.toastBg,
-              borderRadius: BorderRadius.circular(22.0),
-              child: BackdropFilter(
-                filter: ImageFilter.blur(sigmaX: 24.0, sigmaY: 24.0),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 18.0),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    spacing: 10.0,
-                    children: [
-                      AppContainer(
-                        width: 8.0,
-                        height: 8.0,
-                        shape: BoxShape.circle,
-                        gradient: AppGradients.accentGradient,
-                      ),
-                      Flexible(
-                        child: Text(
-                          message,
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
-                          style: textTheme.subhead15.copyWith(
-                            color: scheme.toastInk,
-                            fontWeight: FontWeight.w600,
+          // [UiMessageService] inserts this straight into the ROOT
+          // navigator's overlay, which has no `Scaffold` and therefore no
+          // `Material` ancestor. Without one the pill renders unthemed —
+          // `Text` falls back to the default red-on-transparent debug style
+          // and the pill loses its Material surface. `type: transparency`
+          // supplies the missing Material WITHOUT painting a background of
+          // its own, so `AppContainer`'s `toastBg` and the `BackdropFilter`
+          // stay exactly as designed.
+          child: Material(
+            type: MaterialType.transparency,
+            child: Center(
+              // `AppContainer`'s own `clipBehavior` (default `Clip.antiAlias`)
+              // constrains the `BackdropFilter` to the pill's rounded shape —
+              // no `ClipRRect` needed (hard ban, per CLAUDE.md).
+              child: AppContainer(
+                height: 44.0,
+                color: scheme.toastBg,
+                borderRadius: BorderRadius.circular(22.0),
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 24.0, sigmaY: 24.0),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      spacing: 10.0,
+                      children: [
+                        AppContainer(
+                          width: 8.0,
+                          height: 8.0,
+                          shape: BoxShape.circle,
+                          gradient: AppGradients.accentGradient,
+                        ),
+                        Flexible(
+                          child: Text(
+                            message,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
+                            style: textTheme.subhead15.copyWith(
+                              color: scheme.toastInk,
+                              fontWeight: FontWeight.w600,
+                            ),
                           ),
                         ),
-                      ),
-                    ],
+                      ],
+                    ),
                   ),
                 ),
               ),

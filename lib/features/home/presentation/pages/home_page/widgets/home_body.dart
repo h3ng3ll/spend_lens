@@ -30,17 +30,18 @@ class HomeBody extends StatelessWidget {
   /// Scan Receipt when the device is not [EScanCapability.supported] shows
   /// a per-state toast naming the ACTUAL reason (no camera / OCR
   /// unavailable / permission denied / permanently denied) and never
-  /// navigates; on [EScanCapability.permissionDenied] it requests the
-  /// permission inline first, since that state is still recoverable without
-  /// leaving the app.
+  /// navigates.
+  ///
+  /// It goes through `checkOrRequest()` rather than `check()` so a
+  /// first-ever tap actually PROMPTS. A bare `check()` reports a denial the
+  /// user was never given the chance to resolve — which is how the
+  /// "Camera access is blocked — enable it in Settings" copy used to appear
+  /// on a fresh install that had never seen a system dialog.
   Future<void> _onScanReceipt(BuildContext context) async {
     final lo = AppLocalizations.of(context);
     final capabilityService = getIt<IScanCapabilityService>();
 
-    var capability = await capabilityService.check();
-    if (capability == EScanCapability.permissionDenied) {
-      capability = await capabilityService.requestPermission();
-    }
+    final capability = await capabilityService.checkOrRequest();
 
     if (capability == EScanCapability.supported) {
       if (!context.mounted) return;

@@ -905,6 +905,15 @@ class AppLocalizationsUk extends AppLocalizations {
   String get chooseLibrary => 'З галереї';
 
   @override
+  String get pickImageFailed => 'Не вдалося відкрити зображення';
+
+  @override
+  String get receiptPhotoEmptyTitle => 'Фото ще немає';
+
+  @override
+  String get receiptPhotoEmptyBody => 'Виберіть фото цього чека з галереї.';
+
+  @override
   String get share => 'Поділитися';
 
   @override
