@@ -52,18 +52,22 @@ final class OcrChannel: NSObject {
       guard
         let args = call.arguments as? [String: Any],
         let imageBytes = args["imageBytes"] as? FlutterStandardTypedData,
-        let cgImage = cgImage(from: imageBytes.data)
+        let decoded = decode(imageBytes.data)
       else {
         result([])
         return
       }
-      recognizeText(cgImage: cgImage, result: result)
+      recognizeText(
+        cgImage: decoded.image,
+        orientation: decoded.orientation,
+        result: result
+      )
 
     case "detectReceiptRect":
       guard
         let args = call.arguments as? [String: Any],
         let imageBytes = args["imageBytes"] as? FlutterStandardTypedData,
-        let cgImage = cgImage(from: imageBytes.data)
+        let decoded = decode(imageBytes.data)
       else {
         // design_spendlens.md §24: detection failure never blocks OCR — a
         // decode failure here is the same legitimate "not found" outcome
@@ -71,7 +75,11 @@ final class OcrChannel: NSObject {
         result(nil)
         return
       }
-      detectReceiptRect(cgImage: cgImage, result: result)
+      detectReceiptRect(
+        cgImage: decoded.image,
+        orientation: decoded.orientation,
+        result: result
+      )
 
     case "cropPerspective":
       let args = call.arguments as? [String: Any]
@@ -102,7 +110,11 @@ final class OcrChannel: NSObject {
 
   // MARK: - recognizeText
 
-  private static func recognizeText(cgImage: CGImage, result: @escaping FlutterResult) {
+  private static func recognizeText(
+    cgImage: CGImage,
+    orientation: CGImagePropertyOrientation,
+    result: @escaping FlutterResult
+  ) {
     let request = VNRecognizeTextRequest { request, error in
       guard error == nil,
         let observations = request.results as? [VNRecognizedTextObservation]
@@ -111,8 +123,10 @@ final class OcrChannel: NSObject {
         return
       }
 
-      let imageWidth = CGFloat(cgImage.width)
-      let imageHeight = CGFloat(cgImage.height)
+      let (imageWidth, imageHeight) = orientedSize(
+        of: cgImage,
+        orientation: orientation
+      )
 
       let blocks: [[String: Any]] = observations.compactMap { observation in
         guard let candidate = observation.topCandidates(1).first else { return nil }
@@ -145,17 +159,16 @@ final class OcrChannel: NSObject {
     request.recognitionLanguages = ["ro-RO", "en-US"]
     request.usesLanguageCorrection = true
 
-    let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-    do {
-      try handler.perform([request])
-    } catch {
-      result([])
-    }
+    perform(request, on: cgImage, orientation: orientation) { result([]) }
   }
 
   // MARK: - detectReceiptRect
 
-  private static func detectReceiptRect(cgImage: CGImage, result: @escaping FlutterResult) {
+  private static func detectReceiptRect(
+    cgImage: CGImage,
+    orientation: CGImagePropertyOrientation,
+    result: @escaping FlutterResult
+  ) {
     let request = VNDetectRectanglesRequest { request, error in
       guard error == nil,
         let observations = request.results as? [VNRectangleObservation],
@@ -168,8 +181,10 @@ final class OcrChannel: NSObject {
         return
       }
 
-      let imageWidth = CGFloat(cgImage.width)
-      let imageHeight = CGFloat(cgImage.height)
+      let (imageWidth, imageHeight) = orientedSize(
+        of: cgImage,
+        orientation: orientation
+      )
       let box = best.boundingBox
       let left = box.minX * imageWidth
       let width = box.width * imageWidth
@@ -192,12 +207,7 @@ final class OcrChannel: NSObject {
     request.minimumSize = 0.2
     request.maximumObservations = 1
 
-    let handler = VNImageRequestHandler(cgImage: cgImage, options: [:])
-    do {
-      try handler.perform([request])
-    } catch {
-      result(nil)
-    }
+    perform(request, on: cgImage, orientation: orientation) { result(nil) }
   }
 
   // MARK: - cropPerspective
@@ -207,7 +217,16 @@ final class OcrChannel: NSObject {
     rect: CGRect,
     result: @escaping FlutterResult
   ) {
-    guard let ciImage = CIImage(data: imageBytes) else {
+    let orientation = UIImage(data: imageBytes)
+      .map { cgOrientation(from: $0.imageOrientation) } ?? .up
+
+    // `.oriented()` bakes the EXIF orientation into the image's own extent,
+    // so this crop works in the SAME oriented coordinate space that
+    // `detectReceiptRect` now reports its rect in. Without it, `CIImage`
+    // (which ignores EXIF exactly as `CGImage` and `BitmapFactory` do) would
+    // be cropped with a rect measured against a differently-rotated image —
+    // slicing the wrong band out of the receipt.
+    guard let ciImage = CIImage(data: imageBytes)?.oriented(orientation) else {
       result(imageBytes)
       return
     }
@@ -267,8 +286,101 @@ final class OcrChannel: NSObject {
 
   // MARK: - Helpers
 
-  private static func cgImage(from data: Data) -> CGImage? {
-    guard let uiImage = UIImage(data: data) else { return nil }
-    return uiImage.cgImage
+  /// The pixel size of the image AS VISION SEES IT once `orientation` is
+  /// applied.
+  ///
+  /// A `.left`/`.right` (90°) orientation swaps width and height, and Vision
+  /// normalizes its bounding boxes against that ORIENTED extent — so
+  /// denormalizing with the raw `cgImage.width`/`.height` would stretch every
+  /// box along the wrong axis on exactly the portrait captures this channel
+  /// receives, scrambling the line grouper's row/column geometry.
+  private static func orientedSize(
+    of cgImage: CGImage,
+    orientation: CGImagePropertyOrientation
+  ) -> (width: CGFloat, height: CGFloat) {
+    let width = CGFloat(cgImage.width)
+    let height = CGFloat(cgImage.height)
+    switch orientation {
+    case .left, .leftMirrored, .right, .rightMirrored:
+      return (height, width)
+    default:
+      return (width, height)
+    }
+  }
+
+  /// Decodes JPEG bytes into a `CGImage` PLUS the EXIF orientation that
+  /// describes how those raw pixels must be rotated to appear upright.
+  ///
+  /// `UIImage(data:)` parses the EXIF `Orientation` tag into
+  /// `imageOrientation`, but `.cgImage` hands back the RAW, unrotated pixel
+  /// buffer and drops it. `camera`'s `takePicture()` writes a JPEG whose
+  /// orientation lives ONLY in that tag — the pixels are never rewritten —
+  /// so reading `.cgImage` alone fed Vision a sideways receipt, and
+  /// `VNRecognizeTextRequest` does not read 90°-rotated lines. This is the
+  /// same defect fixed on Android in `OcrChannel.decodeBitmap`, which
+  /// rotates the bitmap because `BitmapFactory` ignores EXIF too.
+  ///
+  /// Vision is told the orientation instead of the pixels being rotated:
+  /// `VNImageRequestHandler` applies it internally and, critically, reports
+  /// bounding boxes in the ORIENTED coordinate space — so the normalized
+  /// boxes below stay correct without any extra transform, and no full
+  /// second copy of a multi-megapixel image is allocated (this capture path
+  /// already hit a 2 GB OOM once).
+  private static func decode(
+    _ data: Data
+  ) -> (image: CGImage, orientation: CGImagePropertyOrientation)? {
+    guard let uiImage = UIImage(data: data), let cgImage = uiImage.cgImage else {
+      return nil
+    }
+    return (cgImage, cgOrientation(from: uiImage.imageOrientation))
+  }
+
+  private static func cgOrientation(
+    from orientation: UIImage.Orientation
+  ) -> CGImagePropertyOrientation {
+    switch orientation {
+    case .up: return .up
+    case .down: return .down
+    case .left: return .left
+    case .right: return .right
+    case .upMirrored: return .upMirrored
+    case .downMirrored: return .downMirrored
+    case .leftMirrored: return .leftMirrored
+    case .rightMirrored: return .rightMirrored
+    @unknown default: return .up
+    }
+  }
+
+  /// Runs a Vision request OFF the platform thread.
+  ///
+  /// `VNImageRequestHandler.perform` is SYNCHRONOUS and invokes the
+  /// request's completion block on the calling thread. Called straight from
+  /// the channel handler, that thread is the platform thread — so an
+  /// `.accurate` recognition pass over a full-resolution receipt blocked the
+  /// very thread that had to deliver the reply, and the Dart side hit its
+  /// 10s timeout and reported "no text blocks" every time. This is the iOS
+  /// twin of the Android `CountDownLatch` deadlock: the thread that must
+  /// carry the result was the one being held.
+  ///
+  /// `FlutterResult` is safe to invoke from a background queue — the engine
+  /// hops the reply to the platform thread itself.
+  private static func perform(
+    _ request: VNImageBasedRequest,
+    on cgImage: CGImage,
+    orientation: CGImagePropertyOrientation,
+    onFailure: @escaping () -> Void
+  ) {
+    DispatchQueue.global(qos: .userInitiated).async {
+      let handler = VNImageRequestHandler(
+        cgImage: cgImage,
+        orientation: orientation,
+        options: [:]
+      )
+      do {
+        try handler.perform([request])
+      } catch {
+        onFailure()
+      }
+    }
   }
 }

@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -16,6 +14,7 @@ import '../../../domain/repositories/i_receipt_item_local_repository.dart';
 import '../../../domain/repositories/i_receipt_local_repository.dart';
 import '../../../domain/rules/receipt_duplicate_detector.dart';
 import '../../../domain/rules/receipt_reconciler.dart';
+import '../../../domain/use_cases/create_expense_from_receipt_use_case.dart';
 import 'review_draft_item.dart';
 
 part 'review_event.dart';
@@ -44,6 +43,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   final IReceiptLocalRepository _receiptRepository;
   final IReceiptItemLocalRepository _receiptItemRepository;
   final IProductLocalRepository _productRepository;
+  final CreateExpenseFromReceiptUseCase _createExpenseFromReceipt;
   final ProductNormalizer _productNormalizer;
   final ReceiptReconciler _reconciler;
   final ReceiptDuplicateDetector _duplicateDetector;
@@ -55,6 +55,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     required this._receiptRepository,
     required this._receiptItemRepository,
     required this._productRepository,
+    required this._createExpenseFromReceipt,
     this._productNormalizer = const ProductNormalizer(),
     this._reconciler = const ReceiptReconciler(),
     this._duplicateDetector = const ReceiptDuplicateDetector(),
@@ -125,7 +126,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
         isReconciled: reconciliation.matches,
         reconciliationDifference: reconciliation.difference,
         isLikelyDuplicate: likelyDuplicate != null,
-        imageBytes: draft.imageBytes,
+        imageFilename: draft.imageFilename,
       ),
     );
   }
@@ -235,14 +236,13 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
       await _receiptItemRepository.save(item);
     }
 
-    String? imagePath;
-    final imageBytes = state.imageBytes;
-    if (imageBytes != null) {
-      imagePath = await _imageStore.save(
-        receiptId: receiptId,
-        bytes: imageBytes,
-      );
-    }
+    // The capture is ALREADY on disk (the scan pipeline wrote it there so
+    // the buffer could be released) — this only gives it the receipt's own
+    // stable `receipt_<id>.jpg` name.
+    final imagePath = await _imageStore.renameToReceipt(
+      receiptId: receiptId,
+      filename: state.imageFilename,
+    );
 
     final itemsTotal = state.itemsTotal;
     final receipt = Receipt(
@@ -260,6 +260,16 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     );
 
     await _receiptRepository.save(receipt);
+
+    // Saving the `Receipt` alone made it INVISIBLE: Home, History and
+    // Analytics all watch the `expenses` box and none of them reads
+    // `receipts`, so a saved scan appeared nowhere and a restart did not
+    // help — nothing was missing from the boxes actually being watched.
+    // The design's prototype puts both flows in ONE list (`saveReceipt`
+    // prepends `{type:'Receipt'}`, `saveCash` prepends `{type:'Cash'}` to
+    // the same `tx` array Home renders), which is what `EExpenseSource`
+    // encodes.
+    await _createExpenseFromReceipt(receipt: receipt);
 
     // The draft's job is done — clear it so a later, unrelated scan never
     // picks up a stale draft (see `PendingReceiptDraftStore` doc comment).

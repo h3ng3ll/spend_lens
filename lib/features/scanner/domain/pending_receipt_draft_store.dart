@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import '../../receipt/domain/parser/parsed_receipt.dart';
 
 /// One in-flight scan's parsed result, held only for the handoff between the
@@ -15,11 +13,26 @@ import '../../receipt/domain/parser/parsed_receipt.dart';
 /// Scanner writes to and Review/Edit read from.
 class PendingReceiptDraft {
   final ParsedReceipt parsedReceipt;
-  final Uint8List imageBytes;
+
+  /// The capture's FILENAME under `ReceiptImageStore`, never its bytes.
+  ///
+  /// This used to be a `Uint8List` of the full-resolution JPEG, which was
+  /// the direct cause of a 2 GB `EXC_RESOURCE` kill. The buffer was retained
+  /// simultaneously by the scanner event, the bloc event queue, this store,
+  /// the pipeline's own field and `ReviewState` — and because `ReviewState`
+  /// is freezed, every `copyWith` (each keystroke while renaming an item)
+  /// ran `DeepCollectionEquality` over all of it for `==`/`hashCode`, and
+  /// `toString()` interpolated it byte by byte.
+  ///
+  /// Nothing ever DISPLAYED these bytes: the only consumer wrote them to
+  /// disk at save time. Writing once at capture and carrying the filename
+  /// keeps the exact same behaviour with a few dozen bytes in flight, and
+  /// matches what `Receipt.imagePath` already stores (§3/§21).
+  final String? imageFilename;
 
   const PendingReceiptDraft({
     required this.parsedReceipt,
-    required this.imageBytes,
+    this.imageFilename,
   });
 }
 

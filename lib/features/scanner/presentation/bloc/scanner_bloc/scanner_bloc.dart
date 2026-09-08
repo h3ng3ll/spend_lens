@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:bloc/bloc.dart';
+import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/material.dart' show Rect;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
@@ -54,7 +55,6 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
   final IReceiptParsePipeline _parsePipeline;
   final PendingReceiptDraftStore _draftStore;
 
-  bool _isDetecting = false;
   DateTime? _lastDetectionAttempt;
 
   ScannerBloc({
@@ -64,7 +64,23 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
     required this._draftStore,
   }) : super(const ScannerState()) {
     on<_Reset>(_onReset);
-    on<_PreviewFrame>(_onPreviewFrame);
+    // `droppable()` BOUNDS the preview-frame queue at one in-flight event.
+    //
+    // Bloc's default transformer queues every event and processes them one
+    // at a time, so the `_isDetecting` guard below returned only AFTER a
+    // frame had already been queued and dequeued — each queued frame
+    // pinning a full plane buffer for as long as it waited. With a native
+    // `detectReceiptRect` that can take up to its 1500 ms timeout, frames
+    // arriving at ~30 fps piled up faster than they drained: an unbounded
+    // buffer of multi-megabyte frames, and a contributor to the 2 GB
+    // EXC_RESOURCE kill.
+    //
+    // `droppable` DISCARDS any frame that arrives while one is being
+    // processed, at the transformer — before the event is queued at all —
+    // so at most one frame's bytes are ever retained. Dropping the stale
+    // ones is correct here: a live preview only cares about the CURRENT
+    // frame, and a 600 ms-old frame has no detection value.
+    on<_PreviewFrame>(_onPreviewFrame, transformer: droppable());
     on<_Capture>(_onCapture);
     on<_CaptureCompleted>(_onCaptureCompleted);
     on<_Failed>(_onFailed);
@@ -91,27 +107,25 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
     Emitter<ScannerState> emit,
   ) async {
     if (state.status != EScannerStatus.searching) return;
-    if (_isDetecting) return;
 
     final now = DateTime.now();
     final last = _lastDetectionAttempt;
     if (last != null && now.difference(last) < _detectionMinInterval) return;
     _lastDetectionAttempt = now;
 
-    _isDetecting = true;
-    try {
-      final bounds = await _receiptDetector.detectReceiptRect(event.imageBytes);
-      if (state.status != EScannerStatus.searching) return;
-      if (bounds != null) {
-        emit(
-          state.copyWith(
-            status: EScannerStatus.detected,
-            detectedBounds: bounds,
-          ),
-        );
-      }
-    } finally {
-      _isDetecting = false;
+    // No `_isDetecting` re-entrancy flag: `droppable()` above already
+    // guarantees only one frame is in flight, and structurally rather than
+    // by convention. A flag here would be dead code that reads like a live
+    // guard.
+    final bounds = await _receiptDetector.detectReceiptRect(event.imageBytes);
+    if (state.status != EScannerStatus.searching) return;
+    if (bounds != null) {
+      emit(
+        state.copyWith(
+          status: EScannerStatus.detected,
+          detectedBounds: bounds,
+        ),
+      );
     }
   }
 
@@ -161,9 +175,14 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
     // bytes (never the cropped/working copy) are what get attached to the
     // draft — the design keeps the actual capture for Review's photo card
     // and the scan-failed sheet, never a perspective-corrected substitute.
+    // Written to DISK here, not retained: `attachImageBytes` persists the
+    // capture and keeps only its filename, so the multi-megabyte buffer is
+    // collectable as soon as this handler returns. Holding it across the
+    // await chain below was one of five simultaneous retainers behind a
+    // 2 GB EXC_RESOURCE kill (see `PendingReceiptDraft.imageFilename`).
     final pipeline = _parsePipeline;
     if (pipeline is ReceiptParsePipeline) {
-      pipeline.attachImageBytes(bytes);
+      await pipeline.attachImageBytes(bytes);
     }
     final productCount = await _parsePipeline.findProducts(blocks);
     if (state.status != EScannerStatus.processing) return;

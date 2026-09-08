@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import '../../../core/services/ocr/ocr_text_block.dart';
+import '../../../core/services/receipt_image_store/receipt_image_store.dart';
 import '../../receipt/domain/parser/parsed_receipt.dart';
 import '../../receipt/domain/parser/receipt_parser.dart';
 import 'i_receipt_parse_pipeline.dart';
@@ -18,28 +19,47 @@ import 'pending_receipt_draft_store.dart';
 class ReceiptParsePipeline implements IReceiptParsePipeline {
   final ReceiptParser _parser;
   final PendingReceiptDraftStore _draftStore;
+  final ReceiptImageStore _imageStore;
 
-  ReceiptParsePipeline(this._parser, this._draftStore);
+  ReceiptParsePipeline(
+    this._parser,
+    this._draftStore, [
+    this._imageStore = const ReceiptImageStore(),
+  ]);
 
-  /// Stashes [blocks] and the captured [imageBytes] so [findProducts] can
-  /// build the full [PendingReceiptDraft] once parsing completes. Set by the
-  /// caller (`CameraPreviewLayer`) immediately before invoking the
-  /// processing pipeline for a capture.
-  Uint8List? _pendingImageBytes;
+  /// The capture's FILENAME once written to disk — never the bytes.
+  ///
+  /// This class is an app-lifetime singleton, so a `Uint8List` field here
+  /// kept the last capture's full-resolution JPEG alive until the next scan
+  /// replaced it. That was one of five simultaneous retainers behind the
+  /// 2 GB `EXC_RESOURCE` kill (see [PendingReceiptDraft.imageFilename]).
+  String? _pendingImageFilename;
 
-  void attachImageBytes(Uint8List imageBytes) {
-    _pendingImageBytes = imageBytes;
+  /// Writes the capture to disk IMMEDIATELY and keeps only its filename, so
+  /// the multi-megabyte buffer becomes garbage as soon as the caller's own
+  /// reference goes out of scope.
+  ///
+  /// The file is named from the capture instant rather than a receipt id,
+  /// because no `Receipt` exists yet at this point — a scan the user never
+  /// saves must still be able to own a file. `ReviewBloc._persist` renames
+  /// it to the receipt's own `receipt_<id>.jpg` on save.
+  Future<void> attachImageBytes(Uint8List imageBytes) async {
+    _pendingImageFilename = await _imageStore.save(
+      receiptId: 'capture_${DateTime.now().microsecondsSinceEpoch}',
+      bytes: imageBytes,
+    );
   }
 
   @override
   Future<int> findProducts(List<OcrTextBlock> blocks) async {
     final parsed = _parser.parse(blocks);
-    final imageBytes = _pendingImageBytes;
-    if (imageBytes != null) {
-      _draftStore.set(
-        PendingReceiptDraft(parsedReceipt: parsed, imageBytes: imageBytes),
-      );
-    }
+    _draftStore.set(
+      PendingReceiptDraft(
+        parsedReceipt: parsed,
+        imageFilename: _pendingImageFilename,
+      ),
+    );
+    _pendingImageFilename = null;
     return parsed.items.length;
   }
 

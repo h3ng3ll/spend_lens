@@ -51,4 +51,43 @@ class ReviewDraftItem {
       isManuallyAdded: isManuallyAdded,
     );
   }
+
+  /// Value equality, because `ReviewState.items` is compared with
+  /// `DeepCollectionEquality` — which compares ELEMENTS by their own `==`.
+  ///
+  /// Without this, the fallback is identity, and [copyWith] returns a new
+  /// instance on every keystroke while renaming an item — so the state
+  /// always compared unequal and bloc's duplicate-state suppression never
+  /// engaged. It also made this the only model in the project without value
+  /// equality (`Product`, `Category`, `Receipt` are all freezed and get it
+  /// generated).
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is ReviewDraftItem &&
+        other.id == id &&
+        other.rawName == rawName &&
+        other.name == name &&
+        other.quantity == quantity &&
+        other.unit == unit &&
+        other.unitPrice == unitPrice &&
+        other.lineTotal == lineTotal &&
+        other.confidence == confidence &&
+        other.isLowConfidence == isLowConfidence &&
+        other.isManuallyAdded == isManuallyAdded;
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    rawName,
+    name,
+    quantity,
+    unit,
+    unitPrice,
+    lineTotal,
+    confidence,
+    isLowConfidence,
+    isManuallyAdded,
+  );
 }

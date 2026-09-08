@@ -10,6 +10,7 @@ import '../../../../product/domain/repositories/i_product_local_repository.dart'
 import '../../../../scanner/domain/pending_receipt_draft_store.dart';
 import '../../../domain/repositories/i_receipt_item_local_repository.dart';
 import '../../../domain/repositories/i_receipt_local_repository.dart';
+import '../../../domain/use_cases/create_expense_from_receipt_use_case.dart';
 import '../../bloc/review_bloc/review_bloc.dart';
 import 'widgets/review_scaffold.dart';
 
@@ -33,6 +34,7 @@ class _ReviewPageState extends State<ReviewPage> {
     receiptRepository: getIt<IReceiptLocalRepository>(),
     receiptItemRepository: getIt<IReceiptItemLocalRepository>(),
     productRepository: getIt<IProductLocalRepository>(),
+    createExpenseFromReceipt: getIt<CreateExpenseFromReceiptUseCase>(),
   )..add(const ReviewEvent.load());
 
   final Map<String, TextEditingController> _editControllers = {};
