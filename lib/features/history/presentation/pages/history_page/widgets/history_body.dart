@@ -79,11 +79,18 @@ class _HistoryBodyState extends State<HistoryBody> {
       filter: _filter,
     );
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.symmetric(vertical: 16.0),
+    // The search field and filter row are PINNED (they must stay put and
+    // interactive in both branches); only what sits beneath them differs.
+    // Splitting the two lets the filter-miss card centre itself in the
+    // leftover space without the header drifting with it.
+    return Padding(
+      // 5dp on top of HorizontalPadding's shared 16dp inset. Kept local to
+      // History rather than raised in the shared widget, which every other
+      // screen also uses.
+      padding: const EdgeInsets.only(top: 16.0, left: 5.0, right: 5.0),
       child: HorizontalPadding(
         child: Column(
-          mainAxisSize: MainAxisSize.min,
+          mainAxisSize: MainAxisSize.max,
           crossAxisAlignment: CrossAxisAlignment.start,
           spacing: 16.0,
           children: [
@@ -94,15 +101,39 @@ class _HistoryBodyState extends State<HistoryBody> {
             // search field and filter row above stay visible and
             // interactive; only the body below differs from branch 1.
             if (filtered.isEmpty)
-              const HistoryFilterMissState()
-            else ...[
-              SectionLabel(text: lo.historyAllRecords),
-              HistoryRecordList(
-                expenses: filtered,
-                categories: categories,
-                stores: stores,
+              // Centred in the space left below the pinned header, and
+              // stretched to full width: `AppEmptyState`'s Column is
+              // `MainAxisSize.min`, so on its own the card shrink-wraps its
+              // text and the parent's `CrossAxisAlignment.start` pins that
+              // narrow card to the left edge.
+              const Expanded(
+                child: Center(
+                  child: SizedBox(
+                    width: double.infinity,
+                    child: HistoryFilterMissState(),
+                  ),
+                ),
+              )
+            else
+              // Only the LIST scrolls; the header above it does not.
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.only(bottom: 24.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    spacing: 16.0,
+                    children: [
+                      SectionLabel(text: lo.historyAllRecords),
+                      HistoryRecordList(
+                        expenses: filtered,
+                        categories: categories,
+                        stores: stores,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ],
           ],
         ),
       ),

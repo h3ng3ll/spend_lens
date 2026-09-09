@@ -215,7 +215,7 @@ void main() {
       expect(summary.categoryShares, isEmpty);
     });
 
-    test('mixed currencies never combine — non-display-currency expenses are excluded', () {
+    test('the display currency LABELS the total, it never filters it', () {
       final expenses = [
         _expense(
           id: '1',
@@ -240,9 +240,15 @@ void main() {
         displayCurrencyCode: 'MDL',
       );
 
-      // The EUR expense must never be summed into the MDL total.
-      expect(summary.total, 100.0);
-      expect(summary.purchaseCount, 1);
+      // The settings currency is a display label, so BOTH expenses count.
+      // Filtering by each record's stored currencyCode is what zeroed the
+      // whole Analytics screen: records carry a fixed code while the
+      // setting is user-changeable, so the filter dropped every expense as
+      // soon as the two differed.
+      expect(summary.total, 1100.0);
+      expect(summary.purchaseCount, 2);
+      // The requested code is still what the summary reports.
+      expect(summary.currencyCode, 'MDL');
     });
   });
 }

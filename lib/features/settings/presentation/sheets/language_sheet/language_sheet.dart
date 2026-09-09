@@ -27,6 +27,8 @@ class LanguageSheet extends StatelessWidget {
     final bloc = context.read<SettingsBloc>();
     return showModalBottomSheet<void>(
       context: context,
+      // Root navigator, above the 5-tab shell — see `CurrencySheet.show`.
+      useRootNavigator: true,
       isScrollControlled: true,
       builder: (sheetContext) =>
           BlocProvider.value(value: bloc, child: const LanguageSheet()),

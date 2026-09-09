@@ -68,6 +68,15 @@ enum AppColors {
   warnLight(Color(0xFF9A5B0B)),
   warnDark(Color(0xFFF5B36B)),
 
+  // Background-glow hues — the two radial layers of `--glow`
+  // (`SpendLens Prototype.dc.html` line 779/780). Deliberately NOT the
+  // `--accent` pair: the glow is stated in the design as the SATURATED
+  // violet/cyan `rgba(139,92,246,…)` / `rgba(34,211,238,…)`, while
+  // `--accent` is the lightened foreground tint (`#C4B5FD`/`#8EE3F5`).
+  // Painting the glow with the accent tokens washes it out to near-flat.
+  glowViolet(Color(0xFF8B5CF6)),
+  glowCyan(Color(0xFF22D3EE)),
+
   // Trend-down (spending fell) — verified at line 716/717: the same hue in
   // both themes, `#6EE7B7`. Never reuse `error`/`warn` for this pair.
   trendDown(Color(0xFF6EE7B7)),

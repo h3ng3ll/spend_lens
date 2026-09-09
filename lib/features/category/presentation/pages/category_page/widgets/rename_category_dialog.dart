@@ -34,6 +34,11 @@ class RenameCategoryDialog extends StatefulWidget {
   }) {
     return showDialog<void>(
       context: context,
+      // Root navigator, above the 5-tab shell — see `CurrencySheet.show`.
+      // `CategoriesPageRoute` is already a top-level route above the shell,
+      // so nothing is broken today; the flag keeps this correct if the page
+      // is ever moved into a shell branch.
+      useRootNavigator: true,
       builder: (_) => RenameCategoryDialog(
         initialName: initialName,
         onRenamed: onRenamed,

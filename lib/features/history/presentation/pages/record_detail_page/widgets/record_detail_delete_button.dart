@@ -30,7 +30,16 @@ import '../../../bloc/record_detail_bloc/record_detail_bloc.dart';
 class RecordDetailDeleteButton extends StatelessWidget {
   final String recordId;
 
-  const RecordDetailDeleteButton({super.key, required this.recordId});
+  /// `dDeleteLabel` — "Delete receipt" for a receipt-sourced record,
+  /// "Delete expense" for a cash one. Resolved by the caller so this widget
+  /// stays branch-agnostic.
+  final String label;
+
+  const RecordDetailDeleteButton({
+    super.key,
+    required this.recordId,
+    required this.label,
+  });
 
   Future<void> _onDelete(BuildContext context) async {
     final lo = AppLocalizations.of(context);
@@ -40,7 +49,7 @@ class RecordDetailDeleteButton extends StatelessWidget {
       context,
       title: lo.deleteExpenseConfirmTitle,
       body: lo.deleteExpenseConfirmBody,
-      confirmLabel: lo.deleteExpense,
+      confirmLabel: label,
       cancelLabel: lo.cancel,
       onConfirm: () => bloc.add(RecordDetailEvent.deleteRecord(recordId)),
     );
@@ -62,7 +71,6 @@ class RecordDetailDeleteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final scheme = AppColorScheme.of(context);
     final textTheme = AppTextTheme.of(context);
-    final lo = AppLocalizations.of(context);
 
     return BlocListener<RecordDetailBloc, RecordDetailState>(
       listenWhen: _listenWhenDeleteFailed,
@@ -77,7 +85,7 @@ class RecordDetailDeleteButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(18.0),
           alignment: Alignment.center,
           child: Text(
-            lo.deleteExpense,
+            label,
             style: textTheme.headline17.copyWith(
               color: scheme.warn,
               fontWeight: FontWeight.w600,

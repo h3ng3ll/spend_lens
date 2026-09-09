@@ -27,9 +27,16 @@ class HistoryRecordList extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final sorted = [...expenses]..sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
+    final sorted = [...expenses]
+      ..sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
 
     return AppSectionCard(
+      // The design's `padding:0 20px` on the rows card: horizontal inset
+      // only, so each row's text clears the card edge while its bottom
+      // divider still spans the full inner width. Vertical spacing belongs
+      // to the rows themselves (each is a fixed-height row), so the card
+      // adds none.
+      padding: const EdgeInsets.symmetric(horizontal: 20.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [

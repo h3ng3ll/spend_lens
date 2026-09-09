@@ -5,6 +5,10 @@ import '../../../../../core/utils/combine_latest_streams.dart';
 import '../../../../category/domain/repositories/i_category_local_repository.dart';
 import '../../../../expense/domain/models/expense/expense.dart';
 import '../../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../../../receipt/domain/models/receipt/receipt.dart';
+import '../../../../receipt/domain/models/receipt_item/receipt_item.dart';
+import '../../../../receipt/domain/repositories/i_receipt_item_local_repository.dart';
+import '../../../../receipt/domain/repositories/i_receipt_local_repository.dart';
 import '../../../../store/domain/repositories/i_store_local_repository.dart';
 import '../../../domain/models/record_detail_snapshot.dart';
 
@@ -21,15 +25,22 @@ part 'record_detail_bloc.freezed.dart';
 /// BLoC rule A3.8), taking [recordId] as a constructor param. Mirrors
 /// `StoreDetailBloc`'s shape.
 ///
-/// M5 scope boundary: every record in History at this milestone is an
-/// [Expense] with `source: cash` — receipt scanning is M7/M8, so this bloc
-/// resolves [recordId] against `IExpenseLocalRepository` only. A future
-/// milestone adding the receipt-detail branch extends this bloc/snapshot
-/// rather than this screen inventing a receipt lookup ahead of its data.
+/// Resolves BOTH branches of the design's Record detail artboard. The
+/// receipt branch works by id identity, which is not a coincidence:
+/// `CreateExpenseFromReceiptUseCase` writes the mirrored [Expense] with
+/// `id: receipt.id` precisely so that "History's `RecordDetailBloc` looks a
+/// record up by id, and a receipt-sourced row must resolve to the receipt it
+/// came from". So the single [recordId] this bloc is constructed with
+/// resolves the expense, its receipt, and that receipt's items.
+///
+/// A cash expense simply finds no receipt, leaving [RecordDetailSnapshot]'s
+/// `receipt`/`items` null/empty — the branch is data-driven, never a flag
+/// the caller passes in.
 ///
 /// Reactive, not static (hive_rules.md §6/§10): combines expenses +
-/// categories + stores into ONE [RecordDetailSnapshot] stream via
-/// `combineLatest3` and subscribes with a SINGLE `emit.forEach` — never
+/// categories + stores + receipts + receipt items into ONE
+/// [RecordDetailSnapshot] stream via `combineLatest5` and subscribes with a
+/// SINGLE `emit.forEach` — never
 /// parallel `emit.forEach` calls, never a Dart record type for the combined
 /// value. Staying reactive (not a one-shot `getById`) means this screen
 /// reflects a delete performed elsewhere (or by its own delete action)
@@ -39,6 +50,8 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
   final IExpenseLocalRepository _expenseLocalRepository;
   final ICategoryLocalRepository _categoryLocalRepository;
   final IStoreLocalRepository _storeLocalRepository;
+  final IReceiptLocalRepository _receiptLocalRepository;
+  final IReceiptItemLocalRepository _receiptItemLocalRepository;
   final String recordId;
 
   RecordDetailBloc({
@@ -46,6 +59,8 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
     required this._expenseLocalRepository,
     required this._categoryLocalRepository,
     required this._storeLocalRepository,
+    required this._receiptLocalRepository,
+    required this._receiptItemLocalRepository,
   }) : super(const RecordDetailState()) {
     on<_Watch>(_onWatch);
     on<_DeleteRecord>(_onDeleteRecord);
@@ -55,15 +70,23 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
     emit(state.copyWith(status: ERecordDetailStatus.loading));
 
     await emit.forEach<RecordDetailSnapshot>(
-      combineLatest3(
+      combineLatest5(
         _expenseLocalRepository.watchAll(),
         _categoryLocalRepository.watchAll(),
         _storeLocalRepository.watchAll(),
-        (expenses, categories, stores) => RecordDetailSnapshot(
-          expense: _findExpense(expenses, recordId),
-          categories: categories,
-          stores: stores,
-        ),
+        _receiptLocalRepository.watchAll(),
+        _receiptItemLocalRepository.watchAll(),
+        (expenses, categories, stores, receipts, receiptItems) {
+          final receipt = _findReceipt(receipts, recordId);
+
+          return RecordDetailSnapshot(
+            expense: _findExpense(expenses, recordId),
+            categories: categories,
+            stores: stores,
+            receipt: receipt,
+            items: _itemsOf(receipt, receiptItems),
+          );
+        },
       ),
       onData: (snapshot) => snapshot.expense == null
           ? state.copyWith(status: ERecordDetailStatus.notFound)
@@ -83,6 +106,38 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
       if (expense.id == id) return expense;
     }
     return null;
+  }
+
+  /// The receipt sharing [id] with the expense, or null for a cash expense.
+  Receipt? _findReceipt(List<Receipt> receipts, String id) {
+    for (final receipt in receipts) {
+      if (receipt.id == id) return receipt;
+    }
+    return null;
+  }
+
+  /// [receipt]'s items, in printed order.
+  ///
+  /// Filtered here rather than through
+  /// `IReceiptItemLocalRepository.watchByReceiptId`: that method needs
+  /// `Receipt.itemIds`, which is not known until the receipt stream emits,
+  /// so reaching for it would mean a second subscription nested inside the
+  /// first — two `emit.forEach`-shaped reads on one emitter, which
+  /// hive_rules.md §7/§10 forbids. One combined stream, filtered in the
+  /// combiner, keeps the single-subscription contract.
+  ///
+  /// Sorted explicitly by `lineIndex`: Hive's `box.values` is INSERTION
+  /// order, so the print order the parser recorded is not guaranteed by the
+  /// box, and an unsorted list would silently reorder a receipt's lines.
+  List<ReceiptItem> _itemsOf(Receipt? receipt, List<ReceiptItem> allItems) {
+    if (receipt == null) return const <ReceiptItem>[];
+
+    final itemIds = receipt.itemIds.toSet();
+    final items = allItems
+        .where((item) => itemIds.contains(item.id))
+        .toList();
+    items.sort((a, b) => a.lineIndex.compareTo(b.lineIndex));
+    return items;
   }
 
   /// Deletes [recordId] (`RecordDetailDeleteButton`'s delete action — used

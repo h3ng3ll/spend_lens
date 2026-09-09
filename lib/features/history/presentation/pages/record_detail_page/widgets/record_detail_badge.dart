@@ -31,7 +31,7 @@ class RecordDetailBadge extends StatelessWidget {
         spacing: 6.0,
         children: [
           if (dot != null)
-            AppContainer(width: 8.0, height: 8.0, color: dot, shape: BoxShape.circle),
+            AppContainer(width: 6.0, height: 6.0, color: dot, shape: BoxShape.circle),
           Text(
             label,
             style: textTheme.sectionLabel12.copyWith(

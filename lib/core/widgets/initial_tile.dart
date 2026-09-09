@@ -21,6 +21,11 @@ class InitialTile extends StatelessWidget {
   final double size;
   final double borderRadius;
 
+  /// Overrides the default glyph style. Optional so every existing caller
+  /// keeps the shared 17px semibold; a larger tile (Record Detail's 48dp
+  /// variant, which the design gives an 18px glyph) passes its own.
+  final TextStyle? textStyle;
+
   const InitialTile({
     super.key,
     required this.initial,
@@ -28,6 +33,7 @@ class InitialTile extends StatelessWidget {
     required this.foreground,
     this.size = 36.0,
     this.borderRadius = 10.0,
+    this.textStyle,
   });
 
   @override
@@ -42,7 +48,8 @@ class InitialTile extends StatelessWidget {
       alignment: Alignment.center,
       child: Text(
         initial,
-        style: textTheme.headline17Semi.copyWith(color: foreground),
+        style: textStyle ??
+            textTheme.headline17Semi.copyWith(color: foreground),
       ),
     );
   }

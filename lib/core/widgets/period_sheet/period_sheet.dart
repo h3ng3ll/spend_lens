@@ -44,6 +44,8 @@ class PeriodSheet extends StatelessWidget {
   }) {
     return showModalBottomSheet<void>(
       context: context,
+      // Root navigator, above the 5-tab shell — see `CurrencySheet.show`.
+      useRootNavigator: true,
       isScrollControlled: true,
       builder: (sheetContext) => PeriodSheet(
         selected: selected,

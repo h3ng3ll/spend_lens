@@ -95,7 +95,7 @@ void main() {
       expect(summary.points[2].hasData, isTrue);
     });
 
-    test('mixed currencies never combine — an observation in another currency is excluded', () {
+    test('the display currency LABELS the series, it never filters it', () {
       final observations = [
         _observation(
           id: '1',
@@ -124,10 +124,14 @@ void main() {
         displayCurrencyCode: 'MDL',
       );
 
-      // The EUR observation must be excluded, so August is a NO-DATA month,
-      // not the 5.0 EUR price masquerading as an MDL one.
-      expect(summary.points[1].hasData, isFalse);
-      expect(summary.percentChangeFirstToLast, 23.8);
+      // The currency setting is a display label, so every observation is
+      // charted: August now carries the 5.0 point instead of being blanked.
+      // Filtering here blanked the chart entirely whenever the setting
+      // differed from the stored code — the same defect that zeroed
+      // Analytics.
+      expect(summary.points[1].hasData, isTrue);
+      expect(summary.points[1].unitPrice, 5.0);
+      expect(summary.currencyCode, 'MDL');
     });
 
     test('no observations for the product returns an empty summary, not a fabricated one', () {

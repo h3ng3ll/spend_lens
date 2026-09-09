@@ -49,7 +49,6 @@ void main() {
         atStoreId: 'kaufland',
         allObservations: observations,
         stores: stores,
-        displayCurrencyCode: 'MDL',
       );
 
       expect(result!.key, EStorePriceComparisonKey.onlyHere);
@@ -78,7 +77,6 @@ void main() {
         atStoreId: 'kaufland',
         allObservations: observations,
         stores: stores,
-        displayCurrencyCode: 'MDL',
       );
 
       expect(result!.key, EStorePriceComparisonKey.cheaperBy);
@@ -106,7 +104,6 @@ void main() {
         atStoreId: 'kaufland',
         allObservations: observations,
         stores: stores,
-        displayCurrencyCode: 'MDL',
       );
 
       expect(result!.key, EStorePriceComparisonKey.cheaperBy);
@@ -145,7 +142,6 @@ void main() {
         atStoreId: 'kaufland',
         allObservations: observations,
         stores: threeStores,
-        displayCurrencyCode: 'MDL',
       );
 
       expect(result!.key, EStorePriceComparisonKey.cheapestOf);
@@ -153,7 +149,7 @@ void main() {
       expect(result.params, [3]);
     });
 
-    test('mixed currencies never combine — an observation in another currency is excluded', () {
+    test('a stored currency code never excludes a store from the comparison', () {
       final observations = [
         _observation(
           id: '1',
@@ -175,12 +171,13 @@ void main() {
         atStoreId: 'kaufland',
         allObservations: observations,
         stores: stores,
-        displayCurrencyCode: 'MDL',
       );
 
-      // The EUR observation at Linella must not enter the comparison —
-      // Kaufland is therefore the ONLY store with an MDL observation.
-      expect(result!.key, EStorePriceComparisonKey.onlyHere);
+      // Currency is a display label, so Linella's observation still counts
+      // and the two stores are genuinely compared. Excluding it used to
+      // collapse this to `onlyHere`, hiding a real cheaper alternative.
+      expect(result!.key, isNot(EStorePriceComparisonKey.onlyHere));
+      expect(result.isBetterHere, isFalse);
     });
 
     test('returns null when there is no observation for this product at this store', () {
@@ -198,7 +195,6 @@ void main() {
         atStoreId: 'kaufland',
         allObservations: observations,
         stores: stores,
-        displayCurrencyCode: 'MDL',
       );
 
       expect(result, isNull);

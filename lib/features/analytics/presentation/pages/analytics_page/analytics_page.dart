@@ -48,6 +48,12 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
 
   SelectedPeriod _selectedPeriod = SelectedPeriod.now();
 
+  /// Which donut slice the category card highlights. UI-local selection
+  /// state, exactly like `_selectedPeriod` — never bloc state (BLoC rule
+  /// A3.1). Held here rather than inside the card so a bloc emission
+  /// (which rebuilds the whole body) cannot silently reset the user's pick.
+  int _selectedCategoryIndex = 0;
+
   @override
   void dispose() {
     _analyticsBloc.close();
@@ -55,7 +61,16 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
   }
 
   void _onSelectPeriod(SelectedPeriod period) {
-    setState(() => _selectedPeriod = period);
+    // A new month has its own category ranking, so a slice index carried
+    // over from the old one would point at an unrelated category.
+    setState(() {
+      _selectedPeriod = period;
+      _selectedCategoryIndex = 0;
+    });
+  }
+
+  void _onSelectCategory(int index) {
+    setState(() => _selectedCategoryIndex = index);
   }
 
   Future<void> _onOpenPeriod(List<Expense> allExpenses) async {
@@ -97,6 +112,8 @@ class _AnalyticsPageState extends State<AnalyticsPage> {
                 currencyCode: currencyCode,
                 onOpenPeriod: () =>
                     _onOpenPeriod(state.snapshot?.expenses ?? const []),
+                selectedCategoryIndex: _selectedCategoryIndex,
+                onSelectCategory: _onSelectCategory,
               );
             },
           ),

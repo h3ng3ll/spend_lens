@@ -296,13 +296,27 @@ class AppColorScheme extends ThemeExtension<AppColorScheme> {
         colors: [AppColors.accentDark.value, AppColors.accent2Dark.value],
       );
 
-  /// The design's radial background glow layers (verified at line 778/779 —
-  /// `--glow`), expressed as stacked [BoxShadow]-free radial gradients a
-  /// screen composes behind its content. Kept theme-aware: the dark glow is
-  /// stronger (28%/16% alpha) than the light glow (16%/12% alpha).
+  /// The design's radial background glow layers (verified at line 779/780 —
+  /// `--glow`), expressed as stacked radial gradients a screen composes
+  /// behind its content via `AppBackground`.
+  ///
+  /// The HUES are the saturated `glowViolet`/`glowCyan`, not the `--accent`
+  /// pair: the design states the glow as `rgba(139,92,246,…)` /
+  /// `rgba(34,211,238,…)` while `--accent` is the lightened FOREGROUND tint
+  /// (`#C4B5FD`/`#8EE3F5`) — painting the glow with the accent tokens
+  /// washes it out until the background reads flat.
+  ///
+  /// The ALPHAS are baked in here and are theme-aware: the dark glow is
+  /// stronger (28%/16%) than the light glow (16%/12%).
+  /// True for the dark palette, read off `bg`'s own luminance rather than a
+  /// stored flag — `bg` is already the discriminator between the two
+  /// factories, so no extra field (and no `copyWith`/`lerp` plumbing) is
+  /// needed to tell them apart.
+  bool get _isDark => bg.computeLuminance() < 0.5;
+
   List<Color> get glowLayers => [
-        AppColors.accentDark.value,
-        AppColors.accent2Dark.value,
+        AppColors.glowViolet.value.withValues(alpha: _isDark ? 0.28 : 0.16),
+        AppColors.glowCyan.value.withValues(alpha: _isDark ? 0.16 : 0.12),
       ];
 
   @override

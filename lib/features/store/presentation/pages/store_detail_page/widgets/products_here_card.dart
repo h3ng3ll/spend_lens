@@ -74,7 +74,6 @@ class ProductsHereCard extends StatelessWidget {
         atStoreId: storeId,
         allObservations: priceObservations,
         stores: stores,
-        displayCurrencyCode: displayCurrencyCode,
       );
 
       rows.add(

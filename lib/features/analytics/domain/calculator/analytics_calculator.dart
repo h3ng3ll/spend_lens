@@ -5,8 +5,18 @@
 /// ReceiptItems for price-history, in the sibling calculator)**, never
 /// stored as a derived source of truth (spec §49).
 ///
-/// Every sum here goes through [totalInCurrency] — currencies are never
-/// silently combined (spec §52, §11).
+/// The settings currency is a DISPLAY LABEL, not a filter: totals sum every
+/// expense in the month and are then labelled with the user's chosen code.
+/// Amounts are never re-denominated or converted.
+///
+/// This reverses an earlier reading of spec §52 that filtered each sum by
+/// `expense.currencyCode == displayCurrencyCode`. Because records are
+/// written with a fixed code while the setting is user-changeable, that
+/// filter silently excluded EVERY expense as soon as the two differed and
+/// the whole screen read 0 — total, average, purchases, cash share and
+/// category breakdown alike — with no error and no empty state, since the
+/// caller's own emptiness check did not filter by currency. Deviation
+/// recorded per the user's decision.
 library;
 
 import '../../../category/domain/models/category/category.dart';
@@ -14,7 +24,7 @@ import '../../../expense/domain/models/expense/e_expense_source.dart';
 import '../../../expense/domain/models/expense/expense.dart';
 import '../models/monthly_summary/category_share.dart';
 import '../models/monthly_summary/monthly_summary.dart';
-import 'currency_guard.dart';
+import 'expense_sum.dart';
 
 /// Expenses whose `occurredAt` falls in the given (year, 0-based month).
 List<Expense> expensesInMonth(
@@ -41,11 +51,9 @@ MonthlySummary buildMonthlySummary({
   required int month,
   required String displayCurrencyCode,
 }) {
-  final monthExpenses = expensesInMonth(allExpenses, year, month)
-      .where((expense) => expense.currencyCode == displayCurrencyCode)
-      .toList();
+  final monthExpenses = expensesInMonth(allExpenses, year, month);
 
-  final total = totalInCurrency(monthExpenses, displayCurrencyCode);
+  final total = sumAmounts(monthExpenses);
   final purchaseCount = monthExpenses.length;
   final average = purchaseCount == 0 ? 0.0 : total / purchaseCount;
 
@@ -59,12 +67,10 @@ MonthlySummary buildMonthlySummary({
   final previousMonth = month == 0 ? 11 : month - 1;
   final previousYear = month == 0 ? year - 1 : year;
   final previousMonthExpenses =
-      expensesInMonth(allExpenses, previousYear, previousMonth)
-          .where((expense) => expense.currencyCode == displayCurrencyCode)
-          .toList();
+      expensesInMonth(allExpenses, previousYear, previousMonth);
   final previousMonthTotal = previousMonthExpenses.isEmpty
       ? null
-      : totalInCurrency(previousMonthExpenses, displayCurrencyCode);
+      : sumAmounts(previousMonthExpenses);
 
   return MonthlySummary(
     year: year,

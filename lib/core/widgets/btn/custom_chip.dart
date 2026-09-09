@@ -1,9 +1,18 @@
 import 'package:flutter/material.dart';
 
-import '../../resources/colors/app_colors.dart';
+import '../../resources/colors/app_color_scheme.dart';
 import '../../resources/colors/app_gradients.dart';
 import '../app_container.dart';
 
+/// A pill chip: the accent gradient when [selected], the semantic field
+/// fill when not.
+///
+/// The unselected/disabled fills are read from [AppColorScheme] rather than
+/// a raw palette constant. They were previously hardcoded to
+/// `AppColors.white`, which assumed a light surface — on this dark-only app
+/// that painted a white pill under near-white `scheme.ink` text, leaving
+/// unselected chip labels invisible. The design specifies
+/// `background:var(--field)` for the unselected state.
 class CustomChip extends StatelessWidget {
   final bool selected;
   final Widget label;
@@ -20,6 +29,7 @@ class CustomChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = AppColorScheme.of(context);
     final borderRadius = BorderRadius.circular(
       25.0,
     );
@@ -35,10 +45,10 @@ class CustomChip extends StatelessWidget {
         borderRadius: borderRadius,
         color: onTap == null
             // is inactive
-            ? AppColors.white.value.withValues(alpha: 0.3)
+            ? scheme.field.withValues(alpha: 0.3)
             : selected
-                ? null
-                : AppColors.white.value,
+            ? null
+            : scheme.field,
         gradient: !selected ? null : AppGradients.accentGradient,
         child: label,
       ),

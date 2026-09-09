@@ -66,8 +66,8 @@ bool _matchesQuery({
       .firstWhere((_) => true, orElse: () => null);
   if (category != null &&
       resolveCategoryName(lo, category).toLowerCase().contains(
-            normalizedQuery,
-          )) {
+        normalizedQuery,
+      )) {
     return true;
   }
 

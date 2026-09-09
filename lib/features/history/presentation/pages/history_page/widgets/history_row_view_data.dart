@@ -47,7 +47,9 @@ class HistoryRowViewData {
     final categoryById = {for (final c in categories) c.id: c};
     final category = categoryById[expense.categoryId];
 
-    final name = category != null ? resolveCategoryName(lo, category) : lo.catOther;
+    final name = category != null
+        ? resolveCategoryName(lo, category)
+        : lo.catOther;
     final color = category != null
         ? resolveCategoryColor(category)
         : resolveCategoryColorForOther();
@@ -60,7 +62,8 @@ class HistoryRowViewData {
       tileForeground: color,
       name: name,
       meta: recentExpenseMeta(lo, expense, stores),
-      amountText: '${numberFormat.format(expense.amount)} ${expense.currencyCode}',
+      amountText:
+          '${numberFormat.format(expense.amount)} ${expense.currencyCode}',
     );
   }
 }

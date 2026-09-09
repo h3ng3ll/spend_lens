@@ -21,6 +21,13 @@ class CurrencySheet extends StatelessWidget {
     final bloc = context.read<SettingsBloc>();
     return showModalBottomSheet<void>(
       context: context,
+      // Presented on the ROOT navigator, above the 5-tab shell — the same
+      // `rootNavigatorKey` every bottom-bar-hiding route uses. Without it
+      // the sheet mounts inside the current shell BRANCH, which sits below
+      // `RootPage`'s bottom bar: the bar then paints over the sheet's scrim
+      // and stays tappable, so the user can switch tabs behind an open
+      // modal.
+      useRootNavigator: true,
       isScrollControlled: true,
       builder: (sheetContext) =>
           BlocProvider.value(value: bloc, child: const CurrencySheet()),

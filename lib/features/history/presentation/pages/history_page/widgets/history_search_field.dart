@@ -31,8 +31,25 @@ class HistorySearchField extends StatelessWidget {
       filled: true,
       isDense: true,
       borderRadius: BorderRadius.circular(14.0),
-      padding: const EdgeInsets.symmetric(horizontal: 14.0, vertical: 10.0),
-      prefixIcon: AppSvgIcon(asset: AppIcons.search, color: scheme.ter, size: 18.0),
+      padding: const EdgeInsets.only(right: 14.0, top: 10.0, bottom: 10.0),
+      // `prefixIcon` WITHOUT `prefixIconConstraints` gets Material's 48x48
+      // minimum touch-target box, and the SVG scales up to fill it — which
+      // is why the glyph rendered far larger than the design's 14dp mark
+      // despite the size argument below. The constraints pin the box to the
+      // icon, and the horizontal inset restores the design's `gap:8px`
+      // between the mark and the placeholder text.
+      prefixIcon: Padding(
+        padding: const EdgeInsets.only(left: 14.0, right: 8.0),
+        child: AppSvgIcon(
+          asset: AppIcons.search,
+          color: scheme.ter,
+          size: 14.0,
+        ),
+      ),
+      prefixIconConstraints: const BoxConstraints(
+        minWidth: 0.0,
+        minHeight: 0.0,
+      ),
       border: OutlineInputBorder(
         borderRadius: BorderRadius.circular(14.0),
         borderSide: BorderSide(color: scheme.line, width: 1.0),

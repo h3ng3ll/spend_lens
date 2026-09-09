@@ -46,6 +46,11 @@ class ConfirmDialog extends StatelessWidget {
   }) {
     return showDialog<void>(
       context: context,
+      // Root navigator, above the 5-tab shell — see `CurrencySheet.show`.
+      // It matters more here than on a picker sheet: a destructive confirm
+      // whose scrim leaves the bottom bar live lets the user tab away
+      // mid-decision, with the dialog still mounted behind the new tab.
+      useRootNavigator: true,
       builder: (dialogContext) => ConfirmDialog(
         title: title,
         body: body,

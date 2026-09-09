@@ -14,7 +14,7 @@ import '../analytics_category_breakdown_row.dart';
 import '../analytics_insight_resolver.dart';
 import '../analytics_view_helpers.dart';
 import 'analytics_cash_receipt_split_card.dart';
-import 'analytics_category_breakdown_card.dart';
+import 'analytics_category_donut_card.dart';
 import 'analytics_header.dart';
 import 'analytics_insights_card.dart';
 import 'analytics_period_pill.dart';
@@ -40,12 +40,19 @@ class AnalyticsBody extends StatelessWidget {
   final String currencyCode;
   final VoidCallback onOpenPeriod;
 
+  /// Which donut slice is highlighted. Owned by the page, not this widget,
+  /// so it survives the rebuild each bloc emission causes.
+  final int selectedCategoryIndex;
+  final ValueChanged<int> onSelectCategory;
+
   const AnalyticsBody({
     super.key,
     required this.state,
     required this.selectedPeriod,
     required this.currencyCode,
     required this.onOpenPeriod,
+    required this.selectedCategoryIndex,
+    required this.onSelectCategory,
   });
 
   @override
@@ -171,10 +178,12 @@ class AnalyticsBody extends StatelessWidget {
                   caption: lo.ofSpending,
                 ),
               ),
-              AnalyticsCategoryBreakdownCard(
-                rows: rows,
-                currencyCode: currencyCode,
-              ),
+              if (rows.isNotEmpty)
+                AnalyticsCategoryDonutCard(
+                  rows: rows,
+                  selectedIndex: selectedCategoryIndex,
+                  onSelect: onSelectCategory,
+                ),
               AnalyticsCashReceiptSplitCard(
                 cashSharePercent: (summary.cashShare * 100).round(),
               ),

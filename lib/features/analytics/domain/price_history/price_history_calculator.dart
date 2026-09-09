@@ -3,10 +3,16 @@
 /// worked example exactly: `18.50 → 22.90 = +23.8%`
 /// (`percentChange(18.50, 22.90)` below).
 ///
-/// Currency guard: [buildPriceHistory] only ever considers observations in
-/// [displayCurrencyCode] — an observation printed in any other currency is
-/// EXCLUDED from the chart entirely, never converted or combined into the
-/// same series (spec §52, §11 — "mixed currencies never combine").
+/// Currency is a DISPLAY LABEL: [displayCurrencyCode] labels the series'
+/// axis and readouts but never selects which observations are charted, and
+/// prices are never converted or re-denominated.
+///
+/// This replaces an earlier filter on `observation.currencyCode ==
+/// displayCurrencyCode`. Observations are written with a fixed code while
+/// the setting is user-changeable, so that filter blanked the chart
+/// entirely the moment the two differed — the same defect that zeroed the
+/// Analytics screen. Deviation from spec §52 recorded per the user's
+/// decision that the currency setting is display-only.
 library;
 
 import '../models/price_history/price_history_point.dart';
@@ -41,8 +47,7 @@ PriceHistorySummary buildPriceHistory({
       .where(
         (observation) =>
             observation.productId == productId &&
-            observation.deletedAt == null &&
-            observation.currencyCode == displayCurrencyCode,
+            observation.deletedAt == null,
       )
       .toList()
     ..sort((a, b) => a.observedAt.compareTo(b.observedAt));

@@ -4,9 +4,11 @@
 /// Pure function; emits (ARB key, params) pairs, never rendered strings —
 /// same discipline as the insight generator.
 ///
-/// Currency guard: only observations in [displayCurrencyCode] are
-/// considered; an observation printed in another currency never enters the
-/// cheapest-store comparison (spec §52).
+/// Currency is a DISPLAY LABEL and is deliberately NOT a parameter here:
+/// every observation for the product enters the comparison regardless of
+/// the code it was stored with, and prices are never converted. Filtering
+/// on a stored code made comparison rows disappear whenever the user's
+/// setting differed from it — the same defect that zeroed Analytics.
 library;
 
 import '../../../store/domain/models/store/store.dart';
@@ -17,21 +19,18 @@ import '../models/store_price_comparison/store_price_comparison.dart';
 /// [atStoreId], across all [allObservations] for that product.
 ///
 /// Returns null when there is no observation for this product at
-/// [atStoreId] in [displayCurrencyCode] — nothing to show a comparison row
-/// for.
+/// [atStoreId] — nothing to show a comparison row for.
 StorePriceComparison? compareStorePriceForProduct({
   required String productId,
   required String atStoreId,
   required List<PriceObservation> allObservations,
   required List<Store> stores,
-  required String displayCurrencyCode,
 }) {
   final productObservations = allObservations
       .where(
         (observation) =>
             observation.productId == productId &&
             observation.deletedAt == null &&
-            observation.currencyCode == displayCurrencyCode &&
             observation.storeId != null,
       )
       .toList();

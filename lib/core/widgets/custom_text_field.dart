@@ -22,6 +22,12 @@ class CustomTextField extends StatelessWidget {
   final String? Function(String?)? validator;
   final Widget? prefix;
   final Widget? prefixIcon;
+
+  /// Sizing box for [prefixIcon]. Left null, `InputDecoration` applies
+  /// Material's 48x48 minimum touch target and a smaller icon scales up to
+  /// fill it, so a caller wanting the icon at its stated size must pass
+  /// constraints here.
+  final BoxConstraints? prefixIconConstraints;
   final Widget? suffixIcon;
   final Widget? suffix;
   final int? maxLines;
@@ -60,6 +66,7 @@ class CustomTextField extends StatelessWidget {
     this.validator,
     this.prefix,
     this.prefixIcon,
+    this.prefixIconConstraints,
     this.controller,
     this.maxLines = 1,
     this.maxLength,
@@ -213,6 +220,7 @@ class CustomTextField extends StatelessWidget {
         ),
         prefix: prefix,
         prefixIcon: prefixIcon,
+        prefixIconConstraints: prefixIconConstraints,
         suffix: suffix,
         suffixIcon: suffixIcon,
       ),

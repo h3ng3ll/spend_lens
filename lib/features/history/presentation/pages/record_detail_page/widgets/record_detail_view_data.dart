@@ -3,8 +3,10 @@ import 'package:intl/intl.dart';
 
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../category/domain/models/category/category.dart';
+import '../../../../../expense/domain/models/expense/e_expense_source.dart';
 import '../../../../../expense/domain/models/expense/expense.dart';
 import '../../../../../home/presentation/utils/category_name_resolver.dart';
+import '../../../../../receipt/domain/models/receipt/receipt.dart';
 import '../../../../../store/domain/models/store/store.dart';
 
 /// Everything [RecordDetailCard] needs to render ONE [Expense], resolved
@@ -12,9 +14,9 @@ import '../../../../../store/domain/models/store/store.dart';
 /// field — derived fresh from `RecordDetailSnapshot` at build time (BLoC
 /// rule A3.1).
 ///
-/// M5 scope boundary: covers the cash-expense branch only (every record in
-/// History at this milestone is `source: cash`) — see `RecordDetailPage`'s
-/// doc comment.
+/// Covers BOTH branches of the design's Record detail artboard. [isReceipt]
+/// selects between them, and it is derived from `Expense.source` — never
+/// passed in by the caller.
 class RecordDetailViewData {
   final String initial;
   final Color tileBackground;
@@ -27,6 +29,18 @@ class RecordDetailViewData {
   final Color categoryDotColor;
   final String? note;
 
+  /// True when this record came from a scanned/entered receipt
+  /// (`EExpenseSource.receipt`) — the branch that shows the Items card, the
+  /// Receipt photo card and the Edit action.
+  final bool isReceipt;
+
+  /// `dType` — the header title AND the type badge label: "Receipt" or
+  /// "Cash".
+  final String typeLabel;
+
+  /// `dDeleteLabel` — "Delete receipt" or "Delete expense".
+  final String deleteLabel;
+
   const RecordDetailViewData({
     required this.initial,
     required this.tileBackground,
@@ -38,12 +52,16 @@ class RecordDetailViewData {
     required this.categoryLabel,
     required this.categoryDotColor,
     required this.note,
+    required this.isReceipt,
+    required this.typeLabel,
+    required this.deleteLabel,
   });
 
   factory RecordDetailViewData.resolve({
     required Expense expense,
     required List<Category> categories,
     required List<Store> stores,
+    required Receipt? receipt,
     required AppLocalizations lo,
   }) {
     final categoryById = {for (final c in categories) c.id: c};
@@ -54,28 +72,41 @@ class RecordDetailViewData {
         ? resolveCategoryColor(category)
         : resolveCategoryColorForOther();
 
-    final storeId = expense.storeId;
+    final isReceipt = expense.source == EExpenseSource.receipt;
+
+    // The store comes from the RECEIPT first, then the expense. A
+    // receipt-sourced expense is written by `CreateExpenseFromReceiptUseCase`
+    // WITHOUT a storeId (`ReviewBloc` does not pass one), so reading only
+    // `Expense.storeId` would show the category name as the record's title
+    // on every scanned receipt — even after Edit receipt set the store.
+    final storeId = receipt?.storeId ?? expense.storeId;
     final store = storeId == null
         ? null
-        : stores.where((candidate) => candidate.id == storeId).cast<Store?>().firstWhere(
-              (_) => true,
-              orElse: () => null,
-            );
+        : stores.where((candidate) => candidate.id == storeId).firstOrNull;
 
     final displayName = store?.name ?? categoryLabel;
     final numberFormat = NumberFormat.decimalPattern();
+
+    // `dDate` is "Sep 6, 2026 · Receipt" — the date, then the record type.
+    // No clock time: the design's detail card carries the day, and a
+    // receipt's purchase time is not meaningful to the day's total.
+    final occurredAt = receipt?.purchasedAt ?? expense.occurredAt;
+    final typeLabel = isReceipt ? lo.receipt : lo.cashType;
 
     return RecordDetailViewData(
       initial: displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
       tileBackground: color.withValues(alpha: 0.13),
       tileForeground: color,
       name: displayName,
-      dateText: DateFormat.yMMMd().add_jm().format(expense.occurredAt),
+      dateText: '${DateFormat.yMMMd().format(occurredAt)} · $typeLabel',
       amountText: numberFormat.format(expense.amount),
       currencyCode: expense.currencyCode,
       categoryLabel: categoryLabel,
       categoryDotColor: color,
       note: expense.note,
+      isReceipt: isReceipt,
+      typeLabel: typeLabel,
+      deleteLabel: isReceipt ? lo.deleteReceipt : lo.deleteExpense,
     );
   }
 }
