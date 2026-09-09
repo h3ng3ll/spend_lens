@@ -12,11 +12,17 @@ part of 'auth_bloc.dart';
 // dart format off
 T _$identity<T>(T value) => value;
 /// @nodoc
-mixin _$AuthEvent {
+mixin _$AuthEvent implements DiagnosticableTreeMixin {
 
 
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'AuthEvent'))
+    ;
+}
 
 @override
 bool operator ==(Object other) {
@@ -28,7 +34,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'AuthEvent()';
 }
 
@@ -186,7 +192,7 @@ return signOut();case _:
 /// @nodoc
 
 
-class _Watch implements AuthEvent {
+class _Watch with DiagnosticableTreeMixin implements AuthEvent {
   const _Watch();
   
 
@@ -194,6 +200,12 @@ class _Watch implements AuthEvent {
 
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'AuthEvent.watch'))
+    ;
+}
 
 @override
 bool operator ==(Object other) {
@@ -205,7 +217,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'AuthEvent.watch()';
 }
 
@@ -218,7 +230,7 @@ String toString() {
 /// @nodoc
 
 
-class _SignInGoogle implements AuthEvent {
+class _SignInGoogle with DiagnosticableTreeMixin implements AuthEvent {
   const _SignInGoogle();
   
 
@@ -226,6 +238,12 @@ class _SignInGoogle implements AuthEvent {
 
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'AuthEvent.signInGoogle'))
+    ;
+}
 
 @override
 bool operator ==(Object other) {
@@ -237,7 +255,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'AuthEvent.signInGoogle()';
 }
 
@@ -250,7 +268,7 @@ String toString() {
 /// @nodoc
 
 
-class _SignInApple implements AuthEvent {
+class _SignInApple with DiagnosticableTreeMixin implements AuthEvent {
   const _SignInApple();
   
 
@@ -258,6 +276,12 @@ class _SignInApple implements AuthEvent {
 
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'AuthEvent.signInApple'))
+    ;
+}
 
 @override
 bool operator ==(Object other) {
@@ -269,7 +293,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'AuthEvent.signInApple()';
 }
 
@@ -282,7 +306,7 @@ String toString() {
 /// @nodoc
 
 
-class _SignOut implements AuthEvent {
+class _SignOut with DiagnosticableTreeMixin implements AuthEvent {
   const _SignOut();
   
 
@@ -290,6 +314,12 @@ class _SignOut implements AuthEvent {
 
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'AuthEvent.signOut'))
+    ;
+}
 
 @override
 bool operator ==(Object other) {
@@ -301,7 +331,7 @@ bool operator ==(Object other) {
 int get hashCode => runtimeType.hashCode;
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'AuthEvent.signOut()';
 }
 
@@ -312,7 +342,7 @@ String toString() {
 
 
 /// @nodoc
-mixin _$AuthState {
+mixin _$AuthState implements DiagnosticableTreeMixin {
 
  EAuthStatus get status; String get errorMessage;/// `true` when signed in via Google, `false` for Apple/anonymous. Only
 /// meaningful when `status == EAuthStatus.signedIn`.
@@ -326,6 +356,12 @@ mixin _$AuthState {
 $AuthStateCopyWith<AuthState> get copyWith => _$AuthStateCopyWithImpl<AuthState>(this as AuthState, _$identity);
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'AuthState'))
+    ..add(DiagnosticsProperty('status', status))..add(DiagnosticsProperty('errorMessage', errorMessage))..add(DiagnosticsProperty('isGoogleAccount', isGoogleAccount))..add(DiagnosticsProperty('email', email));
+}
 
 @override
 bool operator ==(Object other) {
@@ -337,7 +373,7 @@ bool operator ==(Object other) {
 int get hashCode => Object.hash(runtimeType,status,errorMessage,isGoogleAccount,email);
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'AuthState(status: $status, errorMessage: $errorMessage, isGoogleAccount: $isGoogleAccount, email: $email)';
 }
 
@@ -506,7 +542,7 @@ return $default(_that.status,_that.errorMessage,_that.isGoogleAccount,_that.emai
 /// @nodoc
 
 
-class _AuthState implements AuthState {
+class _AuthState with DiagnosticableTreeMixin implements AuthState {
   const _AuthState({this.status = EAuthStatus.signedOut, this.errorMessage = '', this.isGoogleAccount = false, this.email = ''});
   
 
@@ -526,6 +562,12 @@ class _AuthState implements AuthState {
 _$AuthStateCopyWith<_AuthState> get copyWith => __$AuthStateCopyWithImpl<_AuthState>(this, _$identity);
 
 
+@override
+void debugFillProperties(DiagnosticPropertiesBuilder properties) {
+  properties
+    ..add(DiagnosticsProperty('type', 'AuthState'))
+    ..add(DiagnosticsProperty('status', status))..add(DiagnosticsProperty('errorMessage', errorMessage))..add(DiagnosticsProperty('isGoogleAccount', isGoogleAccount))..add(DiagnosticsProperty('email', email));
+}
 
 @override
 bool operator ==(Object other) {
@@ -537,7 +579,7 @@ bool operator ==(Object other) {
 int get hashCode => Object.hash(runtimeType,status,errorMessage,isGoogleAccount,email);
 
 @override
-String toString() {
+String toString({ DiagnosticLevel minLevel = DiagnosticLevel.info }) {
   return 'AuthState(status: $status, errorMessage: $errorMessage, isGoogleAccount: $isGoogleAccount, email: $email)';
 }
 

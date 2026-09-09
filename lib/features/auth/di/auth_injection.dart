@@ -32,7 +32,7 @@ import '../presentation/bloc/auth_bloc/auth_bloc.dart';
 /// `absent-data-mapped-to-failed-status-first-launch-shows-something-went-
 /// wrong` — this is the same class of defect: absence must not be reported
 /// as failure).
-Future<void> initAuthFeature() async {
+Future<bool> initAuthFeature() async {
   final loggerService = getIt<LoggerService>();
   final env = getIt<Env>();
 
@@ -91,4 +91,8 @@ Future<void> initAuthFeature() async {
       signOutUseCase: getIt<SignOutUseCase>(),
     ),
   );
+
+  // Returned so the sync slice can pick its remote repository without
+  // re-running (or duplicating) the Firebase-availability probe.
+  return firebaseReady;
 }

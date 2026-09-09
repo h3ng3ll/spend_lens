@@ -18,4 +18,14 @@ abstract class AppLimits {
 
   /// Premium tier cloud storage quota label.
   static const String premiumCloudQuotaLabel = '5 GB';
+
+  /// The same quotas as BYTE counts.
+  ///
+  /// The labels above are for display; a progress bar needs a numeric
+  /// denominator, and deriving one by parsing "100 MB" back out of a
+  /// localized string would be absurd. Binary units (MiB/GiB), matching how
+  /// Firebase reports object sizes.
+  static const int freeCloudQuotaBytes = 100 * 1024 * 1024;
+
+  static const int premiumCloudQuotaBytes = 5 * 1024 * 1024 * 1024;
 }

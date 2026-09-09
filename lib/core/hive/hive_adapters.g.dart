@@ -25,13 +25,14 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       onboardingCompleted: fields[3] == null ? false : fields[3] as bool,
       flashMode: fields[4] == null ? EFlashMode.auto : fields[4] as EFlashMode,
       dataCleared: fields[5] == null ? false : fields[5] as bool,
+      lastSyncedAt: fields[6] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppSettings obj) {
     writer
-      ..writeByte(6)
+      ..writeByte(7)
       ..writeByte(0)
       ..write(obj.localeCode)
       ..writeByte(1)
@@ -43,7 +44,9 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(4)
       ..write(obj.flashMode)
       ..writeByte(5)
-      ..write(obj.dataCleared);
+      ..write(obj.dataCleared)
+      ..writeByte(6)
+      ..write(obj.lastSyncedAt);
   }
 
   @override

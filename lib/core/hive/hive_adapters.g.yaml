@@ -5,7 +5,7 @@ nextTypeId: 8
 types:
   AppSettings:
     typeId: 0
-    nextIndex: 6
+    nextIndex: 7
     fields:
       localeCode:
         index: 0
@@ -19,6 +19,8 @@ types:
         index: 4
       dataCleared:
         index: 5
+      lastSyncedAt:
+        index: 6
   Receipt:
     typeId: 1
     nextIndex: 14

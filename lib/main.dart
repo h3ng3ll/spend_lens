@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 
 import 'core/bloc/app_observer.dart';
 import 'core/di/injection.dart';
+import 'features/sync/di/sync_injection.dart';
+import 'features/sync/presentation/bloc/sync_bloc/sync_bloc.dart';
 import 'core/services/connectivity_service.dart';
 import 'core/services/firebase/firebase_firestore_service.dart';
 import 'core/hive/hive_initializer.dart';
@@ -134,7 +136,11 @@ void main() async {
 
   // M9: the app-lifetime auth bloc (design_spendlens.md §5/§9). Firebase
   // init failure is caught INSIDE initAuthFeature() — this never throws.
-  await initAuthFeature();
+  final isFirebaseReady = await initAuthFeature();
+
+  // AFTER the seven record slices (whose repositories it resolves) and after
+  // auth (whose Firebase probe decides the remote repository).
+  initSyncFeature(isFirebaseReady: isFirebaseReady);
 
   // M9: Apphud subscription check (design_spendlens.md §6/§9). An empty
   // API key is a disabled feature — `init()` never throws.
@@ -164,6 +170,7 @@ void main() async {
   getIt.registerLazySingleton<StoresBloc>(() => storesBloc);
 
   final authBloc = getIt<AuthBloc>()..add(const AuthEvent.watch());
+  final syncBloc = getIt<SyncBloc>()..add(const SyncEvent.watch());
 
   Bloc.observer = AppObserver.instance();
 
@@ -182,6 +189,7 @@ void main() async {
       categoriesBloc: categoriesBloc,
       storesBloc: storesBloc,
       authBloc: authBloc,
+      syncBloc: syncBloc,
       router: router,
     ),
   );
@@ -192,6 +200,7 @@ class SpendLensApp extends StatefulWidget {
   final CategoriesBloc categoriesBloc;
   final StoresBloc storesBloc;
   final AuthBloc authBloc;
+  final SyncBloc syncBloc;
   final GoRouter router;
 
   const SpendLensApp({
@@ -200,6 +209,7 @@ class SpendLensApp extends StatefulWidget {
     required this.categoriesBloc,
     required this.storesBloc,
     required this.authBloc,
+    required this.syncBloc,
     required this.router,
   });
 
@@ -207,7 +217,8 @@ class SpendLensApp extends StatefulWidget {
   State<SpendLensApp> createState() => _SpendLensAppState();
 }
 
-class _SpendLensAppState extends State<SpendLensApp> {
+class _SpendLensAppState extends State<SpendLensApp>
+    with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
@@ -218,6 +229,29 @@ class _SpendLensAppState extends State<SpendLensApp> {
     // before the first frame paints. See the doc comment on `main()` above
     // for why this replaces the (unreachable) splash-screen-owned call.
     FlutterNativeSplash.remove();
+
+    WidgetsBinding.instance.addObserver(this);
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  void _onSyncNeeded(BuildContext context, SyncState state) {
+    context.read<SyncBloc>().add(const SyncEvent.syncNow());
+  }
+
+  /// Coming back to the foreground is a reconnect opportunity the
+  /// connectivity stream can miss (the OS may not re-emit if the transition
+  /// happened while the process was suspended).
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    super.didChangeAppLifecycleState(state);
+    if (state == AppLifecycleState.resumed) {
+      widget.syncBloc.add(const SyncEvent.syncNow());
+    }
   }
 
   @override
@@ -233,31 +267,46 @@ class _SpendLensAppState extends State<SpendLensApp> {
         BlocProvider<StoresBloc>.value(
           value: widget.storesBloc,
         ),
+        BlocProvider<SyncBloc>.value(
+          value: widget.syncBloc,
+        ),
         BlocProvider<AuthBloc>.value(
           value: widget.authBloc,
         ),
       ],
-      child: BlocBuilder<SettingsBloc, SettingsState>(
-        builder: (context, state) {
-          return MaterialApp.router(
-            debugShowCheckedModeBanner: false,
-            theme: AppThemeData.light,
-            darkTheme: AppThemeData.dark,
-            // Bound to persisted settings — never a hardcoded ThemeMode.
-            // Recorded global bug: a picker that writes state nothing reads
-            // leaves the UI looking wired while nothing actually changes.
-            themeMode: state.resolvedThemeMode,
-            // Bound to persisted settings; `null` correctly falls through to
-            // WidgetsApp's own device-locale resolution (recorded global bug
-            // `language-picker-writes-domain-field-materialapp-locale-never-bound`
-            // — `locale:` must actually be wired, not merely have
-            // `supportedLocales` declared beside an unrelated domain field).
-            locale: state.resolvedLocale,
-            localizationsDelegates: AppLocalizations.localizationsDelegates,
-            supportedLocales: AppLocale.supportedLocales,
-            routerConfig: widget.router,
-          );
-        },
+      // Auto-sync trigger.
+      //
+      // A LISTENER, not a handler: this project's BLoC rules forbid calling
+      // `add()` from inside a bloc handler, so `SyncBloc` exposes
+      // `needsSync` on its state and the dispatch happens here. Do not
+      // "simplify" this into an `add()` inside `_onWatch` — that is the
+      // rule violation, and it also re-enters the handler that is emitting.
+      child: BlocListener<SyncBloc, SyncState>(
+        listenWhen: (previous, current) =>
+            !previous.needsSync && current.needsSync,
+        listener: _onSyncNeeded,
+        child: BlocBuilder<SettingsBloc, SettingsState>(
+          builder: (context, state) {
+            return MaterialApp.router(
+              debugShowCheckedModeBanner: false,
+              theme: AppThemeData.light,
+              darkTheme: AppThemeData.dark,
+              // Bound to persisted settings — never a hardcoded ThemeMode.
+              // Recorded global bug: a picker that writes state nothing reads
+              // leaves the UI looking wired while nothing actually changes.
+              themeMode: state.resolvedThemeMode,
+              // Bound to persisted settings; `null` correctly falls through to
+              // WidgetsApp's own device-locale resolution (recorded global bug
+              // `language-picker-writes-domain-field-materialapp-locale-never-bound`
+              // — `locale:` must actually be wired, not merely have
+              // `supportedLocales` declared beside an unrelated domain field).
+              locale: state.resolvedLocale,
+              localizationsDelegates: AppLocalizations.localizationsDelegates,
+              supportedLocales: AppLocale.supportedLocales,
+              routerConfig: widget.router,
+            );
+          },
+        ),
       ),
     );
   }

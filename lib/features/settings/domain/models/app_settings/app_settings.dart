@@ -11,8 +11,9 @@ part 'app_settings.g.dart';
 /// M2 seeded the first three fields (`localeCode`, `currencyCode`,
 /// `themeMode` — field indices 0–2, LOCKED, never reordered: stored data
 /// depends on them). M3 APPENDS `onboardingCompleted`, `flashMode`,
-/// `dataCleared` as field indices 3–5 — this file only ever grows new
-/// trailing fields; it never re-shapes the box (`settings`, singular key
+/// `dataCleared` as field indices 3–5, and the sync milestone APPENDS
+/// `lastSyncedAt` as index 6 — this file only ever grows new trailing
+/// fields; it never re-shapes the box (`settings`, singular key
 /// `'app_settings'`).
 ///
 /// `localeCode` is deliberately NULLABLE:
@@ -46,6 +47,19 @@ sealed class AppSettings with _$AppSettings {
     /// emptied app never silently repopulates. Any restore path sets this
     /// back to `false`.
     @Default(false) bool dataCleared,
+
+    /// Pull cursor: the newest `updatedAt` this device has already pulled,
+    /// as an ISO-8601 string. Null until the first sync.
+    ///
+    /// Field index 6, APPENDED (the doc comment above: this file only ever
+    /// grows trailing fields). Sync STATE, not synced data — `AppSettings`
+    /// itself is deliberately excluded from record sync, since locale, theme
+    /// and flash mode are per-device preferences.
+    ///
+    /// A String rather than a DateTime so it is compared exactly as
+    /// Firestore stores and orders `updatedAt`, with no parse/format round
+    /// trip that could drift the boundary and skip a record.
+    String? lastSyncedAt,
   }) = _AppSettings;
 
   factory AppSettings.fromJson(Map<String, dynamic> json) =>

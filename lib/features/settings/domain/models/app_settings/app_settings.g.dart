@@ -17,6 +17,7 @@ _AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => _AppSettings(
       $enumDecodeNullable(_$EFlashModeEnumMap, json['flashMode']) ??
       EFlashMode.auto,
   dataCleared: json['dataCleared'] as bool? ?? false,
+  lastSyncedAt: json['lastSyncedAt'] as String?,
 );
 
 Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
@@ -27,6 +28,7 @@ Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
       'onboardingCompleted': instance.onboardingCompleted,
       'flashMode': _$EFlashModeEnumMap[instance.flashMode]!,
       'dataCleared': instance.dataCleared,
+      'lastSyncedAt': instance.lastSyncedAt,
     };
 
 const _$EAppThemeModeEnumMap = {
