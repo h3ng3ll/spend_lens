@@ -12,14 +12,20 @@ import '../models/apple_sign_in_result/apple_sign_in_result.dart';
 ///
 /// Every method returns [Failure] on the error side — never a second
 /// `Exceptions` hierarchy (bug 4).
+///
+/// **Side order is `Either<Failure, T>`** — the conventional functional
+/// ordering: Left = failure, Right = success ("right is right"). The earlier
+/// `Either<T, Failure>` inverted that, so `fold`'s first callback was the
+/// SUCCESS path — the opposite of every reader's expectation and an easy way
+/// to silently handle the wrong branch.
 abstract interface class IAuthRepository {
   Stream<User?> watchUser();
 
   User? get currentUser;
 
-  Future<Either<UserCredential, Failure>> signInWithGoogle();
+  Future<Either<Failure, UserCredential>> signInWithGoogle();
 
-  Future<Either<AppleSignInResult, Failure>> signInWithApple();
+  Future<Either<Failure, AppleSignInResult>> signInWithApple();
 
   Future<void> signOut();
 }

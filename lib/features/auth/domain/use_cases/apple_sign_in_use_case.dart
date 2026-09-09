@@ -10,6 +10,6 @@ class AppleSignInUseCase {
 
   const AppleSignInUseCase(this._authRepository);
 
-  Future<Either<AppleSignInResult, Failure>> call() =>
+  Future<Either<Failure, AppleSignInResult>> call() =>
       _authRepository.signInWithApple();
 }

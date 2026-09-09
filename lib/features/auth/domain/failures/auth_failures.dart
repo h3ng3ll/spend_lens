@@ -10,33 +10,58 @@ import '../../../../core/failures/failure.dart';
 /// `AuthRepository.signIn*` caller could not handle both failure paths with
 /// one `.fold` branch. Every failure in this app is a [Failure] subtype;
 /// there is no second `Exceptions` hierarchy.
-class GoogleSignInFailure extends Failure {
-  const GoogleSignInFailure() : super('Google sign-in failed.');
+///
+/// **Diagnosability (silent-sign-in-button fix).** Every failure below now
+/// carries a [diagnostic]: the underlying platform code/exception text that
+/// caused it. The user-facing [message] stays short and human; [diagnostic]
+/// is what goes to the log and to the debug-build toast. Without it, a
+/// `providerConfigurationError` (a missing Android OAuth client / unregistered
+/// SHA-1 — the actual root cause of "the buttons do nothing") was
+/// indistinguishable from an ordinary network hiccup, because a bare
+/// `catch (_)` discarded the exception before anyone could read it.
+abstract class AuthFailure extends Failure {
+  /// The underlying platform cause — an exception code, a plugin message, a
+  /// Firebase `auth/...` code. Empty only when there genuinely was none.
+  final String diagnostic;
+
+  const AuthFailure(super.message, {this.diagnostic = ''});
+
+  /// `message` for release UI; `message — diagnostic` when a cause is known.
+  String get verboseMessage =>
+      diagnostic.isEmpty ? message : '$message ($diagnostic)';
 }
 
-class GoogleSignInCanceledFailure extends Failure {
-  const GoogleSignInCanceledFailure() : super('Google sign-in was canceled.');
+class GoogleSignInFailure extends AuthFailure {
+  const GoogleSignInFailure({super.diagnostic})
+    : super('Google sign-in failed.');
 }
 
-class GoogleSignInUnconfiguredFailure extends Failure {
-  const GoogleSignInUnconfiguredFailure()
+class GoogleSignInCanceledFailure extends AuthFailure {
+  const GoogleSignInCanceledFailure({super.diagnostic})
+    : super('Google sign-in was canceled.');
+}
+
+class GoogleSignInUnconfiguredFailure extends AuthFailure {
+  const GoogleSignInUnconfiguredFailure({super.diagnostic})
     : super('Google sign-in is not configured yet.');
 }
 
-class AppleSignInFailure extends Failure {
-  const AppleSignInFailure() : super('Apple sign-in failed.');
+class AppleSignInFailure extends AuthFailure {
+  const AppleSignInFailure({super.diagnostic})
+    : super('Apple sign-in failed.');
 }
 
-class AppleSignInCanceledFailure extends Failure {
-  const AppleSignInCanceledFailure() : super('Apple sign-in was canceled.');
+class AppleSignInCanceledFailure extends AuthFailure {
+  const AppleSignInCanceledFailure({super.diagnostic})
+    : super('Apple sign-in was canceled.');
 }
 
-class AppleSignInUnsupportedPlatformFailure extends Failure {
-  const AppleSignInUnsupportedPlatformFailure()
+class AppleSignInUnsupportedPlatformFailure extends AuthFailure {
+  const AppleSignInUnsupportedPlatformFailure({super.diagnostic})
     : super('Sign in with Apple is not supported on this platform.');
 }
 
-class AuthUnavailableFailure extends Failure {
-  const AuthUnavailableFailure()
+class AuthUnavailableFailure extends AuthFailure {
+  const AuthUnavailableFailure({super.diagnostic})
     : super('Sign-in is not available right now.');
 }

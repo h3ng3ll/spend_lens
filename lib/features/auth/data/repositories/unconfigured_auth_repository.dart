@@ -16,7 +16,12 @@ import '../../domain/repositories/i_auth_repository.dart';
 /// functional anonymously (spec §8) regardless of whether Firebase
 /// credentials exist yet.
 class UnconfiguredAuthRepository implements IAuthRepository {
-  const UnconfiguredAuthRepository();
+  /// Why auth is unavailable — the captured `Firebase.initializeApp()`
+  /// error. Surfaced to the user so an unconfigured build explains itself
+  /// instead of presenting buttons that appear to do nothing.
+  final String reason;
+
+  const UnconfiguredAuthRepository({this.reason = ''});
 
   @override
   Stream<User?> watchUser() => Stream.value(null);
@@ -25,12 +30,12 @@ class UnconfiguredAuthRepository implements IAuthRepository {
   User? get currentUser => null;
 
   @override
-  Future<Either<UserCredential, Failure>> signInWithGoogle() async =>
-      const Right(AuthUnavailableFailure());
+  Future<Either<Failure, UserCredential>> signInWithGoogle() async =>
+      Left(AuthUnavailableFailure(diagnostic: reason));
 
   @override
-  Future<Either<AppleSignInResult, Failure>> signInWithApple() async =>
-      const Right(AuthUnavailableFailure());
+  Future<Either<Failure, AppleSignInResult>> signInWithApple() async =>
+      Left(AuthUnavailableFailure(diagnostic: reason));
 
   @override
   Future<void> signOut() async {}

@@ -1,6 +1,5 @@
 import 'dart:async';
 
-import 'package:flutter/foundation.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
 import '../logger_service.dart';
@@ -39,6 +38,14 @@ class GoogleSignInService {
   final LoggerService _loggerService;
   bool _initialized = false;
 
+  /// Why [init] did not leave this service usable. Empty once initialized.
+  ///
+  /// Kept as state because `isConfigured == false` alone is not actionable:
+  /// the repository reports this reason to the user and the log instead of
+  /// a generic "not configured yet", so an empty `.env` value, a timed-out
+  /// plugin channel and an outright plugin throw are told apart.
+  String _unconfiguredReason = 'GoogleSignInService.init() has not run yet.';
+
   GoogleSignInService({
     required GoogleSignIn googleSignIn,
     required LoggerService loggerService,
@@ -58,8 +65,10 @@ class GoogleSignInService {
       // `signInWithGoogle()` on the auth repository checks this same
       // emptiness and reports a Failure with honest copy instead of
       // reaching this uninitialized client at all.
-      _loggerService.info(
-        'GoogleSignInService: GOOGLE_SERVER_CLIENT_ID is empty — '
+      _unconfiguredReason =
+          'GOOGLE_SERVER_CLIENT_ID is empty in .env';
+      _loggerService.warning(
+        'GoogleSignInService: $_unconfiguredReason — '
         'Google sign-in is disabled until .env is configured.',
       );
       return;
@@ -70,25 +79,103 @@ class GoogleSignInService {
           .initialize(serverClientId: env.googleServerClientId)
           .timeout(_kInitializeTimeout);
       _initialized = true;
+      _unconfiguredReason = '';
     } on TimeoutException {
+      _unconfiguredReason =
+          'initialize() timed out after ${_kInitializeTimeout.inSeconds}s';
       _loggerService.warning(
         'GoogleSignInService.init did not complete within '
         '${_kInitializeTimeout.inSeconds}s — treating Google sign-in as '
         'disabled.',
       );
-    } catch (e) {
-      if (kDebugMode) {
-        _loggerService.warning('GoogleSignInService.init failed: $e');
-      }
+    } catch (e, stackTrace) {
+      _unconfiguredReason = 'initialize() threw: $e';
+      // Logged at ERROR on every build, not just debug: a swallowed
+      // initialization failure is exactly what makes the sign-in button look
+      // inert with a clean log in release.
+      _loggerService.error(
+        'GoogleSignInService.init failed: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
     }
   }
 
   bool get isConfigured => _initialized;
 
-  Future<GoogleSignInAccount> authenticate() => _googleSignIn.authenticate();
+  /// Why this service is unusable — empty when [isConfigured] is `true`.
+  String get unconfiguredReason => _unconfiguredReason;
+
+  /// Wraps `google_sign_in`'s `authenticate()` with verbose tracing at the
+  /// plugin boundary.
+  ///
+  /// This is the exact seam where "the button does nothing" was impossible to
+  /// diagnose: the call either returns an account, throws a
+  /// [GoogleSignInException] whose `code` names the real problem, or — on a
+  /// misconfigured project — never surfaces anything useful at all. Logging
+  /// entry, exit and the typed failure code here means the platform's own
+  /// verdict is always on the record, independent of whatever the repository
+  /// above chooses to map it to.
+  ///
+  /// `providerConfigurationError` is the one to look for: on Android it means
+  /// Credential Manager could not match the app to an OAuth client — i.e. the
+  /// signing certificate's SHA-1 is not registered in the Firebase project, so
+  /// `google-services.json` carries no `client_type: 1` entry.
+  Future<GoogleSignInAccount> authenticate() async {
+    if (!_googleSignIn.supportsAuthenticate()) {
+      // Would otherwise throw a bare UnsupportedError from deep in the plugin.
+      _loggerService.error(
+        'GoogleSignInService.authenticate: platform does not support '
+        'authenticate() — this build cannot start an interactive sign-in.',
+      );
+      throw const GoogleSignInException(
+        code: GoogleSignInExceptionCode.uiUnavailable,
+        description: 'authenticate() is unsupported on this platform',
+      );
+    }
+
+    _loggerService.info('GoogleSignInService.authenticate: starting…');
+    try {
+      final account = await _googleSignIn.authenticate();
+      _loggerService.info(
+        'GoogleSignInService.authenticate: succeeded for ${account.email}',
+      );
+      return account;
+    } on GoogleSignInException catch (e, stackTrace) {
+      _loggerService.error(
+        'GoogleSignInService.authenticate: ${e.code.name}'
+        '${e.description == null ? '' : ' — ${e.description}'}'
+        '${e.code == GoogleSignInExceptionCode.providerConfigurationError ? ' '
+            '[likely cause: the signing cert SHA-1 is not registered in the '
+            'Firebase project, so google-services.json has no Android OAuth '
+            'client]' : ''}',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    } catch (e, stackTrace) {
+      _loggerService.error(
+        'GoogleSignInService.authenticate: unexpected error: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
 
   Future<void> signOut() async {
     if (!_initialized) return;
-    await _googleSignIn.disconnect();
+    try {
+      await _googleSignIn.disconnect();
+    } catch (e, stackTrace) {
+      // Never let a disconnect failure escape as an unhandled error — but
+      // never swallow it silently either: a sign-out that half-worked leaves
+      // the next sign-in in a confusing state, and this log is the only clue.
+      _loggerService.error(
+        'GoogleSignInService.signOut: disconnect failed: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
   }
 }

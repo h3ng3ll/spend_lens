@@ -37,19 +37,26 @@ Future<void> initAuthFeature() async {
   final env = getIt<Env>();
 
   var firebaseReady = false;
+  var firebaseInitError = '';
   try {
     await Firebase.initializeApp();
     firebaseReady = true;
-  } catch (e) {
-    loggerService.warning(
+  } catch (e, stackTrace) {
+    // Captured, not just logged: the reason travels into
+    // `UnconfiguredAuthRepository` so a sign-in tap can TELL the user why it
+    // is unavailable instead of failing mutely.
+    firebaseInitError = 'Firebase.initializeApp() failed: $e';
+    loggerService.error(
       'Firebase did not initialize (no config bundled yet) — '
       'auth/Crashlytics are disabled for this run: $e',
+      error: e,
+      stackTrace: stackTrace,
     );
   }
 
   if (!firebaseReady) {
     getIt.registerLazySingleton<IAuthRepository>(
-      () => const UnconfiguredAuthRepository(),
+      () => UnconfiguredAuthRepository(reason: firebaseInitError),
     );
   } else {
     final googleSignInService = GoogleSignInService(
@@ -63,6 +70,7 @@ Future<void> initAuthFeature() async {
         auth: FirebaseAuth.instance,
         googleSignInService: googleSignInService,
         cryptoService: const CryptoService(),
+        loggerService: loggerService,
       ),
     );
   }

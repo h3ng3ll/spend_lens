@@ -10,6 +10,6 @@ class GoogleSignInUseCase {
 
   const GoogleSignInUseCase(this._authRepository);
 
-  Future<Either<UserCredential, Failure>> call() =>
+  Future<Either<Failure, UserCredential>> call() =>
       _authRepository.signInWithGoogle();
 }
