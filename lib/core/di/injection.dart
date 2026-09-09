@@ -1,6 +1,14 @@
 import 'package:get_it/get_it.dart';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
+
 import '../hive/hive_database.dart';
+import '../services/connectivity_service.dart';
+import '../services/firebase/firebase_firestore_service.dart';
+import '../services/firebase/firebase_storage_service.dart';
+import '../services/image_compression_service.dart';
 import '../services/logger_service.dart';
 import '../services/ocr/i_receipt_detector.dart';
 import '../services/ocr/method_channel_ocr_service.dart';
@@ -18,10 +26,16 @@ final getIt = GetIt.instance;
 
 /// App-wide DI registrations.
 ///
-/// design_spendlens.md §1 Step 2: stripped of every Firestore/Functions/
-/// Database/Messaging registration the sinergy_hub template carried — this
-/// app has no Firestore sync, no Realtime Database, no push messaging.
-/// Firebase here (M9) is Crashlytics + optional auth only.
+/// Firebase surface: Crashlytics, auth, **Firestore record sync** and
+/// **Storage** for receipt photos. Still stripped of the Functions /
+/// Realtime-Database / Messaging registrations the sinergy_hub template
+/// carried — this app has no server-side functions, no Realtime Database and
+/// no push messaging, and those exclusions still hold.
+///
+/// Firestore sync was added after M9. It is a REPLICA, not the read path:
+/// every screen still reads Hive through `watchAll()`, so the app is
+/// unchanged offline and no screen bloc knows sync exists. See
+/// `lib/features/sync/`.
 ///
 /// M1 registered only what compiled then (`LoggerService`, the single
 /// concrete `Env`). M2 adds the settings slice's own `initSettingsFeature()`
@@ -40,6 +54,29 @@ Future<void> initDependencies() async {
   // below resolves this one instance via constructor injection rather than
   // opening boxes ad hoc (hive_rules.md §7).
   getIt.registerLazySingleton(() => const HiveDatabase());
+
+  // Raw SDK singletons are registered separately from the wrapper services
+  // that consume them, so those wrappers stay unit-testable against fakes.
+  getIt.registerLazySingleton(() => FirebaseFirestore.instance);
+  getIt.registerLazySingleton(() => FirebaseAuth.instance);
+  getIt.registerLazySingleton(() => FirebaseStorage.instance);
+
+  getIt.registerLazySingleton(
+    () => FirebaseFirestoreService(
+      firebaseFirestore: getIt<FirebaseFirestore>(),
+      firebaseAuth: getIt<FirebaseAuth>(),
+      loggerService: getIt<LoggerService>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => FirebaseStorageService(firebaseStorage: getIt<FirebaseStorage>()),
+  );
+
+  // Proactive online/offline signal for the sync UI, and the reconnect
+  // trigger. Its `init()` is awaited in `main()` before `runApp`.
+  getIt.registerLazySingleton(() => ConnectivityService());
+
+  getIt.registerLazySingleton(() => const ImageCompressionService());
 
   // M7: the single channel contract (design_spendlens.md §6), identical on
   // both platforms — no `Platform.isX` branch anywhere above this line.

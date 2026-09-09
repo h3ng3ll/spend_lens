@@ -7,6 +7,8 @@ import 'package:go_router/go_router.dart';
 
 import 'core/bloc/app_observer.dart';
 import 'core/di/injection.dart';
+import 'core/services/connectivity_service.dart';
+import 'core/services/firebase/firebase_firestore_service.dart';
 import 'core/hive/hive_initializer.dart';
 import 'core/resources/app_locale.dart';
 import 'core/resources/app_theme.dart';
@@ -94,6 +96,15 @@ void main() async {
 
   await initHive();
   await initDependencies();
+
+  // Firestore's local write queue, enabled explicitly so the offline
+  // contract is a recorded decision rather than a platform default: a write
+  // made with no connection is queued and replayed on reconnect.
+  getIt<FirebaseFirestoreService>().configure();
+
+  // Seeded BEFORE runApp so the first frame already knows the real network
+  // state and the sync row cannot flash a false "Offline" on a cold start.
+  await getIt<ConnectivityService>().init();
 
   // Resolved BEFORE runApp — this is the value SettingsBloc is seeded with,
   // never left for an async fetch to deliver after the first frame.

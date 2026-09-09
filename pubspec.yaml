@@ -74,10 +74,19 @@ dependencies:
   # iOS 26.4+ SDK — a toolchain update, not a code change. Revisit then.
   apphud: ^3.4.0
 
-  # Firebase (Crashlytics + optional auth only)
+  # Firebase (Crashlytics + auth + Firestore record sync + receipt-photo storage)
   firebase_core: ^4.1.1
   firebase_auth: ^6.1.0
   firebase_crashlytics: ^5.2.0
+  cloud_firestore: ^6.1.1
+  firebase_storage: ^13.0.5
+
+  # Sync support: connectivity gives the sync UI a PROACTIVE offline signal
+  # (rather than only learning of it from a failed Firestore write), and a
+  # reconnect trigger. Receipt photos are compressed before upload so the
+  # cloud quota is meaningful and the reported usage is measured, not guessed.
+  connectivity_plus: ^7.0.0
+  flutter_image_compress: ^2.4.0
 
   # Sign-in
   google_sign_in: ^7.2.0

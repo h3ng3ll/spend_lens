@@ -23,7 +23,8 @@ class _FakeReceiptRepository implements IReceiptLocalRepository {
   final Map<String, Receipt> store = {};
 
   @override
-  Future<void> save(Receipt receipt) async => store[receipt.id] = receipt;
+  Future<void> save(Receipt receipt, {bool markPending = true}) async =>
+      store[receipt.id] = receipt;
 
   @override
   Future<void> delete(String id) async => store.remove(id);
@@ -35,14 +36,29 @@ class _FakeReceiptRepository implements IReceiptLocalRepository {
   Future<List<Receipt>> getAll() async => store.values.toList();
 
   @override
+  Future<List<Receipt>> getAllIncludingDeleted() async =>
+      store.values.toList();
+
+  @override
+  Future<List<Receipt>> getPending() async => const [];
+
+  @override
   Stream<List<Receipt>> watchAll() => Stream.value(store.values.toList());
+
+  @override
+  Future<void> saveAll(List<Receipt> items, {bool markPending = true}) async {
+    for (final item in items) {
+      store[item.id] = item;
+    }
+  }
 }
 
 class _FakeReceiptItemRepository implements IReceiptItemLocalRepository {
   final Map<String, ReceiptItem> store = {};
 
   @override
-  Future<void> save(ReceiptItem item) async => store[item.id] = item;
+  Future<void> save(ReceiptItem item, {bool markPending = true}) async =>
+      store[item.id] = item;
 
   @override
   Future<void> delete(String id) async => store.remove(id);
@@ -61,13 +77,28 @@ class _FakeReceiptItemRepository implements IReceiptItemLocalRepository {
       Stream.value(
         store.values.where((e) => itemIds.contains(e.id)).toList(),
       );
+
+  @override
+  Future<void> saveAll(List<ReceiptItem> items, {bool markPending = true}) async {
+    for (final item in items) {
+      store[item.id] = item;
+    }
+  }
+
+  @override
+  Future<List<ReceiptItem>> getAllIncludingDeleted() async =>
+      store.values.toList();
+
+  @override
+  Future<List<ReceiptItem>> getPending() async => const [];
 }
 
 class _FakeProductRepository implements IProductLocalRepository {
   final Map<String, Product> store = {};
 
   @override
-  Future<void> save(Product product) async => store[product.id] = product;
+  Future<void> save(Product product, {bool markPending = true}) async =>
+      store[product.id] = product;
 
   @override
   Future<void> delete(String id) async => store.remove(id);
@@ -79,14 +110,28 @@ class _FakeProductRepository implements IProductLocalRepository {
   Future<List<Product>> getAll() async => store.values.toList();
 
   @override
+  Future<List<Product>> getAllIncludingDeleted() async =>
+      store.values.toList();
+
+  @override
+  Future<List<Product>> getPending() async => const [];
+
+  @override
   Stream<List<Product>> watchAll() => Stream.value(store.values.toList());
+
+  @override
+  Future<void> saveAll(List<Product> items, {bool markPending = true}) async {
+    for (final item in items) {
+      store[item.id] = item;
+    }
+  }
 }
 
 class _FakeStoreRepository implements IStoreLocalRepository {
   final Map<String, Store> store = {};
 
   @override
-  Future<void> save(Store s) async => store[s.id] = s;
+  Future<void> save(Store s, {bool markPending = true}) async => store[s.id] = s;
 
   @override
   Future<void> delete(String id) async => store.remove(id);
@@ -98,17 +143,32 @@ class _FakeStoreRepository implements IStoreLocalRepository {
   Future<List<Store>> getAll() async => store.values.toList();
 
   @override
+  Future<List<Store>> getAllIncludingDeleted() async =>
+      store.values.toList();
+
+  @override
+  Future<List<Store>> getPending() async => const [];
+
+  @override
   Stream<List<Store>> watchAll() => Stream.value(store.values.toList());
+
+  @override
+  Future<void> saveAll(List<Store> items, {bool markPending = true}) async {
+    for (final item in items) {
+      store[item.id] = item;
+    }
+  }
 }
 
 class _FakeCategoryRepository implements ICategoryLocalRepository {
   final Map<String, Category> store = {};
 
   @override
-  Future<void> save(Category category) async => store[category.id] = category;
+  Future<void> save(Category category, {bool markPending = true}) async =>
+      store[category.id] = category;
 
   @override
-  Future<void> saveAll(List<Category> categories) async {
+  Future<void> saveAll(List<Category> categories, {bool markPending = true}) async {
     for (final c in categories) {
       store[c.id] = c;
     }
@@ -124,6 +184,13 @@ class _FakeCategoryRepository implements ICategoryLocalRepository {
   Future<List<Category>> getAll() async => store.values.toList();
 
   @override
+  Future<List<Category>> getAllIncludingDeleted() async =>
+      store.values.toList();
+
+  @override
+  Future<List<Category>> getPending() async => const [];
+
+  @override
   Stream<List<Category>> watchAll() => Stream.value(store.values.toList());
 }
 
@@ -131,7 +198,8 @@ class _FakeExpenseRepository implements IExpenseLocalRepository {
   final Map<String, Expense> store = {};
 
   @override
-  Future<void> save(Expense expense) async => store[expense.id] = expense;
+  Future<void> save(Expense expense, {bool markPending = true}) async =>
+      store[expense.id] = expense;
 
   @override
   Future<void> delete(String id) async => store.remove(id);
@@ -143,7 +211,21 @@ class _FakeExpenseRepository implements IExpenseLocalRepository {
   Future<List<Expense>> getAll() async => store.values.toList();
 
   @override
+  Future<List<Expense>> getAllIncludingDeleted() async =>
+      store.values.toList();
+
+  @override
+  Future<List<Expense>> getPending() async => const [];
+
+  @override
   Stream<List<Expense>> watchAll() => Stream.value(store.values.toList());
+
+  @override
+  Future<void> saveAll(List<Expense> items, {bool markPending = true}) async {
+    for (final item in items) {
+      store[item.id] = item;
+    }
+  }
 }
 
 class _FakePriceObservationRepository
@@ -151,7 +233,7 @@ class _FakePriceObservationRepository
   final Map<String, PriceObservation> store = {};
 
   @override
-  Future<void> save(PriceObservation observation) async =>
+  Future<void> save(PriceObservation observation, {bool markPending = true}) async =>
       store[observation.id] = observation;
 
   @override
@@ -166,6 +248,20 @@ class _FakePriceObservationRepository
   @override
   Stream<List<PriceObservation>> watchAll() =>
       Stream.value(store.values.toList());
+
+  @override
+  Future<void> saveAll(List<PriceObservation> items, {bool markPending = true}) async {
+    for (final item in items) {
+      store[item.id] = item;
+    }
+  }
+
+  @override
+  Future<List<PriceObservation>> getAllIncludingDeleted() async =>
+      store.values.toList();
+
+  @override
+  Future<List<PriceObservation>> getPending() async => const [];
 }
 
 class _FakeSettingsRepository implements ISettingsLocalRepository {
@@ -180,7 +276,7 @@ class _FakeSettingsRepository implements ISettingsLocalRepository {
   Stream<AppSettings> watch() => Stream.value(_settings);
 
   @override
-  Future<void> save(AppSettings settings) async => _settings = settings;
+  Future<void> save(AppSettings settings, {bool markPending = true}) async => _settings = settings;
 }
 
 /// design_spendlens.md §6/§9/§11 — import "validates the schema and

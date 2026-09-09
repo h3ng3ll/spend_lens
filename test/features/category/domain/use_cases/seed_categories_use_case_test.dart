@@ -16,15 +16,25 @@ class _FakeCategoryLocalRepository implements ICategoryLocalRepository {
   Future<Category?> getById(String id) async => null;
 
   @override
-  Future<void> save(Category category) async {}
+  Future<void> save(Category category, {bool markPending = true}) async {}
 
   @override
-  Future<void> saveAll(List<Category> categories) async {
+  Future<void> saveAll(
+    List<Category> categories, {
+    bool markPending = true,
+  }) async {
     savedCategories = categories;
   }
 
   @override
   Future<void> delete(String id) async {}
+
+  @override
+  Future<List<Category>> getAllIncludingDeleted() async =>
+      savedCategories ?? const [];
+
+  @override
+  Future<List<Category>> getPending() async => const [];
 
   @override
   Stream<List<Category>> watchAll() => const Stream.empty();

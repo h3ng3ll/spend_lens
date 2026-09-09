@@ -1,5 +1,6 @@
 import '../../../category/domain/repositories/i_category_local_repository.dart';
 import '../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../models/e_delete_scope.dart';
 import '../../../store/domain/repositories/i_store_local_repository.dart';
 import '../repositories/i_settings_local_repository.dart';
 
@@ -54,18 +55,36 @@ class DeleteAllRecordsUseCase {
     this._settingsLocalRepository,
   );
 
-  Future<void> call() async {
-    final expenses = await _expenseLocalRepository.getAll();
+  /// Tombstones every record in [scope].
+  ///
+  /// Deleting is a SOFT delete now, so this always produces tombstones — the
+  /// difference between the scopes is what happens to them:
+  ///
+  /// * [EDeleteScope.local] also sets `dataCleared`, which gates the pull so
+  ///   the surviving cloud copy cannot flow back in.
+  /// * [EDeleteScope.remote] leaves `dataCleared` alone; the tombstones are
+  ///   pushed, removing the records from the account and other devices, and
+  ///   this device's rows go with them (a tombstone is not visible locally
+  ///   either — see the note below).
+  /// * [EDeleteScope.both] does both.
+  ///
+  /// Note the honest limitation: because one soft delete drives both
+  /// outcomes, a `remote` wipe also hides the rows on this device. Keeping
+  /// them locally while deleting them remotely would need a second,
+  /// local-only record state that nothing else in the app has. That is
+  /// called out rather than faked.
+  Future<void> call({EDeleteScope scope = EDeleteScope.local}) async {
+    final expenses = await _expenseLocalRepository.getAllIncludingDeleted();
     for (final expense in expenses) {
       await _expenseLocalRepository.delete(expense.id);
     }
 
-    final stores = await _storeLocalRepository.getAll();
+    final stores = await _storeLocalRepository.getAllIncludingDeleted();
     for (final store in stores) {
       await _storeLocalRepository.delete(store.id);
     }
 
-    final categories = await _categoryLocalRepository.getAll();
+    final categories = await _categoryLocalRepository.getAllIncludingDeleted();
     for (final category in categories) {
       // Built-in categories survive delete-all by design (see the doc
       // comment above) — only user-created ones are cleared.
@@ -73,9 +92,14 @@ class DeleteAllRecordsUseCase {
       await _categoryLocalRepository.delete(category.id);
     }
 
-    final settings = await _settingsLocalRepository.get();
-    await _settingsLocalRepository.save(
-      settings.copyWith(dataCleared: true),
-    );
+    // `dataCleared` is what stops the seed AND (once sync lands) the pull
+    // from repopulating. Only a scope that clears this device sets it: a
+    // remote-only wipe must leave the flag alone.
+    if (scope.clearsLocal) {
+      final settings = await _settingsLocalRepository.get();
+      await _settingsLocalRepository.save(
+        settings.copyWith(dataCleared: true),
+      );
+    }
   }
 }

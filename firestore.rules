@@ -1,0 +1,34 @@
+rules_version = '2';
+
+// SpendLens record sync (design_spendlens.md §3 — the eight entities carry the
+// sync triple `updatedAt` / `deletedAt?` / `syncStatus`).
+//
+// A user's records are PRIVATE to that user: every path is scoped under
+// /users/{uid} and gated on `request.auth.uid == uid`. There is no shared or
+// public collection anywhere in this app.
+//
+// The `collection in [...]` allowlist is load-bearing, not decoration: without
+// it a signed-in client could create arbitrary subcollections beneath its own
+// user document and use the project as free general-purpose storage. Adding a
+// synced entity means adding it here AND to `ESyncCollection`.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /users/{uid} {
+      allow read, write: if request.auth != null && request.auth.uid == uid;
+
+      match /{collection}/{docId} {
+        allow read, write: if request.auth != null
+                           && request.auth.uid == uid
+                           && collection in [
+                                'receipts',
+                                'receiptItems',
+                                'products',
+                                'stores',
+                                'categories',
+                                'expenses',
+                                'priceObservations'
+                              ];
+      }
+    }
+  }
+}
