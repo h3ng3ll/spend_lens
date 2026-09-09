@@ -197,8 +197,8 @@ class FirebaseAuthRepository implements IAuthRepository {
   // token could be replayed with no proof it belonged to THIS sign-in
   // attempt. The fix pairs both halves correctly: the SHA-256 HASH goes to
   // Apple's `nonce:` parameter (so Apple embeds it into the signed identity
-  // token), and the RAW nonce goes to Firebase's `OAuthProvider.credential`
-  // (so Firebase can verify the token's embedded hash matches).
+  // token), and the RAW nonce goes to Firebase's credential (so Firebase can
+  // verify the token's embedded hash matches).
   Future<Either<Failure, AppleSignInResult>> _iosCall() async {
     try {
       final rawNonce = _cryptoService.generateNonce();
@@ -212,10 +212,42 @@ class FirebaseAuthRepository implements IAuthRepository {
         nonce: hashedNonce,
       );
 
-      final oauthCredential = OAuthProvider('apple.com').credential(
-        idToken: appleCredential.identityToken,
-        accessToken: appleCredential.authorizationCode,
-        rawNonce: rawNonce,
+      // The identity token is what Firebase actually verifies. It is nullable
+      // on the Apple credential, so it is GUARDED rather than `!`-asserted:
+      // a null here must surface as a named failure, not a TypeError.
+      final identityToken = appleCredential.identityToken;
+      if (identityToken == null) {
+        const reason = 'Apple returned no identityToken';
+        _loggerService.error('Auth: Apple sign-in failed — $reason',
+            name: 'Auth');
+        return const Left(AppleSignInFailure(diagnostic: reason));
+      }
+
+      // BUILT VIA `AppleAuthProvider`, NOT `OAuthProvider('apple.com')`.
+      //
+      // This is a real bug fix, not a style change. `OAuthProvider.credential`
+      // defaults `signInMethod` to `'oauth'` (never `'apple.com'`), and the
+      // native iOS plugin dispatches on signInMethod — not providerId:
+      //   FLTFirebaseAuthPlugin.swift `case kSignInMethodApple:` calls
+      //   `OAuthProvider.appleCredential(withIDToken:rawNonce:fullName:)` and
+      //   ignores accessToken, while `case kSignInMethodOAuth:` builds a
+      //   GENERIC OIDC credential and forwards accessToken.
+      // So the old call took the generic branch and handed Firebase Apple's
+      // `authorizationCode` as an `accessToken`. That code is a single-use
+      // OAuth code for server-side redemption, NOT an access token, so
+      // verification rejected it with `invalid-credential` — on iOS only,
+      // which is why Android (a different code path entirely) was unaffected.
+      //
+      // `credentialWithIDToken` hardcodes signInMethod to 'apple.com', accepts
+      // no accessToken at all, and carries the full name through to the
+      // Firebase user profile (which the generic branch silently dropped).
+      final oauthCredential = AppleAuthProvider.credentialWithIDToken(
+        identityToken,
+        rawNonce,
+        AppleFullPersonName(
+          givenName: appleCredential.givenName,
+          familyName: appleCredential.familyName,
+        ),
       );
 
       final result = await _auth.signInWithCredential(oauthCredential);
@@ -240,6 +272,15 @@ class FirebaseAuthRepository implements IAuthRepository {
       }
       return Left(
         _logged('Apple sign-in',
+            AppleSignInFailure(diagnostic: _describe(e)), e, stackTrace),
+      );
+    } on FirebaseAuthException catch (e, stackTrace) {
+      // Explicit, though `_describe` already renders the code: a rejection
+      // from FIREBASE (bad credential, provider disabled) is a different
+      // problem from a rejection by APPLE above, and the two were previously
+      // indistinguishable in the handler chain.
+      return Left(
+        _logged('Apple sign-in (Firebase credential exchange)',
             AppleSignInFailure(diagnostic: _describe(e)), e, stackTrace),
       );
     } catch (e, stackTrace) {
