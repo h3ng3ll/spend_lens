@@ -1361,4 +1361,53 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get importCanceled => 'Файл не выбран.';
+
+  @override
+  String get syncing => 'Синхронизация…';
+
+  @override
+  String get syncError => 'Ошибка синхронизации';
+
+  @override
+  String get syncRetry => 'Нажмите, чтобы повторить';
+
+  @override
+  String get syncDisabled => 'Войдите для резервной копии';
+
+  @override
+  String get storageEstimateNote =>
+      'Размер фотографий чеков измерен в вашем аккаунте. Записи занимают ничтожно мало.';
+
+  @override
+  String get purchasesUnavailable => 'Покупки сейчас недоступны.';
+
+  @override
+  String get deleteScopeTitle => 'Откуда удалить?';
+
+  @override
+  String get deleteScopeLocal => 'Только это устройство';
+
+  @override
+  String get deleteScopeRemote => 'Только в облаке';
+
+  @override
+  String get deleteScopeBoth => 'Это устройство и облако';
+
+  @override
+  String syncPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count в очереди',
+      many: '$count в очереди',
+      few: '$count в очереди',
+      one: '$count в очереди',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String storageUsedOf(String used, String total) {
+    return '$used из $total';
+  }
 }

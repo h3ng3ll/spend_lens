@@ -381,5 +381,36 @@
   "importMalformed": "Acest fișier nu este o copie de rezervă validă.",
   "importUnexpected": "A apărut o eroare la restaurarea acestei copii de rezervă.",
   "importTooNew": "Acest backup a fost creat cu o versiune mai nouă a aplicației.",
-  "importCanceled": "Niciun fișier selectat."
+  "importCanceled": "Niciun fișier selectat.",
+  "syncing": "Se sincronizează…",
+  "syncError": "Sincronizare eșuată",
+  "syncRetry": "Atinge pentru reîncercare",
+  "syncDisabled": "Conectează-te pentru backup",
+  "storageEstimateNote": "Fotografiile bonurilor sunt măsurate din contul tău. Înregistrările adaugă o cantitate neglijabilă.",
+  "purchasesUnavailable": "Achizițiile nu sunt disponibile momentan.",
+  "deleteScopeTitle": "Ștergi de unde?",
+  "deleteScopeLocal": "Doar acest dispozitiv",
+  "deleteScopeRemote": "Doar în cloud",
+  "deleteScopeBoth": "Acest dispozitiv și cloud",
+  "syncPending": "{count, plural, =1{1 în așteptare} few{{count} în așteptare} other{{count} în așteptare}}",
+  "@syncPending": {
+    "description": "Count of records awaiting upload.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storageUsedOf": "{used} din {total}",
+  "@storageUsedOf": {
+    "description": "Storage usage, e.g. \"38 MB of 100 MB\".",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

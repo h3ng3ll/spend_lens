@@ -26,6 +26,12 @@ const Duration _kStartTimeout = Duration(seconds: 5);
 /// left unguarded.
 const Duration _kPremiumCheckTimeout = Duration(seconds: 5);
 
+/// How long fetching placements / showing the paywall may take. Longer than
+/// the entitlement check because it is a user-initiated, visible action, but
+/// still BOUNDED for the same reason: an unreachable backend must not leave
+/// the tap hanging with no feedback.
+const Duration _kPaywallTimeout = Duration(seconds: 20);
+
 class ApphudSubscriptionRepository implements ISubscriptionRepository {
   final LoggerService _loggerService;
   bool _started = false;
@@ -62,6 +68,63 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
       );
     } catch (e) {
       _loggerService.warning('Apphud.start failed: $e');
+    }
+  }
+
+  /// Fetches the first placement that actually has a paywall screen and
+  /// shows it.
+  ///
+  /// Returns false rather than throwing on every failure path — SDK not
+  /// started, no placement configured, no screen attached, timeout, or the
+  /// user dismissing it. A purchase that did not happen is not an app
+  /// error, and the recorded bug
+  /// `absent-data-mapped-to-failed-status-first-launch-shows-something-went-
+  /// wrong` is exactly what surfacing it as one would reproduce.
+  @override
+  Future<bool> presentPaywall() async {
+    if (!_started) {
+      _loggerService.info(
+        'ApphudSubscriptionRepository: presentPaywall skipped — SDK not '
+        'started (no API key).',
+      );
+      return false;
+    }
+
+    try {
+      final placements = await Apphud.placements().timeout(_kPaywallTimeout);
+
+      final paywall = placements
+          .map((placement) => placement.paywall)
+          .nonNulls
+          .where((candidate) => candidate.hasScreen)
+          .firstOrNull;
+
+      if (paywall == null) {
+        // Configured in the dashboard, or it is not. Either way there is
+        // nothing to present, and inventing a fallback purchase sheet here
+        // would be worse than reporting nothing happened.
+        _loggerService.warning(
+          'ApphudSubscriptionRepository: no placement with a paywall screen.',
+        );
+        return false;
+      }
+
+      final result = await Apphud.showPaywall(
+        paywall,
+      ).timeout(_kPaywallTimeout);
+
+      return result.success;
+    } on TimeoutException {
+      _loggerService.warning(
+        'ApphudSubscriptionRepository: paywall did not complete within '
+        '${_kPaywallTimeout.inSeconds}s.',
+      );
+      return false;
+    } catch (error) {
+      _loggerService.warning(
+        'ApphudSubscriptionRepository: paywall failed: $error',
+      );
+      return false;
     }
   }
 

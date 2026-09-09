@@ -1362,4 +1362,53 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get importCanceled => 'Файл не вибрано.';
+
+  @override
+  String get syncing => 'Синхронізація…';
+
+  @override
+  String get syncError => 'Помилка синхронізації';
+
+  @override
+  String get syncRetry => 'Натисніть, щоб повторити';
+
+  @override
+  String get syncDisabled => 'Увійдіть для резервної копії';
+
+  @override
+  String get storageEstimateNote =>
+      'Розмір фотографій чеків виміряно у вашому акаунті. Записи займають незначний обсяг.';
+
+  @override
+  String get purchasesUnavailable => 'Покупки зараз недоступні.';
+
+  @override
+  String get deleteScopeTitle => 'Звідки видалити?';
+
+  @override
+  String get deleteScopeLocal => 'Лише цей пристрій';
+
+  @override
+  String get deleteScopeRemote => 'Лише у хмарі';
+
+  @override
+  String get deleteScopeBoth => 'Цей пристрій і хмара';
+
+  @override
+  String syncPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count у черзі',
+      many: '$count у черзі',
+      few: '$count у черзі',
+      one: '$count у черзі',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String storageUsedOf(String used, String total) {
+    return '$used з $total';
+  }
 }

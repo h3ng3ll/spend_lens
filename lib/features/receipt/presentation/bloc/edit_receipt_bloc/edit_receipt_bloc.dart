@@ -10,6 +10,7 @@ import '../../../domain/models/receipt/receipt.dart';
 import '../../../domain/models/receipt_item/receipt_item.dart';
 import '../../../domain/repositories/i_receipt_item_local_repository.dart';
 import '../../../domain/repositories/i_receipt_local_repository.dart';
+import '../../../domain/use_cases/create_expense_from_receipt_use_case.dart';
 import '../../../../scanner/domain/pending_receipt_draft_store.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../domain/parser/parsed_receipt.dart';
@@ -42,6 +43,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
   final IStoreLocalRepository _storeRepository;
   final ProductNormalizer _productNormalizer;
   final PendingReceiptDraftStore _draftStore;
+  final CreateExpenseFromReceiptUseCase _createExpenseFromReceipt;
   final ReceiptReconciler _reconciler;
   final DateTime Function() _now;
 
@@ -51,6 +53,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
     required this._receiptItemRepository,
     required this._productRepository,
     required this._storeRepository,
+    required this._createExpenseFromReceipt,
     this._productNormalizer = const ProductNormalizer(),
     this._reconciler = const ReceiptReconciler(),
     this._now = DateTime.now,
@@ -408,6 +411,31 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
         syncStatus: ESyncStatus.pendingUpdate,
       );
       await _receiptRepository.save(updatedReceipt);
+
+      // Mirror the receipt into the `expenses` box. Home, History and
+      // Analytics all watch `expenses` and NONE of them reads `receipts`,
+      // so a receipt saved without this is invisible everywhere — the app
+      // still shows "No expenses yet" right after a successful save, and a
+      // restart does not help because nothing is missing from the boxes
+      // actually being watched.
+      //
+      // This covers BOTH ways a receipt reaches this screen:
+      //
+      // - MANUAL ENTRY (scan failed → "Enter Manually"): `ScannerBody`
+      //   writes a blank `Receipt` so this editor has a record to load, but
+      //   nothing ever created its `Expense`. `ReviewBloc` — the OCR-success
+      //   path — was the only caller of this use case.
+      // - EDITING an already-saved receipt: the mirrored expense existed but
+      //   went stale, since amount/date/store changes stopped at the
+      //   `Receipt`.
+      //
+      // Idempotent by construction: the use case writes with
+      // `id: receipt.id` and `save` overwrites at that key, so the create
+      // and the update are the same call.
+      await _createExpenseFromReceipt(
+        receipt: updatedReceipt,
+        storeId: updatedReceipt.storeId,
+      );
 
       emit(state.copyWith(status: EEditReceiptStatus.saved));
     } catch (_) {

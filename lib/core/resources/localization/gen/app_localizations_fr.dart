@@ -1344,4 +1344,52 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get importCanceled => 'Aucun fichier sélectionné.';
+
+  @override
+  String get syncing => 'Synchronisation…';
+
+  @override
+  String get syncError => 'Échec de synchronisation';
+
+  @override
+  String get syncRetry => 'Toucher pour réessayer';
+
+  @override
+  String get syncDisabled => 'Connectez-vous pour sauvegarder';
+
+  @override
+  String get storageEstimateNote =>
+      'Les photos de reçus sont mesurées depuis votre compte. Les enregistrements ajoutent une quantité négligeable.';
+
+  @override
+  String get purchasesUnavailable =>
+      'Les achats sont indisponibles pour le moment.';
+
+  @override
+  String get deleteScopeTitle => 'Supprimer d’où ?';
+
+  @override
+  String get deleteScopeLocal => 'Cet appareil uniquement';
+
+  @override
+  String get deleteScopeRemote => 'Le cloud uniquement';
+
+  @override
+  String get deleteScopeBoth => 'Cet appareil et le cloud';
+
+  @override
+  String syncPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count en attente',
+      one: '1 en attente',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String storageUsedOf(String used, String total) {
+    return '$used sur $total';
+  }
 }

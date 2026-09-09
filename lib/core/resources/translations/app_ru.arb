@@ -381,5 +381,36 @@
   "importMalformed": "Этот файл не является допустимой резервной копией.",
   "importUnexpected": "При восстановлении этой резервной копии произошла ошибка.",
   "importTooNew": "Эта резервная копия создана более новой версией приложения.",
-  "importCanceled": "Файл не выбран."
+  "importCanceled": "Файл не выбран.",
+  "syncing": "Синхронизация…",
+  "syncError": "Ошибка синхронизации",
+  "syncRetry": "Нажмите, чтобы повторить",
+  "syncDisabled": "Войдите для резервной копии",
+  "storageEstimateNote": "Размер фотографий чеков измерен в вашем аккаунте. Записи занимают ничтожно мало.",
+  "purchasesUnavailable": "Покупки сейчас недоступны.",
+  "deleteScopeTitle": "Откуда удалить?",
+  "deleteScopeLocal": "Только это устройство",
+  "deleteScopeRemote": "Только в облаке",
+  "deleteScopeBoth": "Это устройство и облако",
+  "syncPending": "{count, plural, one{{count} в очереди} few{{count} в очереди} many{{count} в очереди} other{{count} в очереди}}",
+  "@syncPending": {
+    "description": "Count of records awaiting upload.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storageUsedOf": "{used} из {total}",
+  "@storageUsedOf": {
+    "description": "Storage usage, e.g. \"38 MB of 100 MB\".",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

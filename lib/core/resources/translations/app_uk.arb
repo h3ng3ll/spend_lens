@@ -381,5 +381,36 @@
   "importMalformed": "Цей файл не є дійсною резервною копією.",
   "importUnexpected": "Під час відновлення цієї резервної копії сталася помилка.",
   "importTooNew": "Цю резервну копію створено новішою версією застосунку.",
-  "importCanceled": "Файл не вибрано."
+  "importCanceled": "Файл не вибрано.",
+  "syncing": "Синхронізація…",
+  "syncError": "Помилка синхронізації",
+  "syncRetry": "Натисніть, щоб повторити",
+  "syncDisabled": "Увійдіть для резервної копії",
+  "storageEstimateNote": "Розмір фотографій чеків виміряно у вашому акаунті. Записи займають незначний обсяг.",
+  "purchasesUnavailable": "Покупки зараз недоступні.",
+  "deleteScopeTitle": "Звідки видалити?",
+  "deleteScopeLocal": "Лише цей пристрій",
+  "deleteScopeRemote": "Лише у хмарі",
+  "deleteScopeBoth": "Цей пристрій і хмара",
+  "syncPending": "{count, plural, one{{count} у черзі} few{{count} у черзі} many{{count} у черзі} other{{count} у черзі}}",
+  "@syncPending": {
+    "description": "Count of records awaiting upload.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storageUsedOf": "{used} з {total}",
+  "@storageUsedOf": {
+    "description": "Storage usage, e.g. \"38 MB of 100 MB\".",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

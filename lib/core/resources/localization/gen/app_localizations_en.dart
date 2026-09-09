@@ -1335,4 +1335,51 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get importCanceled => 'No file selected.';
+
+  @override
+  String get syncing => 'Syncing…';
+
+  @override
+  String get syncError => 'Sync failed';
+
+  @override
+  String get syncRetry => 'Tap to retry';
+
+  @override
+  String get syncDisabled => 'Sign in to back up';
+
+  @override
+  String get storageEstimateNote =>
+      'Receipt photos are measured from your account. Records add a negligible amount.';
+
+  @override
+  String get purchasesUnavailable => 'Purchases are unavailable right now.';
+
+  @override
+  String get deleteScopeTitle => 'Delete from where?';
+
+  @override
+  String get deleteScopeLocal => 'This device only';
+
+  @override
+  String get deleteScopeRemote => 'Cloud only';
+
+  @override
+  String get deleteScopeBoth => 'This device and the cloud';
+
+  @override
+  String syncPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count pending',
+      one: '1 pending',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String storageUsedOf(String used, String total) {
+    return '$used of $total';
+  }
 }

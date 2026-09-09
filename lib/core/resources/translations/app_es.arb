@@ -381,5 +381,36 @@
   "importMalformed": "Ese archivo no es una copia de seguridad válida.",
   "importUnexpected": "Se produjo un error al restaurar esta copia de seguridad.",
   "importTooNew": "Esta copia de seguridad se creó con una versión más reciente de la app.",
-  "importCanceled": "No se seleccionó ningún archivo."
+  "importCanceled": "No se seleccionó ningún archivo.",
+  "syncing": "Sincronizando…",
+  "syncError": "Error de sincronización",
+  "syncRetry": "Toca para reintentar",
+  "syncDisabled": "Inicia sesión para respaldar",
+  "storageEstimateNote": "Las fotos de recibos se miden desde tu cuenta. Los registros añaden una cantidad insignificante.",
+  "purchasesUnavailable": "Las compras no están disponibles ahora.",
+  "deleteScopeTitle": "¿Eliminar de dónde?",
+  "deleteScopeLocal": "Solo este dispositivo",
+  "deleteScopeRemote": "Solo la nube",
+  "deleteScopeBoth": "Este dispositivo y la nube",
+  "syncPending": "{count, plural, =1{1 pendiente} other{{count} pendientes}}",
+  "@syncPending": {
+    "description": "Count of records awaiting upload.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storageUsedOf": "{used} de {total}",
+  "@storageUsedOf": {
+    "description": "Storage usage, e.g. \"38 MB of 100 MB\".",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

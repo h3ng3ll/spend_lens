@@ -6,7 +6,9 @@ import 'package:share_plus/share_plus.dart';
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../core/resources/localization/gen/app_localizations.dart';
+import '../../../../../core/services/subscription/i_subscription_repository.dart';
 import '../../../../../core/services/ui_message_service.dart';
+import '../../../../sync/presentation/bloc/sync_bloc/sync_bloc.dart';
 import '../../../../../core/widgets/confirm_dialog.dart';
 import '../../../../backup/presentation/bloc/backup_bloc/backup_bloc.dart';
 import '../../bloc/auth_bloc/auth_bloc.dart';
@@ -60,8 +62,7 @@ class _ProfilePageState extends State<ProfilePage> {
 
   void _onSignOut() => context.read<AuthBloc>().add(const AuthEvent.signOut());
 
-  void _onExportBackup() =>
-      _backupBloc.add(const BackupEvent.exportBackup());
+  void _onExportBackup() => _backupBloc.add(const BackupEvent.exportBackup());
 
   void _onExportSheet() => _backupBloc.add(const BackupEvent.exportCsv());
 
@@ -77,8 +78,7 @@ class _ProfilePageState extends State<ProfilePage> {
     _backupBloc.add(BackupEvent.importFilePicked(files.firstOrNull?.path));
   }
 
-  void _onConfirmImport() =>
-      _backupBloc.add(const BackupEvent.confirmImport());
+  void _onConfirmImport() => _backupBloc.add(const BackupEvent.confirmImport());
 
   Future<void> _onShareExportedFile(BackupState state) async {
     final file = state.exportedFile;
@@ -124,6 +124,21 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
+  /// Opens the purchase SDK's paywall.
+  ///
+  /// Only reached when `isConfigured` is true — `UpgradeToPremiumButton`
+  /// shows an honest toast otherwise, so this never has to represent an
+  /// unavailable SDK.
+  Future<void> _onUpgrade() async {
+    final didUpgrade = await getIt<ISubscriptionRepository>().presentPaywall();
+    if (!mounted || !didUpgrade) return;
+
+    // Re-sync so the Plan badge and the quota denominator pick up the new
+    // entitlement — `hasPremiumAccess()` is a one-shot read by design, so
+    // nothing refreshes it on its own.
+    context.read<SyncBloc>().add(const SyncEvent.syncNow());
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = AppColorScheme.of(context);
@@ -144,6 +159,9 @@ class _ProfilePageState extends State<ProfilePage> {
                 onExportBackup: _onExportBackup,
                 onExportSheet: _onExportSheet,
                 onImportBackup: _onImportBackup,
+                isPurchaseAvailable:
+                    getIt<ISubscriptionRepository>().isConfigured,
+                onUpgrade: _onUpgrade,
               ),
             ),
           ),

@@ -381,5 +381,36 @@
   "importMalformed": "Ce fichier n'est pas une sauvegarde valide.",
   "importUnexpected": "Une erreur s'est produite lors de la restauration de cette sauvegarde.",
   "importTooNew": "Cette sauvegarde a été créée avec une version plus récente de l'application.",
-  "importCanceled": "Aucun fichier sélectionné."
+  "importCanceled": "Aucun fichier sélectionné.",
+  "syncing": "Synchronisation…",
+  "syncError": "Échec de synchronisation",
+  "syncRetry": "Toucher pour réessayer",
+  "syncDisabled": "Connectez-vous pour sauvegarder",
+  "storageEstimateNote": "Les photos de reçus sont mesurées depuis votre compte. Les enregistrements ajoutent une quantité négligeable.",
+  "purchasesUnavailable": "Les achats sont indisponibles pour le moment.",
+  "deleteScopeTitle": "Supprimer d’où ?",
+  "deleteScopeLocal": "Cet appareil uniquement",
+  "deleteScopeRemote": "Le cloud uniquement",
+  "deleteScopeBoth": "Cet appareil et le cloud",
+  "syncPending": "{count, plural, =1{1 en attente} other{{count} en attente}}",
+  "@syncPending": {
+    "description": "Count of records awaiting upload.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storageUsedOf": "{used} sur {total}",
+  "@storageUsedOf": {
+    "description": "Storage usage, e.g. \"38 MB of 100 MB\".",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

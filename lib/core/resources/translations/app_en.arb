@@ -815,5 +815,36 @@
   "importMalformed": "That file isn't a valid backup.",
   "importUnexpected": "Something went wrong while restoring this backup.",
   "importTooNew": "This backup was made with a newer version of the app.",
-  "importCanceled": "No file selected."
+  "importCanceled": "No file selected.",
+  "syncing": "Syncing…",
+  "syncError": "Sync failed",
+  "syncRetry": "Tap to retry",
+  "syncDisabled": "Sign in to back up",
+  "storageEstimateNote": "Receipt photos are measured from your account. Records add a negligible amount.",
+  "purchasesUnavailable": "Purchases are unavailable right now.",
+  "deleteScopeTitle": "Delete from where?",
+  "deleteScopeLocal": "This device only",
+  "deleteScopeRemote": "Cloud only",
+  "deleteScopeBoth": "This device and the cloud",
+  "syncPending": "{count, plural, =1{1 pending} other{{count} pending}}",
+  "@syncPending": {
+    "description": "Count of records awaiting upload.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storageUsedOf": "{used} of {total}",
+  "@storageUsedOf": {
+    "description": "Storage usage, e.g. \"38 MB of 100 MB\".",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

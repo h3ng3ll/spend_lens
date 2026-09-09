@@ -4,6 +4,7 @@ import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../../core/widgets/app_section_card.dart';
 import '../../../../../../core/widgets/settings_row.dart';
+import 'cloud_sync_row.dart';
 
 /// Profile artboard's signed-in-only card (`sc-if signedIn` block in
 /// `SpendLens Prototype.dc.html`) — account email, plan badge, cloud-sync
@@ -39,12 +40,8 @@ class SignedInAccountCard extends StatelessWidget {
             trailingTextColor: scheme.sec,
             showChevron: false,
           ),
-          SettingsRow(
-            label: lo.cloudSync,
-            trailingText: lo.upToDate,
-            trailingTextColor: scheme.accent2,
-            showChevron: false,
-          ),
+          // Real sync state, not a hardcoded string — see CloudSyncRow.
+          const CloudSyncRow(),
           SettingsRow(
             label: lo.signOut,
             labelColor: scheme.warn,

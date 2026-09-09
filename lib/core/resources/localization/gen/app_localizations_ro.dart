@@ -1352,4 +1352,53 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get importCanceled => 'Niciun fișier selectat.';
+
+  @override
+  String get syncing => 'Se sincronizează…';
+
+  @override
+  String get syncError => 'Sincronizare eșuată';
+
+  @override
+  String get syncRetry => 'Atinge pentru reîncercare';
+
+  @override
+  String get syncDisabled => 'Conectează-te pentru backup';
+
+  @override
+  String get storageEstimateNote =>
+      'Fotografiile bonurilor sunt măsurate din contul tău. Înregistrările adaugă o cantitate neglijabilă.';
+
+  @override
+  String get purchasesUnavailable =>
+      'Achizițiile nu sunt disponibile momentan.';
+
+  @override
+  String get deleteScopeTitle => 'Ștergi de unde?';
+
+  @override
+  String get deleteScopeLocal => 'Doar acest dispozitiv';
+
+  @override
+  String get deleteScopeRemote => 'Doar în cloud';
+
+  @override
+  String get deleteScopeBoth => 'Acest dispozitiv și cloud';
+
+  @override
+  String syncPending(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count în așteptare',
+      few: '$count în așteptare',
+      one: '1 în așteptare',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String storageUsedOf(String used, String total) {
+    return '$used din $total';
+  }
 }

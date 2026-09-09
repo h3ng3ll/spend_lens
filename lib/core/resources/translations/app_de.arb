@@ -381,5 +381,36 @@
   "importMalformed": "Diese Datei ist kein gültiges Backup.",
   "importUnexpected": "Beim Wiederherstellen dieses Backups ist ein Fehler aufgetreten.",
   "importTooNew": "Dieses Backup wurde mit einer neueren App-Version erstellt.",
-  "importCanceled": "Keine Datei ausgewählt."
+  "importCanceled": "Keine Datei ausgewählt.",
+  "syncing": "Synchronisiert…",
+  "syncError": "Synchronisierung fehlgeschlagen",
+  "syncRetry": "Zum Wiederholen tippen",
+  "syncDisabled": "Anmelden zum Sichern",
+  "storageEstimateNote": "Belegfotos werden aus deinem Konto gemessen. Datensätze belegen verschwindend wenig.",
+  "purchasesUnavailable": "Käufe sind derzeit nicht verfügbar.",
+  "deleteScopeTitle": "Woher löschen?",
+  "deleteScopeLocal": "Nur dieses Gerät",
+  "deleteScopeRemote": "Nur die Cloud",
+  "deleteScopeBoth": "Dieses Gerät und die Cloud",
+  "syncPending": "{count, plural, =1{1 ausstehend} other{{count} ausstehend}}",
+  "@syncPending": {
+    "description": "Count of records awaiting upload.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "storageUsedOf": "{used} von {total}",
+  "@storageUsedOf": {
+    "description": "Storage usage, e.g. \"38 MB of 100 MB\".",
+    "placeholders": {
+      "used": {
+        "type": "String"
+      },
+      "total": {
+        "type": "String"
+      }
+    }
+  }
 }

@@ -27,6 +27,11 @@ class ProfileBody extends StatelessWidget {
   final VoidCallback onExportSheet;
   final VoidCallback onImportBackup;
 
+  /// Whether the purchase SDK started, so the Upgrade button can degrade
+  /// honestly rather than looking live and doing nothing.
+  final bool isPurchaseAvailable;
+  final VoidCallback onUpgrade;
+
   const ProfileBody({
     super.key,
     required this.state,
@@ -36,6 +41,8 @@ class ProfileBody extends StatelessWidget {
     required this.onExportBackup,
     required this.onExportSheet,
     required this.onImportBackup,
+    required this.isPurchaseAvailable,
+    required this.onUpgrade,
   });
 
   @override
@@ -64,7 +71,12 @@ class ProfileBody extends StatelessWidget {
                 email: state.email,
                 onSignOut: onSignOut,
               ),
-            StorageCard(deviceNoun: lo.thisDevice, isSignedIn: state.isSignedIn),
+            StorageCard(
+              deviceNoun: lo.thisDevice,
+              isSignedIn: state.isSignedIn,
+              isPurchaseAvailable: isPurchaseAvailable,
+              onUpgrade: onUpgrade,
+            ),
             SectionLabel(text: lo.yourData),
             YourDataCard(
               onExportBackup: onExportBackup,

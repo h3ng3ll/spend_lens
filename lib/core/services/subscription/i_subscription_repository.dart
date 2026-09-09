@@ -17,6 +17,16 @@ abstract interface class ISubscriptionRepository {
   /// went-wrong`).
   Future<bool> hasPremiumAccess();
 
+  /// Presents the SDK's paywall, returning whether the user ended up
+  /// entitled.
+  ///
+  /// Lives behind this interface so the presentation layer never touches the
+  /// SDK directly: the widget knows "upgrade", not which vendor or which
+  /// placement identifier. Returns false — never throws — when the SDK is
+  /// unconfigured, no paywall is set up, or the user dismisses it, so a
+  /// failed purchase can never surface as an app error.
+  Future<bool> presentPaywall();
+
   /// Whether the SDK actually started (a non-empty API key was supplied).
   /// The Settings/Profile screens use this to decide whether to even
   /// attempt a premium check, rather than silently treating "unconfigured"

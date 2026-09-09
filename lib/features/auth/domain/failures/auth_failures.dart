@@ -47,8 +47,7 @@ class GoogleSignInUnconfiguredFailure extends AuthFailure {
 }
 
 class AppleSignInFailure extends AuthFailure {
-  const AppleSignInFailure({super.diagnostic})
-    : super('Apple sign-in failed.');
+  const AppleSignInFailure({super.diagnostic}) : super('Apple sign-in failed.');
 }
 
 class AppleSignInCanceledFailure extends AuthFailure {

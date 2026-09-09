@@ -2,7 +2,8 @@ import 'dart:io';
 
 import 'package:dartz/dartz.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:google_sign_in/google_sign_in.dart' show GoogleSignInException, GoogleSignInExceptionCode;
+import 'package:google_sign_in/google_sign_in.dart'
+    show GoogleSignInException, GoogleSignInExceptionCode;
 import 'package:sign_in_with_apple/sign_in_with_apple.dart';
 
 import '../../../../core/failures/failure.dart';
@@ -56,8 +57,12 @@ class FirebaseAuthRepository implements IAuthRepository {
     _ => error.toString(),
   };
 
-  Failure _logged(String operation, Failure failure, Object error,
-      StackTrace stackTrace) {
+  Failure _logged(
+    String operation,
+    Failure failure,
+    Object error,
+    StackTrace stackTrace,
+  ) {
     _loggerService.error(
       'Auth: $operation failed — ${_describe(error)}',
       error: error,
@@ -92,8 +97,10 @@ class FirebaseAuthRepository implements IAuthRepository {
       final idToken = account.authentication.idToken;
       if (idToken == null) {
         const reason = 'authenticate() returned no idToken';
-        _loggerService.error('Auth: Google sign-in failed — $reason',
-            name: 'Auth');
+        _loggerService.error(
+          'Auth: Google sign-in failed — $reason',
+          name: 'Auth',
+        );
         return const Left(GoogleSignInFailure(diagnostic: reason));
       }
 
@@ -103,9 +110,12 @@ class FirebaseAuthRepository implements IAuthRepository {
     } on GoogleSignInException catch (e, stackTrace) {
       if (e.code == GoogleSignInExceptionCode.canceled) {
         return Left(
-          _logged('Google sign-in (canceled)',
-              GoogleSignInCanceledFailure(diagnostic: _describe(e)), e,
-              stackTrace),
+          _logged(
+            'Google sign-in (canceled)',
+            GoogleSignInCanceledFailure(diagnostic: _describe(e)),
+            e,
+            stackTrace,
+          ),
         );
       }
       // `providerConfigurationError` lands here — the signature of a missing
@@ -113,13 +123,21 @@ class FirebaseAuthRepository implements IAuthRepository {
       // flattened into a bare `GoogleSignInFailure`, which is why an
       // unconfigured project looked identical to a transient error.
       return Left(
-        _logged('Google sign-in',
-            GoogleSignInFailure(diagnostic: _describe(e)), e, stackTrace),
+        _logged(
+          'Google sign-in',
+          GoogleSignInFailure(diagnostic: _describe(e)),
+          e,
+          stackTrace,
+        ),
       );
     } catch (e, stackTrace) {
       return Left(
-        _logged('Google sign-in',
-            GoogleSignInFailure(diagnostic: _describe(e)), e, stackTrace),
+        _logged(
+          'Google sign-in',
+          GoogleSignInFailure(diagnostic: _describe(e)),
+          e,
+          stackTrace,
+        ),
       );
     }
   }
@@ -179,8 +197,12 @@ class FirebaseAuthRepository implements IAuthRepository {
       // enabled in the Firebase console. That is a configuration answer the
       // user can act on, so it must reach them, not die in a bare catch.
       return Left(
-        _logged('Apple sign-in (Android web OAuth)',
-            AppleSignInFailure(diagnostic: _describe(e)), e, stackTrace),
+        _logged(
+          'Apple sign-in (Android web OAuth)',
+          AppleSignInFailure(diagnostic: _describe(e)),
+          e,
+          stackTrace,
+        ),
       );
     }
   }
@@ -218,8 +240,10 @@ class FirebaseAuthRepository implements IAuthRepository {
       final identityToken = appleCredential.identityToken;
       if (identityToken == null) {
         const reason = 'Apple returned no identityToken';
-        _loggerService.error('Auth: Apple sign-in failed — $reason',
-            name: 'Auth');
+        _loggerService.error(
+          'Auth: Apple sign-in failed — $reason',
+          name: 'Auth',
+        );
         return const Left(AppleSignInFailure(diagnostic: reason));
       }
 
@@ -265,14 +289,21 @@ class FirebaseAuthRepository implements IAuthRepository {
     } on SignInWithAppleAuthorizationException catch (e, stackTrace) {
       if (e.code == AuthorizationErrorCode.canceled) {
         return Left(
-          _logged('Apple sign-in (canceled)',
-              AppleSignInCanceledFailure(diagnostic: _describe(e)), e,
-              stackTrace),
+          _logged(
+            'Apple sign-in (canceled)',
+            AppleSignInCanceledFailure(diagnostic: _describe(e)),
+            e,
+            stackTrace,
+          ),
         );
       }
       return Left(
-        _logged('Apple sign-in',
-            AppleSignInFailure(diagnostic: _describe(e)), e, stackTrace),
+        _logged(
+          'Apple sign-in',
+          AppleSignInFailure(diagnostic: _describe(e)),
+          e,
+          stackTrace,
+        ),
       );
     } on FirebaseAuthException catch (e, stackTrace) {
       // Explicit, though `_describe` already renders the code: a rejection
@@ -280,13 +311,21 @@ class FirebaseAuthRepository implements IAuthRepository {
       // problem from a rejection by APPLE above, and the two were previously
       // indistinguishable in the handler chain.
       return Left(
-        _logged('Apple sign-in (Firebase credential exchange)',
-            AppleSignInFailure(diagnostic: _describe(e)), e, stackTrace),
+        _logged(
+          'Apple sign-in (Firebase credential exchange)',
+          AppleSignInFailure(diagnostic: _describe(e)),
+          e,
+          stackTrace,
+        ),
       );
     } catch (e, stackTrace) {
       return Left(
-        _logged('Apple sign-in',
-            AppleSignInFailure(diagnostic: _describe(e)), e, stackTrace),
+        _logged(
+          'Apple sign-in',
+          AppleSignInFailure(diagnostic: _describe(e)),
+          e,
+          stackTrace,
+        ),
       );
     }
   }

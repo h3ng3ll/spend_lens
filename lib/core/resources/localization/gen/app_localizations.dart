@@ -2165,6 +2165,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'No file selected.'**
   String get importCanceled;
+
+  /// No description provided for @syncing.
+  ///
+  /// In en, this message translates to:
+  /// **'Syncing…'**
+  String get syncing;
+
+  /// No description provided for @syncError.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync failed'**
+  String get syncError;
+
+  /// No description provided for @syncRetry.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap to retry'**
+  String get syncRetry;
+
+  /// No description provided for @syncDisabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign in to back up'**
+  String get syncDisabled;
+
+  /// No description provided for @storageEstimateNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Receipt photos are measured from your account. Records add a negligible amount.'**
+  String get storageEstimateNote;
+
+  /// No description provided for @purchasesUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'Purchases are unavailable right now.'**
+  String get purchasesUnavailable;
+
+  /// No description provided for @deleteScopeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete from where?'**
+  String get deleteScopeTitle;
+
+  /// No description provided for @deleteScopeLocal.
+  ///
+  /// In en, this message translates to:
+  /// **'This device only'**
+  String get deleteScopeLocal;
+
+  /// No description provided for @deleteScopeRemote.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud only'**
+  String get deleteScopeRemote;
+
+  /// No description provided for @deleteScopeBoth.
+  ///
+  /// In en, this message translates to:
+  /// **'This device and the cloud'**
+  String get deleteScopeBoth;
+
+  /// Count of records awaiting upload.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 pending} other{{count} pending}}'**
+  String syncPending(int count);
+
+  /// Storage usage, e.g. "38 MB of 100 MB".
+  ///
+  /// In en, this message translates to:
+  /// **'{used} of {total}'**
+  String storageUsedOf(String used, String total);
 }
 
 class _AppLocalizationsDelegate
