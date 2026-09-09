@@ -11,8 +11,8 @@ import '../../../bloc/auth_bloc/auth_bloc.dart';
 
 /// Profile artboard's identity block: 88dp avatar, name, and a status pill
 /// (dot + text) reflecting [AuthState] — signed-out renders in a neutral/
-/// secondary style, since M5 has no real sign-in yet (design_spendlens.md —
-/// M9).
+/// secondary style, and the signed-in label names the ACTUAL provider that
+/// [AuthState.isGoogleAccount] reports (design_spendlens.md — M9).
 class ProfileIdentityColumn extends StatelessWidget {
   final AuthState state;
 
@@ -26,7 +26,14 @@ class ProfileIdentityColumn extends StatelessWidget {
     final textTheme = AppTextTheme.of(context);
     final lo = AppLocalizations.of(context);
 
-    final statusLabel = state.isSignedIn ? lo.signedInGoogle : lo.notSignedIn;
+    // The provider comes from `isGoogleAccount`, which the bloc derives from
+    // Firebase's `providerData`. Hardcoding the Google string here made an
+    // Apple sign-in report "Signed in with Google".
+    final statusLabel = switch (state) {
+      _ when state.isNotSignedIn => lo.notSignedIn,
+      _ when state.isGoogleAccount => lo.signedInGoogle,
+      _ => lo.signedInApple,
+    };
     final statusColor = state.isSignedIn ? scheme.accent2 : scheme.sec;
     final displayName = state.isSignedIn && state.email.isNotEmpty
         ? state.email

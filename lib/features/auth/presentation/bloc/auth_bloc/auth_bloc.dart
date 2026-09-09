@@ -87,7 +87,15 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       _authRepository.watchUser(),
       onData: (user) {
         if (user == null) {
-          return state.copyWith(status: EAuthStatus.signedOut, email: '');
+          // `isGoogleAccount` is reset alongside `email`: it is provider
+          // identity, and leaving the previous session's value behind makes
+          // the Profile status pill name the WRONG provider on the next
+          // sign-in until `providerData` is read again.
+          return state.copyWith(
+            status: EAuthStatus.signedOut,
+            email: '',
+            isGoogleAccount: false,
+          );
         }
         return state.copyWith(
           status: EAuthStatus.signedIn,

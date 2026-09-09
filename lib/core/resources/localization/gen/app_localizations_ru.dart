@@ -798,6 +798,9 @@ class AppLocalizationsRu extends AppLocalizations {
   String get signedInGoogle => 'Вход через Google';
 
   @override
+  String get signedInApple => 'Вход через Apple';
+
+  @override
   String get storage => 'Хранилище';
 
   @override

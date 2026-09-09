@@ -469,6 +469,7 @@
   "localAccount": "Local account",
   "notSignedIn": "Not signed in · on device only",
   "signedInGoogle": "Signed in with Google",
+  "signedInApple": "Signed in with Apple",
   "storage": "Storage",
   "cloudStorage": "Cloud storage",
   "unlimited": "Unlimited · on device",

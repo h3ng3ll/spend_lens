@@ -1266,6 +1266,12 @@ abstract class AppLocalizations {
   /// **'Signed in with Google'**
   String get signedInGoogle;
 
+  /// No description provided for @signedInApple.
+  ///
+  /// In en, this message translates to:
+  /// **'Signed in with Apple'**
+  String get signedInApple;
+
   /// No description provided for @storage.
   ///
   /// In en, this message translates to:

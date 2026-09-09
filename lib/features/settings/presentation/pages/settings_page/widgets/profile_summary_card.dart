@@ -45,7 +45,11 @@ class ProfileSummaryCard extends StatelessWidget {
     final displayName = state.isSignedIn && state.email.isNotEmpty
         ? state.email
         : lo.localAccount;
-    final statusLabel = state.isSignedIn ? lo.signedInGoogle : lo.notSignedIn;
+    final statusLabel = switch (state) {
+      _ when state.isNotSignedIn => lo.notSignedIn,
+      _ when state.isGoogleAccount => lo.signedInGoogle,
+      _ => lo.signedInApple,
+    };
     final statusColor = state.isSignedIn ? scheme.accent2 : scheme.ter;
 
     return GestureDetector(

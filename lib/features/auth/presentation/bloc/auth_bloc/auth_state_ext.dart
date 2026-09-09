@@ -16,4 +16,21 @@ extension AuthStateX on AuthState {
   /// Alias for [isSignedIn] — the minimum `isReady`/`isSuccess` contract
   /// (A3 rule 9).
   bool get isReady => isSignedIn;
+
+  /// Every state in which the user has no account attached — signed out, an
+  /// attempt in flight, and a FAILED attempt.
+  ///
+  /// The sign-in offer must be gated on this, never on [isSignedOut] alone:
+  /// a failed authorization leaves the bloc in [EAuthStatus.failed], which is
+  /// neither `signedOut` nor `signedIn`, so an `isSignedOut`/`isSignedIn` pair
+  /// of branches renders NOTHING and the Google/Apple buttons disappear with
+  /// no way to retry.
+  bool get isNotSignedIn => !isSignedIn;
+
+  /// `true` when signed in through Apple rather than Google.
+  ///
+  /// Read this instead of negating [isGoogleAccount] directly: that flag is
+  /// only meaningful while signed in, so a bare `!isGoogleAccount` reports
+  /// "Apple" for a signed-OUT user too.
+  bool get isAppleAccount => isSignedIn && !isGoogleAccount;
 }

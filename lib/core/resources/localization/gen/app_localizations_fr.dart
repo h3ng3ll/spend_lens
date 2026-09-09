@@ -785,6 +785,9 @@ class AppLocalizationsFr extends AppLocalizations {
   String get signedInGoogle => 'Connecté avec Google';
 
   @override
+  String get signedInApple => 'Connecté avec Apple';
+
+  @override
   String get storage => 'Stockage';
 
   @override

@@ -791,6 +791,9 @@ class AppLocalizationsRo extends AppLocalizations {
   String get signedInGoogle => 'Conectat cu Google';
 
   @override
+  String get signedInApple => 'Conectat cu Apple';
+
+  @override
   String get storage => 'Stocare';
 
   @override

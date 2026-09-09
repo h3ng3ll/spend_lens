@@ -53,7 +53,7 @@ class ProfileBody extends StatelessWidget {
           children: [
             const ProfileHeaderRow(),
             ProfileIdentityColumn(state: state),
-            if (state.isSignedOut)
+            if (state.isNotSignedIn)
               KeepDataSafeCard(
                 deviceNoun: lo.thisDevice,
                 onGoogle: onGoogle,

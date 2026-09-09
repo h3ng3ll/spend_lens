@@ -193,6 +193,7 @@
   "localAccount": "Локальний акаунт",
   "notSignedIn": "Не виконано вхід · лише на пристрої",
   "signedInGoogle": "Вхід через Google",
+  "signedInApple": "Вхід через Apple",
   "storage": "Сховище",
   "cloudStorage": "Хмарне сховище",
   "unlimited": "Без обмежень · на пристрої",

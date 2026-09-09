@@ -193,6 +193,7 @@
   "localAccount": "Compte local",
   "notSignedIn": "Non connecté · sur l’appareil uniquement",
   "signedInGoogle": "Connecté avec Google",
+  "signedInApple": "Connecté avec Apple",
   "storage": "Stockage",
   "cloudStorage": "Stockage cloud",
   "unlimited": "Illimité · sur l’appareil",

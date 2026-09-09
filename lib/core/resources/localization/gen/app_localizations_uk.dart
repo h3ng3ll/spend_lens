@@ -800,6 +800,9 @@ class AppLocalizationsUk extends AppLocalizations {
   String get signedInGoogle => 'Вхід через Google';
 
   @override
+  String get signedInApple => 'Вхід через Apple';
+
+  @override
   String get storage => 'Сховище';
 
   @override

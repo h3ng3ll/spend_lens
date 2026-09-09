@@ -193,6 +193,7 @@
   "localAccount": "Cont local",
   "notSignedIn": "Neconectat · doar pe dispozitiv",
   "signedInGoogle": "Conectat cu Google",
+  "signedInApple": "Conectat cu Apple",
   "storage": "Stocare",
   "cloudStorage": "Stocare cloud",
   "unlimited": "Nelimitat · pe dispozitiv",

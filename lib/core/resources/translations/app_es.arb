@@ -193,6 +193,7 @@
   "localAccount": "Cuenta local",
   "notSignedIn": "Sin sesión · solo en el dispositivo",
   "signedInGoogle": "Sesión con Google",
+  "signedInApple": "Sesión con Apple",
   "storage": "Almacenamiento",
   "cloudStorage": "Almacenamiento en la nube",
   "unlimited": "Ilimitado · en el dispositivo",

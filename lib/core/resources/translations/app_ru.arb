@@ -193,6 +193,7 @@
   "localAccount": "Локальный аккаунт",
   "notSignedIn": "Не выполнен вход · только на устройстве",
   "signedInGoogle": "Вход через Google",
+  "signedInApple": "Вход через Apple",
   "storage": "Хранилище",
   "cloudStorage": "Облачное хранилище",
   "unlimited": "Без ограничений · на устройстве",
