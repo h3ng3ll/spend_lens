@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../../core/services/scan_capability/e_scan_capability.dart';
 import '../../../../../../core/widgets/padding/horizontal_padding.dart';
+import '../../../../../auth/presentation/bloc/auth_bloc/auth_bloc.dart';
 import '../../../../../category/presentation/bloc/categories_bloc/categories_bloc.dart';
 import '../../../../domain/models/app_settings/e_app_theme_mode.dart';
 import '../../../bloc/settings_bloc/settings_bloc.dart';
@@ -69,7 +70,15 @@ class SettingsBody extends StatelessWidget {
           spacing: 16.0,
           children: [
             SettingsHeaderRow(onAvatarTap: onProfile),
-            ProfileSummaryCard(onTap: onProfile),
+            // Subscribed to AuthBloc so signing in/out on the Profile screen
+            // is reflected here immediately. AuthBloc is the app-lifetime
+            // singleton provided in main(); this only listens to it.
+            BlocBuilder<AuthBloc, AuthState>(
+              builder: (context, authState) => ProfileSummaryCard(
+                state: authState,
+                onTap: onProfile,
+              ),
+            ),
             BlocBuilder<CategoriesBloc, CategoriesState>(
               builder: (context, categoriesState) => PreferencesCard(
                 currencyLabel: currencyLabel,

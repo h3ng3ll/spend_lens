@@ -7,16 +7,30 @@ import '../../../../../../core/resources/text/app_text_theme.dart';
 import '../../../../../../core/widgets/app_container.dart';
 import '../../../../../../core/widgets/app_section_card.dart';
 import '../../../../../../core/widgets/app_svg_icon.dart';
+import '../../../../../auth/presentation/bloc/auth_bloc/auth_bloc.dart';
 
 /// Settings artboard's tappable profile-summary card: avatar + name/status
 /// line + chevron, navigating to Profile.
 ///
-/// M5 has no real signed-in user, so the name/status lines use the neutral
-/// "local account / not signed in" copy rather than invented user data.
+/// **Reads [AuthState] reactively.** The name/status lines were previously
+/// the hardcoded "Local account" / "Not signed in" strings from M5, when no
+/// real sign-in existed. Once M9 landed the real flow, that made the card lie:
+/// a user could sign in on the Profile screen, come back, and still be told
+/// they were on a local account — the card had no subscription to auth state,
+/// so nothing could ever change it.
+///
+/// The identity copy here mirrors [ProfileIdentityColumn] exactly (same
+/// getters, same l10n keys) so the two screens can never disagree about who
+/// is signed in.
 class ProfileSummaryCard extends StatelessWidget {
+  final AuthState state;
   final VoidCallback onTap;
 
-  const ProfileSummaryCard({super.key, required this.onTap});
+  const ProfileSummaryCard({
+    super.key,
+    required this.state,
+    required this.onTap,
+  });
 
   static const double _avatarSize = 48.0;
 
@@ -25,6 +39,14 @@ class ProfileSummaryCard extends StatelessWidget {
     final scheme = AppColorScheme.of(context);
     final textTheme = AppTextTheme.of(context);
     final lo = AppLocalizations.of(context);
+
+    // Same derivation as ProfileIdentityColumn — signed in shows the account
+    // email, signed out keeps the neutral local-account copy.
+    final displayName = state.isSignedIn && state.email.isNotEmpty
+        ? state.email
+        : lo.localAccount;
+    final statusLabel = state.isSignedIn ? lo.signedInGoogle : lo.notSignedIn;
+    final statusColor = state.isSignedIn ? scheme.accent2 : scheme.ter;
 
     return GestureDetector(
       onTap: onTap,
@@ -52,12 +74,16 @@ class ProfileSummaryCard extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    lo.localAccount,
+                    displayName,
                     style: textTheme.headline17Semi.copyWith(color: scheme.ink),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                   Text(
-                    lo.notSignedIn,
-                    style: textTheme.footnote13.copyWith(color: scheme.ter),
+                    statusLabel,
+                    style: textTheme.footnote13.copyWith(color: statusColor),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ],
               ),
