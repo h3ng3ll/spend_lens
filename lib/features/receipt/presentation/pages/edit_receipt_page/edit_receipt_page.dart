@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
+import '../../../../scanner/domain/pending_receipt_draft_store.dart';
 import '../../../../../core/services/ui_message_service.dart';
 import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../../store/domain/repositories/i_store_local_repository.dart';
@@ -35,6 +36,7 @@ class EditReceiptPage extends StatefulWidget {
 class _EditReceiptPageState extends State<EditReceiptPage> {
   late final EditReceiptBloc _bloc = EditReceiptBloc(
     receiptRepository: getIt<IReceiptLocalRepository>(),
+    draftStore: getIt<PendingReceiptDraftStore>(),
     receiptItemRepository: getIt<IReceiptItemLocalRepository>(),
     productRepository: getIt<IProductLocalRepository>(),
     storeRepository: getIt<IStoreLocalRepository>(),
@@ -79,7 +81,29 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
     return created;
   }
 
-  void _onCancel() => context.pop();
+  /// `context.pop()` ONLY when there is something to pop.
+  ///
+  /// Every entry into this screen uses `.go()` — `ReviewPage`'s
+  /// save-and-correct listener and the scanner's "Enter Manually" path —
+  /// and `.go()` REPLACES the route stack. `pop()` then has no target and
+  /// throws `GoError: There is nothing to pop`, so Cancel was a dead
+  /// control on its only real entry paths. Falling back to an explicit
+  /// destination is what makes it work; this is the same fix already
+  /// applied to Review's own back/retake controls.
+  /// Cancel returns to the PREVIOUS screen.
+  ///
+  /// Review's `Correct` now PUSHES this screen (it is a staging step, not a
+  /// replacement), so `pop()` lands back on Review with its state intact —
+  /// which is what the design shows (`Apply corrections` -> `goReview`).
+  /// The `HomePageRoute` fallback is only for an entry path with no stack
+  /// to pop, such as the scanner's "Enter Manually" `.go()`.
+  void _onCancel() {
+    if (context.canPop()) {
+      context.pop();
+      return;
+    }
+    HomePageRoute().go(context);
+  }
 
   void _onDone() {
     _bloc.add(const EditReceiptEvent.save());
@@ -90,6 +114,11 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
     if (pickedId == null || !context.mounted) return;
     _bloc.add(EditReceiptEvent.pickStore(pickedId));
   }
+
+  /// Cycles the item unit. NO payload beyond the id — the bloc reads the
+  /// current unit and advances it (BLoC toggle-event rule).
+  void _onCycleItemUnit(String itemId) =>
+      _bloc.add(EditReceiptEvent.cycleItemUnit(itemId));
 
   void _onRemoveItem(String itemId) {
     _nameControllers.remove(itemId)?.dispose();
@@ -126,7 +155,17 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
           BlocListener<EditReceiptBloc, EditReceiptState>(
             listenWhen: (previous, current) =>
                 !previous.isSaved && current.isSaved,
-            listener: (context, state) => context.pop(),
+            // Same pop-or-navigate fallback as [_onCancel]: on the `.go()`
+            // entry paths a bare `pop()` threw and left the user stranded
+            // on this screen AFTER a successful save — the corrections were
+            // written but the screen never closed.
+            listener: (context, state) {
+              if (context.canPop()) {
+                context.pop();
+                return;
+              }
+              HomePageRoute().go(context);
+            },
           ),
           BlocListener<EditReceiptBloc, EditReceiptState>(
             listenWhen: (previous, current) =>
@@ -156,6 +195,7 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
           onDone: _onDone,
           onPickStore: () => _onPickStore(context),
           onRemoveItem: _onRemoveItem,
+          onCycleItemUnit: _onCycleItemUnit,
           onAddItem: _onAddItem,
           onItemNameChanged: (id, value) =>
               _bloc.add(EditReceiptEvent.updateItemName(id, value)),

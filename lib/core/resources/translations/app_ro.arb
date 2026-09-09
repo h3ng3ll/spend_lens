@@ -259,6 +259,8 @@
   "autoDetected": "Detectat automat",
   "addItem": "Adaugă produs",
   "qty": "Cant.",
+  "qtyKg": "Kg",
+  "qtyL": "L",
   "total": "Total",
   "usedForPrice": "folosit pentru istoricul prețurilor",
   "subtotal": "Subtotal",

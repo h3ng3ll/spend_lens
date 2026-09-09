@@ -11,6 +11,11 @@ import 'app_svg_icon.dart';
 /// (design_spendlens.md's Settings artboard — every grouped-card row shares
 /// this exact 52dp shape).
 ///
+/// Layout is content-driven: `MainAxisAlignment.spaceBetween` pushes the
+/// label and the trailing group to opposite edges, so a trailing value sits
+/// hard against the right (or the chevron) instead of floating inside a
+/// reserved column. No hardcoded flex split.
+///
 /// No fixed height anywhere — the row grows with its tallest child under a
 /// larger `textScaleFactor` (same guard as `RecordListRow`), so `height:
 /// 52.0` in the artboard is a MINIMUM, applied via a `ConstrainedBox`, never
@@ -46,57 +51,68 @@ class SettingsRow extends StatelessWidget {
 
     final row = ConstrainedBox(
       constraints: const BoxConstraints(minHeight: _minHeight),
+      // `spaceBetween` + content-sized children, NOT a fixed flex split.
+      //
+      // The label and trailing value used to be hardcoded to `flex: 3` /
+      // `flex: 2`, which reserved 2/5 of the row for the trailing text no
+      // matter how short it was — so `MDL`, a category count, and the
+      // version string all floated with a gap before the right edge or the
+      // chevron. Letting the trailing content size ITSELF and pushing the
+      // free space between the two ends puts every value hard against the
+      // right, at any label length or locale.
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            flex: 3,
+          // Still Flexible: a long label in a verbose locale must ellipsize
+          // rather than overflow, and it yields space to the trailing value
+          // instead of the other way round.
+          Flexible(
             child: Text(
               label,
               style: textTheme.body17.copyWith(color: labelColor ?? scheme.ink),
             ),
           ),
-          if (trailing != null)
-            // `FlexFit.tight` + a clamped scaler: a bare `Flexible` let the
-            // trailing WIDGET keep its intrinsic width and overflow at large
-            // text scales, while the `trailingText` branch below was already
-            // clamped. Fixing only the text branch left this one live --
-            // the same partial-rollout shape the fixed-dp chronic keeps
-            // taking (`sig:developer-derived-fixed-dp-cell-height-ignores-
-            // textScaleFactor`).
-            Flexible(
-              flex: 2,
-              fit: FlexFit.tight,
-              child: Align(
-                alignment: Alignment.centerRight,
-                child: MediaQuery.withClampedTextScaling(
+          Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (trailing != null)
+                // The clamped scaler stays: without it the trailing WIDGET
+                // keeps its intrinsic width and overflows at large text
+                // scales (`sig:developer-derived-fixed-dp-cell-height-
+                // ignores-textScaleFactor`).
+                MediaQuery.withClampedTextScaling(
                   maxScaleFactor: 1.3,
                   child: trailing!,
                 ),
-              ),
-            ),
-          if (trailing == null && trailingText != null)
-            Flexible(
-              flex: 2,
-              child: Text(
-                trailingText!,
-                textAlign: TextAlign.right,
-                overflow: TextOverflow.ellipsis,
-                maxLines: 2,
-                style: textTheme.body17.copyWith(
-                  color: trailingTextColor ?? scheme.sec,
-                  fontWeight: FontWeight.w500,
+              if (trailing == null && trailingText != null)
+                // Capped so a long value cannot push the label out; short
+                // values (the common case) size to their own width.
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: MediaQuery.sizeOf(context).width * 0.45,
+                  ),
+                  child: Text(
+                    trailingText!,
+                    textAlign: TextAlign.right,
+                    overflow: TextOverflow.ellipsis,
+                    maxLines: 2,
+                    style: textTheme.body17.copyWith(
+                      color: trailingTextColor ?? scheme.sec,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          if (showChevron)
-            Padding(
-              padding: const EdgeInsets.only(left: 8.0),
-              child: AppSvgIcon(
-                asset: AppIcons.chevronRight,
-                color: scheme.ter,
-                size: 18.0,
-              ),
-            ),
+              if (showChevron)
+                Padding(
+                  padding: const EdgeInsets.only(left: 8.0),
+                  child: AppSvgIcon(
+                    asset: AppIcons.chevronRight,
+                    color: scheme.ter,
+                    size: 18.0,
+                  ),
+                ),
+            ],
+          ),
         ],
       ),
     );

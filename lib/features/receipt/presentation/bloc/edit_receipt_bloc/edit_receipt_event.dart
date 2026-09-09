@@ -26,6 +26,17 @@ sealed class EditReceiptEvent with _$EditReceiptEvent {
   const factory EditReceiptEvent.updateItemName(String itemId, String name) =
       _UpdateItemName;
 
+  /// Cycles one item's unit of measure (piece -> kg -> L -> piece).
+  ///
+  /// The parser's unit is a best guess from OCR text that routinely reads
+  /// `kg` as `kq`/`ka`, so the user needs to be able to correct it — and a
+  /// weighed line's quantity IS its weight, so the wrong unit mislabels
+  /// the number too. NO PAYLOAD beyond the item id: the handler reads the
+  /// current unit and advances it, so the UI never computes the next value
+  /// (BLoC toggle-event rule).
+  const factory EditReceiptEvent.cycleItemUnit(String itemId) =
+      _CycleItemUnit;
+
   const factory EditReceiptEvent.updateItemQuantity(
     String itemId,
     double quantity,

@@ -56,13 +56,12 @@ class _ReviewPageState extends State<ReviewPage> {
     return created;
   }
 
-  /// `context.pop()` ONLY when there is something to pop.
+  /// Back returns to whatever sits beneath Review — Home on the normal
+  /// path, since the scanner `pushReplacement`s Review over itself and
+  /// leaves Home in the stack.
   ///
-  /// The scanner reaches Review with `.go()` — deliberately, so the user
-  /// cannot back into a stale scanner session — which REPLACES the route
-  /// stack. `pop()` then has no target and does nothing at all, leaving the
-  /// user stuck on this screen. Falling back to an explicit destination is
-  /// what makes the control actually work on that (normal) entry path.
+  /// The explicit fallback covers a Review reached with no stack beneath
+  /// it, where `pop()` would throw `GoError: There is nothing to pop`.
   void _onBack() {
     if (context.canPop()) {
       context.pop();
@@ -71,18 +70,17 @@ class _ReviewPageState extends State<ReviewPage> {
     HomePageRoute().go(context);
   }
 
-  /// Discards the pending draft and returns to the scanner for a fresh
-  /// capture. Uses the same pop-or-navigate fallback as [_onBack]: on the
-  /// `.go()` entry path there is nothing to pop, and a dead "Retake" is
-  /// exactly the dead end spec §66 forbids.
+  /// Discards the pending draft and returns to the SCANNER for a fresh
+  /// capture.
+  ///
+  /// This deliberately does NOT pop: the scanner route was replaced by
+  /// Review, so what lies beneath is Home — popping would send "Retake" to
+  /// the wrong screen entirely. `.pushReplacement` swaps Review back out
+  /// for a fresh scanner, preserving Home underneath and keeping the stack
+  /// exactly one deep however many times the user retakes.
   void _onRetake() {
     getIt<PendingReceiptDraftStore>().clear();
-
-    if (context.canPop()) {
-      context.pop();
-      return;
-    }
-    const ScannerPageRoute().go(context);
+    const ScannerPageRoute().pushReplacement(context);
   }
 
   void _onStartEditItem(String itemId) =>
@@ -115,40 +113,50 @@ class _ReviewPageState extends State<ReviewPage> {
     return BlocProvider<ReviewBloc>.value(
       value: _reviewBloc,
       child: MultiBlocListener(
-        listeners: [
-          // Two DISTINCT terminal statuses, two DISTINCT navigations — a
-          // shared `saved` status here would fire the wrong route for one
-          // of the two exit paths (see `ReviewState`'s doc comment).
-          BlocListener<ReviewBloc, ReviewState>(
-            listenWhen: (previous, current) =>
-                !previous.isSaved && current.isSaved,
-            listener: (context, state) {
-              final lo = AppLocalizations.of(context);
-              UiMessageService.showSuccess(lo.tSaved(lo.reviewReceipt));
-              HomePageRoute().go(context);
-            },
-          ),
-          // `failed` was reachable and had an `isFailed` getter, but NOTHING
-          // read it — a save that failed was completely silent, leaving the
-          // user on a screen that looked unchanged. Surfacing it is the
-          // other half of moving feedback off the dispatch site.
-          BlocListener<ReviewBloc, ReviewState>(
-            listenWhen: (previous, current) =>
-                !previous.isFailed && current.isFailed,
-            listener: (context, state) => UiMessageService.showError(
-              AppLocalizations.of(context).tSaveFailed,
+          listeners: [
+            // Two DISTINCT terminal statuses, two DISTINCT navigations — a
+            // shared `saved` status here would fire the wrong route for one
+            // of the two exit paths (see `ReviewState`'s doc comment).
+            BlocListener<ReviewBloc, ReviewState>(
+              listenWhen: (previous, current) =>
+                  !previous.isSaved && current.isSaved,
+              listener: (context, state) {
+                final lo = AppLocalizations.of(context);
+                UiMessageService.showSuccess(lo.tSaved(lo.reviewReceipt));
+                HomePageRoute().go(context);
+              },
             ),
-          ),
-          BlocListener<ReviewBloc, ReviewState>(
-            listenWhen: (previous, current) =>
-                !previous.isSavedThenCorrect && current.isSavedThenCorrect,
-            listener: (context, state) {
-              final receiptId = state.savedReceiptId;
-              if (receiptId == null) return;
-              EditReceiptPageRoute(receiptId: receiptId).go(context);
-            },
-          ),
-        ],
+            // `failed` was reachable and had an `isFailed` getter, but NOTHING
+            // read it — a save that failed was completely silent, leaving the
+            // user on a screen that looked unchanged. Surfacing it is the
+            // other half of moving feedback off the dispatch site.
+            BlocListener<ReviewBloc, ReviewState>(
+              listenWhen: (previous, current) =>
+                  !previous.isFailed && current.isFailed,
+              listener: (context, state) => UiMessageService.showError(
+                AppLocalizations.of(context).tSaveFailed,
+              ),
+            ),
+            BlocListener<ReviewBloc, ReviewState>(
+              listenWhen: (previous, current) =>
+                  !previous.isCorrecting && current.isCorrecting,
+              // PUSHED, not `.go()`: the Edit screen is a staging step the
+              // user must be able to Cancel out of, back to THIS screen with
+              // its state intact. `.go()` replaced the stack, which is why
+              // Cancel had nowhere to return to.
+              listener: (context, state) async {
+                await const EditReceiptPageRoute(
+                  receiptId: kPendingDraftReceiptId,
+                ).push<void>(context);
+                if (!context.mounted) return;
+                // Reload on return so Review shows the corrections, and so
+                // the status leaves `correcting` — otherwise the
+                // `listenWhen` transition below could never fire again and
+                // Correct would be a one-shot button.
+                _reviewBloc.add(const ReviewEvent.load());
+              },
+            ),
+          ],
         child: ReviewScaffold(
           controllerFor: _controllerFor,
           onBack: _onBack,

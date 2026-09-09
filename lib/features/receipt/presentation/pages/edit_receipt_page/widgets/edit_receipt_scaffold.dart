@@ -7,6 +7,7 @@ import '../../../../../../core/resources/text/app_text_theme.dart';
 import '../../../../../../core/widgets/app_container.dart';
 import '../../../../../../core/widgets/gradient_cta_button.dart';
 import '../../../../../../core/widgets/padding/horizontal_padding.dart';
+import '../../../../../product/domain/models/product/e_unit.dart';
 import '../../../bloc/edit_receipt_bloc/edit_receipt_bloc.dart';
 import 'edit_item_row.dart';
 
@@ -29,6 +30,7 @@ class EditReceiptScaffold extends StatelessWidget {
   final VoidCallback onAddItem;
   final void Function(String itemId, String value) onItemNameChanged;
   final void Function(String itemId, String value) onItemQuantityChanged;
+  final void Function(String itemId) onCycleItemUnit;
   final void Function(String itemId, String value) onItemPriceChanged;
   final ValueChanged<String> onPrintedTotalChanged;
 
@@ -45,6 +47,7 @@ class EditReceiptScaffold extends StatelessWidget {
     required this.onAddItem,
     required this.onItemNameChanged,
     required this.onItemQuantityChanged,
+    required this.onCycleItemUnit,
     required this.onItemPriceChanged,
     required this.onPrintedTotalChanged,
   });
@@ -249,7 +252,14 @@ class EditReceiptScaffold extends StatelessWidget {
                                 item.id,
                                 item.lineTotal.toStringAsFixed(2),
                               ),
-                              qtyLabel: lo.qty,
+                              // A weighed item's quantity IS its weight, so
+                              // the field must say so — labelling `0.488 kg`
+                              // as "Qty" reads as 0.488 pieces.
+                              qtyLabel: switch (item.unit) {
+                                EUnit.kilogram => lo.qtyKg,
+                                EUnit.liter => lo.qtyL,
+                                EUnit.piece => lo.qty,
+                              },
                               priceLabel: lo.price,
                               rawLine: item.rawName,
                               onRemove: () => onRemoveItem(item.id),
@@ -257,6 +267,7 @@ class EditReceiptScaffold extends StatelessWidget {
                                   onItemNameChanged(item.id, value),
                               onQuantityChanged: (value) =>
                                   onItemQuantityChanged(item.id, value),
+                              onCycleUnit: () => onCycleItemUnit(item.id),
                               onPriceChanged: (value) =>
                                   onItemPriceChanged(item.id, value),
                             ),

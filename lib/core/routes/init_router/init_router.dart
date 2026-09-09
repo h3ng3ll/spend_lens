@@ -94,25 +94,30 @@ class GoRouterRefreshListenable extends ChangeNotifier {
   }
 }
 
-/// Fade transition shared by every top-level push
-/// (design_spendlens.md §5 — "one shared `slideUpPage()` transition helper").
-/// Named to match the design's `slUp` timing family; the concrete curve/
-/// duration match the design tokens once M5 builds real screens — M4 needs
-/// only ONE shared helper every route below calls, not per-route bespoke
-/// transitions.
-CustomTransitionPage<void> slideUpPage(Widget child) {
-  return CustomTransitionPage<void>(
-    child: child,
-    transitionsBuilder: (context, animation, secondaryAnimation, child) {
-      return SlideTransition(
-        position: Tween<Offset>(
-          begin: const Offset(0.0, 1.0),
-          end: Offset.zero,
-        ).animate(CurvedAnimation(parent: animation, curve: Curves.easeOut)),
-        child: child,
-      );
-    },
-  );
+/// The ONE shared page builder every top-level route below calls
+/// (design_spendlens.md §5 — "one shared transition helper", never
+/// per-route bespoke transitions).
+///
+/// Renamed from `slideUpPage`: it no longer slides, and a name describing a
+/// transition the code does not perform is how the modal-looking push
+/// survived review in the first place.
+///
+/// Uses the PLATFORM DEFAULT transition — a horizontal push on iOS, the
+/// platform's own page animation on Android — because these are ordinary
+/// pushed PAGES, not modals.
+///
+/// It previously slid the whole page up from the bottom edge
+/// (`Offset(0, 1)` -> `zero`), which is the modal-sheet gesture and read as
+/// wrong on a normal push. That was also a misreading of the design: its
+/// `slUp` keyframe is `translateY(24px)` + `opacity 0 -> 1` — a subtle
+/// 24-PIXEL fade-and-rise applied to a screen's CONTENT — not a
+/// full-viewport-height page slide. (The old doc comment here said "Fade
+/// transition" while the code slid, which is the tell.)
+///
+/// Real bottom sheets are unaffected: they use `showModalBottomSheet`,
+/// which is a different mechanism entirely.
+Page<void> appPage(Widget child) {
+  return MaterialPage<void>(child: child);
 }
 
 // ─────────────────────────── top level ────────────────────────────────
@@ -130,7 +135,7 @@ class SplashPageRoute extends GoRouteData with $SplashPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const LoadingDataWidget());
+    return appPage(const LoadingDataWidget());
   }
 }
 
@@ -140,7 +145,7 @@ class OnboardingPageRoute extends GoRouteData with $OnboardingPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const OnboardingPage());
+    return appPage(const OnboardingPage());
   }
 }
 
@@ -254,7 +259,7 @@ class NewStorePageRoute extends GoRouteData with $NewStorePageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const NewStorePage());
+    return appPage(const NewStorePage());
   }
 }
 
@@ -269,7 +274,7 @@ class StoreDetailPageRoute extends GoRouteData with $StoreDetailPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(StoreDetailPage(storeId: storeId));
+    return appPage(StoreDetailPage(storeId: storeId));
   }
 }
 
@@ -282,7 +287,7 @@ class ChooseStorePageRoute extends GoRouteData with $ChooseStorePageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const ChooseStorePage());
+    return appPage(const ChooseStorePage());
   }
 }
 
@@ -300,7 +305,7 @@ class NewCategoryPageRoute extends GoRouteData with $NewCategoryPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const NewCategoryPage());
+    return appPage(const NewCategoryPage());
   }
 }
 
@@ -313,7 +318,7 @@ class CategoriesPageRoute extends GoRouteData with $CategoriesPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const CategoryPage());
+    return appPage(const CategoryPage());
   }
 }
 
@@ -331,7 +336,7 @@ class RecordDetailPageRoute extends GoRouteData with $RecordDetailPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(RecordDetailPage(recordId: recordId));
+    return appPage(RecordDetailPage(recordId: recordId));
   }
 }
 
@@ -346,9 +351,19 @@ class ReceiptPhotoPageRoute extends GoRouteData with $ReceiptPhotoPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(ReceiptPhotoPage(receiptId: receiptId));
+    return appPage(ReceiptPhotoPage(receiptId: receiptId));
   }
 }
+
+/// The `receiptId` value meaning "correct the UNSAVED scan currently held
+/// on `PendingReceiptDraftStore`", used by Review's `Correct` button.
+///
+/// Review's Correct is pure navigation per the design — nothing is
+/// persisted until Save Receipt — so at that point there is no receipt id
+/// to route with. A sentinel keeps the route's `:receiptId` contract (and
+/// its deep-linkability for a real saved receipt) instead of making the
+/// parameter nullable for one caller.
+const String kPendingDraftReceiptId = 'pending';
 
 @TypedGoRoute<EditReceiptPageRoute>(path: '/receipt/:receiptId/edit')
 class EditReceiptPageRoute extends GoRouteData with $EditReceiptPageRoute {
@@ -361,7 +376,7 @@ class EditReceiptPageRoute extends GoRouteData with $EditReceiptPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(EditReceiptPage(receiptId: receiptId));
+    return appPage(EditReceiptPage(receiptId: receiptId));
   }
 }
 
@@ -374,7 +389,7 @@ class ScannerPageRoute extends GoRouteData with $ScannerPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const ScannerPage());
+    return appPage(const ScannerPage());
   }
 }
 
@@ -387,7 +402,7 @@ class ReviewPageRoute extends GoRouteData with $ReviewPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const ReviewPage());
+    return appPage(const ReviewPage());
   }
 }
 
@@ -400,7 +415,7 @@ class CashExpensePageRoute extends GoRouteData with $CashExpensePageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const CashExpensePage());
+    return appPage(const CashExpensePage());
   }
 }
 
@@ -415,7 +430,7 @@ class PriceHistoryPageRoute extends GoRouteData with $PriceHistoryPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(PriceHistoryPage(productId: productId));
+    return appPage(PriceHistoryPage(productId: productId));
   }
 }
 
@@ -428,7 +443,7 @@ class ProfilePageRoute extends GoRouteData with $ProfilePageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const ProfilePage());
+    return appPage(const ProfilePage());
   }
 }
 
@@ -441,7 +456,7 @@ class PrivacyPageRoute extends GoRouteData with $PrivacyPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const PrivacyPage());
+    return appPage(const PrivacyPage());
   }
 }
 
@@ -454,6 +469,6 @@ class AboutPageRoute extends GoRouteData with $AboutPageRoute {
 
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return slideUpPage(const AboutPage());
+    return appPage(const AboutPage());
   }
 }

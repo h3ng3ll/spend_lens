@@ -1044,6 +1044,12 @@ class AppLocalizationsRo extends AppLocalizations {
   String get qty => 'Cant.';
 
   @override
+  String get qtyKg => 'Kg';
+
+  @override
+  String get qtyL => 'L';
+
+  @override
   String get total => 'Total';
 
   @override

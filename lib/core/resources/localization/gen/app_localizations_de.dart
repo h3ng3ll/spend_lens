@@ -1034,6 +1034,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get qty => 'Menge';
 
   @override
+  String get qtyKg => 'Kg';
+
+  @override
+  String get qtyL => 'L';
+
+  @override
   String get total => 'Gesamt';
 
   @override

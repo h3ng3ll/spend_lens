@@ -74,7 +74,7 @@ class ReviewScaffold extends StatelessWidget {
       );
     }
 
-    if (!state.isReady && !state.isSaved) {
+    if (!state.hasContent) {
       return Scaffold(
         backgroundColor: scheme.bg,
         body: const Center(child: CircularProgressIndicator()),

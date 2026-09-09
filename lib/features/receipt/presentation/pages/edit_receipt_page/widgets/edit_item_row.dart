@@ -24,6 +24,9 @@ class EditItemRow extends StatelessWidget {
   final VoidCallback onRemove;
   final ValueChanged<String> onNameChanged;
   final ValueChanged<String> onQuantityChanged;
+
+  /// Tapping the qty/unit label cycles the item's unit of measure.
+  final VoidCallback onCycleUnit;
   final ValueChanged<String> onPriceChanged;
 
   const EditItemRow({
@@ -37,6 +40,7 @@ class EditItemRow extends StatelessWidget {
     required this.onRemove,
     required this.onNameChanged,
     required this.onQuantityChanged,
+    required this.onCycleUnit,
     required this.onPriceChanged,
   });
 
@@ -102,10 +106,20 @@ class EditItemRow extends StatelessWidget {
                     child: Row(
                       spacing: 6.0,
                       children: [
-                        Text(
-                          qtyLabel,
-                          style: textTheme.subhead15.copyWith(
-                            color: scheme.ter,
+                        // The label is the unit CONTROL, not decoration:
+                        // OCR reads `kg` as `kq`/`ka` often enough that the
+                        // parsed unit is a guess the user must be able to
+                        // correct — and on a weighed line the quantity IS
+                        // the weight, so a wrong unit mislabels the number.
+                        GestureDetector(
+                          onTap: onCycleUnit,
+                          child: Text(
+                            qtyLabel,
+                            style: textTheme.subhead15.copyWith(
+                              color: scheme.accent,
+                              decoration: TextDecoration.underline,
+                              decorationColor: scheme.accent,
+                            ),
                           ),
                         ),
                         Expanded(

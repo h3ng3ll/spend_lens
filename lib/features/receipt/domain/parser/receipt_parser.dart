@@ -108,8 +108,14 @@ class ReceiptParser {
     // read for `total` below.
     var reachedTotal = false;
 
-    // The NAME half of a wrapped item, awaiting the price line below it.
-    String? pendingName;
+    // The NAME fragments of a wrapped item, awaiting the price line below
+    // them — a LIST, because a long product name wraps across more than
+    // one line and a single slot silently kept only the last fragment.
+    //
+    // `Conserva cu carne tocata de` / `porc/gain 1 buc x 54.99- 54.99 A`
+    // reported its name as just `porc/gain`: the price line's own prefix
+    // won because the fragment above had already been overwritten.
+    final pendingNameParts = <String>[];
 
     for (final line in normalizedLines) {
       // ── Structural filters, applied BEFORE keyword classification ──
@@ -139,13 +145,21 @@ class ReceiptParser {
           lineIndex: itemLineIndex,
         );
         if (built != null) {
+          // The name comes from EVERY held fragment above, joined in print
+          // order; the numbers come from this line. `built.rawName` is
+          // appended last because a continuation line can carry a trailing
+          // name fragment of its own (`porc/gain 1 buc x 54.99`), which is
+          // the final piece of the name, not a separate product.
+          final nameParts = [...pendingNameParts, built.rawName]
+              .map((part) => part.trim())
+              .where((part) => part.isNotEmpty)
+              .toList();
+
           items.add(
-            pendingName == null
+            nameParts.isEmpty
                 ? built
                 : ParsedLineCandidate(
-                    // The name comes from the line above, the numbers from
-                    // this one.
-                    rawName: pendingName,
+                    rawName: nameParts.join(' '),
                     quantity: built.quantity,
                     unit: built.unit,
                     unitPrice: built.unitPrice,
@@ -156,7 +170,7 @@ class ReceiptParser {
           );
           itemLineIndex++;
         }
-        pendingName = null;
+        pendingNameParts.clear();
         continue;
       }
 
@@ -196,7 +210,12 @@ class ReceiptParser {
           // and `...45% 130g BREST` at 130.00 from the gram weight,
           // stranding their real price lines below.
           if (_structureResolver.isNameOnlyLine(line.text)) {
-            pendingName = line.text;
+            // A promo banner (`O ! PRET MIC`) sits above an item and is
+            // not part of its name — accumulating it would prepend the
+            // banner to the product.
+            if (!_structureResolver.isPromoBanner(line.text)) {
+              pendingNameParts.add(line.text);
+            }
             continue;
           }
 
@@ -207,18 +226,49 @@ class ReceiptParser {
             lineIndex: itemLineIndex,
           );
           if (candidate != null) {
-            // A self-contained item line: name AND price on one row.
-            items.add(candidate);
+            // A priced line, with any held name fragments PREPENDED.
+            //
+            // A receipt prints an item as: one line of name text, then a
+            // second line carrying the REST of the name (only when the
+            // name was too long to fit) plus the price, right-aligned. So
+            // this line's own leading text is the TAIL of the name above,
+            // not a new product — `Conserva cu carne tocata de` +
+            // `porc/gain 1 buc x 54.99` is ONE item whose full name is
+            // `Conserva cu carne tocata de porc/gain`.
+            //
+            // Without this, the fragments were simply discarded here and
+            // the item was named `porc/gain` — the price line's prefix
+            // alone.
+            final nameParts = [...pendingNameParts, candidate.rawName]
+                .map((part) => part.trim())
+                .where((part) => part.isNotEmpty)
+                .toList();
+
+            items.add(
+              pendingNameParts.isEmpty
+                  ? candidate
+                  : ParsedLineCandidate(
+                      rawName: nameParts.join(' '),
+                      quantity: candidate.quantity,
+                      unit: candidate.unit,
+                      unitPrice: candidate.unitPrice,
+                      lineTotal: candidate.lineTotal,
+                      confidence: candidate.confidence,
+                      lineIndex: itemLineIndex,
+                    ),
+            );
             itemLineIndex++;
-            pendingName = null;
+            pendingNameParts.clear();
           } else {
             // No price on this line. On a wrapping receipt that is the
             // NAME half of an item whose numbers print on the next row, so
             // it is held rather than discarded. On a non-wrapping receipt
             // it is simply stray text, and holding it is harmless: it is
             // only ever consumed by an immediately following continuation
-            // line, and overwritten by the next name-only line otherwise.
-            pendingName = line.text;
+            // line, and cleared by the next completed item otherwise.
+            if (!_structureResolver.isPromoBanner(line.text)) {
+              pendingNameParts.add(line.text);
+            }
           }
       }
     }

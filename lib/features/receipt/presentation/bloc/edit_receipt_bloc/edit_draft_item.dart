@@ -24,6 +24,7 @@ class EditDraftItem {
   EditDraftItem copyWith({
     String? name,
     double? quantity,
+    EUnit? unit,
     double? lineTotal,
   }) {
     return EditDraftItem(
@@ -31,7 +32,7 @@ class EditDraftItem {
       rawName: rawName,
       name: name ?? this.name,
       quantity: quantity ?? this.quantity,
-      unit: unit,
+      unit: unit ?? this.unit,
       lineTotal: lineTotal ?? this.lineTotal,
     );
   }

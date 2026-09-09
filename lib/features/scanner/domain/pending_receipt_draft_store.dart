@@ -49,6 +49,25 @@ class PendingReceiptDraftStore {
     _current = draft;
   }
 
+  /// Replaces the held draft's parsed receipt, keeping its image.
+  ///
+  /// This is how the Edit screen hands corrections BACK to Review without
+  /// anything being persisted. The design's `Correct` is a pure screen
+  /// switch (`goEdit: () => setState({screen:'edit'})`) and
+  /// `Apply corrections` returns to review
+  /// (`goReview: () => setState({screen:'review', fixed:true})`) — only
+  /// `saveReceipt` ever writes. Previously `Correct` ran the FULL persist
+  /// first, so a receipt, its items, its products and its expense were all
+  /// committed before the user ever saw a Save button.
+  void updateParsedReceipt(ParsedReceipt parsedReceipt) {
+    final existing = _current;
+    if (existing == null) return;
+    _current = PendingReceiptDraft(
+      parsedReceipt: parsedReceipt,
+      imageFilename: existing.imageFilename,
+    );
+  }
+
   void clear() {
     _current = null;
   }

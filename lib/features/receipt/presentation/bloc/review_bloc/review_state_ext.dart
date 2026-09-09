@@ -7,7 +7,15 @@ extension ReviewStateX on ReviewState {
 
   bool get isSaved => status == EReviewStatus.saved;
 
-  bool get isSavedThenCorrect => status == EReviewStatus.savedThenCorrect;
+  bool get isCorrecting => status == EReviewStatus.correcting;
+
+  /// Whether the review CONTENT should render.
+  ///
+  /// `correcting` is a transient navigation trigger, not a loading state —
+  /// the parsed receipt is fully in hand. Treating it as "not ready" left a
+  /// permanent `CircularProgressIndicator` on Review once the user popped
+  /// back from the Edit screen.
+  bool get hasContent => isReady || isSaved || isCorrecting;
 
   bool get isFailed => status == EReviewStatus.failed;
 

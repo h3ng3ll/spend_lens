@@ -10,6 +10,9 @@ import '../../../domain/models/receipt/receipt.dart';
 import '../../../domain/models/receipt_item/receipt_item.dart';
 import '../../../domain/repositories/i_receipt_item_local_repository.dart';
 import '../../../domain/repositories/i_receipt_local_repository.dart';
+import '../../../../scanner/domain/pending_receipt_draft_store.dart';
+import '../../../../../core/routes/init_router/init_router.dart';
+import '../../../domain/parser/parsed_receipt.dart';
 import '../../../domain/rules/receipt_reconciler.dart';
 import 'edit_draft_item.dart';
 
@@ -38,11 +41,13 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
   final IProductLocalRepository _productRepository;
   final IStoreLocalRepository _storeRepository;
   final ProductNormalizer _productNormalizer;
+  final PendingReceiptDraftStore _draftStore;
   final ReceiptReconciler _reconciler;
   final DateTime Function() _now;
 
   EditReceiptBloc({
     required this._receiptRepository,
+    required this._draftStore,
     required this._receiptItemRepository,
     required this._productRepository,
     required this._storeRepository,
@@ -57,6 +62,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
     on<_SetPrintedTotal>(_onSetPrintedTotal);
     on<_UpdateItemName>(_onUpdateItemName);
     on<_UpdateItemQuantity>(_onUpdateItemQuantity);
+    on<_CycleItemUnit>(_onCycleItemUnit);
     on<_UpdateItemPrice>(_onUpdateItemPrice);
     on<_RemoveItem>(_onRemoveItem);
     on<_AddItem>(_onAddItem);
@@ -65,6 +71,14 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
 
   Future<void> _onLoad(_Load event, Emitter<EditReceiptState> emit) async {
     emit(state.copyWith(status: EEditReceiptStatus.loading));
+
+    // The UNSAVED path: Review's `Correct` is pure navigation, so there is
+    // no persisted receipt to read — the in-progress scan lives on the
+    // draft store.
+    if (event.receiptId == kPendingDraftReceiptId) {
+      _loadFromPendingDraft(emit);
+      return;
+    }
 
     final receipt = await _receiptRepository.getById(event.receiptId);
     if (receipt == null) {
@@ -109,6 +123,96 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
             .matches,
       ),
     );
+  }
+
+  /// Loads the in-progress, UNSAVED scan from [PendingReceiptDraftStore].
+  ///
+  /// `receiptId` is left NULL in the emitted state — that null is what
+  /// [_onSave] branches on to write corrections back to the draft instead
+  /// of to Hive, so an unsaved receipt stays unsaved.
+  void _loadFromPendingDraft(Emitter<EditReceiptState> emit) {
+    final draft = _draftStore.current;
+    if (draft == null) {
+      emit(
+        state.copyWith(
+          status: EEditReceiptStatus.failed,
+          errorMessage: 'receipt_not_found',
+        ),
+      );
+      return;
+    }
+
+    final parsed = draft.parsedReceipt;
+    final items = [
+      for (final candidate in parsed.items)
+        EditDraftItem(
+          id: '${candidate.lineIndex}',
+          rawName: candidate.rawName,
+          name: candidate.rawName,
+          quantity: candidate.quantity,
+          unit: candidate.unit,
+          lineTotal: candidate.lineTotal,
+        ),
+    ];
+
+    emit(
+      state.copyWith(
+        status: EEditReceiptStatus.ready,
+        purchasedAt: parsed.purchasedAt,
+        printedTotal: parsed.total,
+        items: items,
+        matchesTotal: _reconciler
+            .reconcile(
+              printedTotal: parsed.total,
+              itemsTotal: items.fold(0.0, (sum, i) => sum + i.lineTotal),
+            )
+            .matches,
+      ),
+    );
+  }
+
+  /// Writes the corrections back onto the draft — NOT to Hive.
+  ///
+  /// "Apply corrections" on an unsaved scan returns to Review with the
+  /// edits applied; only Review's Save Receipt persists anything.
+  void _applyCorrectionsToDraft(Emitter<EditReceiptState> emit) {
+    final existing = _draftStore.current;
+    if (existing == null) {
+      emit(
+        state.copyWith(
+          status: EEditReceiptStatus.failed,
+          errorMessage: 'save_failed',
+        ),
+      );
+      return;
+    }
+
+    _draftStore.updateParsedReceipt(
+      ParsedReceipt(
+        storeName: existing.parsedReceipt.storeName,
+        purchasedAt: state.purchasedAt ?? existing.parsedReceipt.purchasedAt,
+        total: state.printedTotal,
+        discount: existing.parsedReceipt.discount,
+        items: [
+          for (var i = 0; i < state.items.length; i++)
+            ParsedLineCandidate(
+              // An OCR-derived row keeps its ORIGINAL rawName (spec §11);
+              // a manually-added row has none, so its typed name becomes
+              // the rawName exactly as the Hive path does.
+              rawName: state.items[i].rawName.isEmpty
+                  ? state.items[i].name
+                  : state.items[i].rawName,
+              quantity: state.items[i].quantity,
+              unit: state.items[i].unit,
+              lineTotal: state.items[i].lineTotal,
+              confidence: 1.0,
+              lineIndex: i,
+            ),
+        ],
+      ),
+    );
+
+    emit(state.copyWith(status: EEditReceiptStatus.saved));
   }
 
   /// Resolves the picked store id against the repository — used to be a
@@ -173,6 +277,25 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
     emit(state.copyWith(items: updated));
   }
 
+  /// Advances one item's unit: piece -> kilogram -> liter -> piece.
+  ///
+  /// A cycle rather than a picker sheet: three values is short enough that
+  /// tapping through is faster than opening and dismissing a modal, and it
+  /// adds no new screen.
+  void _onCycleItemUnit(_CycleItemUnit event, Emitter<EditReceiptState> emit) {
+    final updated = state.items.map((item) {
+      if (item.id != event.itemId) return item;
+      return item.copyWith(
+        unit: switch (item.unit) {
+          EUnit.piece => EUnit.kilogram,
+          EUnit.kilogram => EUnit.liter,
+          EUnit.liter => EUnit.piece,
+        },
+      );
+    }).toList();
+    emit(state.copyWith(items: updated));
+  }
+
   void _onUpdateItemPrice(
     _UpdateItemPrice event,
     Emitter<EditReceiptState> emit,
@@ -212,7 +335,13 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
 
   Future<void> _onSave(_Save event, Emitter<EditReceiptState> emit) async {
     final receiptId = state.receiptId;
-    if (receiptId == null) return;
+    // A null receiptId means the UNSAVED draft path — corrections go back
+    // onto the draft store, not into Hive. (This used to `return` silently,
+    // which would now make Apply-corrections a dead button.)
+    if (receiptId == null) {
+      _applyCorrectionsToDraft(emit);
+      return;
+    }
 
     try {
       final now = _now();

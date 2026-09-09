@@ -640,6 +640,8 @@
   "autoDetected": "Auto-detected",
   "addItem": "Add item",
   "qty": "Qty",
+  "qtyKg": "Kg",
+  "qtyL": "L",
   "total": "Total",
   "usedForPrice": "used for price history",
   "subtotal": "Subtotal",

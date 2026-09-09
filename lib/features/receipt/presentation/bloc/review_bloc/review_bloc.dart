@@ -8,6 +8,7 @@ import '../../../../product/domain/normalizer/product_match_result.dart';
 import '../../../../product/domain/normalizer/product_normalizer.dart';
 import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../../scanner/domain/pending_receipt_draft_store.dart';
+import '../../../domain/parser/parsed_receipt.dart';
 import '../../../domain/models/receipt/receipt.dart';
 import '../../../domain/models/receipt_item/receipt_item.dart';
 import '../../../domain/repositories/i_receipt_item_local_repository.dart';
@@ -164,17 +165,43 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     emit(state.copyWith(status: EReviewStatus.saved, savedReceiptId: receiptId));
   }
 
-  Future<void> _onSaveAndCorrect(
-    _SaveAndCorrect event,
-    Emitter<ReviewState> emit,
-  ) async {
-    final receiptId = await _persist();
-    emit(
-      state.copyWith(
-        status: EReviewStatus.savedThenCorrect,
-        savedReceiptId: receiptId,
+  /// `Correct` NAVIGATES — it does not save.
+  ///
+  /// This previously ran the full [_persist], committing the receipt, its
+  /// items, its products AND its expense before the user had seen a Save
+  /// button, let alone tapped one. The design is explicit that the
+  /// Correct → Edit → Apply-corrections loop is pure navigation
+  /// (`goEdit`/`goReview` are `setState` screen switches) and that
+  /// `saveReceipt` is the ONLY writer.
+  ///
+  /// The current in-progress edits are pushed back onto the draft store so
+  /// the Edit screen loads what the user is actually looking at — including
+  /// any item renames made here — rather than re-reading the original parse.
+  void _onSaveAndCorrect(_SaveAndCorrect event, Emitter<ReviewState> emit) {
+    _draftStore.updateParsedReceipt(
+      ParsedReceipt(
+        storeName: state.storeName,
+        purchasedAt: state.purchasedAt,
+        total: state.printedTotal,
+        items: [
+          for (var i = 0; i < state.items.length; i++)
+            ParsedLineCandidate(
+              // `rawName` is preserved byte-for-byte (spec §11) — only
+              // `name` is user-editable, and it is carried separately so
+              // the Edit screen shows the edited text.
+              rawName: state.items[i].rawName,
+              quantity: state.items[i].quantity,
+              unit: state.items[i].unit,
+              unitPrice: state.items[i].unitPrice,
+              lineTotal: state.items[i].lineTotal,
+              confidence: state.items[i].confidence,
+              lineIndex: i,
+            ),
+        ],
       ),
     );
+
+    emit(state.copyWith(status: EReviewStatus.correcting));
   }
 
   /// Shared persistence path for both [_onSave] and [_onSaveAndCorrect] —

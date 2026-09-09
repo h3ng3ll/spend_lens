@@ -1036,6 +1036,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get qty => 'Qté';
 
   @override
+  String get qtyKg => 'Kg';
+
+  @override
+  String get qtyL => 'L';
+
+  @override
   String get total => 'Total';
 
   @override

@@ -28,6 +28,6 @@ sealed class ReviewEvent with _$ReviewEvent {
 
   /// Save, then route to Edit-receipt for further correction (the
   /// "Correct" secondary action) — a DISTINCT terminal status from `save`,
-  /// see [EReviewStatus.savedThenCorrect].
+  /// see [EReviewStatus.correcting].
   const factory ReviewEvent.saveAndCorrect() = _SaveAndCorrect;
 }

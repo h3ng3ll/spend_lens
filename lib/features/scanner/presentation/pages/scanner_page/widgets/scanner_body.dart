@@ -37,7 +37,16 @@ class ScannerBody extends StatelessWidget {
   const ScannerBody({super.key, required this._receiptLocalRepository});
 
   void _onReady(BuildContext context) {
-    ReviewPageRoute().go(context);
+    // pushReplacement, NOT `.go()`: this REPLACES the scanner with Review
+    // while KEEPING Home beneath it.
+    //
+    // `.go()` replaced the whole stack, leaving Review with nothing to pop
+    // — so Android's back gesture fell through to the OS and exited the
+    // app. It still must not be a plain `push`: backing into a finished
+    // scanner session would hold a disposed camera controller. Replacing
+    // just the scanner gives both — the camera route is gone, and back
+    // lands on Home.
+    ReviewPageRoute().pushReplacement(context);
   }
 
   void _onTryAgain(BuildContext context) {
@@ -46,7 +55,9 @@ class ScannerBody extends StatelessWidget {
 
   /// Enter Manually creates a blank [Receipt] (empty items, zero total) so
   /// `EditReceiptPageRoute` — which requires a `receiptId` — always has a
-  /// real record to load, then pushes it. The captured image is preserved
+  /// real record to load, then REPLACES the scanner with it (keeping Home
+  /// beneath, so Cancel and the back gesture both land there). The
+  /// captured image is preserved
   /// on the draft store; this path does not need it (a manual entry starts
   /// from a blank form), but it is NEVER cleared/discarded here either
   /// (spec §66) — only a completed Review save or an explicit Retake clears
@@ -64,7 +75,10 @@ class ScannerBody extends StatelessWidget {
     );
     await _receiptLocalRepository.save(receipt);
     if (!context.mounted) return;
-    EditReceiptPageRoute(receiptId: receipt.id).go(context);
+    // Same reasoning as the Review handoff above: replace the scanner,
+    // keep Home beneath, so back/Cancel has somewhere to land instead of
+    // exiting the app.
+    EditReceiptPageRoute(receiptId: receipt.id).pushReplacement(context);
   }
 
   @override

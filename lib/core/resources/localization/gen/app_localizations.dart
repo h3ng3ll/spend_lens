@@ -1662,6 +1662,18 @@ abstract class AppLocalizations {
   /// **'Qty'**
   String get qty;
 
+  /// No description provided for @qtyKg.
+  ///
+  /// In en, this message translates to:
+  /// **'Kg'**
+  String get qtyKg;
+
+  /// No description provided for @qtyL.
+  ///
+  /// In en, this message translates to:
+  /// **'L'**
+  String get qtyL;
+
   /// No description provided for @total.
   ///
   /// In en, this message translates to:

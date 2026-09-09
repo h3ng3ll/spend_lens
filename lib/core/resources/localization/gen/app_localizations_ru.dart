@@ -1052,6 +1052,12 @@ class AppLocalizationsRu extends AppLocalizations {
   String get qty => 'Кол-во';
 
   @override
+  String get qtyKg => 'Кг';
+
+  @override
+  String get qtyL => 'Л';
+
+  @override
   String get total => 'Итого';
 
   @override

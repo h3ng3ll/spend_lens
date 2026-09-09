@@ -1,3 +1,5 @@
+import 'receipt_line_expression.dart';
+
 /// Which structural REGION of the receipt a grouped line belongs to.
 ///
 /// A fiscal receipt is not a flat list of lines — it has a fixed shape, and
@@ -100,14 +102,83 @@ class ReceiptStructureResolver {
   /// integer is deliberately NOT money here.
   static final _moneyToken = RegExp(r'\d{1,3}(?:[.,]\d{3})*[.,]\d{2}(?!\d)');
 
+  static const _expressionExtractor = ReceiptLineExpressionExtractor();
+
   const ReceiptStructureResolver();
 
   /// True when [line] is a wrapped item's price line rather than a product.
+  ///
+  /// The test is positional and delegated to
+  /// [ReceiptLineExpressionExtractor]: a continuation line is one whose
+  /// price expression starts at the very BEGINNING of the line, i.e. there
+  /// is no product name in front of it. `0.488 kq x7.49- 3.66 b` is a
+  /// continuation; `PASTE rigati 1 buc x 15.99- 15.99 A` prices itself and
+  /// is not.
+  ///
+  /// This replaced a second, independently-maintained regex that did not
+  /// recognize the real `QTY kg x PRICE= TOTAL TAXCODE` shape at all — so
+  /// every weighed continuation line fell through to the item branch and
+  /// became an item with an EMPTY name, instead of pairing with the name
+  /// printed on the row above. One extractor owning the expression grammar
+  /// means that shape can never drift between two places again.
   bool isPriceContinuation(String line) {
     final trimmed = line.trim();
     if (trimmed.isEmpty) return false;
-    return _continuationLine.hasMatch(trimmed);
+    if (!RegExp(r'^[\s_.,\-]*\d').hasMatch(trimmed)) return false;
+
+    final expression = _expressionExtractor.extract(trimmed);
+    if (expression == null) return _continuationLine.hasMatch(trimmed);
+
+    // Only leading punctuation/whitespace may precede the expression —
+    // anything word-like is a product name, making this a self-priced line.
+    final prefix = trimmed.substring(0, expression.startIndex);
+    return !RegExp(r'[A-Za-z]').hasMatch(prefix);
   }
+
+  /// Promotional banner text a till prints ABOVE an item, not part of any
+  /// product name.
+  ///
+  /// A real scan produced `O ! PRET MIC` ("special price") on its own line
+  /// directly above `Conserva cu carne tocata de`. It has letters and no
+  /// price, so it is indistinguishable from a name fragment by shape alone
+  /// — and once name fragments are ACCUMULATED rather than overwritten, a
+  /// banner would prepend itself to the product name
+  /// (`O ! PRET MIC Conserva cu carne tocata de porc/gain`). Matched by
+  /// vocabulary because that is the only thing that separates it.
+  bool isPromoBanner(String line) {
+    final trimmed = line.trim();
+    if (trimmed.isEmpty) return false;
+
+    // Strip the decorative punctuation these banners are wrapped in
+    // (`O ! PRET MIC`, `** REDUCERE **`) before matching.
+    final letters = trimmed
+        .toUpperCase()
+        .replaceAll(RegExp(r'[^A-Z\s]'), ' ')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+    if (letters.isEmpty) return false;
+
+    for (final keyword in promoKeywords) {
+      if (RegExp('(?<!\\w)${RegExp.escape(keyword)}(?!\\w)')
+          .hasMatch(letters)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  /// PRINTED promo vocabulary (Romanian/Moldovan tills), from the same
+  /// fixed non-localized vocabulary as [footerKeywords] — never the app's
+  /// own ARB labels.
+  static const promoKeywords = <String>[
+    'PRET MIC',
+    'PRET SPECIAL',
+    'REDUCERE',
+    'OFERTA',
+    'PROMO',
+    'PROMOTIE',
+    'SUPER PRET',
+  ];
 
   /// True when [line] names a product but prints NO price of its own — the
   /// first half of a wrapped item.

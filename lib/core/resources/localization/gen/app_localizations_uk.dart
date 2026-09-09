@@ -1054,6 +1054,12 @@ class AppLocalizationsUk extends AppLocalizations {
   String get qty => 'К-сть';
 
   @override
+  String get qtyKg => 'Кг';
+
+  @override
+  String get qtyL => 'Л';
+
+  @override
   String get total => 'Разом';
 
   @override

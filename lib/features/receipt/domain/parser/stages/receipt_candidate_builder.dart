@@ -1,4 +1,5 @@
 import '../parsed_receipt.dart';
+import 'receipt_line_expression.dart';
 import 'receipt_price_extractor.dart';
 import 'receipt_quantity_extractor.dart';
 import 'receipt_text_normalizer.dart';
@@ -14,11 +15,13 @@ class ReceiptCandidateBuilder {
   final ReceiptTextNormalizer _textNormalizer;
   final ReceiptPriceExtractor _priceExtractor;
   final ReceiptQuantityExtractor _quantityExtractor;
+  final ReceiptLineExpressionExtractor _expressionExtractor;
 
   const ReceiptCandidateBuilder({
     this._textNormalizer = const ReceiptTextNormalizer(),
     this._priceExtractor = const ReceiptPriceExtractor(),
     this._quantityExtractor = const ReceiptQuantityExtractor(),
+    this._expressionExtractor = const ReceiptLineExpressionExtractor(),
   });
 
   /// Builds a candidate from an already-grouped, already-classified line.
@@ -29,6 +32,43 @@ class ReceiptCandidateBuilder {
     required double lineConfidence,
     required int lineIndex,
   }) {
+    // The price/quantity EXPRESSION is a separate entity from the name, so
+    // it is located structurally and the name is taken as the text BEFORE
+    // it. The old approach stripped trailing numeric tokens anchored with
+    // `$`, which was a NO-OP on every real line — the tax code (`A`/`B`)
+    // prints after the numbers, so nothing ever matched and names came out
+    // as `0.500 kg x 116.99= 58.50 A`.
+    final expression = _expressionExtractor.extract(line);
+    if (expression != null) {
+      final lineTotal =
+          expression.lineTotal ??
+          _impliedLineTotal(expression) ??
+          _priceExtractor.extractLastPrice(line);
+      if (lineTotal == null) return null;
+
+      final rawName = _textNormalizer.normalizeLine(
+        line.substring(0, expression.startIndex),
+      );
+      // An EMPTY name here is legitimate and must not be discarded: it is
+      // the continuation half of a wrapped item whose name printed on the
+      // line above (`ReceiptParser` pairs it with its `pendingName`).
+      return ParsedLineCandidate(
+        rawName: rawName,
+        quantity: expression.quantity,
+        unit: expression.unit,
+        unitPrice:
+            expression.unitPrice ??
+            _quantityExtractor.comparableUnitPrice(
+              quantity: expression.quantity,
+              lineTotal: lineTotal,
+              unit: expression.unit,
+            ),
+        lineTotal: lineTotal,
+        confidence: lineConfidence,
+        lineIndex: lineIndex,
+      );
+    }
+
     final lineTotal = _priceExtractor.extractLastPrice(line);
     if (lineTotal == null) return null;
 
@@ -61,6 +101,20 @@ class ReceiptCandidateBuilder {
       confidence: lineConfidence,
       lineIndex: lineIndex,
     );
+  }
+
+  /// `qty x unitPrice` with the printed total cut off by OCR — the total
+  /// is recoverable arithmetically, which is strictly better than falling
+  /// back to "the last number on the line" (that would pick the unit price
+  /// and under-report a multi-quantity line).
+  double? _impliedLineTotal(ReceiptLineExpression expression) {
+    // ONLY when the receipt printed a total separator whose number OCR
+    // lost. Without that condition this also fired on `ROSII 1.2 kg @ 104`
+    // — where `104` IS the total, not a per-kg rate — and reported 124.80.
+    if (!expression.hasPrintedTotalSeparator) return null;
+    final unitPrice = expression.unitPrice;
+    if (unitPrice == null || expression.quantity <= 0) return null;
+    return (unitPrice * expression.quantity * 100).round() / 100;
   }
 
   /// Removes the trailing quantity/price tokens from the line, leaving
