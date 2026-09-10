@@ -1411,4 +1411,54 @@ class AppLocalizationsUk extends AppLocalizations {
   String storageUsedOf(String used, String total) {
     return '$used з $total';
   }
+
+  @override
+  String get premiumUpgradeTitle => 'Перейти на Premium';
+
+  @override
+  String premiumUpgradeSubtitle(String quota) {
+    return 'Необмежена історія, синхронізація між пристроями та $quota хмарного сховища.';
+  }
+
+  @override
+  String get planMonthly => 'Щомісяця';
+
+  @override
+  String get planYearly => 'Щороку';
+
+  @override
+  String get planMonthlyPrice => '€2,99 / місяць';
+
+  @override
+  String get planYearlyPrice => '€24,99 / рік';
+
+  @override
+  String get planYearlyNote => '2 місяці безкоштовно';
+
+  @override
+  String get planBestValue => 'Вигідніше';
+
+  @override
+  String get premiumFeatureHistory => 'Необмежена історія чеків';
+
+  @override
+  String get premiumFeatureSync => 'Синхронізація між пристроями';
+
+  @override
+  String premiumFeatureStorage(String quota) {
+    return '$quota хмарного сховища';
+  }
+
+  @override
+  String get premiumSubscribe => 'Оформити підписку';
+
+  @override
+  String get premiumRestore => 'Відновити покупку';
+
+  @override
+  String get premiumRestoreNothing => 'Попередню покупку не знайдено.';
+
+  @override
+  String get premiumTerms =>
+      'Поновлюється автоматично. Скасувати можна в App Store.';
 }

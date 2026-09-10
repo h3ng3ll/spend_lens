@@ -412,5 +412,20 @@
         "type": "String"
       }
     }
-  }
+  },
+  "premiumUpgradeTitle": "Passer à Premium",
+  "premiumUpgradeSubtitle": "Historique illimité, synchronisation multi-appareils et {quota} de stockage cloud.",
+  "planMonthly": "Mensuel",
+  "planYearly": "Annuel",
+  "planMonthlyPrice": "2,99 € / mois",
+  "planYearlyPrice": "24,99 € / an",
+  "planYearlyNote": "2 mois offerts",
+  "planBestValue": "Meilleure offre",
+  "premiumFeatureHistory": "Historique de tickets illimité",
+  "premiumFeatureSync": "Synchronisation entre vos appareils",
+  "premiumFeatureStorage": "{quota} de stockage cloud",
+  "premiumSubscribe": "S'abonner",
+  "premiumRestore": "Restaurer l'achat",
+  "premiumRestoreNothing": "Aucun achat précédent trouvé.",
+  "premiumTerms": "Renouvellement automatique. Annulable à tout moment dans l'App Store."
 }

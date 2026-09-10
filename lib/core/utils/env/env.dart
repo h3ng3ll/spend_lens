@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// App environment configuration.
@@ -14,7 +16,7 @@ abstract class Env {
 
   String get googleIosReversedClientId;
 
-  String get apphudApiKey;
+  String get appHudApiKey;
 
   int get freeReceiptLimit;
 }
@@ -24,17 +26,21 @@ class ConcreteEnv implements Env {
   static const int _defaultFreeReceiptLimit = 50;
 
   @override
-  String get googleServerClientId => dotenv.get('GOOGLE_SERVER_CLIENT_ID', fallback: '');
+  String get googleServerClientId =>
+      dotenv.get('GOOGLE_SERVER_CLIENT_ID', fallback: '');
 
   @override
-  String get googleIosClientId => dotenv.get('GOOGLE_IOS_CLIENT_ID', fallback: '');
+  String get googleIosClientId =>
+      dotenv.get('GOOGLE_IOS_CLIENT_ID', fallback: '');
 
   @override
   String get googleIosReversedClientId =>
       dotenv.get('GOOGLE_IOS_REVERSED_CLIENT_ID', fallback: '');
 
   @override
-  String get apphudApiKey => dotenv.get('APPHUD_API_KEY', fallback: '');
+  String get appHudApiKey => Platform.isAndroid
+      ? dotenv.get('APPHUD_GOOGLE_PLAY_API_KEY', fallback: '')
+      : dotenv.get('APPHUD_APP_STORE_API_KEY', fallback: '');
 
   @override
   int get freeReceiptLimit {

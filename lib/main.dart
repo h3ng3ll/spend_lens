@@ -24,6 +24,7 @@ import 'features/analytics/di/analytics_injection.dart';
 import 'features/auth/di/auth_injection.dart';
 import 'features/auth/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'features/backup/di/backup_injection.dart';
+import 'features/subscription/di/subscription_injection.dart';
 import 'features/category/di/category_injection.dart';
 import 'features/category/domain/repositories/i_category_local_repository.dart';
 import 'features/category/domain/use_cases/seed_categories_use_case.dart';
@@ -121,6 +122,7 @@ void main() async {
   initAnalyticsFeature();
   initScannerFeature();
   initBackupFeature();
+  initSubscriptionFeature();
 
   // First-launch category seed (design_spendlens.md §7). THE GUARD IS
   // isEmpty && !dataCleared — never isEmpty alone, or a store the user

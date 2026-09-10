@@ -1401,4 +1401,55 @@ class AppLocalizationsRo extends AppLocalizations {
   String storageUsedOf(String used, String total) {
     return '$used din $total';
   }
+
+  @override
+  String get premiumUpgradeTitle => 'Treci la Premium';
+
+  @override
+  String premiumUpgradeSubtitle(String quota) {
+    return 'Istoric nelimitat, sincronizare între dispozitive și $quota de stocare în cloud.';
+  }
+
+  @override
+  String get planMonthly => 'Lunar';
+
+  @override
+  String get planYearly => 'Anual';
+
+  @override
+  String get planMonthlyPrice => '2,99 € / lună';
+
+  @override
+  String get planYearlyPrice => '24,99 € / an';
+
+  @override
+  String get planYearlyNote => '2 luni gratuite';
+
+  @override
+  String get planBestValue => 'Cea mai bună ofertă';
+
+  @override
+  String get premiumFeatureHistory => 'Istoric nelimitat de bonuri';
+
+  @override
+  String get premiumFeatureSync => 'Sincronizare pe dispozitivele tale';
+
+  @override
+  String premiumFeatureStorage(String quota) {
+    return '$quota de stocare în cloud';
+  }
+
+  @override
+  String get premiumSubscribe => 'Abonează-te';
+
+  @override
+  String get premiumRestore => 'Restaurează achiziția';
+
+  @override
+  String get premiumRestoreNothing =>
+      'Nu s-a găsit nicio achiziție anterioară.';
+
+  @override
+  String get premiumTerms =>
+      'Se reînnoiește automat. Anulează oricând în App Store.';
 }

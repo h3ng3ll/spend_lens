@@ -1389,4 +1389,54 @@ class AppLocalizationsEs extends AppLocalizations {
   String storageUsedOf(String used, String total) {
     return '$used de $total';
   }
+
+  @override
+  String get premiumUpgradeTitle => 'Hazte Premium';
+
+  @override
+  String premiumUpgradeSubtitle(String quota) {
+    return 'Historial ilimitado, sincronización entre dispositivos y $quota de almacenamiento en la nube.';
+  }
+
+  @override
+  String get planMonthly => 'Mensual';
+
+  @override
+  String get planYearly => 'Anual';
+
+  @override
+  String get planMonthlyPrice => '2,99 € / mes';
+
+  @override
+  String get planYearlyPrice => '24,99 € / año';
+
+  @override
+  String get planYearlyNote => '2 meses gratis';
+
+  @override
+  String get planBestValue => 'Mejor valor';
+
+  @override
+  String get premiumFeatureHistory => 'Historial de recibos ilimitado';
+
+  @override
+  String get premiumFeatureSync => 'Sincroniza entre tus dispositivos';
+
+  @override
+  String premiumFeatureStorage(String quota) {
+    return '$quota de almacenamiento en la nube';
+  }
+
+  @override
+  String get premiumSubscribe => 'Suscribirse';
+
+  @override
+  String get premiumRestore => 'Restaurar compra';
+
+  @override
+  String get premiumRestoreNothing => 'No se encontró ninguna compra anterior.';
+
+  @override
+  String get premiumTerms =>
+      'Se renueva automáticamente. Cancela cuando quieras en la App Store.';
 }

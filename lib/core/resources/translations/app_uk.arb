@@ -412,5 +412,20 @@
         "type": "String"
       }
     }
-  }
+  },
+  "premiumUpgradeTitle": "Перейти на Premium",
+  "premiumUpgradeSubtitle": "Необмежена історія, синхронізація між пристроями та {quota} хмарного сховища.",
+  "planMonthly": "Щомісяця",
+  "planYearly": "Щороку",
+  "planMonthlyPrice": "€2,99 / місяць",
+  "planYearlyPrice": "€24,99 / рік",
+  "planYearlyNote": "2 місяці безкоштовно",
+  "planBestValue": "Вигідніше",
+  "premiumFeatureHistory": "Необмежена історія чеків",
+  "premiumFeatureSync": "Синхронізація між пристроями",
+  "premiumFeatureStorage": "{quota} хмарного сховища",
+  "premiumSubscribe": "Оформити підписку",
+  "premiumRestore": "Відновити покупку",
+  "premiumRestoreNothing": "Попередню покупку не знайдено.",
+  "premiumTerms": "Поновлюється автоматично. Скасувати можна в App Store."
 }

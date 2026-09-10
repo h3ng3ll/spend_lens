@@ -1,3 +1,5 @@
+import '../../../features/subscription/domain/models/e_subscription_plan.dart';
+
 /// Premium-entitlement contract (design_spendlens.md §6/§9 — `Apphud only`,
 /// no custom StoreKit).
 ///
@@ -32,4 +34,22 @@ abstract interface class ISubscriptionRepository {
   /// attempt a premium check, rather than silently treating "unconfigured"
   /// and "checked and not premium" as the same thing in their own logic.
   bool get isConfigured;
+
+  /// Purchases the product backing [plan], returning whether the user ended
+  /// up entitled.
+  ///
+  /// Distinct from [presentPaywall]: that hands the whole selection UI to
+  /// the SDK, whereas this is the in-app upgrade sheet's path, where the
+  /// user has ALREADY chosen a billing period and the app only needs the
+  /// purchase executed.
+  ///
+  /// Same error contract as everything else here — returns false, never
+  /// throws, when the SDK is unconfigured, the product is missing, or the
+  /// user cancels. A purchase that did not happen is not an app error.
+  Future<bool> purchasePlan(ESubscriptionPlan plan);
+
+  /// Restores a previously-purchased entitlement, returning whether the
+  /// user ended up entitled. Required by App Review for any app selling a
+  /// subscription; same never-throws contract as [purchasePlan].
+  Future<bool> restorePurchases();
 }

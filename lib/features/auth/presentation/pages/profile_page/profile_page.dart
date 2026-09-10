@@ -8,6 +8,7 @@ import '../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/services/subscription/i_subscription_repository.dart';
 import '../../../../../core/services/ui_message_service.dart';
+import '../../../../subscription/presentation/sheets/subscription_sheet/subscription_sheet.dart';
 import '../../../../sync/presentation/bloc/sync_bloc/sync_bloc.dart';
 import '../../../../../core/widgets/confirm_dialog.dart';
 import '../../../../backup/presentation/bloc/backup_bloc/backup_bloc.dart';
@@ -124,18 +125,24 @@ class _ProfilePageState extends State<ProfilePage> {
     }
   }
 
-  /// Opens the purchase SDK's paywall.
+  /// Opens the in-app premium upgrade sheet.
   ///
-  /// Only reached when `isConfigured` is true — `UpgradeToPremiumButton`
-  /// shows an honest toast otherwise, so this never has to represent an
-  /// unavailable SDK.
+  /// Replaces a direct `ISubscriptionRepository.presentPaywall()` call: the
+  /// app now owns the plan selection (monthly vs yearly) instead of handing
+  /// the whole UI to the SDK, so the user picks a billing period here and
+  /// only the purchase itself goes to the repository.
+  ///
+  /// The sheet reports its own outcome via a toast and closes itself on
+  /// success, so this only has to refresh what the rest of Profile shows.
   Future<void> _onUpgrade() async {
-    final didUpgrade = await getIt<ISubscriptionRepository>().presentPaywall();
-    if (!mounted || !didUpgrade) return;
+    await SubscriptionSheet.show(context);
+    if (!mounted) return;
 
-    // Re-sync so the Plan badge and the quota denominator pick up the new
+    // Re-sync so the Plan badge and the quota denominator pick up a new
     // entitlement — `hasPremiumAccess()` is a one-shot read by design, so
-    // nothing refreshes it on its own.
+    // nothing refreshes it on its own. Dispatched unconditionally now: the
+    // sheet does not report back whether a purchase landed, and a redundant
+    // sync is cheaper than a stale badge.
     context.read<SyncBloc>().add(const SyncEvent.syncNow());
   }
 

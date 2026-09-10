@@ -412,5 +412,20 @@
         "type": "String"
       }
     }
-  }
+  },
+  "premiumUpgradeTitle": "Premium holen",
+  "premiumUpgradeSubtitle": "Unbegrenzter Verlauf, Geräte-Synchronisierung und {quota} Cloud-Speicher.",
+  "planMonthly": "Monatlich",
+  "planYearly": "Jährlich",
+  "planMonthlyPrice": "2,99 € / Monat",
+  "planYearlyPrice": "24,99 € / Jahr",
+  "planYearlyNote": "2 Monate gratis",
+  "planBestValue": "Bester Preis",
+  "premiumFeatureHistory": "Unbegrenzter Belegverlauf",
+  "premiumFeatureSync": "Synchronisierung über alle Geräte",
+  "premiumFeatureStorage": "{quota} Cloud-Speicher",
+  "premiumSubscribe": "Abonnieren",
+  "premiumRestore": "Kauf wiederherstellen",
+  "premiumRestoreNothing": "Kein früherer Kauf gefunden.",
+  "premiumTerms": "Verlängert sich automatisch. Jederzeit im App Store kündbar."
 }

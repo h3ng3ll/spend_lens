@@ -2237,6 +2237,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{used} of {total}'**
   String storageUsedOf(String used, String total);
+
+  /// No description provided for @premiumUpgradeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Go Premium'**
+  String get premiumUpgradeTitle;
+
+  /// Premium upgrade sheet subtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited history, multi-device sync and {quota} of cloud storage.'**
+  String premiumUpgradeSubtitle(String quota);
+
+  /// No description provided for @planMonthly.
+  ///
+  /// In en, this message translates to:
+  /// **'Monthly'**
+  String get planMonthly;
+
+  /// No description provided for @planYearly.
+  ///
+  /// In en, this message translates to:
+  /// **'Yearly'**
+  String get planYearly;
+
+  /// No description provided for @planMonthlyPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'€2.99 / month'**
+  String get planMonthlyPrice;
+
+  /// No description provided for @planYearlyPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'€24.99 / year'**
+  String get planYearlyPrice;
+
+  /// No description provided for @planYearlyNote.
+  ///
+  /// In en, this message translates to:
+  /// **'2 months free'**
+  String get planYearlyNote;
+
+  /// No description provided for @planBestValue.
+  ///
+  /// In en, this message translates to:
+  /// **'Best value'**
+  String get planBestValue;
+
+  /// No description provided for @premiumFeatureHistory.
+  ///
+  /// In en, this message translates to:
+  /// **'Unlimited receipt history'**
+  String get premiumFeatureHistory;
+
+  /// No description provided for @premiumFeatureSync.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync across your devices'**
+  String get premiumFeatureSync;
+
+  /// Premium benefit row naming the cloud quota.
+  ///
+  /// In en, this message translates to:
+  /// **'{quota} of cloud storage'**
+  String premiumFeatureStorage(String quota);
+
+  /// No description provided for @premiumSubscribe.
+  ///
+  /// In en, this message translates to:
+  /// **'Subscribe'**
+  String get premiumSubscribe;
+
+  /// No description provided for @premiumRestore.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore purchase'**
+  String get premiumRestore;
+
+  /// No description provided for @premiumRestoreNothing.
+  ///
+  /// In en, this message translates to:
+  /// **'No previous purchase found.'**
+  String get premiumRestoreNothing;
+
+  /// No description provided for @premiumTerms.
+  ///
+  /// In en, this message translates to:
+  /// **'Renews automatically. Cancel anytime in the App Store.'**
+  String get premiumTerms;
 }
 
 class _AppLocalizationsDelegate

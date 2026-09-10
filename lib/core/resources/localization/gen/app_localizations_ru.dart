@@ -1410,4 +1410,54 @@ class AppLocalizationsRu extends AppLocalizations {
   String storageUsedOf(String used, String total) {
     return '$used из $total';
   }
+
+  @override
+  String get premiumUpgradeTitle => 'Перейти на Premium';
+
+  @override
+  String premiumUpgradeSubtitle(String quota) {
+    return 'Неограниченная история, синхронизация между устройствами и $quota облачного хранилища.';
+  }
+
+  @override
+  String get planMonthly => 'Ежемесячно';
+
+  @override
+  String get planYearly => 'Ежегодно';
+
+  @override
+  String get planMonthlyPrice => '€2,99 / месяц';
+
+  @override
+  String get planYearlyPrice => '€24,99 / год';
+
+  @override
+  String get planYearlyNote => '2 месяца бесплатно';
+
+  @override
+  String get planBestValue => 'Выгоднее';
+
+  @override
+  String get premiumFeatureHistory => 'Неограниченная история чеков';
+
+  @override
+  String get premiumFeatureSync => 'Синхронизация между устройствами';
+
+  @override
+  String premiumFeatureStorage(String quota) {
+    return '$quota облачного хранилища';
+  }
+
+  @override
+  String get premiumSubscribe => 'Оформить подписку';
+
+  @override
+  String get premiumRestore => 'Восстановить покупку';
+
+  @override
+  String get premiumRestoreNothing => 'Предыдущая покупка не найдена.';
+
+  @override
+  String get premiumTerms =>
+      'Продлевается автоматически. Отменить можно в App Store.';
 }

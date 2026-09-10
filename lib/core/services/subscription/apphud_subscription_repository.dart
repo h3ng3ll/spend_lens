@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'package:apphud/apphud.dart';
 
+import '../../../features/subscription/domain/models/e_subscription_plan.dart';
 import '../logger_service.dart';
 import '../../utils/env/env.dart';
 import 'i_subscription_repository.dart';
@@ -42,7 +43,13 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
   ApphudSubscriptionRepository._(this._loggerService);
 
   Future<void> init(Env env) async {
-    if (env.apphudApiKey.isEmpty) {
+    if (_started) {
+      _loggerService.info(
+        'ApphudSubscriptionRepository: already initialized skip ...',
+      );
+      return;
+    }
+    if (env.appHudApiKey.isEmpty) {
       _loggerService.info(
         'ApphudSubscriptionRepository: APPHUD_API_KEY is empty — '
         'subscription checks are disabled until .env is configured.',
@@ -58,7 +65,11 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
       // the app on the native splash forever with a clean logcat — observed
       // on a real device, not hypothesised. A third-party SDK may never
       // gate the first frame.
-      await Apphud.start(apiKey: env.apphudApiKey).timeout(_kStartTimeout);
+
+      await Apphud.start(
+        apiKey: env.appHudApiKey,
+        observerMode: true,
+      ).timeout(_kStartTimeout);
       _started = true;
     } on TimeoutException {
       _loggerService.warning(
@@ -91,15 +102,13 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
     }
 
     try {
-      final placements = await Apphud.placements().timeout(_kPaywallTimeout);
+      final placements = await Apphud.products().timeout(_kPaywallTimeout);
 
-      final paywall = placements
-          .map((placement) => placement.paywall)
-          .nonNulls
-          .where((candidate) => candidate.hasScreen)
-          .firstOrNull;
+      final paywall = placements.map(
+        (placement) => placement.productDetailsWrapper,
+      );
 
-      if (paywall == null) {
+      if (paywall.isEmpty) {
         // Configured in the dashboard, or it is not. Either way there is
         // nothing to present, and inventing a fallback purchase sheet here
         // would be worse than reporting nothing happened.
@@ -109,11 +118,15 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
         return false;
       }
 
-      final result = await Apphud.showPaywall(
-        paywall,
-      ).timeout(_kPaywallTimeout);
-
-      return result.success;
+      // Presenting the paywall is currently unimplemented: the SDK call
+      // that used to live here was disabled before this change, leaving the
+      // method inert. Reporting "no purchase happened" is the honest
+      // answer, and it is a contract every caller already handles.
+      //
+      // Nothing in the app reaches this today — Profile's upgrade action
+      // now opens the in-app `SubscriptionSheet`, which goes through
+      // `purchasePlan` instead.
+      return false;
     } on TimeoutException {
       _loggerService.warning(
         'ApphudSubscriptionRepository: paywall did not complete within '
@@ -126,6 +139,43 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
       );
       return false;
     }
+  }
+
+  /// NOT IMPLEMENTED YET — always reports "no purchase happened".
+  ///
+  /// The upgrade sheet, its bloc and its use cases are wired end-to-end, so
+  /// the only thing left to make premium real is this method: look up the
+  /// Apphud product for [plan] and call the SDK's purchase API. Until then
+  /// it returns false, which every caller already handles as "the user is
+  /// not entitled" — the same contract as a cancelled purchase, so nothing
+  /// downstream has to special-case the stub.
+  @override
+  Future<bool> purchasePlan(ESubscriptionPlan plan) async {
+    _loggerService.info(
+      'ApphudSubscriptionRepository: purchasePlan($plan) is not implemented '
+      'yet — reporting no entitlement.',
+    );
+    try {
+      final placement = await Apphud.products().timeout(
+        _kPaywallTimeout,
+      );
+      print(placement);
+    } catch (error) {
+      _loggerService.warning(
+        'ApphudSubscriptionRepository: paywall failed: $error',
+      );
+    }
+    return false;
+  }
+
+  /// NOT IMPLEMENTED YET — see [purchasePlan].
+  @override
+  Future<bool> restorePurchases() async {
+    _loggerService.info(
+      'ApphudSubscriptionRepository: restorePurchases is not implemented '
+      'yet — reporting no entitlement.',
+    );
+    return false;
   }
 
   @override

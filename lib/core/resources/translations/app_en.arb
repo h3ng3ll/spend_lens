@@ -846,5 +846,36 @@
         "type": "String"
       }
     }
-  }
+  },
+  "premiumUpgradeTitle": "Go Premium",
+  "premiumUpgradeSubtitle": "Unlimited history, multi-device sync and {quota} of cloud storage.",
+  "@premiumUpgradeSubtitle": {
+    "description": "Premium upgrade sheet subtitle.",
+    "placeholders": {
+      "quota": {
+        "type": "String"
+      }
+    }
+  },
+  "planMonthly": "Monthly",
+  "planYearly": "Yearly",
+  "planMonthlyPrice": "€2.99 / month",
+  "planYearlyPrice": "€24.99 / year",
+  "planYearlyNote": "2 months free",
+  "planBestValue": "Best value",
+  "premiumFeatureHistory": "Unlimited receipt history",
+  "premiumFeatureSync": "Sync across your devices",
+  "premiumFeatureStorage": "{quota} of cloud storage",
+  "@premiumFeatureStorage": {
+    "description": "Premium benefit row naming the cloud quota.",
+    "placeholders": {
+      "quota": {
+        "type": "String"
+      }
+    }
+  },
+  "premiumSubscribe": "Subscribe",
+  "premiumRestore": "Restore purchase",
+  "premiumRestoreNothing": "No previous purchase found.",
+  "premiumTerms": "Renews automatically. Cancel anytime in the App Store."
 }

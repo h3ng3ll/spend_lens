@@ -412,5 +412,20 @@
         "type": "String"
       }
     }
-  }
+  },
+  "premiumUpgradeTitle": "Перейти на Premium",
+  "premiumUpgradeSubtitle": "Неограниченная история, синхронизация между устройствами и {quota} облачного хранилища.",
+  "planMonthly": "Ежемесячно",
+  "planYearly": "Ежегодно",
+  "planMonthlyPrice": "€2,99 / месяц",
+  "planYearlyPrice": "€24,99 / год",
+  "planYearlyNote": "2 месяца бесплатно",
+  "planBestValue": "Выгоднее",
+  "premiumFeatureHistory": "Неограниченная история чеков",
+  "premiumFeatureSync": "Синхронизация между устройствами",
+  "premiumFeatureStorage": "{quota} облачного хранилища",
+  "premiumSubscribe": "Оформить подписку",
+  "premiumRestore": "Восстановить покупку",
+  "premiumRestoreNothing": "Предыдущая покупка не найдена.",
+  "premiumTerms": "Продлевается автоматически. Отменить можно в App Store."
 }
