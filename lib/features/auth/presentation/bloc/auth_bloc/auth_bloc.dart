@@ -105,7 +105,13 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           email: user.email ?? '',
         );
       },
-      onError: (_, _) => state.copyWith(status: EAuthStatus.failed),
+      // Carries a message, because a `failed` state with an empty
+      // `errorMessage` renders as a blank toast — worse than silence, since
+      // it looks like the app broke and says nothing.
+      onError: (error, _) => state.copyWith(
+        status: EAuthStatus.failed,
+        errorMessage: const AuthUnavailableFailure().message,
+      ),
     );
   }
 

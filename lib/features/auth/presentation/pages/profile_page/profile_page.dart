@@ -99,6 +99,22 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  /// Surfaces a failed sign-in.
+  ///
+  /// Without this the failure was SILENT: `AuthBloc` sets
+  /// `EAuthStatus.failed` with a user-facing `errorMessage`, and nothing in
+  /// the widget tree read it — the buttons simply did nothing on a real
+  /// failure, which is indistinguishable from being unwired.
+  ///
+  /// A USER CANCELLATION is not an error and must stay quiet: the bloc
+  /// already maps it to `signedOut` with an empty message, so gating on a
+  /// non-empty message keeps a dismissed Google/Apple sheet from toasting
+  /// "sign-in failed" at someone who simply changed their mind.
+  void _onAuthListener(BuildContext context, AuthState state) {
+    if (state.errorMessage.isEmpty) return;
+    UiMessageService.showError(state.errorMessage);
+  }
+
   void _onBackupListener(BuildContext context, BackupState state) {
     final lo = AppLocalizations.of(context);
 
@@ -152,23 +168,31 @@ class _ProfilePageState extends State<ProfilePage> {
 
     return BlocProvider<BackupBloc>.value(
       value: _backupBloc,
-      child: BlocListener<BackupBloc, BackupState>(
-        listener: _onBackupListener,
-        child: Scaffold(
-          backgroundColor: scheme.bg,
-          body: SafeArea(
-            child: BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, state) => ProfileBody(
-                state: state,
-                onGoogle: _onGoogle,
-                onApple: _onApple,
-                onSignOut: _onSignOut,
-                onExportBackup: _onExportBackup,
-                onExportSheet: _onExportSheet,
-                onImportBackup: _onImportBackup,
-                isPurchaseAvailable:
-                    getIt<ISubscriptionRepository>().isConfigured,
-                onUpgrade: _onUpgrade,
+      child: BlocListener<AuthBloc, AuthState>(
+        // Fires only on a TRANSITION into a message-bearing state, so a
+        // rebuild (theme change, a sync tick) cannot re-toast a stale
+        // failure the user already dismissed.
+        listenWhen: (previous, current) =>
+            previous.errorMessage != current.errorMessage,
+        listener: _onAuthListener,
+        child: BlocListener<BackupBloc, BackupState>(
+          listener: _onBackupListener,
+          child: Scaffold(
+            backgroundColor: scheme.bg,
+            body: SafeArea(
+              child: BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) => ProfileBody(
+                  state: state,
+                  onGoogle: _onGoogle,
+                  onApple: _onApple,
+                  onSignOut: _onSignOut,
+                  onExportBackup: _onExportBackup,
+                  onExportSheet: _onExportSheet,
+                  onImportBackup: _onImportBackup,
+                  isPurchaseAvailable:
+                      getIt<ISubscriptionRepository>().isConfigured,
+                  onUpgrade: _onUpgrade,
+                ),
               ),
             ),
           ),
