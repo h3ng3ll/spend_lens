@@ -108,7 +108,26 @@ class FirebaseAuthRepository implements IAuthRepository {
       final result = await _auth.signInWithCredential(credential);
       return Right(result);
     } on GoogleSignInException catch (e, stackTrace) {
-      if (e.code == GoogleSignInExceptionCode.canceled) {
+      // `canceled` does NOT reliably mean the user dismissed the sheet.
+      //
+      // On Android the plugin maps `GetCredentialFailureType.canceled` to
+      // this code, and Credential Manager raises that whenever ITS UI goes
+      // away — including when the activity dies because Google rejected the
+      // app (`This android application is not registered to use OAuth2.0`,
+      // i.e. the signing SHA-1 is not in the Firebase project). The plugin
+      // cannot tell "user tapped away" from "the OS killed the flow".
+      //
+      // Observed symptom this fixes: Google sign-in failed and the app
+      // showed NOTHING, while Apple correctly showed its error — because a
+      // real configuration failure was being classified as a cancellation
+      // and deliberately suppressed.
+      //
+      // A genuine user cancellation carries no `description`; the platform
+      // attaches one only when it has an actual error to report. So an
+      // empty description is treated as a real cancellation (stay silent)
+      // and a populated one as a failure the user must be told about.
+      if (e.code == GoogleSignInExceptionCode.canceled &&
+          (e.description == null || e.description!.isEmpty)) {
         return Left(
           _logged(
             'Google sign-in (canceled)',

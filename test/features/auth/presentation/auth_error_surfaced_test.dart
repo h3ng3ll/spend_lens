@@ -48,6 +48,8 @@ void main() {
     );
   });
 
+  _googleCancellationGuard();
+
   test('the watch stream error carries a message, not a blank toast', () {
     final bloc = File(
       'lib/features/auth/presentation/bloc/auth_bloc/auth_bloc.dart',
@@ -67,6 +69,31 @@ void main() {
       reason:
           'A failed status with no message renders as a blank toast — worse '
           'than silence, since it looks broken and says nothing.',
+    );
+  });
+}
+
+/// Guards the Android-specific misclassification found on device.
+///
+/// Credential Manager reports an OAuth rejection (unregistered signing
+/// SHA-1) as `GoogleSignInExceptionCode.canceled` with the description
+/// "[16] Cancelled by user." — verified in a live `flutter run` log. The
+/// plugin cannot distinguish that from a real dismissal, so the app was
+/// silently suppressing a genuine configuration failure: Google appeared to
+/// do nothing while Apple correctly reported its error.
+void _googleCancellationGuard() {
+  final repository = File(
+    'lib/features/auth/data/repositories/firebase_auth_repository.dart',
+  );
+
+  test('a Google `canceled` with a description is NOT treated as silent', () {
+    final source = repository.readAsStringSync();
+    expect(
+      source.contains('e.description == null || e.description!.isEmpty'),
+      isTrue,
+      reason:
+          'Android reports an OAuth rejection as `canceled` with a '
+          'description. Suppressing every `canceled` hides real failures.',
     );
   });
 }
