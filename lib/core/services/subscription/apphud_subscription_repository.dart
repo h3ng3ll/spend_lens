@@ -38,6 +38,8 @@ const Duration _kPremiumCheckTimeout = Duration(seconds: 5);
 /// the tap hanging with no feedback.
 const Duration _kPaywallTimeout = Duration(seconds: 20);
 
+/// Very useful example
+/// https://github.com/apphud/ApphudSDK-Flutter/blob/main/example/lib/src/purchase_bloc/purchase_bloc.dart
 class ApphudSubscriptionRepository implements ISubscriptionRepository {
   final LoggerService _loggerService;
   bool _started = false;
@@ -261,15 +263,12 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
         );
       }
 
-      // Presenting the paywall is currently unimplemented: the SDK call
-      // that used to live here was disabled before this change, leaving the
-      // method inert. Reporting "no purchase happened" is the honest
-      // answer, and it is a contract every caller already handles.
-      //
-      // Nothing in the app reaches this today — Profile's upgrade action
-      // now opens the in-app `SubscriptionSheet`, which goes through
-      // `purchasePlan` instead.
-      final blackList = ['PremiumYearly', 'PremiumMonthly'];
+      /// Regardless Appstore showing deleted subscription
+      /// just remove from list
+      final blackList = [
+        'PremiumYearly',
+        'PremiumMonthly',
+      ];
       final offers = paywall
           .whereType<SKProductWrapper>()
           .map((e) {

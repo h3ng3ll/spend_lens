@@ -87,8 +87,14 @@ class StorageCard extends StatelessWidget {
               ),
               if (isSignedIn) StorageUsageBar(fraction: syncState.usedFraction),
               Text(
+                // `limitPremium` vs `limitFree` — not just the quota NUMBER.
+                // A premium user previously read "Free accounts include
+                // 5 GB", which contradicts the badge beside it and misstates
+                // what they paid for.
                 isSignedIn
-                    ? lo.limitFree(quotaLabel)
+                    ? (syncState.isPremium
+                        ? lo.limitPremium(quotaLabel)
+                        : lo.limitFree(quotaLabel))
                     : lo.limitLocal(deviceNoun),
                 style: textTheme.footnote13.copyWith(color: scheme.ter),
               ),
