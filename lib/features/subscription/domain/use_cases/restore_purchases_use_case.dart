@@ -1,4 +1,8 @@
+import 'package:dartz/dartz.dart';
+
 import '../../../../core/services/subscription/i_subscription_repository.dart';
+import '../../presentation/bloc/subscription_bloc/subscription_bloc.dart';
+import '../failures/subscription_failures.dart';
 
 /// Restores a previously-purchased premium entitlement.
 ///
@@ -13,7 +17,7 @@ class RestorePurchasesUseCase {
   const RestorePurchasesUseCase(this._subscriptionRepository);
 
   /// Returns whether the user ended up entitled. Never throws.
-  Future<bool> call() {
+  Future<Either<ESubscriptionStatus, SubscriptionFailures>> call() {
     return _subscriptionRepository.restorePurchases();
   }
 }

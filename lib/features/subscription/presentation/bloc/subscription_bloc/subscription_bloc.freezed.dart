@@ -55,13 +55,14 @@ extension SubscriptionEventPatterns on SubscriptionEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _SelectPlan value)?  selectPlan,TResult Function( _Purchase value)?  purchase,TResult Function( _Restore value)?  restore,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _SelectPlan value)?  selectPlan,TResult Function( _Purchase value)?  purchase,TResult Function( _Restore value)?  restore,TResult Function( _GetOffers value)?  getOffers,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _SelectPlan() when selectPlan != null:
 return selectPlan(_that);case _Purchase() when purchase != null:
 return purchase(_that);case _Restore() when restore != null:
-return restore(_that);case _:
+return restore(_that);case _GetOffers() when getOffers != null:
+return getOffers(_that);case _:
   return orElse();
 
 }
@@ -79,13 +80,14 @@ return restore(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _SelectPlan value)  selectPlan,required TResult Function( _Purchase value)  purchase,required TResult Function( _Restore value)  restore,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _SelectPlan value)  selectPlan,required TResult Function( _Purchase value)  purchase,required TResult Function( _Restore value)  restore,required TResult Function( _GetOffers value)  getOffers,}){
 final _that = this;
 switch (_that) {
 case _SelectPlan():
 return selectPlan(_that);case _Purchase():
 return purchase(_that);case _Restore():
-return restore(_that);}
+return restore(_that);case _GetOffers():
+return getOffers(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -99,13 +101,14 @@ return restore(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _SelectPlan value)?  selectPlan,TResult? Function( _Purchase value)?  purchase,TResult? Function( _Restore value)?  restore,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _SelectPlan value)?  selectPlan,TResult? Function( _Purchase value)?  purchase,TResult? Function( _Restore value)?  restore,TResult? Function( _GetOffers value)?  getOffers,}){
 final _that = this;
 switch (_that) {
 case _SelectPlan() when selectPlan != null:
 return selectPlan(_that);case _Purchase() when purchase != null:
 return purchase(_that);case _Restore() when restore != null:
-return restore(_that);case _:
+return restore(_that);case _GetOffers() when getOffers != null:
+return getOffers(_that);case _:
   return null;
 
 }
@@ -122,12 +125,13 @@ return restore(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( ESubscriptionPlan plan)?  selectPlan,TResult Function()?  purchase,TResult Function()?  restore,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String planId)?  selectPlan,TResult Function()?  purchase,TResult Function()?  restore,TResult Function()?  getOffers,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SelectPlan() when selectPlan != null:
-return selectPlan(_that.plan);case _Purchase() when purchase != null:
+return selectPlan(_that.planId);case _Purchase() when purchase != null:
 return purchase();case _Restore() when restore != null:
-return restore();case _:
+return restore();case _GetOffers() when getOffers != null:
+return getOffers();case _:
   return orElse();
 
 }
@@ -145,12 +149,13 @@ return restore();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( ESubscriptionPlan plan)  selectPlan,required TResult Function()  purchase,required TResult Function()  restore,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String planId)  selectPlan,required TResult Function()  purchase,required TResult Function()  restore,required TResult Function()  getOffers,}) {final _that = this;
 switch (_that) {
 case _SelectPlan():
-return selectPlan(_that.plan);case _Purchase():
+return selectPlan(_that.planId);case _Purchase():
 return purchase();case _Restore():
-return restore();}
+return restore();case _GetOffers():
+return getOffers();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -164,12 +169,13 @@ return restore();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( ESubscriptionPlan plan)?  selectPlan,TResult? Function()?  purchase,TResult? Function()?  restore,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String planId)?  selectPlan,TResult? Function()?  purchase,TResult? Function()?  restore,TResult? Function()?  getOffers,}) {final _that = this;
 switch (_that) {
 case _SelectPlan() when selectPlan != null:
-return selectPlan(_that.plan);case _Purchase() when purchase != null:
+return selectPlan(_that.planId);case _Purchase() when purchase != null:
 return purchase();case _Restore() when restore != null:
-return restore();case _:
+return restore();case _GetOffers() when getOffers != null:
+return getOffers();case _:
   return null;
 
 }
@@ -181,10 +187,10 @@ return restore();case _:
 
 
 class _SelectPlan implements SubscriptionEvent {
-  const _SelectPlan(this.plan);
+  const _SelectPlan(this.planId);
   
 
- final  ESubscriptionPlan plan;
+ final  String planId;
 
 /// Create a copy of SubscriptionEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -196,16 +202,16 @@ _$SelectPlanCopyWith<_SelectPlan> get copyWith => __$SelectPlanCopyWithImpl<_Sel
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SelectPlan&&(identical(other.plan, plan) || other.plan == plan));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SelectPlan&&(identical(other.planId, planId) || other.planId == planId));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,plan);
+int get hashCode => Object.hash(runtimeType,planId);
 
 @override
 String toString() {
-  return 'SubscriptionEvent.selectPlan(plan: $plan)';
+  return 'SubscriptionEvent.selectPlan(planId: $planId)';
 }
 
 
@@ -216,7 +222,7 @@ abstract mixin class _$SelectPlanCopyWith<$Res> implements $SubscriptionEventCop
   factory _$SelectPlanCopyWith(_SelectPlan value, $Res Function(_SelectPlan) _then) = __$SelectPlanCopyWithImpl;
 @useResult
 $Res call({
- ESubscriptionPlan plan
+ String planId
 });
 
 
@@ -233,10 +239,10 @@ class __$SelectPlanCopyWithImpl<$Res>
 
 /// Create a copy of SubscriptionEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? plan = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? planId = null,}) {
   return _then(_SelectPlan(
-null == plan ? _self.plan : plan // ignore: cast_nullable_to_non_nullable
-as ESubscriptionPlan,
+null == planId ? _self.planId : planId // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -308,11 +314,42 @@ String toString() {
 
 
 /// @nodoc
+
+
+class _GetOffers implements SubscriptionEvent {
+  const _GetOffers();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _GetOffers);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'SubscriptionEvent.getOffers()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
 mixin _$SubscriptionState {
 
- ESubscriptionStatus get status;/// Defaults to yearly — the sheet presents it as the better-value
-/// option, so it is also the one pre-selected.
- ESubscriptionPlan get selectedPlan;
+ ESubscriptionStatus get status;/// Id
+ String? get selectedPlan; List<SubscriptionOffer> get subscriptions; String get errorMessage;
 /// Create a copy of SubscriptionState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -323,16 +360,16 @@ $SubscriptionStateCopyWith<SubscriptionState> get copyWith => _$SubscriptionStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SubscriptionState&&(identical(other.status, status) || other.status == status)&&(identical(other.selectedPlan, selectedPlan) || other.selectedPlan == selectedPlan));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SubscriptionState&&(identical(other.status, status) || other.status == status)&&(identical(other.selectedPlan, selectedPlan) || other.selectedPlan == selectedPlan)&&const DeepCollectionEquality().equals(other.subscriptions, subscriptions)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,selectedPlan);
+int get hashCode => Object.hash(runtimeType,status,selectedPlan,const DeepCollectionEquality().hash(subscriptions),errorMessage);
 
 @override
 String toString() {
-  return 'SubscriptionState(status: $status, selectedPlan: $selectedPlan)';
+  return 'SubscriptionState(status: $status, selectedPlan: $selectedPlan, subscriptions: $subscriptions, errorMessage: $errorMessage)';
 }
 
 
@@ -343,7 +380,7 @@ abstract mixin class $SubscriptionStateCopyWith<$Res>  {
   factory $SubscriptionStateCopyWith(SubscriptionState value, $Res Function(SubscriptionState) _then) = _$SubscriptionStateCopyWithImpl;
 @useResult
 $Res call({
- ESubscriptionStatus status, ESubscriptionPlan selectedPlan
+ ESubscriptionStatus status, String? selectedPlan, List<SubscriptionOffer> subscriptions, String errorMessage
 });
 
 
@@ -360,11 +397,13 @@ class _$SubscriptionStateCopyWithImpl<$Res>
 
 /// Create a copy of SubscriptionState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? selectedPlan = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? selectedPlan = freezed,Object? subscriptions = null,Object? errorMessage = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as ESubscriptionStatus,selectedPlan: null == selectedPlan ? _self.selectedPlan : selectedPlan // ignore: cast_nullable_to_non_nullable
-as ESubscriptionPlan,
+as ESubscriptionStatus,selectedPlan: freezed == selectedPlan ? _self.selectedPlan : selectedPlan // ignore: cast_nullable_to_non_nullable
+as String?,subscriptions: null == subscriptions ? _self.subscriptions : subscriptions // ignore: cast_nullable_to_non_nullable
+as List<SubscriptionOffer>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -446,10 +485,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ESubscriptionStatus status,  ESubscriptionPlan selectedPlan)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ESubscriptionStatus status,  String? selectedPlan,  List<SubscriptionOffer> subscriptions,  String errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SubscriptionState() when $default != null:
-return $default(_that.status,_that.selectedPlan);case _:
+return $default(_that.status,_that.selectedPlan,_that.subscriptions,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -467,10 +506,10 @@ return $default(_that.status,_that.selectedPlan);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ESubscriptionStatus status,  ESubscriptionPlan selectedPlan)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ESubscriptionStatus status,  String? selectedPlan,  List<SubscriptionOffer> subscriptions,  String errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _SubscriptionState():
-return $default(_that.status,_that.selectedPlan);}
+return $default(_that.status,_that.selectedPlan,_that.subscriptions,_that.errorMessage);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -484,10 +523,10 @@ return $default(_that.status,_that.selectedPlan);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ESubscriptionStatus status,  ESubscriptionPlan selectedPlan)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ESubscriptionStatus status,  String? selectedPlan,  List<SubscriptionOffer> subscriptions,  String errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _SubscriptionState() when $default != null:
-return $default(_that.status,_that.selectedPlan);case _:
+return $default(_that.status,_that.selectedPlan,_that.subscriptions,_that.errorMessage);case _:
   return null;
 
 }
@@ -499,13 +538,20 @@ return $default(_that.status,_that.selectedPlan);case _:
 
 
 class _SubscriptionState implements SubscriptionState {
-  const _SubscriptionState({this.status = ESubscriptionStatus.idle, this.selectedPlan = ESubscriptionPlan.yearly});
+  const _SubscriptionState({this.status = ESubscriptionStatus.idle, this.selectedPlan, final  List<SubscriptionOffer> subscriptions = const [], this.errorMessage = ''}): _subscriptions = subscriptions;
   
 
 @override@JsonKey() final  ESubscriptionStatus status;
-/// Defaults to yearly — the sheet presents it as the better-value
-/// option, so it is also the one pre-selected.
-@override@JsonKey() final  ESubscriptionPlan selectedPlan;
+/// Id
+@override final  String? selectedPlan;
+ final  List<SubscriptionOffer> _subscriptions;
+@override@JsonKey() List<SubscriptionOffer> get subscriptions {
+  if (_subscriptions is EqualUnmodifiableListView) return _subscriptions;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_subscriptions);
+}
+
+@override@JsonKey() final  String errorMessage;
 
 /// Create a copy of SubscriptionState
 /// with the given fields replaced by the non-null parameter values.
@@ -517,16 +563,16 @@ _$SubscriptionStateCopyWith<_SubscriptionState> get copyWith => __$SubscriptionS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SubscriptionState&&(identical(other.status, status) || other.status == status)&&(identical(other.selectedPlan, selectedPlan) || other.selectedPlan == selectedPlan));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SubscriptionState&&(identical(other.status, status) || other.status == status)&&(identical(other.selectedPlan, selectedPlan) || other.selectedPlan == selectedPlan)&&const DeepCollectionEquality().equals(other._subscriptions, _subscriptions)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,selectedPlan);
+int get hashCode => Object.hash(runtimeType,status,selectedPlan,const DeepCollectionEquality().hash(_subscriptions),errorMessage);
 
 @override
 String toString() {
-  return 'SubscriptionState(status: $status, selectedPlan: $selectedPlan)';
+  return 'SubscriptionState(status: $status, selectedPlan: $selectedPlan, subscriptions: $subscriptions, errorMessage: $errorMessage)';
 }
 
 
@@ -537,7 +583,7 @@ abstract mixin class _$SubscriptionStateCopyWith<$Res> implements $SubscriptionS
   factory _$SubscriptionStateCopyWith(_SubscriptionState value, $Res Function(_SubscriptionState) _then) = __$SubscriptionStateCopyWithImpl;
 @override @useResult
 $Res call({
- ESubscriptionStatus status, ESubscriptionPlan selectedPlan
+ ESubscriptionStatus status, String? selectedPlan, List<SubscriptionOffer> subscriptions, String errorMessage
 });
 
 
@@ -554,11 +600,13 @@ class __$SubscriptionStateCopyWithImpl<$Res>
 
 /// Create a copy of SubscriptionState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? selectedPlan = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? selectedPlan = freezed,Object? subscriptions = null,Object? errorMessage = null,}) {
   return _then(_SubscriptionState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
-as ESubscriptionStatus,selectedPlan: null == selectedPlan ? _self.selectedPlan : selectedPlan // ignore: cast_nullable_to_non_nullable
-as ESubscriptionPlan,
+as ESubscriptionStatus,selectedPlan: freezed == selectedPlan ? _self.selectedPlan : selectedPlan // ignore: cast_nullable_to_non_nullable
+as String?,subscriptions: null == subscriptions ? _self._subscriptions : subscriptions // ignore: cast_nullable_to_non_nullable
+as List<SubscriptionOffer>,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 

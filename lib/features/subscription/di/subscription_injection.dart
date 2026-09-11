@@ -1,5 +1,6 @@
 import '../../../core/di/injection.dart';
 import '../../../core/services/subscription/i_subscription_repository.dart';
+import '../domain/use_cases/get_offers_use_case.dart';
 import '../domain/use_cases/purchase_subscription_use_case.dart';
 import '../domain/use_cases/restore_purchases_use_case.dart';
 
@@ -10,9 +11,18 @@ import '../domain/use_cases/restore_purchases_use_case.dart';
 /// cases this feature owns live here.
 void initSubscriptionFeature() {
   getIt.registerLazySingleton(
-    () => PurchaseSubscriptionUseCase(getIt<ISubscriptionRepository>()),
+    () => PurchaseSubscriptionUseCase(
+      getIt<ISubscriptionRepository>(),
+    ),
   );
   getIt.registerLazySingleton(
-    () => RestorePurchasesUseCase(getIt<ISubscriptionRepository>()),
+    () => RestorePurchasesUseCase(
+      getIt<ISubscriptionRepository>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => GetOffersUseCase(
+      getIt<ISubscriptionRepository>(),
+    ),
   );
 }

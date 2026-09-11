@@ -20,6 +20,7 @@ import '../services/scan_capability/i_scan_capability_service.dart';
 import '../services/scan_capability/scan_capability_service.dart';
 import '../services/subscription/apphud_subscription_repository.dart';
 import '../services/subscription/i_subscription_repository.dart';
+import '../services/subscription/revenue_cat_subscription_repository.dart';
 import '../utils/env/env.dart';
 
 final getIt = GetIt.instance;
@@ -69,42 +70,57 @@ Future<void> initDependencies() async {
     ),
   );
   getIt.registerLazySingleton(
-    () => FirebaseStorageService(firebaseStorage: getIt<FirebaseStorage>()),
+    () => FirebaseStorageService(
+      firebaseStorage: getIt<FirebaseStorage>(),
+    ),
   );
 
   // Proactive online/offline signal for the sync UI, and the reconnect
   // trigger. Its `init()` is awaited in `main()` before `runApp`.
-  getIt.registerLazySingleton(() => ConnectivityService());
+  getIt.registerLazySingleton(
+    () => ConnectivityService(),
+  );
 
-  getIt.registerLazySingleton(() => const ImageCompressionService());
+  getIt.registerLazySingleton(
+    () => const ImageCompressionService(),
+  );
 
   // M7: the single channel contract (design_spendlens.md §6), identical on
   // both platforms — no `Platform.isX` branch anywhere above this line.
   getIt.registerLazySingleton<OcrService>(
-    () => MethodChannelOcrService(loggerService: getIt<LoggerService>()),
+    () => MethodChannelOcrService(
+      loggerService: getIt<LoggerService>(),
+    ),
   );
   getIt.registerLazySingleton<IReceiptDetector>(
-    () =>
-        MethodChannelReceiptDetector(loggerService: getIt<LoggerService>()),
+    () => MethodChannelReceiptDetector(
+      loggerService: getIt<LoggerService>(),
+    ),
   );
 
   // M7: lives in core because two unrelated consumers read it — the Home
   // screen's Scan Receipt button AND the Settings capability row
   // (design_spendlens.md §6).
   getIt.registerLazySingleton<IScanCapabilityService>(
-    () => ScanCapabilityService(getIt<OcrService>()),
+    () => ScanCapabilityService(
+      getIt<OcrService>(),
+    ),
   );
 
   // Stateless filesystem helper for receipt photos. Registered so the
   // gallery-pick path and `ReviewBloc` share ONE instance instead of each
   // default-constructing its own.
-  getIt.registerLazySingleton(() => const ReceiptImageStore());
+  getIt.registerLazySingleton(
+    () => const ReceiptImageStore(),
+  );
 
   // registerLazySingleton, never a factory: `isPicking` is a process-wide
   // re-entrancy guard, and a factory would hand each call site a fresh
   // `false` — silently deleting the double-pick protection.
   getIt.registerLazySingleton(
-    () => PermissionRequester(getIt<IScanCapabilityService>()),
+    () => PermissionRequester(
+      getIt<IScanCapabilityService>(),
+    ),
   );
 
   // M9: Apphud-only subscription repository (design_spendlens.md §6/§9).
@@ -112,6 +128,8 @@ Future<void> initDependencies() async {
   // mirroring `GoogleSignInService`'s pattern — a missing API key degrades
   // to `isConfigured == false` rather than throwing.
   getIt.registerLazySingleton<ISubscriptionRepository>(
-    () => ApphudSubscriptionRepository(loggerService: getIt<LoggerService>()),
+    () => ApphudSubscriptionRepository(
+      loggerService: getIt<LoggerService>(),
+    ),
   );
 }

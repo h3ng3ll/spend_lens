@@ -10,7 +10,8 @@ import '../../../../../core/utils/app_limits.dart';
 import '../../../../../core/widgets/app_container.dart';
 import '../../../../../core/widgets/gradient_cta_button.dart';
 import '../../../../../core/widgets/padding/horizontal_padding.dart';
-import '../../../domain/models/e_subscription_plan.dart';
+import '../../../domain/models/subscription/subscription_offer.dart';
+import '../../../domain/use_cases/get_offers_use_case.dart';
 import '../../../domain/use_cases/purchase_subscription_use_case.dart';
 import '../../../domain/use_cases/restore_purchases_use_case.dart';
 import '../../bloc/subscription_bloc/subscription_bloc.dart';
@@ -45,22 +46,27 @@ class SubscriptionSheet extends StatelessWidget {
       useRootNavigator: true,
       isScrollControlled: true,
       builder: (sheetContext) => BlocProvider<SubscriptionBloc>(
-        create: (_) => SubscriptionBloc(
-          purchaseSubscription: getIt<PurchaseSubscriptionUseCase>(),
-          restorePurchases: getIt<RestorePurchasesUseCase>(),
-        ),
+        create: (_) =>
+            SubscriptionBloc(
+              purchaseSubscription: getIt<PurchaseSubscriptionUseCase>(),
+              restorePurchases: getIt<RestorePurchasesUseCase>(),
+              getOffersUseCase: getIt<GetOffersUseCase>(),
+            )..add(
+              SubscriptionEvent.getOffers(),
+            ),
         child: const SubscriptionSheet(),
       ),
     );
   }
 
-  void _onSelectMonthly(BuildContext context) => context
-      .read<SubscriptionBloc>()
-      .add(const SubscriptionEvent.selectPlan(ESubscriptionPlan.monthly));
-
-  void _onSelectYearly(BuildContext context) => context
-      .read<SubscriptionBloc>()
-      .add(const SubscriptionEvent.selectPlan(ESubscriptionPlan.yearly));
+  void _onSelectPlan(
+    BuildContext context,
+    SubscriptionOffer offer,
+  ) => context.read<SubscriptionBloc>().add(
+    SubscriptionEvent.selectPlan(
+      offer.id,
+    ),
+  );
 
   void _onSubscribe(BuildContext context) =>
       context.read<SubscriptionBloc>().add(const SubscriptionEvent.purchase());
@@ -153,6 +159,7 @@ class SubscriptionSheet extends StatelessWidget {
                             fontWeight: FontWeight.w400,
                           ),
                         ),
+
                         Column(
                           mainAxisSize: MainAxisSize.min,
                           crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,22 +174,37 @@ class SubscriptionSheet extends StatelessWidget {
                             ),
                           ],
                         ),
-                        PlanOptionCard(
-                          title: lo.planYearly,
-                          price: lo.planYearlyPrice,
-                          note: lo.planYearlyNote,
-                          badge: lo.planBestValue,
-                          selected:
-                              state.selectedPlan == ESubscriptionPlan.yearly,
-                          onTap: () => _onSelectYearly(context),
+                        ...state.subscriptions.map(
+                          (e) {
+                            return PlanOptionCard(
+                              title: e.name,
+                              price: e.description,
+                              note: lo.planYearlyNote,
+                              badge: lo.planBestValue,
+                              selected: state.selectedPlan == e.id,
+                              onTap: () => _onSelectPlan(
+                                context,
+                                e,
+                              ),
+                            );
+                          },
                         ),
-                        PlanOptionCard(
-                          title: lo.planMonthly,
-                          price: lo.planMonthlyPrice,
-                          selected:
-                              state.selectedPlan == ESubscriptionPlan.monthly,
-                          onTap: () => _onSelectMonthly(context),
-                        ),
+                        // PlanOptionCard(
+                        //   title: lo.planYearly,
+                        //   price: lo.planYearlyPrice,
+                        //   note: lo.planYearlyNote,
+                        //   badge: lo.planBestValue,
+                        //   selected:
+                        //       state.selectedPlan == ESubscriptionPlan.yearly,
+                        //   onTap: () => _onSelectYearly(context),
+                        // ),
+                        // PlanOptionCard(
+                        //   title: lo.planMonthly,
+                        //   price: lo.planMonthlyPrice,
+                        //   selected:
+                        //       state.selectedPlan == ESubscriptionPlan.monthly,
+                        //   onTap: () => _onSelectMonthly(context),
+                        // ),
                         GradientCtaButton(
                           label: lo.premiumSubscribe,
                           enabled: !isBusy,

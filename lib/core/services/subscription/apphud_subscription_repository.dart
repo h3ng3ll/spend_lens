@@ -1,7 +1,12 @@
 import 'dart:async';
 import 'package:apphud/apphud.dart';
+import 'package:apphud/models/product_details/product_details_wrapper.dart';
+import 'package:apphud/models/sk_product/sk_product_wrapper.dart';
+import 'package:dartz/dartz.dart';
 
-import '../../../features/subscription/domain/models/e_subscription_plan.dart';
+import '../../../features/subscription/domain/failures/subscription_failures.dart';
+import '../../../features/subscription/domain/models/subscription/subscription_offer.dart';
+import '../../../features/subscription/presentation/bloc/subscription_bloc/subscription_bloc.dart';
 import '../logger_service.dart';
 import '../../utils/env/env.dart';
 import 'i_subscription_repository.dart';
@@ -42,6 +47,7 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
 
   ApphudSubscriptionRepository._(this._loggerService);
 
+  @override
   Future<void> init(Env env) async {
     if (_started) {
       _loggerService.info(
@@ -150,32 +156,54 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
   /// not entitled" — the same contract as a cancelled purchase, so nothing
   /// downstream has to special-case the stub.
   @override
-  Future<bool> purchasePlan(ESubscriptionPlan plan) async {
-    _loggerService.info(
-      'ApphudSubscriptionRepository: purchasePlan($plan) is not implemented '
-      'yet — reporting no entitlement.',
-    );
+  PurchaseHandlingType purchasePlan(
+    String planId,
+  ) async {
     try {
       final placement = await Apphud.products().timeout(
         _kPaywallTimeout,
       );
       print(placement);
+      final res = await Apphud.purchase(
+        productId: planId,
+      );
+      if (res.error?.message != null) {
+        return Right(
+          FailedPurchaseFailure(
+            details: res.error?.message ?? 'unknown',
+          ),
+        );
+      }
+      return Left(
+        .purchased,
+      );
     } catch (error) {
       _loggerService.warning(
         'ApphudSubscriptionRepository: paywall failed: $error',
       );
     }
-    return false;
+    return Right(
+      UnknownSubscriptionFailure(),
+    );
   }
 
-  /// NOT IMPLEMENTED YET — see [purchasePlan].
   @override
-  Future<bool> restorePurchases() async {
-    _loggerService.info(
-      'ApphudSubscriptionRepository: restorePurchases is not implemented '
-      'yet — reporting no entitlement.',
+  PurchaseHandlingType restorePurchases() async {
+    final result = await Apphud.restorePurchases();
+    if (result.error?.message != null) {
+      return Right(
+        FailedPurchaseFailure(
+          details: result.error!.message!,
+        ),
+      );
+    }
+    final status = result.subscriptions.isNotEmpty
+        ? ESubscriptionStatus.restored
+        : ESubscriptionStatus.nothingToRestore;
+
+    return Left(
+      status,
     );
-    return false;
   }
 
   @override
@@ -196,6 +224,89 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
     } catch (e) {
       _loggerService.warning('Apphud.hasPremiumAccess failed: $e');
       return false;
+    }
+  }
+
+  @override
+  Future<Either<List<SubscriptionOffer>, SubscriptionFailures>>
+  getSubscriptionOffers() async {
+    if (!_started) {
+      _loggerService.info(
+        'ApphudSubscriptionRepository: presentPaywall skipped — SDK not '
+        'started (no API key).',
+      );
+      return Right(
+        AlreadyInitializedSubscriptionFailure(),
+      );
+    }
+
+    try {
+      final placements = await Apphud.products().timeout(
+        _kPaywallTimeout,
+      );
+
+      final paywall = placements.map(
+        (placement) => placement.skProductWrapper,
+      );
+
+      if (paywall.isEmpty) {
+        // Configured in the dashboard, or it is not. Either way there is
+        // nothing to present, and inventing a fallback purchase sheet here
+        // would be worse than reporting nothing happened.
+        _loggerService.warning(
+          'ApphudSubscriptionRepository: no placement with a paywall screen.',
+        );
+        return Left(
+          [],
+        );
+      }
+
+      // Presenting the paywall is currently unimplemented: the SDK call
+      // that used to live here was disabled before this change, leaving the
+      // method inert. Reporting "no purchase happened" is the honest
+      // answer, and it is a contract every caller already handles.
+      //
+      // Nothing in the app reaches this today — Profile's upgrade action
+      // now opens the in-app `SubscriptionSheet`, which goes through
+      // `purchasePlan` instead.
+      final blackList = ['PremiumYearly', 'PremiumMonthly'];
+      final offers = paywall
+          .whereType<SKProductWrapper>()
+          .map((e) {
+            print(e);
+            return SubscriptionOffer(
+              id: e.productIdentifier,
+              name: e.localizedTitle,
+              description: e.localizedDescription,
+            );
+          })
+          .where(
+            (e) => !blackList.contains(
+              e.id,
+            ),
+          )
+          .toList();
+
+      return Left(
+        offers,
+      );
+    } on TimeoutException {
+      _loggerService.warning(
+        'ApphudSubscriptionRepository: paywall did not complete within '
+        '${_kPaywallTimeout.inSeconds}s.',
+      );
+      return Right(
+        TimeoutSubscriptionFailure(
+          timeout: '${_kPaywallTimeout.inSeconds}s.',
+        ),
+      );
+    } catch (error) {
+      _loggerService.warning(
+        'ApphudSubscriptionRepository: paywall failed: $error',
+      );
+      return Right(
+        UnknownSubscriptionFailure(),
+      );
     }
   }
 }

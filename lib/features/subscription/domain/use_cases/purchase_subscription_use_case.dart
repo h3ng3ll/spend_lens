@@ -1,5 +1,8 @@
+import 'package:dartz/dartz.dart';
+
 import '../../../../core/services/subscription/i_subscription_repository.dart';
-import '../models/e_subscription_plan.dart';
+import '../../presentation/bloc/subscription_bloc/subscription_bloc.dart';
+import '../failures/subscription_failures.dart';
 
 /// Buys the premium subscription for one billing period.
 ///
@@ -21,7 +24,9 @@ class PurchaseSubscriptionUseCase {
 
   /// Returns whether the user ended up entitled. Never throws — see
   /// [ISubscriptionRepository.purchasePlan].
-  Future<bool> call(ESubscriptionPlan plan) {
-    return _subscriptionRepository.purchasePlan(plan);
+  Future<Either<ESubscriptionStatus, SubscriptionFailures>>  call(String planId) {
+    return _subscriptionRepository.purchasePlan(
+      planId,
+    );
   }
 }

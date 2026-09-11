@@ -1,4 +1,9 @@
-import '../../../features/subscription/domain/models/e_subscription_plan.dart';
+import 'package:dartz/dartz.dart';
+
+import '../../../features/subscription/domain/failures/subscription_failures.dart';
+import '../../../features/subscription/domain/models/subscription/subscription_offer.dart';
+import '../../../features/subscription/presentation/bloc/subscription_bloc/subscription_bloc.dart';
+import '../../utils/env/env.dart';
 
 /// Premium-entitlement contract (design_spendlens.md §6/§9 — `Apphud only`,
 /// no custom StoreKit).
@@ -9,7 +14,13 @@ import '../../../features/subscription/domain/models/e_subscription_plan.dart';
 /// mutation for a Bloc to subscribe to the way it would `watchAll()` a Hive
 /// box (hive_rules.md §9 governs Hive-backed reactive data, not a
 /// third-party SDK's cached entitlement flag).
+///
+
+typedef PurchaseHandlingType =  Future<Either<ESubscriptionStatus, SubscriptionFailures>>;
+
 abstract interface class ISubscriptionRepository {
+  Future<void> init(Env env);
+
   /// `true` once the SDK has started successfully AND the entitlement
   /// check itself succeeded. `false` — never a thrown exception — when the
   /// SDK is unconfigured (no API key) or the check fails for any reason:
@@ -46,10 +57,15 @@ abstract interface class ISubscriptionRepository {
   /// Same error contract as everything else here — returns false, never
   /// throws, when the SDK is unconfigured, the product is missing, or the
   /// user cancels. A purchase that did not happen is not an app error.
-  Future<bool> purchasePlan(ESubscriptionPlan plan);
+  PurchaseHandlingType purchasePlan(
+    String planId,
+  );
 
   /// Restores a previously-purchased entitlement, returning whether the
   /// user ended up entitled. Required by App Review for any app selling a
   /// subscription; same never-throws contract as [purchasePlan].
-  Future<bool> restorePurchases();
+  PurchaseHandlingType restorePurchases();
+
+  Future<Either<List<SubscriptionOffer>, SubscriptionFailures>>
+  getSubscriptionOffers();
 }

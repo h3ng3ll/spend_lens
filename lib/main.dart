@@ -146,8 +146,7 @@ void main() async {
 
   // M9: Apphud subscription check (design_spendlens.md §6/§9). An empty
   // API key is a disabled feature — `init()` never throws.
-  final subscriptionRepository =
-      getIt<ISubscriptionRepository>() as ApphudSubscriptionRepository;
+  final subscriptionRepository = getIt<ISubscriptionRepository>();
   await subscriptionRepository.init(getIt<Env>());
 
   final settingsBloc = SettingsBloc(

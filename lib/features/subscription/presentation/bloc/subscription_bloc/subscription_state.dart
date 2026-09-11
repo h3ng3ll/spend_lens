@@ -2,7 +2,9 @@ part of 'subscription_bloc.dart';
 
 enum ESubscriptionStatus {
   idle,
+  loading,
   purchasing,
+  loaded,
 
   /// The purchase completed and the user is entitled.
   purchased,
@@ -24,8 +26,9 @@ sealed class SubscriptionState with _$SubscriptionState {
   const factory SubscriptionState({
     @Default(ESubscriptionStatus.idle) ESubscriptionStatus status,
 
-    /// Defaults to yearly — the sheet presents it as the better-value
-    /// option, so it is also the one pre-selected.
-    @Default(ESubscriptionPlan.yearly) ESubscriptionPlan selectedPlan,
+    /// Id
+    String? selectedPlan,
+    @Default([]) List<SubscriptionOffer> subscriptions,
+    @Default('') String errorMessage,
   }) = _SubscriptionState;
 }

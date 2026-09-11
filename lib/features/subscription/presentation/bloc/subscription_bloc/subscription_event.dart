@@ -5,8 +5,9 @@ part of 'subscription_bloc.dart';
 @freezed
 sealed class SubscriptionEvent with _$SubscriptionEvent {
   /// The user tapped one of the plan cards.
-  const factory SubscriptionEvent.selectPlan(ESubscriptionPlan plan) =
-      _SelectPlan;
+  const factory SubscriptionEvent.selectPlan(
+    String planId,
+  ) = _SelectPlan;
 
   /// The user tapped the CTA. Deliberately payload-free — the plan to buy
   /// is `SubscriptionState.selectedPlan`, so the UI cannot hand the bloc a
@@ -14,4 +15,6 @@ sealed class SubscriptionEvent with _$SubscriptionEvent {
   const factory SubscriptionEvent.purchase() = _Purchase;
 
   const factory SubscriptionEvent.restore() = _Restore;
+
+  const factory SubscriptionEvent.getOffers() = _GetOffers;
 }

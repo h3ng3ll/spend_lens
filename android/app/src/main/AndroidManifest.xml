@@ -3,6 +3,8 @@
          `required="false"` lets a camera-less tablet still install the app
          for cash-only use — capability is reported per-device by
          `IScanCapabilityService`, never assumed from the manifest alone. -->
+    <uses-permission android:name="com.android.vending.BILLING"/>
+
     <uses-permission android:name="android.permission.CAMERA"/>
     <uses-feature android:name="android.hardware.camera" android:required="false"/>
 

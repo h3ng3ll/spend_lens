@@ -29,15 +29,6 @@ class UpgradeToPremiumButton extends StatelessWidget {
     required this.onUpgrade,
   });
 
-  void _onTap(BuildContext context) {
-    if (!isPurchaseAvailable) {
-      UiMessageService.showInfo(
-        AppLocalizations.of(context).purchasesUnavailable,
-      );
-      return;
-    }
-    onUpgrade();
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -46,7 +37,7 @@ class UpgradeToPremiumButton extends StatelessWidget {
     final lo = AppLocalizations.of(context);
 
     return GestureDetector(
-      onTap: () => _onTap(context),
+      onTap: onUpgrade,
       child: AppContainer(
         height: 40.0,
         color: scheme.accentTint,
