@@ -11,6 +11,7 @@ sealed class SubscriptionOffer with _$SubscriptionOffer {
     required String id,
     required String name,
     required String description,
+    required String price,
   }) = _SubscriptionOffer;
 
   factory SubscriptionOffer.fromJson(

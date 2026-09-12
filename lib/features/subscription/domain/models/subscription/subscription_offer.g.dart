@@ -11,6 +11,7 @@ _SubscriptionOffer _$SubscriptionOfferFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       name: json['name'] as String,
       description: json['description'] as String,
+      price: json['price'] as String,
     );
 
 Map<String, dynamic> _$SubscriptionOfferToJson(_SubscriptionOffer instance) =>
@@ -18,4 +19,5 @@ Map<String, dynamic> _$SubscriptionOfferToJson(_SubscriptionOffer instance) =>
       'id': instance.id,
       'name': instance.name,
       'description': instance.description,
+      'price': instance.price,
     };

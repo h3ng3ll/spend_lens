@@ -2,7 +2,7 @@ name: spend_lens
 description: "SpendLens — receipt expense analyzer."
 publish_to: 'none'
 
-version: 1.0.0+2
+version: 1.0.1+4
 
 environment:
   sdk: ^3.12.2
@@ -72,7 +72,7 @@ dependencies:
   # Holding 3.4.0: Android is the platform verified end-to-end on a device
   # this session, and iOS is unblocked by installing an Xcode that ships the
   # iOS 26.4+ SDK — a toolchain update, not a code change. Revisit then.
-  apphud: ^3.4.0
+  apphud: ^3.3.0
 
   # Firebase (Crashlytics + auth + Firestore record sync + receipt-photo storage)
   firebase_core: ^4.1.1

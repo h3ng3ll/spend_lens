@@ -31,7 +31,10 @@ class AboutPage extends StatelessWidget {
             return const LoadingDataWidget();
           }
 
-          return AboutBody(versionLabel: snapshot.data!.version);
+          return AboutBody(
+            versionLabel:
+                '${snapshot.data!.version} ${snapshot.data!.buildNumber}',
+          );
         },
       ),
     );

@@ -73,7 +73,7 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
       // the app on the native splash forever with a clean logcat — observed
       // on a real device, not hypothesised. A third-party SDK may never
       // gate the first frame.
-
+      await Apphud.enableDebugLogs();
       await Apphud.start(
         apiKey: env.appHudApiKey,
         observerMode: true,
@@ -243,6 +243,7 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
     }
 
     try {
+      // final place = await Apphud.placements();
       final placements = await Apphud.products().timeout(
         _kPaywallTimeout,
       );
@@ -273,10 +274,12 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
           .whereType<SKProductWrapper>()
           .map((e) {
             print(e);
+
             return SubscriptionOffer(
               id: e.productIdentifier,
               name: e.localizedTitle,
               description: e.localizedDescription,
+              price: '${e.price.toStringAsFixed(2)} ${e.priceLocale.currencyCode}',
             );
           })
           .where(

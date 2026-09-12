@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$SubscriptionOffer {
 
- String get id; String get name; String get description;
+ String get id; String get name; String get description; String get price;
 /// Create a copy of SubscriptionOffer
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -28,16 +28,16 @@ $SubscriptionOfferCopyWith<SubscriptionOffer> get copyWith => _$SubscriptionOffe
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SubscriptionOffer&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SubscriptionOffer&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,description);
+int get hashCode => Object.hash(runtimeType,id,name,description,price);
 
 @override
 String toString() {
-  return 'SubscriptionOffer(id: $id, name: $name, description: $description)';
+  return 'SubscriptionOffer(id: $id, name: $name, description: $description, price: $price)';
 }
 
 
@@ -48,7 +48,7 @@ abstract mixin class $SubscriptionOfferCopyWith<$Res>  {
   factory $SubscriptionOfferCopyWith(SubscriptionOffer value, $Res Function(SubscriptionOffer) _then) = _$SubscriptionOfferCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String description
+ String id, String name, String description, String price
 });
 
 
@@ -65,11 +65,12 @@ class _$SubscriptionOfferCopyWithImpl<$Res>
 
 /// Create a copy of SubscriptionOffer
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? description = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? description = null,Object? price = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -152,10 +153,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String description)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String description,  String price)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SubscriptionOffer() when $default != null:
-return $default(_that.id,_that.name,_that.description);case _:
+return $default(_that.id,_that.name,_that.description,_that.price);case _:
   return orElse();
 
 }
@@ -173,10 +174,10 @@ return $default(_that.id,_that.name,_that.description);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String description)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String description,  String price)  $default,) {final _that = this;
 switch (_that) {
 case _SubscriptionOffer():
-return $default(_that.id,_that.name,_that.description);}
+return $default(_that.id,_that.name,_that.description,_that.price);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -190,10 +191,10 @@ return $default(_that.id,_that.name,_that.description);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String description)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String description,  String price)?  $default,) {final _that = this;
 switch (_that) {
 case _SubscriptionOffer() when $default != null:
-return $default(_that.id,_that.name,_that.description);case _:
+return $default(_that.id,_that.name,_that.description,_that.price);case _:
   return null;
 
 }
@@ -205,12 +206,13 @@ return $default(_that.id,_that.name,_that.description);case _:
 @JsonSerializable()
 
 class _SubscriptionOffer implements SubscriptionOffer {
-  const _SubscriptionOffer({required this.id, required this.name, required this.description});
+  const _SubscriptionOffer({required this.id, required this.name, required this.description, required this.price});
   factory _SubscriptionOffer.fromJson(Map<String, dynamic> json) => _$SubscriptionOfferFromJson(json);
 
 @override final  String id;
 @override final  String name;
 @override final  String description;
+@override final  String price;
 
 /// Create a copy of SubscriptionOffer
 /// with the given fields replaced by the non-null parameter values.
@@ -225,16 +227,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SubscriptionOffer&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SubscriptionOffer&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.description, description) || other.description == description)&&(identical(other.price, price) || other.price == price));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,name,description);
+int get hashCode => Object.hash(runtimeType,id,name,description,price);
 
 @override
 String toString() {
-  return 'SubscriptionOffer(id: $id, name: $name, description: $description)';
+  return 'SubscriptionOffer(id: $id, name: $name, description: $description, price: $price)';
 }
 
 
@@ -245,7 +247,7 @@ abstract mixin class _$SubscriptionOfferCopyWith<$Res> implements $SubscriptionO
   factory _$SubscriptionOfferCopyWith(_SubscriptionOffer value, $Res Function(_SubscriptionOffer) _then) = __$SubscriptionOfferCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String description
+ String id, String name, String description, String price
 });
 
 
@@ -262,11 +264,12 @@ class __$SubscriptionOfferCopyWithImpl<$Res>
 
 /// Create a copy of SubscriptionOffer
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? description = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? description = null,Object? price = null,}) {
   return _then(_SubscriptionOffer(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,description: null == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
+as String,price: null == price ? _self.price : price // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

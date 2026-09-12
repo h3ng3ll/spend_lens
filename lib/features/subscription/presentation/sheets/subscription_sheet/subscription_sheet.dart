@@ -178,8 +178,8 @@ class SubscriptionSheet extends StatelessWidget {
                           (e) {
                             return PlanOptionCard(
                               title: e.name,
-                              price: e.description,
-                              note: lo.planYearlyNote,
+                              price: e.price,
+                              // note: lo.planYearlyNote,
                               badge: lo.planBestValue,
                               selected: state.selectedPlan == e.id,
                               onTap: () => _onSelectPlan(
