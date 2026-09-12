@@ -37,9 +37,7 @@ class PlanBadge extends StatelessWidget {
       height: 24.0,
       gradient: isPremium ? scheme.accentGradient : null,
       color: isPremium ? null : scheme.field,
-      border: isPremium
-          ? null
-          : Border.all(color: scheme.line2, width: 1.0),
+      border: isPremium ? null : Border.all(color: scheme.line2, width: 1.0),
       borderRadius: BorderRadius.circular(999.0),
       padding: const EdgeInsets.symmetric(horizontal: 10.0),
       alignment: Alignment.center,

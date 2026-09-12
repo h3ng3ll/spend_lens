@@ -1,5 +1,6 @@
 import '../../../core/services/receipt_image_store/receipt_image_store.dart';
 import '../../../core/di/injection.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../core/services/firebase/firebase_firestore_service.dart';
 import '../../../core/services/firebase/firebase_storage_service.dart';
 import '../../../core/services/subscription/i_subscription_repository.dart';
@@ -81,6 +82,7 @@ void initSyncFeature({required bool isFirebaseReady}) {
       downloadReceiptPhotos: getIt<DownloadReceiptPhotosUseCase>(),
       adapters: getIt<SyncEntityAdapters>(),
       settingsLocalRepository: getIt<ISettingsLocalRepository>(),
+      loggerService: getIt<LoggerService>(),
     ),
   );
 

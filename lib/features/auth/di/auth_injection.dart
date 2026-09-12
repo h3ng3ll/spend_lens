@@ -5,7 +5,9 @@ import '../../../core/services/receipt_image_store/receipt_image_store.dart';
 import '../../receipt/domain/repositories/i_receipt_item_local_repository.dart';
 import '../../receipt/domain/repositories/i_receipt_local_repository.dart';
 import '../../store/domain/repositories/i_store_local_repository.dart';
+import '../../../core/services/firebase/firebase_firestore_service.dart';
 import '../../sync/domain/use_cases/clear_synced_local_records_use_case.dart';
+import '../../sync/domain/use_cases/run_full_sync_use_case.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/services/crypto_service.dart';
@@ -99,6 +101,9 @@ Future<bool> initAuthFeature() async {
       receiptItemLocalRepository: getIt<IReceiptItemLocalRepository>(),
       storeLocalRepository: getIt<IStoreLocalRepository>(),
       imageStore: getIt<ReceiptImageStore>(),
+      runFullSync: getIt<RunFullSyncUseCase>(),
+      firestoreService: getIt<FirebaseFirestoreService>(),
+      loggerService: getIt<LoggerService>(),
     ),
   );
 

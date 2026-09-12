@@ -3,6 +3,7 @@ import 'dart:typed_data';
 
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:spend_lens/core/services/logger_service.dart';
 import 'package:spend_lens/core/models/e_sync_status.dart';
 import 'package:spend_lens/core/services/receipt_image_store/receipt_image_store.dart';
 import 'package:spend_lens/features/receipt/domain/models/receipt/receipt.dart';
@@ -11,7 +12,12 @@ import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_item_l
 import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_local_repository.dart';
 import 'package:spend_lens/features/store/domain/models/store/store.dart';
 import 'package:spend_lens/features/store/domain/repositories/i_store_local_repository.dart';
+import 'package:dartz/dartz.dart';
+import 'package:spend_lens/core/failures/failure.dart';
+import 'package:spend_lens/core/failures/sync_failures.dart';
+import 'package:spend_lens/core/services/firebase/firebase_firestore_service.dart';
 import 'package:spend_lens/features/sync/domain/use_cases/clear_synced_local_records_use_case.dart';
+import 'package:spend_lens/features/sync/domain/use_cases/run_full_sync_use_case.dart';
 
 /// The sign-out cleanup. This deletes user data, so its safety properties
 /// are pinned rather than assumed.
@@ -20,6 +26,7 @@ void main() {
   late _FakeItems items;
   late _FakeStores stores;
   late _RecordingImageStore imageStore;
+  late _SpyFullSync fullSync;
 
   final timestamp = DateTime(2026, 9, 12);
 
@@ -29,6 +36,9 @@ void main() {
         receiptItemLocalRepository: items,
         storeLocalRepository: stores,
         imageStore: imageStore,
+        runFullSync: fullSync,
+        firestoreService: _FakeFirestore(),
+        loggerService: LoggerService(),
       );
 
   Receipt receipt(
@@ -58,6 +68,7 @@ void main() {
     items = _FakeItems();
     stores = _FakeStores();
     imageStore = _RecordingImageStore();
+    fullSync = _SpyFullSync();
   });
 
   test('removes synced receipts', () async {
@@ -81,6 +92,7 @@ void main() {
       items = _FakeItems();
       stores = _FakeStores();
       imageStore = _RecordingImageStore();
+      fullSync = _SpyFullSync();
       await receipts.save(receipt('r1', status));
 
       final cleared = await buildUseCase()();
@@ -172,6 +184,38 @@ void main() {
       await buildUseCase()();
 
       expect(await stores.getAll(), hasLength(1));
+    });
+  });
+
+  group('publishing before clearing', () {
+    // Without this the cleanup removed almost nothing: rows created since
+    // the last cycle are still pendingCreate, so the synced-only rule kept
+    // every one of them and signing out appeared to do nothing at all.
+    test('runs a sync before deciding what to clear', () async {
+      await receipts.save(receipt('r1', ESyncStatus.synced));
+
+      await buildUseCase()();
+
+      expect(fullSync.callCount, 1);
+    });
+
+    test('a failed sync still clears what was already synced', () async {
+      fullSync.shouldFail = true;
+      await receipts.save(receipt('r1', ESyncStatus.synced));
+
+      final cleared = await buildUseCase()();
+
+      expect(cleared, 1, reason: 'r1 was already safe on the server');
+    });
+
+    test('a failed sync keeps everything still unsynchronized', () async {
+      // The conservative outcome: nothing reached the server, so nothing is
+      // eligible to be dropped.
+      fullSync.shouldFail = true;
+      await receipts.save(receipt('r1', ESyncStatus.pendingCreate));
+
+      expect(await buildUseCase()(), 0);
+      expect(await receipts.getAll(), hasLength(1));
     });
   });
 }
@@ -339,4 +383,34 @@ class _FakeStores implements IStoreLocalRepository {
 
   @override
   Stream<List<Store>> watchAll() => Stream.value(_store.values.toList());
+}
+
+/// Records whether the cleanup published outstanding work first.
+class _SpyFullSync implements RunFullSyncUseCase {
+  int callCount = 0;
+
+  /// Returns `Left` — the project's side order, Left = failure. The use case
+  /// signals failure this way rather than throwing, so the test does too.
+  bool shouldFail = false;
+
+  @override
+  Future<Either<Failure, SyncReport>> call({
+    required String uid,
+    bool fullResync = false,
+  }) async {
+    callCount++;
+    if (shouldFail) return const Left(SyncOfflineFailure());
+    return const Right(SyncReport(pushed: 0, pulled: 0));
+  }
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeFirestore implements FirebaseFirestoreService {
+  @override
+  String? get currentUid => 'u1';
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

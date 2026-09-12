@@ -15,6 +15,5 @@ sealed class SyncEvent with _$SyncEvent {
   /// Synchronize is usually trying to repair something an incremental pull
   /// cannot see, because the cursor has already moved past it. Automatic
   /// cycles leave it false and stay cheap.
-  const factory SyncEvent.syncNow({@Default(false) bool fullResync}) =
-      _SyncNow;
+  const factory SyncEvent.syncNow({@Default(false) bool fullResync}) = _SyncNow;
 }

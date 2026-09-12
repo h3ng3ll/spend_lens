@@ -93,8 +93,8 @@ class StorageCard extends StatelessWidget {
                 // what they paid for.
                 isSignedIn
                     ? (syncState.isPremium
-                        ? lo.limitPremium(quotaLabel)
-                        : lo.limitFree(quotaLabel))
+                          ? lo.limitPremium(quotaLabel)
+                          : lo.limitFree(quotaLabel))
                     : lo.limitLocal(deviceNoun),
                 style: textTheme.footnote13.copyWith(color: scheme.ter),
               ),

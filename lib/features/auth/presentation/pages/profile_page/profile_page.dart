@@ -167,7 +167,6 @@ class _ProfilePageState extends State<ProfilePage> {
   /// The sheet reports its own outcome via a toast and closes itself on
   /// success, so this only has to refresh what the rest of Profile shows.
   Future<void> _onUpgrade() async {
-
     // if (!isPurchaseAvailable) {
     //   UiMessageService.showInfo(
     //     AppLocalizations.of(context).purchasesUnavailable,

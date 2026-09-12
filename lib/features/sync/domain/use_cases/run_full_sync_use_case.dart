@@ -1,6 +1,7 @@
 import 'package:dartz/dartz.dart';
 
 import '../../../../core/failures/failure.dart';
+import '../../../../core/services/logger_service.dart';
 import '../../../../core/utils/sync_error_classifier.dart';
 import '../../../settings/domain/repositories/i_settings_local_repository.dart';
 import '../adapters/sync_entity_adapters.dart';
@@ -57,6 +58,7 @@ class RunFullSyncUseCase {
   final DownloadReceiptPhotosUseCase _downloadReceiptPhotos;
   final SyncEntityAdapters _adapters;
   final ISettingsLocalRepository _settingsLocalRepository;
+  final LoggerService _loggerService;
 
   const RunFullSyncUseCase({
     required ISyncRemoteRepository remoteRepository,
@@ -66,6 +68,7 @@ class RunFullSyncUseCase {
     required DownloadReceiptPhotosUseCase downloadReceiptPhotos,
     required SyncEntityAdapters adapters,
     required ISettingsLocalRepository settingsLocalRepository,
+    required LoggerService loggerService,
   }) : this._(
          remoteRepository,
          pushPendingChanges,
@@ -74,6 +77,7 @@ class RunFullSyncUseCase {
          downloadReceiptPhotos,
          adapters,
          settingsLocalRepository,
+         loggerService,
        );
 
   const RunFullSyncUseCase._(
@@ -84,6 +88,7 @@ class RunFullSyncUseCase {
     this._downloadReceiptPhotos,
     this._adapters,
     this._settingsLocalRepository,
+    this._loggerService,
   );
 
   /// Runs a cycle for [uid].
@@ -198,7 +203,18 @@ class RunFullSyncUseCase {
           purged: purged,
         ),
       );
-    } catch (error) {
+    } catch (error, stackTrace) {
+      // LOGGED before it is classified away. `classifySyncError` maps this
+      // to a short, user-facing `Failure` and the original exception —
+      // with its Firestore code and stack — is gone after that. This is the
+      // only place that detail still exists, and a sync that silently
+      // stopped working is precisely what needs it.
+      _loggerService.error(
+        'RunFullSync: cycle failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'Sync',
+      );
       return Left(classifySyncError(error));
     }
   }

@@ -188,9 +188,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // of records the server already holds. They are fetched back — photos
     // included — on the next sign-in.
     //
-    // Failing here must NOT strand the user signed in. A cleanup that threw
-    // would otherwise make sign-out impossible; the rows are simply kept and
-    // the next sign-out retries.
+    // A LAST-RESORT guard, not the sync's error channel: the cleanup folds
+    // its own `Either` internally and a failed sync is already handled there
+    // (fewer rows qualify as synced, so more stay on the device). This
+    // catches only an unexpected THROW — a Hive I/O error, say — because
+    // sign-out must never be blocked by local housekeeping.
     try {
       await _clearSyncedLocalRecords();
     } catch (_) {

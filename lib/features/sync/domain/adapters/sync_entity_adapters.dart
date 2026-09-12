@@ -135,8 +135,8 @@ class SyncEntityAdapters {
         updatedAtOf: (e) => e.updatedAt,
         syncStatusOf: (e) => e.syncStatus,
         markSynced: (e) => e.copyWith(syncStatus: ESyncStatus.synced),
-    deletedAtOf: (e) => e.deletedAt,
-    purgeLocal: _receiptItems.deleteLocalOnly,
+        deletedAtOf: (e) => e.deletedAt,
+        purgeLocal: _receiptItems.deleteLocalOnly,
         watchAll: _receiptItems.watchAll,
       );
 
