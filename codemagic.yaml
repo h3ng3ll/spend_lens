@@ -6,15 +6,21 @@ workflows:
     environment:
       groups:
         - google_credentials
+        - android_credentials
       flutter: 3.44.4
     scripts:
+      - name: Restore key
+        script: |
+          echo $KEY_PROPERTY > android/key.properties
+          echo $UPLOAD_KEYSTORE > android/app/upload-keystore.jks
+
       - name: Clean Flutter project
         script: |
           flutter clean
       - name: Get Flutter packages
         script: |
           flutter pub get
-      - name: Flutter build ipa
+      - name: Flutter build appbundle
         script: |
           flutter build appbundle --release
     publishing:
