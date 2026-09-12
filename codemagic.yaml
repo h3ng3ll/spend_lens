@@ -11,7 +11,7 @@ workflows:
     scripts:
       - name: Restore key
         script: |
-          echo $KEY_PROPERTY > android/key.properties
+          echo $KEY_PROPERTY > android/app/key.properties
           echo  "$UPLOAD_KEYSTORE_BASE64" | base64 --decode > android/app/upload-keystore.jks
           pwd
           ls -la android/key.properties
