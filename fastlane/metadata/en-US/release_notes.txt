@@ -1,0 +1,8 @@
+Initial release of Spend Lens.
+
+• Scan paper receipts and have products, prices and totals read on your device
+• Automatic categories, monthly totals and spending insights
+• Stores built from your receipts, with price comparisons across them
+• Price history per product
+• Cash expenses alongside scanned receipts
+• Works offline, no account required

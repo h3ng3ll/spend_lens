@@ -1,0 +1,1 @@
+receipt,scanner,expense,budget,spending,tracker,grocery,price,finance,money,ocr,offline
