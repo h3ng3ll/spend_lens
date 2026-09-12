@@ -13,7 +13,9 @@ workflows:
         script: |
           echo $KEY_PROPERTY > android/key.properties
           echo $UPLOAD_KEYSTORE > android/app/upload-keystore.jks
-
+          pwd
+          ls -la android/key.properties
+          ls -la android/app/upload-keystore.jks
       - name: Clean Flutter project
         script: |
           flutter clean
