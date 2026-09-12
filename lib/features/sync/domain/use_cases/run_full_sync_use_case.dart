@@ -167,6 +167,8 @@ class RunFullSyncUseCase {
       final photosUploaded = await _uploadReceiptPhotos(uid: uid);
 
       var pulled = 0;
+      // Per-collection high-water marks, reduced to the OLDEST at the end.
+      final marks = <String>[];
 
       // LEGACY RECOVERY. A document written without `updatedAt` is excluded
       // from `where('updatedAt' > cursor)` by Firestore itself — silently,
@@ -181,26 +183,55 @@ class RunFullSyncUseCase {
       // recovery automatic, which is the point — the stranded record is on
       // the device the user is already holding.
       final needsLegacyPull = !settings.legacyPullCompleted;
+
       final unfiltered = fullResync || needsLegacyPull;
 
       // A full resync starts from nothing, so the server returns everything
       // and any previously-stranded record comes back.
       var cursor = unfiltered ? null : settings.lastSyncedAt;
       for (final adapter in adapters) {
+        // SELF-REPAIR, per collection. A collection this device holds NOTHING
+        // of cannot trust the shared cursor: there is no local row the cursor
+        // could legitimately be "past". Asking unfiltered costs one full read
+        // of an empty-for-us collection and is the only way a collection
+        // stranded behind the cursor ever comes back.
+        //
+        // This is not hypothetical — it is the state the max-instead-of-min
+        // bug left devices in: categories re-seeded at 13:19 dragged the
+        // shared cursor forward, and the receipts (12:54, 13:12) sat in
+        // Firestore permanently unreachable while the app showed an empty
+        // list and reported `upToDate`.
+        final holdsNothingLocally =
+            (await adapter.readAllIncludingDeleted()).isEmpty;
+
         final result = await _pullRemoteChanges(
           uid: uid,
           adapter: adapter,
-          sinceUpdatedAt: cursor,
+          sinceUpdatedAt: holdsNothingLocally ? null : cursor,
         );
         pulled += result.applied;
 
-        // One cursor for all collections: keep the OLDEST high-water mark so
-        // a collection that lagged behind is not skipped on the next cycle.
+        // Collected, not folded into `cursor` yet: one shared cursor must
+        // end up at the OLDEST of the seven marks, and that minimum is only
+        // known once every collection has been pulled.
+        //
+        // This used to take the MAXIMUM, which silently stranded records.
+        // A cycle that pushed freshly re-seeded categories got their
+        // `updatedAt` back as that collection's mark, jumped the shared
+        // cursor to it, and every OTHER collection — whose records are
+        // older — fell permanently behind the `updatedAt >` filter. The
+        // receipts were still in Firestore and no future sync would ever
+        // ask for them again.
         final newest = result.newestUpdatedAt;
-        if (newest != null &&
-            (cursor == null || newest.compareTo(cursor) > 0)) {
-          cursor = newest;
-        }
+        if (newest != null) marks.add(newest);
+      }
+
+      // The OLDEST mark, so no collection is skipped. A collection that
+      // returned nothing contributes no mark and cannot drag the cursor
+      // forward past another collection's unseen records.
+      if (marks.length == adapters.length) {
+        final oldest = marks.reduce((a, b) => a.compareTo(b) <= 0 ? a : b);
+        if (cursor == null || oldest.compareTo(cursor) > 0) cursor = oldest;
       }
 
       final cursorMoved = cursor != null && cursor != settings.lastSyncedAt;
@@ -222,6 +253,16 @@ class RunFullSyncUseCase {
       // images on a device that lost them — a reinstall, or the sign-out
       // cleanup that clears synced records.
       final photosDownloaded = await _downloadReceiptPhotos(uid: uid);
+
+      // One line per cycle, deliberately kept. Every sync bug in this
+      // feature presented as "the UI says up to date and nothing happened",
+      // and without an outcome line that state is indistinguishable from a
+      // healthy no-op.
+      _loggerService.info(
+        'RunFullSync: pushed=$pushed pulled=$pulled purged=$purged '
+        'photosUp=$photosUploaded photosDown=$photosDownloaded',
+        name: 'Sync',
+      );
 
       return Right(
         SyncReport(

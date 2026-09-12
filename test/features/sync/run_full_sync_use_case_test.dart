@@ -47,17 +47,21 @@ void main() {
     syncStatus: syncStatus,
   );
 
-  SyncEntityAdapter<Object> adapter() => SyncEntityAdapter<Object>(
-    collection: ESyncCollection.expenses,
-    readAllIncludingDeleted: () async => local.cast<Object>(),
-    readPending: () async => local
+  SyncEntityAdapter<Object> adapter({
+    ESyncCollection collection = ESyncCollection.expenses,
+    List<Expense>? backing,
+  }) => SyncEntityAdapter<Object>(
+    collection: collection,
+    readAllIncludingDeleted: () async => (backing ?? local).cast<Object>(),
+    readPending: () async => (backing ?? local)
         .where((e) => e.syncStatus != ESyncStatus.synced)
         .toList()
         .cast<Object>(),
     writeAllVerbatim: (items) async {
+      final target = backing ?? local;
       for (final item in items.cast<Expense>()) {
-        local.removeWhere((e) => e.id == item.id);
-        local.add(item);
+        target.removeWhere((e) => e.id == item.id);
+        target.add(item);
       }
     },
     toJson: (e) => (e as Expense).toJson(),
@@ -153,6 +157,106 @@ void main() {
       // An empty account has no legacy rows; leaving it false would re-read
       // everything forever.
       expect(settings.current.legacyPullCompleted, isTrue);
+    });
+  });
+
+  group('the shared cursor across collections', () {
+    // THE REGRESSION. The cursor took the MAXIMUM mark across all seven
+    // collections, so one collection that had just been written (freshly
+    // re-seeded categories) dragged it forward past every OTHER
+    // collection's older records. Those records stayed in Firestore,
+    // permanently excluded by `updatedAt >`, while the app showed an empty
+    // list and reported `upToDate`.
+    test('settles on the OLDEST mark, never the newest', () async {
+      final categories = <Expense>[];
+      final expenses = <Expense>[];
+
+      remote.byCollection[ESyncCollection.categories] = [
+        RemoteRecord(
+          id: 'c1',
+          json: expense('c1', updatedAt: DateTime(2026, 9, 12, 13, 19)).toJson(),
+        ),
+      ];
+      remote.byCollection[ESyncCollection.expenses] = [
+        RemoteRecord(
+          id: 'e1',
+          json: expense('e1', updatedAt: DateTime(2026, 9, 12, 12, 54)).toJson(),
+        ),
+      ];
+      settings.current = const AppSettings(legacyPullCompleted: true);
+
+      final useCase = RunFullSyncUseCase(
+        remoteRepository: remote,
+        pushPendingChanges: PushPendingChangesUseCase(remote),
+        pullRemoteChanges: PullRemoteChangesUseCase(remote),
+        uploadReceiptPhotos: UploadReceiptPhotosUseCase(
+          receiptLocalRepository: _EmptyReceipts(),
+          imageStore: ReceiptImageStore(),
+          storageService: _UnusedStorage(),
+        ),
+        downloadReceiptPhotos: DownloadReceiptPhotosUseCase(
+          receiptLocalRepository: _EmptyReceipts(),
+          imageStore: ReceiptImageStore(),
+          storageService: _UnusedStorage(),
+        ),
+        adapters: _FakeAdapters([
+          adapter(
+            collection: ESyncCollection.categories,
+            backing: categories,
+          ),
+          adapter(collection: ESyncCollection.expenses, backing: expenses),
+        ]),
+        settingsLocalRepository: settings,
+        loggerService: LoggerService(),
+      );
+
+      await useCase(uid: 'u1');
+
+      // 12:54, not 13:19 — otherwise the expenses collection is stranded.
+      expect(
+        settings.current.lastSyncedAt,
+        DateTime(2026, 9, 12, 12, 54).toIso8601String(),
+      );
+    });
+  });
+
+  group('a collection this device holds nothing of', () {
+    test('ignores the cursor, so stranded records come back', () async {
+      // The state the max-cursor bug left behind: a populated account, a
+      // cursor ahead of the records, and nothing local to justify it.
+      settings.current = const AppSettings(
+        lastSyncedAt: '2026-09-12T13:19:02.251529',
+        legacyPullCompleted: true,
+      );
+      remote.byCollection[ESyncCollection.expenses] = [
+        RemoteRecord(
+          id: 'e1',
+          json: expense('e1', updatedAt: DateTime(2026, 9, 12, 12, 54)).toJson(),
+        ),
+      ];
+
+      await buildUseCase()(uid: 'u1');
+
+      expect(remote.lastSince, isNull, reason: 'must ask unfiltered');
+      expect(local.map((e) => e.id), contains('e1'));
+    });
+
+    test('a collection WITH local rows still uses the cursor', () async {
+      local = [expense('kept', updatedAt: DateTime(2026, 9, 12, 14))];
+      settings.current = const AppSettings(
+        lastSyncedAt: '2026-09-12T13:19:02.251529',
+        legacyPullCompleted: true,
+      );
+      remote.byCollection[ESyncCollection.expenses] = [
+        RemoteRecord(
+          id: 'e1',
+          json: expense('e1', updatedAt: DateTime(2026, 9, 12, 15)).toJson(),
+        ),
+      ];
+
+      await buildUseCase()(uid: 'u1');
+
+      expect(remote.lastSince, '2026-09-12T13:19:02.251529');
     });
   });
 

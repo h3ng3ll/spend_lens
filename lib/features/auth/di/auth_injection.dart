@@ -4,6 +4,7 @@ import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/services/receipt_image_store/receipt_image_store.dart';
 import '../../receipt/domain/repositories/i_receipt_local_repository.dart';
 import '../../sync/domain/adapters/sync_entity_adapters.dart';
+import '../../settings/domain/repositories/i_settings_local_repository.dart';
 import '../../../core/services/firebase/firebase_firestore_service.dart';
 import '../../sync/domain/use_cases/clear_synced_local_records_use_case.dart';
 import '../../sync/domain/use_cases/run_full_sync_use_case.dart';
@@ -98,6 +99,7 @@ Future<bool> initAuthFeature() async {
     () => ClearSyncedLocalRecordsUseCase(
       receiptLocalRepository: getIt<IReceiptLocalRepository>(),
       adapters: getIt<SyncEntityAdapters>(),
+      settingsLocalRepository: getIt<ISettingsLocalRepository>(),
       imageStore: getIt<ReceiptImageStore>(),
       runFullSync: getIt<RunFullSyncUseCase>(),
       firestoreService: getIt<FirebaseFirestoreService>(),

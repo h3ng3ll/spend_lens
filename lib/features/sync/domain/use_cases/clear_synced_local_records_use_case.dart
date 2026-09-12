@@ -2,6 +2,7 @@ import '../../../../core/models/e_sync_status.dart';
 import '../../../../core/services/logger_service.dart';
 import '../../../../core/services/receipt_image_store/receipt_image_store.dart';
 import '../../../receipt/domain/repositories/i_receipt_local_repository.dart';
+import '../../../settings/domain/repositories/i_settings_local_repository.dart';
 import '../../../../core/services/firebase/firebase_firestore_service.dart';
 import '../adapters/sync_entity_adapters.dart';
 import 'run_full_sync_use_case.dart';
@@ -46,6 +47,7 @@ import 'run_full_sync_use_case.dart';
 class ClearSyncedLocalRecordsUseCase {
   final IReceiptLocalRepository _receiptLocalRepository;
   final SyncEntityAdapters _adapters;
+  final ISettingsLocalRepository _settingsLocalRepository;
   final ReceiptImageStore _imageStore;
   final RunFullSyncUseCase _runFullSync;
   final FirebaseFirestoreService _firestoreService;
@@ -54,6 +56,7 @@ class ClearSyncedLocalRecordsUseCase {
   const ClearSyncedLocalRecordsUseCase({
     required this._receiptLocalRepository,
     required this._adapters,
+    required this._settingsLocalRepository,
     required this._imageStore,
     required this._runFullSync,
     required this._firestoreService,
@@ -68,6 +71,10 @@ class ClearSyncedLocalRecordsUseCase {
     // Doing this after the sweep would leave orphaned JPEGs no record
     // points at, and no way left to find them.
     await _clearSyncedPhotos();
+
+    // BEFORE the sweep, so a crash mid-clear still leaves a cursor that
+    // re-fetches rather than one that skips.
+    await _resetPullCursor();
 
     var cleared = 0;
     for (final adapter in _adapters.all()) {
@@ -86,6 +93,25 @@ class ClearSyncedLocalRecordsUseCase {
     }
 
     return cleared;
+  }
+
+  /// Clears the incremental-pull cursor.
+  ///
+  /// Without this, signing back in restored NOTHING. `lastSyncedAt` means
+  /// "this device already holds every record up to here" — but the sweep
+  /// below just deleted those records, so the claim became false the moment
+  /// it ran. The next sign-in then asked Firestore only for records NEWER
+  /// than the cursor, got an empty page, and reported `upToDate` with an
+  /// empty app while every document still sat in the account.
+  ///
+  /// The records are safe on the server (that is precisely why they were
+  /// eligible for clearing), so the correct cursor for a device holding
+  /// none of them is no cursor at all.
+  Future<void> _resetPullCursor() async {
+    final settings = await _settingsLocalRepository.get();
+    await _settingsLocalRepository.save(
+      settings.copyWith(lastSyncedAt: null),
+    );
   }
 
   /// Deletes the image files of receipts that are about to be cleared.

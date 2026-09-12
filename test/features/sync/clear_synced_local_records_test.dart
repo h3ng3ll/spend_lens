@@ -18,6 +18,8 @@ import 'package:spend_lens/features/expense/domain/models/expense/expense.dart';
 import 'package:spend_lens/features/expense/domain/repositories/i_expense_local_repository.dart';
 import 'package:spend_lens/features/sync/domain/adapters/sync_entity_adapter.dart';
 import 'package:spend_lens/features/sync/domain/adapters/sync_entity_adapters.dart';
+import 'package:spend_lens/features/settings/domain/models/app_settings/app_settings.dart';
+import 'package:spend_lens/features/settings/domain/repositories/i_settings_local_repository.dart';
 import 'package:dartz/dartz.dart';
 import 'package:spend_lens/core/failures/failure.dart';
 import 'package:spend_lens/core/failures/sync_failures.dart';
@@ -32,6 +34,7 @@ void main() {
   late _FakeItems items;
   late _FakeStores stores;
   late _FakeExpenses expenses;
+  late _FakeSettings settings;
   late _RecordingImageStore imageStore;
   late _SpyFullSync fullSync;
 
@@ -46,6 +49,7 @@ void main() {
           stores: stores,
           expenses: expenses,
         ),
+        settingsLocalRepository: settings,
         imageStore: imageStore,
         runFullSync: fullSync,
         firestoreService: _FakeFirestore(),
@@ -79,6 +83,7 @@ void main() {
     items = _FakeItems();
     stores = _FakeStores();
     expenses = _FakeExpenses();
+    settings = _FakeSettings();
     imageStore = _RecordingImageStore();
     fullSync = _SpyFullSync();
   });
@@ -104,6 +109,7 @@ void main() {
       items = _FakeItems();
       stores = _FakeStores();
       expenses = _FakeExpenses();
+      settings = _FakeSettings();
       imageStore = _RecordingImageStore();
       fullSync = _SpyFullSync();
       await receipts.save(receipt('r1', status));
@@ -235,6 +241,35 @@ void main() {
       // Reading including-deleted is what distinguishes "removed" from
       // "soft-deleted and about to reappear on the next restart".
       expect(await expenses.getAllIncludingDeleted(), isEmpty);
+    });
+  });
+
+  group('the pull cursor', () {
+    // THE REGRESSION. `lastSyncedAt` claims "this device already holds every
+    // record up to here" — a claim the sweep makes FALSE by deleting them.
+    // Left standing, the next sign-in asked Firestore only for records NEWER
+    // than the cursor, got an empty page, and reported `upToDate` over an
+    // empty app while every document still sat in the account.
+    test('is cleared, so signing back in re-fetches everything', () async {
+      settings.current = const AppSettings(
+        lastSyncedAt: '2026-09-12T13:14:08.715039',
+      );
+      await receipts.save(receipt('r1', ESyncStatus.synced));
+
+      await buildUseCase()();
+
+      expect(settings.current.lastSyncedAt, isNull);
+    });
+
+    test('is cleared even when nothing qualified for clearing', () async {
+      // The sync that ran first may have pushed rows this device then keeps.
+      // A stale cursor is wrong regardless of how many rows were removed.
+      settings.current = const AppSettings(lastSyncedAt: '2026-09-12T13:14:08.000');
+      await receipts.save(receipt('r1', ESyncStatus.pendingCreate));
+
+      await buildUseCase()();
+
+      expect(settings.current.lastSyncedAt, isNull);
     });
   });
 
@@ -574,6 +609,19 @@ class _FakeExpenses implements IExpenseLocalRepository {
 
   @override
   Future<void> deleteLocalOnly(String id) async => _box.remove(id);
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeSettings implements ISettingsLocalRepository {
+  AppSettings current = const AppSettings();
+
+  @override
+  Future<AppSettings> get() async => current;
+
+  @override
+  Future<void> save(AppSettings settings) async => current = settings;
 
   @override
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

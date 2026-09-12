@@ -237,6 +237,19 @@ class _SpendLensAppState extends State<SpendLensApp>
     FlutterNativeSplash.remove();
 
     WidgetsBinding.instance.addObserver(this);
+
+    // A RESTORED session reaches `signedIn` before this widget mounts —
+    // Firebase resolves a cached credential in milliseconds, and `AuthBloc`
+    // is constructed in `main()` ahead of `runApp`. `listenWhen` only sees
+    // transitions that happen AFTER subscribing, so `_onSignedIn` never
+    // fires on a cold start or hot restart, and `needsSync` cannot cover it
+    // either (it requires pending work, and a device that already pushed
+    // everything has none). Without this, an app relaunched while signed in
+    // ran NO sync cycle at all: it sat at `idle` and never pulled the
+    // account's records down.
+    if (widget.authBloc.state.isSignedIn) {
+      widget.syncBloc.add(const SyncEvent.syncNow());
+    }
   }
 
   @override
@@ -256,6 +269,9 @@ class _SpendLensAppState extends State<SpendLensApp>
   /// cannot cover this: a device signing in with nothing outstanding has a
   /// pending count of 0 and would sit idle while the account's records stay
   /// on the server. This listener is what pulls them down.
+  ///
+  /// It only catches a LIVE transition, which is why `initState` below also
+  /// dispatches for a session that was already restored — see there.
   void _onSignedIn(BuildContext context, AuthState state) {
     context.read<SyncBloc>().add(const SyncEvent.syncNow());
   }
