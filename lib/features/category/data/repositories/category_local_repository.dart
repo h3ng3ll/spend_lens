@@ -67,6 +67,18 @@ class CategoryLocalRepository implements ICategoryLocalRepository {
     );
   }
 
+  /// HARD delete, local only — removes the row with NO tombstone.
+  ///
+  /// The opposite of [delete], which soft-deletes so the removal can
+  /// propagate. Used to retire a tombstone once its deletion has reached the
+  /// server, and to drop a local copy the server already holds. Never call
+  /// it on a row carrying unpublished work — nothing else has that data.
+  @override
+  Future<void> deleteLocalOnly(String id) async {
+    final box = await _hiveDatabase.getBox<Category>(_boxName);
+    await box.delete(id);
+  }
+
   @override
   Future<List<Category>> getAllIncludingDeleted() async {
     final box = await _hiveDatabase.getBox<Category>(_boxName);

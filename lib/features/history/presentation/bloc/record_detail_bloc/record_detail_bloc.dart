@@ -22,7 +22,8 @@ part 'record_detail_bloc.freezed.dart';
 
 /// Screen-scoped bloc (`registerFactory` semantics: built in
 /// `RecordDetailPage.initState`, closed in `dispose` — never `main()`, per
-/// BLoC rule A3.8), taking [recordId] as a constructor param. Mirrors
+/// BLoC rule A3.8), taking the record id as a constructor param and
+/// seeding it into [RecordDetailState.recordId]. Mirrors
 /// `StoreDetailBloc`'s shape.
 ///
 /// Resolves BOTH branches of the design's Record detail artboard. The
@@ -30,7 +31,7 @@ part 'record_detail_bloc.freezed.dart';
 /// `CreateExpenseFromReceiptUseCase` writes the mirrored [Expense] with
 /// `id: receipt.id` precisely so that "History's `RecordDetailBloc` looks a
 /// record up by id, and a receipt-sourced row must resolve to the receipt it
-/// came from". So the single [recordId] this bloc is constructed with
+/// came from". So the single record id this bloc is constructed with
 /// resolves the expense, its receipt, and that receipt's items.
 ///
 /// A cash expense simply finds no receipt, leaving [RecordDetailSnapshot]'s
@@ -52,16 +53,15 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
   final IStoreLocalRepository _storeLocalRepository;
   final IReceiptLocalRepository _receiptLocalRepository;
   final IReceiptItemLocalRepository _receiptItemLocalRepository;
-  final String recordId;
 
   RecordDetailBloc({
-    required this.recordId,
+    required String recordId,
     required this._expenseLocalRepository,
     required this._categoryLocalRepository,
     required this._storeLocalRepository,
     required this._receiptLocalRepository,
     required this._receiptItemLocalRepository,
-  }) : super(const RecordDetailState()) {
+  }) : super(RecordDetailState(recordId: recordId)) {
     on<_Watch>(_onWatch);
     on<_DeleteRecord>(_onDeleteRecord);
   }
@@ -77,6 +77,7 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
         _receiptLocalRepository.watchAll(),
         _receiptItemLocalRepository.watchAll(),
         (expenses, categories, stores, receipts, receiptItems) {
+          final recordId = state.recordId;
           final receipt = _findReceipt(receipts, recordId);
 
           return RecordDetailSnapshot(
@@ -133,14 +134,13 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
     if (receipt == null) return const <ReceiptItem>[];
 
     final itemIds = receipt.itemIds.toSet();
-    final items = allItems
-        .where((item) => itemIds.contains(item.id))
-        .toList();
+    final items = allItems.where((item) => itemIds.contains(item.id)).toList();
     items.sort((a, b) => a.lineIndex.compareTo(b.lineIndex));
     return items;
   }
 
-  /// Deletes [recordId] (`RecordDetailDeleteButton`'s delete action — used
+  /// Deletes [RecordDetailState.recordId] (`RecordDetailDeleteButton`'s
+  /// delete action — used
   /// to call `getIt<IExpenseLocalRepository>().delete(recordId)` directly
   /// from the UI, fire-and-forget, a BLoC-layer violation). SUCCESS is not
   /// signalled here: once the write lands, the reactive `_onWatch` stream
@@ -153,7 +153,7 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
     Emitter<RecordDetailState> emit,
   ) async {
     try {
-      await _expenseLocalRepository.delete(event.recordId);
+      await _expenseLocalRepository.delete(state.recordId);
       emit(state.copyWith(lastDeleteFailed: false));
     } catch (_) {
       emit(state.copyWith(lastDeleteFailed: true));

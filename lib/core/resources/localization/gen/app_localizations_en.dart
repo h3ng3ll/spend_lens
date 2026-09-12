@@ -1372,8 +1372,8 @@ class AppLocalizationsEn extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count pending',
-      one: '1 pending',
+      other: '$count not synchronized',
+      one: '1 not synchronized',
     );
     return '$_temp0';
   }
@@ -1432,4 +1432,51 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get premiumTerms =>
       'Renews automatically. Cancel anytime in the App Store.';
+
+  @override
+  String get syncPendingUpload => 'Not synchronized';
+
+  @override
+  String get syncPendingDelete => 'Waiting to delete';
+
+  @override
+  String get storageDetails => 'Storage details';
+
+  @override
+  String get photoSize => 'Photo';
+
+  @override
+  String get documentSize => 'Record data';
+
+  @override
+  String get noPhotoStored => 'No photo';
+
+  @override
+  String get cloudCopy => 'Cloud copy';
+
+  @override
+  String get cloudCopyUploaded => 'Uploaded';
+
+  @override
+  String get cloudCopyPending => 'Not uploaded yet';
+
+  @override
+  String get storageDetailsNote =>
+      'Only the photo counts toward your cloud storage. Record data is an estimate of what is uploaded for this receipt.';
+
+  @override
+  String get syncStatus => 'Sync status';
+
+  @override
+  String get syncNow => 'Synchronize now';
+
+  @override
+  String get syncSection => 'Sync';
+
+  @override
+  String get signOutConfirmTitle => 'Sign out?';
+
+  @override
+  String get signOutConfirmBody =>
+      'Records already backed up will be removed from this device and restored when you sign in again. Anything not synchronized stays.';
 }

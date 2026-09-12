@@ -2229,7 +2229,7 @@ abstract class AppLocalizations {
   /// Count of records awaiting upload.
   ///
   /// In en, this message translates to:
-  /// **'{count, plural, =1{1 pending} other{{count} pending}}'**
+  /// **'{count, plural, =1{1 not synchronized} other{{count} not synchronized}}'**
   String syncPending(int count);
 
   /// Storage usage, e.g. "38 MB of 100 MB".
@@ -2327,6 +2327,96 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Renews automatically. Cancel anytime in the App Store.'**
   String get premiumTerms;
+
+  /// No description provided for @syncPendingUpload.
+  ///
+  /// In en, this message translates to:
+  /// **'Not synchronized'**
+  String get syncPendingUpload;
+
+  /// No description provided for @syncPendingDelete.
+  ///
+  /// In en, this message translates to:
+  /// **'Waiting to delete'**
+  String get syncPendingDelete;
+
+  /// No description provided for @storageDetails.
+  ///
+  /// In en, this message translates to:
+  /// **'Storage details'**
+  String get storageDetails;
+
+  /// No description provided for @photoSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Photo'**
+  String get photoSize;
+
+  /// No description provided for @documentSize.
+  ///
+  /// In en, this message translates to:
+  /// **'Record data'**
+  String get documentSize;
+
+  /// No description provided for @noPhotoStored.
+  ///
+  /// In en, this message translates to:
+  /// **'No photo'**
+  String get noPhotoStored;
+
+  /// No description provided for @cloudCopy.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud copy'**
+  String get cloudCopy;
+
+  /// No description provided for @cloudCopyUploaded.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploaded'**
+  String get cloudCopyUploaded;
+
+  /// No description provided for @cloudCopyPending.
+  ///
+  /// In en, this message translates to:
+  /// **'Not uploaded yet'**
+  String get cloudCopyPending;
+
+  /// No description provided for @storageDetailsNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Only the photo counts toward your cloud storage. Record data is an estimate of what is uploaded for this receipt.'**
+  String get storageDetailsNote;
+
+  /// No description provided for @syncStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync status'**
+  String get syncStatus;
+
+  /// No description provided for @syncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Synchronize now'**
+  String get syncNow;
+
+  /// No description provided for @syncSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync'**
+  String get syncSection;
+
+  /// No description provided for @signOutConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Sign out?'**
+  String get signOutConfirmTitle;
+
+  /// No description provided for @signOutConfirmBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Records already backed up will be removed from this device and restored when you sign in again. Anything not synchronized stays.'**
+  String get signOutConfirmBody;
 }
 
 class _AppLocalizationsDelegate

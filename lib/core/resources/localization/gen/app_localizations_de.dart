@@ -1379,8 +1379,8 @@ class AppLocalizationsDe extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count ausstehend',
-      one: '1 ausstehend',
+      other: '$count nicht synchronisiert',
+      one: '1 nicht synchronisiert',
     );
     return '$_temp0';
   }
@@ -1439,4 +1439,51 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get premiumTerms =>
       'Verlängert sich automatisch. Jederzeit im App Store kündbar.';
+
+  @override
+  String get syncPendingUpload => 'Nicht synchronisiert';
+
+  @override
+  String get syncPendingDelete => 'Wartet auf Löschung';
+
+  @override
+  String get storageDetails => 'Speicherdetails';
+
+  @override
+  String get photoSize => 'Foto';
+
+  @override
+  String get documentSize => 'Datensatz';
+
+  @override
+  String get noPhotoStored => 'Kein Foto';
+
+  @override
+  String get cloudCopy => 'Cloud-Kopie';
+
+  @override
+  String get cloudCopyUploaded => 'Hochgeladen';
+
+  @override
+  String get cloudCopyPending => 'Noch nicht hochgeladen';
+
+  @override
+  String get storageDetailsNote =>
+      'Nur das Foto zählt zum Cloud-Speicher. Die Datensatzgröße ist eine Schätzung dessen, was für diesen Beleg hochgeladen wird.';
+
+  @override
+  String get syncStatus => 'Sync-Status';
+
+  @override
+  String get syncNow => 'Jetzt synchronisieren';
+
+  @override
+  String get syncSection => 'Synchronisierung';
+
+  @override
+  String get signOutConfirmTitle => 'Abmelden?';
+
+  @override
+  String get signOutConfirmBody =>
+      'Bereits gesicherte Datensätze werden von diesem Gerät entfernt und bei der nächsten Anmeldung wiederhergestellt. Nicht synchronisierte bleiben erhalten.';
 }

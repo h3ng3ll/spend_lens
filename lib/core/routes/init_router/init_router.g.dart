@@ -17,6 +17,7 @@ List<RouteBase> get $appRoutes => [
   $categoriesPageRoute,
   $recordDetailPageRoute,
   $receiptPhotoPageRoute,
+  $receiptStoragePageRoute,
   $editReceiptPageRoute,
   $scannerPageRoute,
   $reviewPageRoute,
@@ -430,6 +431,38 @@ mixin $ReceiptPhotoPageRoute on GoRouteData {
   @override
   String get location => GoRouteData.$location(
     '/receipt/${Uri.encodeComponent(_self.receiptId)}/photo',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $receiptStoragePageRoute => GoRouteData.$route(
+  path: '/receipt/:receiptId/storage',
+  hasOverriddenOnExit: false,
+  parentNavigatorKey: ReceiptStoragePageRoute.$parentNavigatorKey,
+  factory: $ReceiptStoragePageRoute._fromState,
+);
+
+mixin $ReceiptStoragePageRoute on GoRouteData {
+  static ReceiptStoragePageRoute _fromState(GoRouterState state) =>
+      ReceiptStoragePageRoute(receiptId: state.pathParameters['receiptId']!);
+
+  ReceiptStoragePageRoute get _self => this as ReceiptStoragePageRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/receipt/${Uri.encodeComponent(_self.receiptId)}/storage',
   );
 
   @override

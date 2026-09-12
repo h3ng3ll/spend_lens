@@ -392,7 +392,7 @@
   "deleteScopeLocal": "Nur dieses Gerät",
   "deleteScopeRemote": "Nur die Cloud",
   "deleteScopeBoth": "Dieses Gerät und die Cloud",
-  "syncPending": "{count, plural, =1{1 ausstehend} other{{count} ausstehend}}",
+  "syncPending": "{count, plural, =1{1 nicht synchronisiert} other{{count} nicht synchronisiert}}",
   "@syncPending": {
     "description": "Count of records awaiting upload.",
     "placeholders": {
@@ -427,5 +427,20 @@
   "premiumSubscribe": "Abonnieren",
   "premiumRestore": "Kauf wiederherstellen",
   "premiumRestoreNothing": "Kein früherer Kauf gefunden.",
-  "premiumTerms": "Verlängert sich automatisch. Jederzeit im App Store kündbar."
+  "premiumTerms": "Verlängert sich automatisch. Jederzeit im App Store kündbar.",
+  "syncPendingUpload": "Nicht synchronisiert",
+  "syncPendingDelete": "Wartet auf Löschung",
+  "storageDetails": "Speicherdetails",
+  "photoSize": "Foto",
+  "documentSize": "Datensatz",
+  "noPhotoStored": "Kein Foto",
+  "cloudCopy": "Cloud-Kopie",
+  "cloudCopyUploaded": "Hochgeladen",
+  "cloudCopyPending": "Noch nicht hochgeladen",
+  "storageDetailsNote": "Nur das Foto zählt zum Cloud-Speicher. Die Datensatzgröße ist eine Schätzung dessen, was für diesen Beleg hochgeladen wird.",
+  "syncStatus": "Sync-Status",
+  "syncNow": "Jetzt synchronisieren",
+  "syncSection": "Synchronisierung",
+  "signOutConfirmTitle": "Abmelden?",
+  "signOutConfirmBody": "Bereits gesicherte Datensätze werden von diesem Gerät entfernt und bei der nächsten Anmeldung wiederhergestellt. Nicht synchronisierte bleiben erhalten."
 }

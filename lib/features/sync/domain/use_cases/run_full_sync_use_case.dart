@@ -7,15 +7,39 @@ import '../adapters/sync_entity_adapters.dart';
 import '../repositories/i_sync_remote_repository.dart';
 import 'pull_remote_changes_use_case.dart';
 import 'push_pending_changes_use_case.dart';
+import 'download_receipt_photos_use_case.dart';
+import 'upload_receipt_photos_use_case.dart';
 
 /// What one sync cycle accomplished.
 class SyncReport {
   final int pushed;
   final int pulled;
 
-  const SyncReport({required this.pushed, required this.pulled});
+  /// Receipt photos uploaded to cloud storage this cycle.
+  final int photosUploaded;
 
-  bool get didAnything => pushed > 0 || pulled > 0;
+  /// Receipt photos restored FROM cloud storage this cycle — a device that
+  /// lost its files (reinstall, restore, the sign-out cleanup) getting them
+  /// back.
+  final int photosDownloaded;
+
+  /// Remote documents removed because their deletion had been published.
+  final int purged;
+
+  const SyncReport({
+    required this.pushed,
+    required this.pulled,
+    this.photosUploaded = 0,
+    this.photosDownloaded = 0,
+    this.purged = 0,
+  });
+
+  bool get didAnything =>
+      pushed > 0 ||
+      pulled > 0 ||
+      photosUploaded > 0 ||
+      photosDownloaded > 0 ||
+      purged > 0;
 }
 
 /// One sync cycle: push local changes, then pull remote ones.
@@ -29,6 +53,8 @@ class RunFullSyncUseCase {
   final ISyncRemoteRepository _remoteRepository;
   final PushPendingChangesUseCase _pushPendingChanges;
   final PullRemoteChangesUseCase _pullRemoteChanges;
+  final UploadReceiptPhotosUseCase _uploadReceiptPhotos;
+  final DownloadReceiptPhotosUseCase _downloadReceiptPhotos;
   final SyncEntityAdapters _adapters;
   final ISettingsLocalRepository _settingsLocalRepository;
 
@@ -36,12 +62,16 @@ class RunFullSyncUseCase {
     required ISyncRemoteRepository remoteRepository,
     required PushPendingChangesUseCase pushPendingChanges,
     required PullRemoteChangesUseCase pullRemoteChanges,
+    required UploadReceiptPhotosUseCase uploadReceiptPhotos,
+    required DownloadReceiptPhotosUseCase downloadReceiptPhotos,
     required SyncEntityAdapters adapters,
     required ISettingsLocalRepository settingsLocalRepository,
   }) : this._(
          remoteRepository,
          pushPendingChanges,
          pullRemoteChanges,
+         uploadReceiptPhotos,
+         downloadReceiptPhotos,
          adapters,
          settingsLocalRepository,
        );
@@ -50,6 +80,8 @@ class RunFullSyncUseCase {
     this._remoteRepository,
     this._pushPendingChanges,
     this._pullRemoteChanges,
+    this._uploadReceiptPhotos,
+    this._downloadReceiptPhotos,
     this._adapters,
     this._settingsLocalRepository,
   );
@@ -60,7 +92,18 @@ class RunFullSyncUseCase {
   /// The failure is CLASSIFIED (offline vs permission vs unexpected) so the
   /// UI can distinguish a benign, self-healing offline state from something
   /// actually broken.
-  Future<Either<Failure, SyncReport>> call({required String uid}) async {
+  /// [fullResync] ignores the stored cursor and pulls EVERY remote record.
+  ///
+  /// The manual "Synchronize now" action passes true. An incremental pull
+  /// asks only for records newer than `lastSyncedAt`, which is the right
+  /// default for automatic cycles but useless as a repair: if a record was
+  /// ever missed, the cursor has already moved past it and no ordinary sync
+  /// will ever ask for it again. A user tapping Synchronize is asking for
+  /// exactly that repair, so the manual path does the thorough thing.
+  Future<Either<Failure, SyncReport>> call({
+    required String uid,
+    bool fullResync = false,
+  }) async {
     try {
       final settings = await _settingsLocalRepository.get();
       final adapters = _adapters.all();
@@ -91,8 +134,31 @@ class RunFullSyncUseCase {
         }
       }
 
+      // AFTER the push, never before: a tombstone must reach the server so
+      // other devices can learn about the deletion, and only then is the
+      // document removed. This is what makes Firestore REFLECT a delete
+      // instead of keeping the record forever.
+      var purged = 0;
+      for (final adapter in adapters) {
+        purged += await _pushPendingChanges.purgePublishedDeletions(
+          uid: uid,
+          adapter: adapter,
+        );
+      }
+
+      // AFTER the record push, so a photo's receipt row always reaches the
+      // server before (or with) its image — never an object in the bucket
+      // that no document refers to.
+      //
+      // This is what makes Profile's storage bar mean anything: before it
+      // existed, `usedBytes` measured a bucket nothing ever wrote to, so it
+      // correctly but uselessly reported 0 MB of the quota.
+      final photosUploaded = await _uploadReceiptPhotos(uid: uid);
+
       var pulled = 0;
-      var cursor = settings.lastSyncedAt;
+      // A full resync starts from nothing, so the server returns everything
+      // and any previously-stranded record comes back.
+      var cursor = fullResync ? null : settings.lastSyncedAt;
       for (final adapter in adapters) {
         final result = await _pullRemoteChanges(
           uid: uid,
@@ -117,7 +183,21 @@ class RunFullSyncUseCase {
         );
       }
 
-      return Right(SyncReport(pushed: pushed, pulled: pulled));
+      // AFTER the pull: a photo needs its receipt row to exist locally
+      // before there is anything to attach it to. This is what restores
+      // images on a device that lost them — a reinstall, or the sign-out
+      // cleanup that clears synced records.
+      final photosDownloaded = await _downloadReceiptPhotos(uid: uid);
+
+      return Right(
+        SyncReport(
+          pushed: pushed,
+          pulled: pulled,
+          photosUploaded: photosUploaded,
+          photosDownloaded: photosDownloaded,
+          purged: purged,
+        ),
+      );
     } catch (error) {
       return Left(classifySyncError(error));
     }

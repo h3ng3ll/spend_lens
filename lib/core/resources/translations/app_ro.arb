@@ -392,7 +392,7 @@
   "deleteScopeLocal": "Doar acest dispozitiv",
   "deleteScopeRemote": "Doar în cloud",
   "deleteScopeBoth": "Acest dispozitiv și cloud",
-  "syncPending": "{count, plural, =1{1 în așteptare} few{{count} în așteptare} other{{count} în așteptare}}",
+  "syncPending": "{count, plural, =1{1 nesincronizat} other{{count} nesincronizate}}",
   "@syncPending": {
     "description": "Count of records awaiting upload.",
     "placeholders": {
@@ -427,5 +427,20 @@
   "premiumSubscribe": "Abonează-te",
   "premiumRestore": "Restaurează achiziția",
   "premiumRestoreNothing": "Nu s-a găsit nicio achiziție anterioară.",
-  "premiumTerms": "Se reînnoiește automat. Anulează oricând în App Store."
+  "premiumTerms": "Se reînnoiește automat. Anulează oricând în App Store.",
+  "syncPendingUpload": "Nesincronizat",
+  "syncPendingDelete": "Așteaptă ștergerea",
+  "storageDetails": "Detalii stocare",
+  "photoSize": "Fotografie",
+  "documentSize": "Date înregistrare",
+  "noPhotoStored": "Fără fotografie",
+  "cloudCopy": "Copie în cloud",
+  "cloudCopyUploaded": "Încărcat",
+  "cloudCopyPending": "Încă neîncărcat",
+  "storageDetailsNote": "Doar fotografia contează pentru stocarea în cloud. Dimensiunea datelor este o estimare a ceea ce se încarcă pentru acest bon.",
+  "syncStatus": "Stare sincronizare",
+  "syncNow": "Sincronizează acum",
+  "syncSection": "Sincronizare",
+  "signOutConfirmTitle": "Te deconectezi?",
+  "signOutConfirmBody": "Înregistrările deja salvate în cloud vor fi eliminate de pe acest dispozitiv și restaurate la următoarea conectare. Cele nesincronizate rămân."
 }

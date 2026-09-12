@@ -29,6 +29,19 @@ class SyncEntityAdapter<T> {
   /// Returns [entity] marked `synced`, for the post-push write-back.
   final T Function(T entity) markSynced;
 
+  /// When this row was soft-deleted, or null while it is live.
+  ///
+  /// Needed so the purge pass can tell a tombstone whose deletion has
+  /// already been published from a live row.
+  final DateTime? Function(T entity) deletedAtOf;
+
+  /// HARD-removes a row locally, leaving no tombstone.
+  ///
+  /// Used only to retire a tombstone once its deletion has reached the
+  /// server and the remote document is gone — at that point the marker has
+  /// done its job and keeping it forever just grows the box.
+  final Future<void> Function(String id) purgeLocal;
+
   /// Re-emits on every box mutation. Used only as a CHANGE TRIGGER for
   /// recounting pending rows — the emitted list itself is ignored, which is
   /// why the element type is not part of this signature.
@@ -45,6 +58,8 @@ class SyncEntityAdapter<T> {
     required this.updatedAtOf,
     required this.syncStatusOf,
     required this.markSynced,
+    required this.deletedAtOf,
+    required this.purgeLocal,
     required this.watchAll,
   });
 }

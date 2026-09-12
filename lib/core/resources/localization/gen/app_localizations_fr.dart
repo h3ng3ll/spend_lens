@@ -1382,8 +1382,8 @@ class AppLocalizationsFr extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count en attente',
-      one: '1 en attente',
+      other: '$count non synchronisés',
+      one: '1 non synchronisé',
     );
     return '$_temp0';
   }
@@ -1442,4 +1442,51 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get premiumTerms =>
       'Renouvellement automatique. Annulable à tout moment dans l\'App Store.';
+
+  @override
+  String get syncPendingUpload => 'Non synchronisé';
+
+  @override
+  String get syncPendingDelete => 'En attente de suppression';
+
+  @override
+  String get storageDetails => 'Détails du stockage';
+
+  @override
+  String get photoSize => 'Photo';
+
+  @override
+  String get documentSize => 'Données';
+
+  @override
+  String get noPhotoStored => 'Aucune photo';
+
+  @override
+  String get cloudCopy => 'Copie cloud';
+
+  @override
+  String get cloudCopyUploaded => 'Envoyée';
+
+  @override
+  String get cloudCopyPending => 'Pas encore envoyée';
+
+  @override
+  String get storageDetailsNote =>
+      'Seule la photo compte dans votre stockage cloud. La taille des données est une estimation de ce qui est envoyé pour ce ticket.';
+
+  @override
+  String get syncStatus => 'État de synchronisation';
+
+  @override
+  String get syncNow => 'Synchroniser maintenant';
+
+  @override
+  String get syncSection => 'Synchronisation';
+
+  @override
+  String get signOutConfirmTitle => 'Se déconnecter ?';
+
+  @override
+  String get signOutConfirmBody =>
+      'Les enregistrements déjà sauvegardés seront supprimés de cet appareil et restaurés à votre prochaine connexion. Ceux non synchronisés sont conservés.';
 }

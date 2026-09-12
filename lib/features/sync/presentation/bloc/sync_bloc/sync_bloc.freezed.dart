@@ -119,11 +119,11 @@ return syncNow(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function()?  syncNow,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( bool fullResync)?  syncNow,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _SyncNow() when syncNow != null:
-return syncNow();case _:
+return syncNow(_that.fullResync);case _:
   return orElse();
 
 }
@@ -141,11 +141,11 @@ return syncNow();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function()  syncNow,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( bool fullResync)  syncNow,}) {final _that = this;
 switch (_that) {
 case _Watch():
 return watch();case _SyncNow():
-return syncNow();}
+return syncNow(_that.fullResync);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -159,11 +159,11 @@ return syncNow();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function()?  syncNow,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( bool fullResync)?  syncNow,}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _SyncNow() when syncNow != null:
-return syncNow();case _:
+return syncNow(_that.fullResync);case _:
   return null;
 
 }
@@ -207,33 +207,67 @@ String toString() {
 
 
 class _SyncNow implements SyncEvent {
-  const _SyncNow();
+  const _SyncNow({this.fullResync = false});
   
 
+@JsonKey() final  bool fullResync;
 
-
+/// Create a copy of SyncEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SyncNowCopyWith<_SyncNow> get copyWith => __$SyncNowCopyWithImpl<_SyncNow>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SyncNow);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SyncNow&&(identical(other.fullResync, fullResync) || other.fullResync == fullResync));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,fullResync);
 
 @override
 String toString() {
-  return 'SyncEvent.syncNow()';
+  return 'SyncEvent.syncNow(fullResync: $fullResync)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$SyncNowCopyWith<$Res> implements $SyncEventCopyWith<$Res> {
+  factory _$SyncNowCopyWith(_SyncNow value, $Res Function(_SyncNow) _then) = __$SyncNowCopyWithImpl;
+@useResult
+$Res call({
+ bool fullResync
+});
 
 
+
+
+}
+/// @nodoc
+class __$SyncNowCopyWithImpl<$Res>
+    implements _$SyncNowCopyWith<$Res> {
+  __$SyncNowCopyWithImpl(this._self, this._then);
+
+  final _SyncNow _self;
+  final $Res Function(_SyncNow) _then;
+
+/// Create a copy of SyncEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? fullResync = null,}) {
+  return _then(_SyncNow(
+fullResync: null == fullResync ? _self.fullResync : fullResync // ignore: cast_nullable_to_non_nullable
+as bool,
+  ));
+}
+
+
+}
 
 /// @nodoc
 mixin _$SyncState {

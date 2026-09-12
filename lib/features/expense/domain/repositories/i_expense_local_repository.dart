@@ -20,6 +20,13 @@ abstract interface class IExpenseLocalRepository {
   /// Reads (`getAll`, `getById`, `watchAll`) hide tombstoned rows.
   Future<void> delete(String id);
 
+  /// HARD delete, local only — drops the row with NO tombstone.
+  ///
+  /// Distinct from [delete], which soft-deletes so the removal propagates.
+  /// Used to retire a published tombstone, and to discard a local copy the
+  /// server already holds. Never for a row with unpublished work.
+  Future<void> deleteLocalOnly(String id);
+
   /// Every row INCLUDING tombstones. For the sync engine only — screens must
   /// use [getAll], which hides deleted rows.
   Future<List<Expense>> getAllIncludingDeleted();

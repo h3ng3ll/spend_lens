@@ -30,6 +30,9 @@ class _FakeReceiptRepository implements IReceiptLocalRepository {
   Future<void> delete(String id) async => store.remove(id);
 
   @override
+  Future<void> deleteLocalOnly(String id) async => store.remove(id);
+
+  @override
   Future<Receipt?> getById(String id) async => store[id];
 
   @override
@@ -62,6 +65,9 @@ class _FakeReceiptItemRepository implements IReceiptItemLocalRepository {
 
   @override
   Future<void> delete(String id) async => store.remove(id);
+
+  @override
+  Future<void> deleteLocalOnly(String id) async => store.remove(id);
 
   @override
   Future<ReceiptItem?> getById(String id) async => store[id];
@@ -104,6 +110,10 @@ class _FakeProductRepository implements IProductLocalRepository {
   Future<void> delete(String id) async => store.remove(id);
 
   @override
+  Future<void> deleteLocalOnly(String id) async =>
+      store.remove(id);
+
+  @override
   Future<Product?> getById(String id) async => store[id];
 
   @override
@@ -135,6 +145,9 @@ class _FakeStoreRepository implements IStoreLocalRepository {
 
   @override
   Future<void> delete(String id) async => store.remove(id);
+
+  @override
+  Future<void> deleteLocalOnly(String id) async => store.remove(id);
 
   @override
   Future<Store?> getById(String id) async => store[id];
@@ -178,6 +191,10 @@ class _FakeCategoryRepository implements ICategoryLocalRepository {
   Future<void> delete(String id) async => store.remove(id);
 
   @override
+  Future<void> deleteLocalOnly(String id) async =>
+      store.remove(id);
+
+  @override
   Future<Category?> getById(String id) async => store[id];
 
   @override
@@ -203,6 +220,10 @@ class _FakeExpenseRepository implements IExpenseLocalRepository {
 
   @override
   Future<void> delete(String id) async => store.remove(id);
+
+  @override
+  Future<void> deleteLocalOnly(String id) async =>
+      store.remove(id);
 
   @override
   Future<Expense?> getById(String id) async => store[id];
@@ -238,6 +259,10 @@ class _FakePriceObservationRepository
 
   @override
   Future<void> delete(String id) async => store.remove(id);
+
+  @override
+  Future<void> deleteLocalOnly(String id) async =>
+      store.remove(id);
 
   @override
   Future<PriceObservation?> getById(String id) async => store[id];

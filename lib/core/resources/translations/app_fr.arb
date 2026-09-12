@@ -392,7 +392,7 @@
   "deleteScopeLocal": "Cet appareil uniquement",
   "deleteScopeRemote": "Le cloud uniquement",
   "deleteScopeBoth": "Cet appareil et le cloud",
-  "syncPending": "{count, plural, =1{1 en attente} other{{count} en attente}}",
+  "syncPending": "{count, plural, =1{1 non synchronisé} other{{count} non synchronisés}}",
   "@syncPending": {
     "description": "Count of records awaiting upload.",
     "placeholders": {
@@ -427,5 +427,20 @@
   "premiumSubscribe": "S'abonner",
   "premiumRestore": "Restaurer l'achat",
   "premiumRestoreNothing": "Aucun achat précédent trouvé.",
-  "premiumTerms": "Renouvellement automatique. Annulable à tout moment dans l'App Store."
+  "premiumTerms": "Renouvellement automatique. Annulable à tout moment dans l'App Store.",
+  "syncPendingUpload": "Non synchronisé",
+  "syncPendingDelete": "En attente de suppression",
+  "storageDetails": "Détails du stockage",
+  "photoSize": "Photo",
+  "documentSize": "Données",
+  "noPhotoStored": "Aucune photo",
+  "cloudCopy": "Copie cloud",
+  "cloudCopyUploaded": "Envoyée",
+  "cloudCopyPending": "Pas encore envoyée",
+  "storageDetailsNote": "Seule la photo compte dans votre stockage cloud. La taille des données est une estimation de ce qui est envoyé pour ce ticket.",
+  "syncStatus": "État de synchronisation",
+  "syncNow": "Synchroniser maintenant",
+  "syncSection": "Synchronisation",
+  "signOutConfirmTitle": "Se déconnecter ?",
+  "signOutConfirmBody": "Les enregistrements déjà sauvegardés seront supprimés de cet appareil et restaurés à votre prochaine connexion. Ceux non synchronisés sont conservés."
 }

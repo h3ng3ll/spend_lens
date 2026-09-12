@@ -143,6 +143,10 @@ class _FakeReceiptRepository implements IReceiptLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
+  Future<void> deleteLocalOnly(String id) async =>
+      _store.remove(id);
+
+  @override
   Future<List<Receipt>> getAllIncludingDeleted() async =>
       _store.values.toList();
 
@@ -175,6 +179,10 @@ class _FakeReceiptItemRepository implements IReceiptItemLocalRepository {
 
   @override
   Future<void> delete(String id) async => _store.remove(id);
+
+  @override
+  Future<void> deleteLocalOnly(String id) async =>
+      _store.remove(id);
 
   @override
   Stream<List<ReceiptItem>> watchAll() =>
@@ -221,6 +229,10 @@ class _FakeProductRepository implements IProductLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
+  Future<void> deleteLocalOnly(String id) async =>
+      _store.remove(id);
+
+  @override
   Future<List<Product>> getAllIncludingDeleted() async =>
       _store.values.toList();
 
@@ -255,6 +267,10 @@ class _FakeStoreRepository implements IStoreLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
+  Future<void> deleteLocalOnly(String id) async =>
+      _store.remove(id);
+
+  @override
   Future<List<Store>> getAllIncludingDeleted() async => _store.values.toList();
 
   @override
@@ -286,6 +302,10 @@ class _FakeExpenseRepository implements IExpenseLocalRepository {
 
   @override
   Future<void> delete(String id) async => _store.remove(id);
+
+  @override
+  Future<void> deleteLocalOnly(String id) async =>
+      _store.remove(id);
 
   @override
   Future<List<Expense>> getAllIncludingDeleted() async =>

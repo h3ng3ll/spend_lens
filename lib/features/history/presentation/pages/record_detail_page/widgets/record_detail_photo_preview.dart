@@ -58,8 +58,7 @@ class RecordDetailPhotoPreview extends StatelessWidget {
             borderRadius: BorderRadius.circular(14.0),
             child: bytes == null
                 ? RecordDetailPhotoPlaceholder(
-                    isLoading:
-                        snapshot.connectionState != ConnectionState.done,
+                    isLoading: snapshot.connectionState != ConnectionState.done,
                   )
                 : RecordDetailPhotoThumb(bytes: bytes),
           ),

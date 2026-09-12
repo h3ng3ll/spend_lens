@@ -11,6 +11,7 @@ import '../../../domain/repositories/i_auth_repository.dart';
 import '../../../domain/use_cases/apple_sign_in_use_case.dart';
 import '../../../domain/use_cases/google_sign_in_use_case.dart';
 import '../../../domain/use_cases/sign_out_use_case.dart';
+import '../../../../sync/domain/use_cases/clear_synced_local_records_use_case.dart';
 
 part 'auth_event.dart';
 
@@ -34,12 +35,14 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final GoogleSignInUseCase _googleSignInUseCase;
   final AppleSignInUseCase _appleSignInUseCase;
   final SignOutUseCase _signOutUseCase;
+  final ClearSyncedLocalRecordsUseCase _clearSyncedLocalRecords;
 
   AuthBloc({
     required this._authRepository,
     required this._googleSignInUseCase,
     required this._appleSignInUseCase,
     required this._signOutUseCase,
+    required this._clearSyncedLocalRecords,
   }) : super(const AuthState(status: EAuthStatus.signedOut)) {
     // `_Watch` is registered SEPARATELY from the action events, and this is
     // load-bearing.
@@ -181,6 +184,19 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignOut(Emitter<AuthState> emit) async {
+    // BEFORE signing out, while the session still exists: drop local copies
+    // of records the server already holds. They are fetched back — photos
+    // included — on the next sign-in.
+    //
+    // Failing here must NOT strand the user signed in. A cleanup that threw
+    // would otherwise make sign-out impossible; the rows are simply kept and
+    // the next sign-out retries.
+    try {
+      await _clearSyncedLocalRecords();
+    } catch (_) {
+      // Intentionally swallowed — see above.
+    }
+
     await _signOutUseCase();
     // watchUser() picks up the signed-out state reactively.
   }

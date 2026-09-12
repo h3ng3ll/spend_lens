@@ -1399,10 +1399,9 @@ class AppLocalizationsUk extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count у черзі',
-      many: '$count у черзі',
-      few: '$count у черзі',
-      one: '$count у черзі',
+      other: '$count не синхронізовано',
+      few: '$count не синхронізовані',
+      one: '1 не синхронізована',
     );
     return '$_temp0';
   }
@@ -1461,4 +1460,51 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get premiumTerms =>
       'Поновлюється автоматично. Скасувати можна в App Store.';
+
+  @override
+  String get syncPendingUpload => 'Не синхронізовано';
+
+  @override
+  String get syncPendingDelete => 'Очікує видалення';
+
+  @override
+  String get storageDetails => 'Відомості про сховище';
+
+  @override
+  String get photoSize => 'Фото';
+
+  @override
+  String get documentSize => 'Дані запису';
+
+  @override
+  String get noPhotoStored => 'Немає фото';
+
+  @override
+  String get cloudCopy => 'Копія у хмарі';
+
+  @override
+  String get cloudCopyUploaded => 'Вивантажено';
+
+  @override
+  String get cloudCopyPending => 'Ще не вивантажено';
+
+  @override
+  String get storageDetailsNote =>
+      'До хмарного сховища зараховується лише фото. Розмір даних запису — це оцінка того, що вивантажується для цього чека.';
+
+  @override
+  String get syncStatus => 'Статус синхронізації';
+
+  @override
+  String get syncNow => 'Синхронізувати';
+
+  @override
+  String get syncSection => 'Синхронізація';
+
+  @override
+  String get signOutConfirmTitle => 'Вийти?';
+
+  @override
+  String get signOutConfirmBody =>
+      'Записи, уже збережені в хмарі, буде видалено з цього пристрою та відновлено під час наступного входу. Несинхронізовані залишаться.';
 }

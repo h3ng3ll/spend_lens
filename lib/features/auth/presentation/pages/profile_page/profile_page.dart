@@ -61,7 +61,23 @@ class _ProfilePageState extends State<ProfilePage> {
   void _onApple() =>
       context.read<AuthBloc>().add(const AuthEvent.signInApple());
 
-  void _onSignOut() => context.read<AuthBloc>().add(const AuthEvent.signOut());
+  /// Sign-out now REMOVES data from the device (local copies of records the
+  /// server already holds), so it is confirmed first. The dialog states both
+  /// halves — what goes and what stays — because "anything not synchronized
+  /// is kept" is the reassurance that makes the action safe to accept.
+  Future<void> _onSignOut() async {
+    final lo = AppLocalizations.of(context);
+    final authBloc = context.read<AuthBloc>();
+
+    await ConfirmDialog.show(
+      context,
+      title: lo.signOutConfirmTitle,
+      body: lo.signOutConfirmBody,
+      confirmLabel: lo.signOut,
+      cancelLabel: lo.cancel,
+      onConfirm: () => authBloc.add(const AuthEvent.signOut()),
+    );
+  }
 
   void _onExportBackup() => _backupBloc.add(const BackupEvent.exportBackup());
 

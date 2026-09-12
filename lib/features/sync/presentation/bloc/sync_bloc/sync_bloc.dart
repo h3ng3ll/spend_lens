@@ -156,7 +156,10 @@ class SyncBloc extends Bloc<SyncEvent, SyncState> {
 
     emit(state.copyWith(status: ESyncUiStatus.syncing, errorMessage: ''));
 
-    final result = await _runFullSync(uid: uid);
+    final result = await _runFullSync(
+      uid: uid,
+      fullResync: event.fullResync,
+    );
 
     await result.fold(
       (failure) async => emit(

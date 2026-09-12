@@ -30,6 +30,9 @@ class _FakeCategoryLocalRepository implements ICategoryLocalRepository {
   Future<void> delete(String id) async {}
 
   @override
+  Future<void> deleteLocalOnly(String id) async {}
+
+  @override
   Future<List<Category>> getAllIncludingDeleted() async =>
       savedCategories ?? const [];
 

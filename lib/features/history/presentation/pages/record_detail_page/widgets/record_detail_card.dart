@@ -31,6 +31,11 @@ class RecordDetailCard extends StatelessWidget {
   final String categoryLabel;
   final Color categoryDotColor;
 
+  /// Sync badge, rendered only when non-null (receipts only — see
+  /// `RecordDetailViewData.syncLabel`).
+  final String? syncLabel;
+  final Color? syncDotColor;
+
   const RecordDetailCard({
     super.key,
     required this.initial,
@@ -43,12 +48,15 @@ class RecordDetailCard extends StatelessWidget {
     required this.typeLabel,
     required this.categoryLabel,
     required this.categoryDotColor,
+    this.syncLabel,
+    this.syncDotColor,
   });
 
   @override
   Widget build(BuildContext context) {
     final scheme = AppColorScheme.of(context);
     final textTheme = AppTextTheme.of(context);
+    final sync = syncLabel;
 
     return AppSectionCard(
       padding: const EdgeInsets.all(20.0),
@@ -125,12 +133,17 @@ class RecordDetailCard extends StatelessWidget {
               ),
             ],
           ),
-          Row(
-            mainAxisSize: MainAxisSize.min,
+          Wrap(
             spacing: 8.0,
+            runSpacing: 8.0,
             children: [
               RecordDetailBadge(label: typeLabel),
-              RecordDetailBadge(label: categoryLabel, dotColor: categoryDotColor),
+              RecordDetailBadge(
+                label: categoryLabel,
+                dotColor: categoryDotColor,
+              ),
+              if (sync != null)
+                RecordDetailBadge(label: sync, dotColor: syncDotColor),
             ],
           ),
         ],

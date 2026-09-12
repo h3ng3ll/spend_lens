@@ -392,7 +392,7 @@
   "deleteScopeLocal": "Solo este dispositivo",
   "deleteScopeRemote": "Solo la nube",
   "deleteScopeBoth": "Este dispositivo y la nube",
-  "syncPending": "{count, plural, =1{1 pendiente} other{{count} pendientes}}",
+  "syncPending": "{count, plural, =1{1 sin sincronizar} other{{count} sin sincronizar}}",
   "@syncPending": {
     "description": "Count of records awaiting upload.",
     "placeholders": {
@@ -427,5 +427,20 @@
   "premiumSubscribe": "Suscribirse",
   "premiumRestore": "Restaurar compra",
   "premiumRestoreNothing": "No se encontró ninguna compra anterior.",
-  "premiumTerms": "Se renueva automáticamente. Cancela cuando quieras en la App Store."
+  "premiumTerms": "Se renueva automáticamente. Cancela cuando quieras en la App Store.",
+  "syncPendingUpload": "No sincronizado",
+  "syncPendingDelete": "Pendiente de eliminar",
+  "storageDetails": "Detalles de almacenamiento",
+  "photoSize": "Foto",
+  "documentSize": "Datos del registro",
+  "noPhotoStored": "Sin foto",
+  "cloudCopy": "Copia en la nube",
+  "cloudCopyUploaded": "Subida",
+  "cloudCopyPending": "Aún no subida",
+  "storageDetailsNote": "Solo la foto cuenta para tu almacenamiento en la nube. El tamaño de los datos es una estimación de lo que se sube para este recibo.",
+  "syncStatus": "Estado de sincronización",
+  "syncNow": "Sincronizar ahora",
+  "syncSection": "Sincronización",
+  "signOutConfirmTitle": "¿Cerrar sesión?",
+  "signOutConfirmBody": "Los registros ya respaldados se eliminarán de este dispositivo y se restaurarán al volver a iniciar sesión. Los no sincronizados se conservan."
 }

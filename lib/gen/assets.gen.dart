@@ -47,6 +47,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/google_logo.svg
   String get googleLogo => 'assets/icons/google_logo.svg';
 
+  /// File path: assets/icons/more_vertical.svg
+  String get moreVertical => 'assets/icons/more_vertical.svg';
+
   /// File path: assets/icons/no_wifi.svg
   String get noWifi => 'assets/icons/no_wifi.svg';
 
@@ -108,6 +111,7 @@ class $AssetsIconsGen {
     emptyReceipt,
     flash,
     googleLogo,
+    moreVertical,
     noWifi,
     pdf,
     plus,

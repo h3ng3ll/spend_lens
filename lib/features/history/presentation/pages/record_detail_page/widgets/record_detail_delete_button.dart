@@ -28,8 +28,6 @@ import '../../../bloc/record_detail_bloc/record_detail_bloc.dart';
 /// exits the detail page. This widget only surfaces FAILURE, via its own
 /// `BlocListener` on [RecordDetailState.isDeleteFailed].
 class RecordDetailDeleteButton extends StatelessWidget {
-  final String recordId;
-
   /// `dDeleteLabel` — "Delete receipt" for a receipt-sourced record,
   /// "Delete expense" for a cash one. Resolved by the caller so this widget
   /// stays branch-agnostic.
@@ -37,7 +35,6 @@ class RecordDetailDeleteButton extends StatelessWidget {
 
   const RecordDetailDeleteButton({
     super.key,
-    required this.recordId,
     required this.label,
   });
 
@@ -51,7 +48,7 @@ class RecordDetailDeleteButton extends StatelessWidget {
       body: lo.deleteExpenseConfirmBody,
       confirmLabel: label,
       cancelLabel: lo.cancel,
-      onConfirm: () => bloc.add(RecordDetailEvent.deleteRecord(recordId)),
+      onConfirm: () => bloc.add(const RecordDetailEvent.deleteRecord()),
     );
   }
 

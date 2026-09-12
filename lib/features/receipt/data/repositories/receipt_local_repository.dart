@@ -63,6 +63,25 @@ class ReceiptLocalRepository implements IReceiptLocalRepository {
     );
   }
 
+
+  /// HARD delete, local only — removes the row from this device WITHOUT a
+  /// tombstone.
+  ///
+  /// The opposite of [delete] and used for exactly one thing: dropping a
+  /// row this device no longer needs to keep, because the server already
+  /// has it (the sign-out cleanup). Using [delete] there would stamp
+  /// `pendingDelete` and push a tombstone on the next sync, DESTROYING the
+  /// user's cloud copy — the precise opposite of the intent.
+  ///
+  /// Only ever call this for a row whose `syncStatus` is `synced`. A row
+  /// with unpublished local work has no copy anywhere else, and removing it
+  /// loses it for good.
+  @override
+  Future<void> deleteLocalOnly(String id) async {
+    final box = await _hiveDatabase.getBox<Receipt>(_boxName);
+    await box.delete(id);
+  }
+
   @override
   Future<List<Receipt>> getAllIncludingDeleted() async {
     final box = await _hiveDatabase.getBox<Receipt>(_boxName);

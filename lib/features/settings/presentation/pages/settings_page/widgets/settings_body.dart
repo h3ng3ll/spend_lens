@@ -12,6 +12,7 @@ import 'legal_card.dart';
 import 'preferences_card.dart';
 import 'profile_summary_card.dart';
 import 'scan_capability_card.dart';
+import 'sync_card.dart';
 import 'settings_header_row.dart';
 
 /// The Settings artboard's full grouped-card layout
@@ -95,6 +96,7 @@ class SettingsBody extends StatelessWidget {
               capability: scanCapability,
               onOpenSettings: onOpenScanSettings,
             ),
+            const SyncCard(),
             DeleteAllCard(onTap: onDeleteAll),
             LegalCard(
               onPrivacy: onPrivacy,

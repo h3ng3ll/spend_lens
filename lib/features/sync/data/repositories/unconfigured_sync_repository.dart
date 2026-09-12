@@ -20,6 +20,13 @@ class UnconfiguredSyncRepository implements ISyncRemoteRepository {
   }) async {}
 
   @override
+  Future<void> deleteRecords({
+    required String uid,
+    required ESyncCollection collection,
+    required List<String> ids,
+  }) async {}
+
+  @override
   Future<List<RemoteRecord>> fetchRecords({
     required String uid,
     required ESyncCollection collection,

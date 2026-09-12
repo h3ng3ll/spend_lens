@@ -21,6 +21,22 @@ abstract interface class ISyncRemoteRepository {
     required List<Map<String, dynamic>> records,
   });
 
+  /// Permanently removes [ids] from [collection], in batches.
+  ///
+  /// The SECOND half of a delete, run after the tombstone has been pushed.
+  /// A tombstone alone leaves the document sitting in Firestore forever: the
+  /// record is correctly hidden in the app, but the console still shows it,
+  /// and it keeps consuming the user's storage for data they deleted.
+  ///
+  /// Ordering is what makes this safe — see `RunFullSyncUseCase`. The
+  /// tombstone is uploaded first so any other device can learn about the
+  /// deletion from it; only then is the document purged.
+  Future<void> deleteRecords({
+    required String uid,
+    required ESyncCollection collection,
+    required List<String> ids,
+  });
+
   /// Every document in [collection] whose `updatedAt` is strictly after
   /// [sinceUpdatedAt] (an ISO-8601 string), or all of them when it is null.
   Future<List<RemoteRecord>> fetchRecords({

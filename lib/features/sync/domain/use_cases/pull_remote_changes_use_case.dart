@@ -28,6 +28,19 @@ class PullResult {
 ///
 /// Ties lose. `isAfter` is strict, so re-pulling an unchanged page rewrites
 /// nothing.
+///
+/// **The cursor only advances past records this pull actually accounted
+/// for.** It used to advance for EVERY fetched record, before the conflict
+/// rules ran — so a record skipped because the local row looked pending
+/// still moved `lastSyncedAt` past itself. Since `fetchRecords` filters
+/// server-side on `updatedAt > sinceUpdatedAt`, that record could then never
+/// be fetched again: it was stranded on the server permanently, invisible to
+/// this device, and no amount of re-syncing or restarting would bring it
+/// back (the cursor is persisted in Hive, so a restart does not reset it).
+///
+/// That was reachable in normal use, and the `syncStatus`-on-the-wire bug
+/// made it common: pulled rows landed falsely pending, so the very next pull
+/// skipped them while still stepping the cursor forward.
 class PullRemoteChangesUseCase {
   final ISyncRemoteRepository _remoteRepository;
 
@@ -63,13 +76,23 @@ class PullRemoteChangesUseCase {
       final remoteUpdatedAt = record.updatedAt;
       if (raw == null || remoteUpdatedAt == null) continue;
 
-      if (newest == null || raw.compareTo(newest) > 0) newest = raw;
-
       final local = localById[record.id];
       if (local != null) {
+        // Local has unpublished work — keep it, and do NOT advance the
+        // cursor past this record. See the cursor note above: moving past a
+        // record this device declined to take strands it permanently.
         if (adapter.syncStatusOf(local) != ESyncStatus.synced) continue;
-        if (!remoteUpdatedAt.isAfter(adapter.updatedAtOf(local))) continue;
+        // Not newer than what we hold. Safe to advance: we already have an
+        // equal-or-newer copy, so there is nothing here to come back for.
+        if (!remoteUpdatedAt.isAfter(adapter.updatedAtOf(local))) {
+          if (newest == null || raw.compareTo(newest) > 0) newest = raw;
+          continue;
+        }
       }
+
+      // Advanced only for records actually TAKEN (or already held), never
+      // for one that was skipped with work still owed.
+      if (newest == null || raw.compareTo(newest) > 0) newest = raw;
 
       winners.add(adapter.fromJson(record.json));
     }

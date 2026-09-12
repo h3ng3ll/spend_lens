@@ -1379,8 +1379,8 @@ class AppLocalizationsEs extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count pendientes',
-      one: '1 pendiente',
+      other: '$count sin sincronizar',
+      one: '1 sin sincronizar',
     );
     return '$_temp0';
   }
@@ -1439,4 +1439,51 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get premiumTerms =>
       'Se renueva automáticamente. Cancela cuando quieras en la App Store.';
+
+  @override
+  String get syncPendingUpload => 'No sincronizado';
+
+  @override
+  String get syncPendingDelete => 'Pendiente de eliminar';
+
+  @override
+  String get storageDetails => 'Detalles de almacenamiento';
+
+  @override
+  String get photoSize => 'Foto';
+
+  @override
+  String get documentSize => 'Datos del registro';
+
+  @override
+  String get noPhotoStored => 'Sin foto';
+
+  @override
+  String get cloudCopy => 'Copia en la nube';
+
+  @override
+  String get cloudCopyUploaded => 'Subida';
+
+  @override
+  String get cloudCopyPending => 'Aún no subida';
+
+  @override
+  String get storageDetailsNote =>
+      'Solo la foto cuenta para tu almacenamiento en la nube. El tamaño de los datos es una estimación de lo que se sube para este recibo.';
+
+  @override
+  String get syncStatus => 'Estado de sincronización';
+
+  @override
+  String get syncNow => 'Sincronizar ahora';
+
+  @override
+  String get syncSection => 'Sincronización';
+
+  @override
+  String get signOutConfirmTitle => '¿Cerrar sesión?';
+
+  @override
+  String get signOutConfirmBody =>
+      'Los registros ya respaldados se eliminarán de este dispositivo y se restaurarán al volver a iniciar sesión. Los no sincronizados se conservan.';
 }

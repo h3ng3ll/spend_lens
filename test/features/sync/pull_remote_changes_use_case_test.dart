@@ -10,6 +10,7 @@ import 'package:spend_lens/features/sync/domain/repositories/i_sync_remote_repos
 import 'package:spend_lens/features/sync/domain/use_cases/pull_remote_changes_use_case.dart';
 
 class _FakeRemote implements ISyncRemoteRepository {
+  final List<String> deleted = [];
   List<RemoteRecord> toReturn = const [];
 
   @override
@@ -25,6 +26,13 @@ class _FakeRemote implements ISyncRemoteRepository {
     required ESyncCollection collection,
     required List<Map<String, dynamic>> records,
   }) async {}
+
+  @override
+  Future<void> deleteRecords({
+    required String uid,
+    required ESyncCollection collection,
+    required List<String> ids,
+  }) async => deleted.addAll(ids);
 
   @override
   Future<bool> hasAnyRecords({required String uid}) async => false;
@@ -65,6 +73,8 @@ void main() {
     updatedAtOf: (e) => e.updatedAt,
     syncStatusOf: (e) => e.syncStatus,
     markSynced: (e) => e.copyWith(syncStatus: ESyncStatus.synced),
+    deletedAtOf: (e) => e.deletedAt,
+    purgeLocal: (id) async => local.removeWhere((e) => e.id == id),
     watchAll: () => const Stream<void>.empty(),
   );
 
@@ -189,5 +199,97 @@ void main() {
     );
     expect(result.applied, 0);
     expect(result.newestUpdatedAt, isNull);
+  });
+
+  group('cursor safety', () {
+    // The cursor is the pull's memory of "everything up to here is handled".
+    // `fetchRecords` filters SERVER-side on `updatedAt > sinceUpdatedAt`, and
+    // the cursor is persisted in Hive — so a record the cursor passes without
+    // being taken is stranded on the server FOREVER. No re-sync, no restart,
+    // and no reinstall-free recovery. This group exists because that was a
+    // live bug.
+    test('does not advance past a record it declined to take', () async {
+      local = [
+        expense(
+          'e1',
+          updatedAt: DateTime(2026, 9, 1),
+          syncStatus: ESyncStatus.pendingUpdate,
+        ),
+      ];
+      remote.toReturn = [
+        record(expense('e1', updatedAt: DateTime(2026, 9, 5))),
+      ];
+
+      final result = await useCase(uid: 'u1', adapter: adapter());
+
+      expect(result.applied, 0, reason: 'local pending must win');
+      expect(
+        result.newestUpdatedAt,
+        isNull,
+        reason: 'Advancing here would strand e1: the next pull asks for '
+            'updatedAt > that value and can never see it again.',
+      );
+    });
+
+    test('a skipped record does not drag the cursor past its NEIGHBOURS',
+        () async {
+      // The damaging shape: one pending row in a page would otherwise push
+      // the cursor to the newest id in that page, stranding everything older
+      // that had not been fetched yet.
+      local = [
+        expense(
+          'e2',
+          updatedAt: DateTime(2026, 9, 1),
+          syncStatus: ESyncStatus.pendingUpdate,
+        ),
+      ];
+      remote.toReturn = [
+        record(expense('e1', updatedAt: DateTime(2026, 9, 3))),
+        record(expense('e2', updatedAt: DateTime(2026, 9, 9))),
+      ];
+
+      final result = await useCase(uid: 'u1', adapter: adapter());
+
+      expect(result.applied, 1);
+      expect(
+        result.newestUpdatedAt,
+        DateTime(2026, 9, 3).toIso8601String(),
+        reason: 'e2 was skipped, so the cursor must stop at e1 — not jump '
+            'to e2 and lose it.',
+      );
+    });
+
+    test('advances for a record already held at an equal-or-newer version',
+        () async {
+      // Safe: we hold an equal-or-newer copy, so there is nothing to come
+      // back for and the cursor SHOULD move (otherwise it never progresses).
+      local = [expense('e1', updatedAt: DateTime(2026, 9, 5))];
+      remote.toReturn = [
+        record(expense('e1', updatedAt: DateTime(2026, 9, 5))),
+      ];
+
+      final result = await useCase(uid: 'u1', adapter: adapter());
+
+      expect(result.applied, 0);
+      expect(
+        result.newestUpdatedAt,
+        DateTime(2026, 9, 5).toIso8601String(),
+      );
+    });
+
+    test('advances for records it takes', () async {
+      remote.toReturn = [
+        record(expense('e1', updatedAt: DateTime(2026, 9, 2))),
+        record(expense('e2', updatedAt: DateTime(2026, 9, 4))),
+      ];
+
+      final result = await useCase(uid: 'u1', adapter: adapter());
+
+      expect(result.applied, 2);
+      expect(
+        result.newestUpdatedAt,
+        DateTime(2026, 9, 4).toIso8601String(),
+      );
+    });
   });
 }

@@ -1,6 +1,11 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import '../../../core/services/receipt_image_store/receipt_image_store.dart';
+import '../../receipt/domain/repositories/i_receipt_item_local_repository.dart';
+import '../../receipt/domain/repositories/i_receipt_local_repository.dart';
+import '../../store/domain/repositories/i_store_local_repository.dart';
+import '../../sync/domain/use_cases/clear_synced_local_records_use_case.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/services/crypto_service.dart';
@@ -83,12 +88,27 @@ Future<bool> initAuthFeature() async {
   );
   getIt.registerLazySingleton(() => SignOutUseCase(getIt<IAuthRepository>()));
 
+  // Registered here rather than in the sync slice because `AuthBloc`
+  // depends on it and auth is initialized first. Its own dependencies (the
+  // receipt/store repositories and the image store) are all registered
+  // earlier still, and every registration is lazy, so nothing resolves
+  // before it exists.
+  getIt.registerLazySingleton(
+    () => ClearSyncedLocalRecordsUseCase(
+      receiptLocalRepository: getIt<IReceiptLocalRepository>(),
+      receiptItemLocalRepository: getIt<IReceiptItemLocalRepository>(),
+      storeLocalRepository: getIt<IStoreLocalRepository>(),
+      imageStore: getIt<ReceiptImageStore>(),
+    ),
+  );
+
   getIt.registerLazySingleton<AuthBloc>(
     () => AuthBloc(
       authRepository: getIt<IAuthRepository>(),
       googleSignInUseCase: getIt<GoogleSignInUseCase>(),
       appleSignInUseCase: getIt<AppleSignInUseCase>(),
       signOutUseCase: getIt<SignOutUseCase>(),
+      clearSyncedLocalRecords: getIt<ClearSyncedLocalRecordsUseCase>(),
     ),
   );
 

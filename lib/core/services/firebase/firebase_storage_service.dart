@@ -11,6 +11,12 @@ import 'package:firebase_storage/firebase_storage.dart';
 /// storage bar must show a MEASURED figure, and object metadata is the only
 /// honest source for it. The design's "38 MB" is prototype simulation and is
 /// never reproduced.
+/// Ceiling for a single downloaded photo. `getData` buffers the whole
+/// object in memory, and receipt photos are compressed to ~200 KB before
+/// upload, so 20 MB is far above any legitimate file while still bounding a
+/// corrupt or hostile one.
+const int _kMaxPhotoBytes = 20 * 1024 * 1024;
+
 class FirebaseStorageService {
   final FirebaseStorage _firebaseStorage;
 
@@ -40,6 +46,33 @@ class FirebaseStorageService {
     return task.totalBytes;
   }
 
+  /// Downloads this receipt's photo, or null when the object is absent.
+  ///
+  /// The counterpart to [uploadReceiptPhoto], and the half that makes the
+  /// cloud copy actually a BACKUP rather than a one-way archive: without a
+  /// download there was no way to get an image back onto a device that no
+  /// longer had it, so clearing local photos would have lost them for good.
+  ///
+  /// [_kMaxPhotoBytes] bounds `getData` because it buffers the whole object
+  /// in memory. Receipt photos are compressed to roughly 200 KB before
+  /// upload, so this ceiling is far above any legitimate file and exists to
+  /// stop a corrupt or hostile object from exhausting memory.
+  ///
+  /// Returns null rather than throwing when the object is missing — a
+  /// receipt whose photo never uploaded (the account was full, say) is a
+  /// normal state, not an error.
+  Future<Uint8List?> downloadReceiptPhoto({
+    required String uid,
+    required String receiptId,
+  }) async {
+    try {
+      return await _receiptRef(uid, receiptId).getData(_kMaxPhotoBytes);
+    } on FirebaseException catch (error) {
+      if (error.code == 'object-not-found') return null;
+      rethrow;
+    }
+  }
+
   Future<void> deleteReceiptPhoto({
     required String uid,
     required String receiptId,
@@ -52,6 +85,34 @@ class FirebaseStorageService {
       if (error.code == 'object-not-found') return;
       rethrow;
     }
+  }
+
+  /// The receipt ids that already have a photo object in the bucket.
+  ///
+  /// Lets the upload stage be STATELESS: rather than tracking an
+  /// `isPhotoUploaded` flag on every [Receipt] (a Hive model change, with
+  /// the adapter-regeneration hazards hive_rules.md warns about), the sync
+  /// asks the bucket what it already holds and uploads only the difference.
+  /// Re-running a cycle therefore uploads nothing twice.
+  ///
+  /// Paginated for the same reason as [usedBytes] — `listAll()` is one
+  /// unbounded call.
+  Future<Set<String>> uploadedReceiptIds(String uid) async {
+    final ids = <String>{};
+    String? pageToken;
+
+    do {
+      final page = await _receiptsFolder(uid).list(
+        ListOptions(maxResults: 100, pageToken: pageToken),
+      );
+      for (final item in page.items) {
+        // Objects are stored as `<receiptId>.jpg`.
+        ids.add(item.name.replaceFirst(RegExp(r'\.jpg$'), ''));
+      }
+      pageToken = page.nextPageToken;
+    } while (pageToken != null);
+
+    return ids;
   }
 
   /// Total bytes this user occupies, summed from real object metadata.

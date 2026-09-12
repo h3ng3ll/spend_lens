@@ -33,6 +33,19 @@ class SyncUnexpectedFailure extends SyncFailure {
     : super('Sync failed — tap to retry');
 }
 
+/// Cloud storage is full — the account is at its quota.
+///
+/// Distinct from [SyncOfflineFailure], which it used to be lumped in with
+/// (`resource-exhausted` was classified as offline). That misreported a full
+/// account as a connectivity problem, so the user saw "Offline" while online
+/// and had no idea why records never synchronized. This one is NOT
+/// self-healing: waiting does not fix it, only freeing space or upgrading
+/// does, and the message has to say so.
+class SyncQuotaExceededFailure extends SyncFailure {
+  const SyncQuotaExceededFailure()
+    : super('Cloud storage is full — free up space or upgrade');
+}
+
 /// Sync was requested with no signed-in user. Not an error: the app is
 /// fully usable signed out, and this is the normal anonymous path.
 class SyncSignedOutFailure extends SyncFailure {

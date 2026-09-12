@@ -1390,9 +1390,8 @@ class AppLocalizationsRo extends AppLocalizations {
     String _temp0 = intl.Intl.pluralLogic(
       count,
       locale: localeName,
-      other: '$count în așteptare',
-      few: '$count în așteptare',
-      one: '1 în așteptare',
+      other: '$count nesincronizate',
+      one: '1 nesincronizat',
     );
     return '$_temp0';
   }
@@ -1452,4 +1451,51 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get premiumTerms =>
       'Se reînnoiește automat. Anulează oricând în App Store.';
+
+  @override
+  String get syncPendingUpload => 'Nesincronizat';
+
+  @override
+  String get syncPendingDelete => 'Așteaptă ștergerea';
+
+  @override
+  String get storageDetails => 'Detalii stocare';
+
+  @override
+  String get photoSize => 'Fotografie';
+
+  @override
+  String get documentSize => 'Date înregistrare';
+
+  @override
+  String get noPhotoStored => 'Fără fotografie';
+
+  @override
+  String get cloudCopy => 'Copie în cloud';
+
+  @override
+  String get cloudCopyUploaded => 'Încărcat';
+
+  @override
+  String get cloudCopyPending => 'Încă neîncărcat';
+
+  @override
+  String get storageDetailsNote =>
+      'Doar fotografia contează pentru stocarea în cloud. Dimensiunea datelor este o estimare a ceea ce se încarcă pentru acest bon.';
+
+  @override
+  String get syncStatus => 'Stare sincronizare';
+
+  @override
+  String get syncNow => 'Sincronizează acum';
+
+  @override
+  String get syncSection => 'Sincronizare';
+
+  @override
+  String get signOutConfirmTitle => 'Te deconectezi?';
+
+  @override
+  String get signOutConfirmBody =>
+      'Înregistrările deja salvate în cloud vor fi eliminate de pe acest dispozitiv și restaurate la următoarea conectare. Cele nesincronizate rămân.';
 }

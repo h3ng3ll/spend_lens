@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../core/resources/colors/app_colors.dart';
 import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
@@ -17,6 +18,7 @@ import '../../../../receipt/domain/repositories/i_receipt_item_local_repository.
 import '../../../../receipt/domain/repositories/i_receipt_local_repository.dart';
 import '../../../../store/domain/repositories/i_store_local_repository.dart';
 import '../../bloc/record_detail_bloc/record_detail_bloc.dart';
+import 'widgets/e_record_detail_menu_action.dart';
 import 'widgets/record_detail_body.dart';
 import 'widgets/record_detail_header.dart';
 import 'widgets/record_detail_view_data.dart';
@@ -76,6 +78,22 @@ class _RecordDetailPageState extends State<RecordDetailPage> {
   /// The design's `dEdit`. Receipts only — see the class doc.
   void _onEdit() {
     EditReceiptPageRoute(receiptId: widget.recordId).push<void>(context);
+  }
+
+  /// What this receipt costs in storage, and whether it has synced.
+  void _onStorageDetails() {
+    ReceiptStoragePageRoute(receiptId: widget.recordId).push<void>(context);
+  }
+
+  /// Routes the header menu's selection. The menu itself is receipts-only,
+  /// so both destinations are receipt routes.
+  void _onMenuAction(ERecordDetailMenuAction action) {
+    switch (action) {
+      case ERecordDetailMenuAction.edit:
+        _onEdit();
+      case ERecordDetailMenuAction.storageDetails:
+        _onStorageDetails();
+    }
   }
 
   /// The design's `openPhoto` — opens the saved photo full-screen.
@@ -167,11 +185,12 @@ class _RecordDetailPageState extends State<RecordDetailPage> {
                         // Falls back to the neutral cash label while the
                         // record is still loading, so the header never
                         // renders an empty title.
-                        typeLabel: viewData?.typeLabel ??
+                        typeLabel:
+                            viewData?.typeLabel ??
                             AppLocalizations.of(context).cashType,
                         onClose: _onClose,
-                        onEdit: (viewData?.isReceipt ?? false)
-                            ? _onEdit
+                        onMenuAction: (viewData?.isReceipt ?? false)
+                            ? _onMenuAction
                             : null,
                       ),
                       Expanded(
@@ -210,6 +229,7 @@ class _RecordDetailPageState extends State<RecordDetailPage> {
       stores: snapshot.stores,
       receipt: snapshot.receipt,
       lo: AppLocalizations.of(context),
+      scheme: AppColorScheme.of(context),
     );
   }
 }

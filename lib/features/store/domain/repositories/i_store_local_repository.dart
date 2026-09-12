@@ -20,6 +20,14 @@ abstract interface class IStoreLocalRepository {
   /// Reads (`getAll`, `getById`, `watchAll`) hide tombstoned rows.
   Future<void> delete(String id);
 
+/// HARD delete, local only — drops the row with NO tombstone.
+  ///
+  /// Distinct from [delete], which soft-deletes so the removal propagates.
+  /// This is for discarding a local copy the server already holds (the
+  /// sign-out cleanup); it must never be used on a row that is not
+  /// `synced`, because nothing else has that data.
+  Future<void> deleteLocalOnly(String id);
+
   /// Every row INCLUDING tombstones. For the sync engine only — screens must
   /// use [getAll], which hides deleted rows.
   Future<List<Store>> getAllIncludingDeleted();

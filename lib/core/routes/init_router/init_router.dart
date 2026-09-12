@@ -15,6 +15,7 @@ import '../../../features/home/presentation/pages/home_page/home_page.dart';
 import '../../../features/onboarding/presentation/pages/onboarding_page/onboarding_page.dart';
 import '../../../features/receipt/presentation/pages/edit_receipt_page/edit_receipt_page.dart';
 import '../../../features/receipt/presentation/pages/receipt_photo_page/receipt_photo_page.dart';
+import '../../../features/receipt/presentation/pages/receipt_storage_page/receipt_storage_page.dart';
 import '../../../features/receipt/presentation/pages/review_page/review_page.dart';
 import '../../../features/scanner/presentation/pages/scanner_page/scanner_page.dart';
 import '../../../features/settings/presentation/pages/about_page/about_page.dart';
@@ -364,6 +365,22 @@ class ReceiptPhotoPageRoute extends GoRouteData with $ReceiptPhotoPageRoute {
 /// its deep-linkability for a real saved receipt) instead of making the
 /// parameter nullable for one caller.
 const String kPendingDraftReceiptId = 'pending';
+
+@TypedGoRoute<ReceiptStoragePageRoute>(path: '/receipt/:receiptId/storage')
+class ReceiptStoragePageRoute extends GoRouteData
+    with $ReceiptStoragePageRoute {
+  final String receiptId;
+
+  const ReceiptStoragePageRoute({required this.receiptId});
+
+  static final GlobalKey<NavigatorState> $parentNavigatorKey =
+      rootNavigatorKey;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return appPage(ReceiptStoragePage(receiptId: receiptId));
+  }
+}
 
 @TypedGoRoute<EditReceiptPageRoute>(path: '/receipt/:receiptId/edit')
 class EditReceiptPageRoute extends GoRouteData with $EditReceiptPageRoute {

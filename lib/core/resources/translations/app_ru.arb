@@ -392,7 +392,7 @@
   "deleteScopeLocal": "Только это устройство",
   "deleteScopeRemote": "Только в облаке",
   "deleteScopeBoth": "Это устройство и облако",
-  "syncPending": "{count, plural, one{{count} в очереди} few{{count} в очереди} many{{count} в очереди} other{{count} в очереди}}",
+  "syncPending": "{count, plural, =1{1 не синхронизирована} few{{count} не синхронизированы} other{{count} не синхронизировано}}",
   "@syncPending": {
     "description": "Count of records awaiting upload.",
     "placeholders": {
@@ -427,5 +427,20 @@
   "premiumSubscribe": "Оформить подписку",
   "premiumRestore": "Восстановить покупку",
   "premiumRestoreNothing": "Предыдущая покупка не найдена.",
-  "premiumTerms": "Продлевается автоматически. Отменить можно в App Store."
+  "premiumTerms": "Продлевается автоматически. Отменить можно в App Store.",
+  "syncPendingUpload": "Не синхронизировано",
+  "syncPendingDelete": "Ожидает удаления",
+  "storageDetails": "Сведения о хранилище",
+  "photoSize": "Фото",
+  "documentSize": "Данные записи",
+  "noPhotoStored": "Нет фото",
+  "cloudCopy": "Копия в облаке",
+  "cloudCopyUploaded": "Выгружено",
+  "cloudCopyPending": "Ещё не выгружено",
+  "storageDetailsNote": "В облачное хранилище засчитывается только фото. Размер данных записи — это оценка того, что выгружается для этого чека.",
+  "syncStatus": "Статус синхронизации",
+  "syncNow": "Синхронизировать",
+  "syncSection": "Синхронизация",
+  "signOutConfirmTitle": "Выйти?",
+  "signOutConfirmBody": "Записи, уже сохранённые в облаке, будут удалены с этого устройства и восстановлены при следующем входе. Несинхронизированные останутся."
 }

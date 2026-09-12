@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:spend_lens/core/models/e_sync_status.dart';
+import 'package:spend_lens/core/resources/colors/app_color_scheme.dart';
 import 'package:spend_lens/core/resources/localization/gen/app_localizations_en.dart';
 import 'package:spend_lens/features/category/domain/models/category/category.dart';
 import 'package:spend_lens/features/expense/domain/models/expense/e_expense_source.dart';
@@ -14,6 +16,7 @@ import 'package:spend_lens/features/store/domain/models/store/store.dart';
 /// store-name resolution that the receipt branch depends on.
 void main() {
   final lo = AppLocalizationsEn();
+  final scheme = AppColorScheme.dark();
   final timestamp = DateTime(2026, 9, 6, 18, 42);
 
   final categories = [
@@ -47,13 +50,18 @@ void main() {
         updatedAt: timestamp,
       );
 
-  Receipt receipt({String? storeId = 'store-lidl'}) => Receipt(
+  Receipt receipt({
+    String? storeId = 'store-lidl',
+    ESyncStatus syncStatus = ESyncStatus.synced,
+  }) =>
+      Receipt(
         id: 'record-1',
         storeId: storeId,
         purchasedAt: timestamp,
         itemsTotal: 110.10,
         currencyCode: 'MDL',
         updatedAt: timestamp,
+        syncStatus: syncStatus,
       );
 
   group('branch selection follows Expense.source', () {
@@ -64,6 +72,7 @@ void main() {
         stores: stores,
         receipt: null,
         lo: lo,
+        scheme: scheme,
       );
 
       expect(viewData.isReceipt, isFalse);
@@ -78,6 +87,7 @@ void main() {
         stores: stores,
         receipt: receipt(),
         lo: lo,
+        scheme: scheme,
       );
 
       expect(viewData.isReceipt, isTrue);
@@ -98,6 +108,7 @@ void main() {
         stores: stores,
         receipt: receipt(),
         lo: lo,
+        scheme: scheme,
       );
 
       expect(viewData.name, 'Lidl');
@@ -111,6 +122,7 @@ void main() {
         stores: stores,
         receipt: receipt(storeId: null),
         lo: lo,
+        scheme: scheme,
       );
 
       expect(viewData.name, lo.catFood);
@@ -123,6 +135,7 @@ void main() {
         stores: stores,
         receipt: null,
         lo: lo,
+        scheme: scheme,
       );
 
       expect(viewData.name, 'Lidl');
@@ -139,12 +152,78 @@ void main() {
         stores: stores,
         receipt: receipt(),
         lo: lo,
+        scheme: scheme,
       );
 
       expect(viewData.dateText, endsWith('· ${lo.receipt}'));
       expect(viewData.dateText, contains('2026'));
       expect(viewData.dateText, isNot(contains('18:42')));
       expect(viewData.dateText, isNot(contains('6:42')));
+    });
+  });
+
+  group('sync badge', () {
+    // The badge reports the RECEIPT's own row. A cash expense has no
+    // receipt behind it, and the mirrored expense's status drifts from the
+    // receipt's (they are stamped independently), so showing one on a cash
+    // record would misreport it.
+    test('is absent for a cash expense', () {
+      final viewData = RecordDetailViewData.resolve(
+        expense: expense(),
+        categories: categories,
+        stores: stores,
+        receipt: null,
+        lo: lo,
+        scheme: scheme,
+      );
+
+      expect(viewData.syncLabel, isNull);
+      expect(viewData.syncDotColor, isNull);
+    });
+
+    test('reads Synced from a synced receipt', () {
+      final viewData = RecordDetailViewData.resolve(
+        expense: expense(source: EExpenseSource.receipt),
+        categories: categories,
+        stores: stores,
+        receipt: receipt(),
+        lo: lo,
+        scheme: scheme,
+      );
+
+      expect(viewData.syncLabel, lo.synced);
+      expect(viewData.syncDotColor, scheme.accent2);
+    });
+
+    test('reads pending from a not-yet-uploaded receipt', () {
+      final viewData = RecordDetailViewData.resolve(
+        expense: expense(source: EExpenseSource.receipt),
+        categories: categories,
+        stores: stores,
+        receipt: receipt(syncStatus: ESyncStatus.pendingCreate),
+        lo: lo,
+        scheme: scheme,
+      );
+
+      expect(viewData.syncLabel, lo.syncPendingUpload);
+      expect(viewData.syncDotColor, scheme.warn);
+    });
+
+    test('an edited receipt reads the same pending label as a new one', () {
+      RecordDetailViewData resolveWith(ESyncStatus status) =>
+          RecordDetailViewData.resolve(
+            expense: expense(source: EExpenseSource.receipt),
+            categories: categories,
+            stores: stores,
+            receipt: receipt(syncStatus: status),
+            lo: lo,
+            scheme: scheme,
+          );
+
+      expect(
+        resolveWith(ESyncStatus.pendingUpdate).syncLabel,
+        resolveWith(ESyncStatus.pendingCreate).syncLabel,
+      );
     });
   });
 
@@ -155,6 +234,7 @@ void main() {
       stores: stores,
       receipt: null,
       lo: lo,
+      scheme: scheme,
     );
 
     expect(viewData.note, 'Taxi to airport');

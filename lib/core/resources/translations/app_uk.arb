@@ -392,7 +392,7 @@
   "deleteScopeLocal": "Лише цей пристрій",
   "deleteScopeRemote": "Лише у хмарі",
   "deleteScopeBoth": "Цей пристрій і хмара",
-  "syncPending": "{count, plural, one{{count} у черзі} few{{count} у черзі} many{{count} у черзі} other{{count} у черзі}}",
+  "syncPending": "{count, plural, =1{1 не синхронізована} few{{count} не синхронізовані} other{{count} не синхронізовано}}",
   "@syncPending": {
     "description": "Count of records awaiting upload.",
     "placeholders": {
@@ -427,5 +427,20 @@
   "premiumSubscribe": "Оформити підписку",
   "premiumRestore": "Відновити покупку",
   "premiumRestoreNothing": "Попередню покупку не знайдено.",
-  "premiumTerms": "Поновлюється автоматично. Скасувати можна в App Store."
+  "premiumTerms": "Поновлюється автоматично. Скасувати можна в App Store.",
+  "syncPendingUpload": "Не синхронізовано",
+  "syncPendingDelete": "Очікує видалення",
+  "storageDetails": "Відомості про сховище",
+  "photoSize": "Фото",
+  "documentSize": "Дані запису",
+  "noPhotoStored": "Немає фото",
+  "cloudCopy": "Копія у хмарі",
+  "cloudCopyUploaded": "Вивантажено",
+  "cloudCopyPending": "Ще не вивантажено",
+  "storageDetailsNote": "До хмарного сховища зараховується лише фото. Розмір даних запису — це оцінка того, що вивантажується для цього чека.",
+  "syncStatus": "Статус синхронізації",
+  "syncNow": "Синхронізувати",
+  "syncSection": "Синхронізація",
+  "signOutConfirmTitle": "Вийти?",
+  "signOutConfirmBody": "Записи, уже збережені в хмарі, буде видалено з цього пристрою та відновлено під час наступного входу. Несинхронізовані залишаться."
 }

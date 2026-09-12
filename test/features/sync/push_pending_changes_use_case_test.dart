@@ -10,6 +10,7 @@ import 'package:spend_lens/features/sync/domain/repositories/i_sync_remote_repos
 import 'package:spend_lens/features/sync/domain/use_cases/push_pending_changes_use_case.dart';
 
 class _FakeRemote implements ISyncRemoteRepository {
+  final List<String> deleted = [];
   final List<Map<String, dynamic>> pushed = [];
   bool throwOnPush = false;
 
@@ -29,6 +30,13 @@ class _FakeRemote implements ISyncRemoteRepository {
     required ESyncCollection collection,
     String? sinceUpdatedAt,
   }) async => const [];
+
+  @override
+  Future<void> deleteRecords({
+    required String uid,
+    required ESyncCollection collection,
+    required List<String> ids,
+  }) async => deleted.addAll(ids);
 
   @override
   Future<bool> hasAnyRecords({required String uid}) async => false;
@@ -64,6 +72,8 @@ void main() {
     updatedAtOf: (e) => e.updatedAt,
     syncStatusOf: (e) => e.syncStatus,
     markSynced: (e) => e.copyWith(syncStatus: ESyncStatus.synced),
+    deletedAtOf: (e) => e.deletedAt,
+    purgeLocal: (id) async => stored.removeWhere((e) => e.id == id),
     watchAll: () => const Stream<void>.empty(),
   );
 
@@ -130,6 +140,82 @@ void main() {
     test('an empty box uploads nothing', () async {
       expect(await useCase.pushAll(uid: 'u1', adapter: adapter()), 0);
       expect(remote.pushed, isEmpty);
+    });
+  });
+
+  group('purgePublishedDeletions', () {
+    // A tombstone tells other devices about a deletion, but nothing ever
+    // removed the document afterwards — so Firestore kept the record
+    // forever. It was correctly hidden in the app while the console still
+    // listed it, and it went on consuming storage for deleted data.
+    test('removes the remote document for a published tombstone', () async {
+      stored = [
+        expense('e1', ESyncStatus.synced).copyWith(
+          deletedAt: DateTime(2026, 9, 10),
+        ),
+      ];
+
+      final purged = await useCase.purgePublishedDeletions(
+        uid: 'u1',
+        adapter: adapter(),
+      );
+
+      expect(purged, 1);
+      expect(remote.deleted, ['e1']);
+    });
+
+    test('retires the local tombstone once the document is gone', () async {
+      stored = [
+        expense('e1', ESyncStatus.synced).copyWith(
+          deletedAt: DateTime(2026, 9, 10),
+        ),
+      ];
+
+      await useCase.purgePublishedDeletions(uid: 'u1', adapter: adapter());
+
+      expect(stored, isEmpty);
+    });
+
+    test('leaves a tombstone whose deletion has NOT been published',
+        () async {
+      // Purging now would destroy the only evidence of the deletion, and an
+      // offline device would re-upload the record.
+      stored = [
+        expense('e1', ESyncStatus.pendingDelete).copyWith(
+          deletedAt: DateTime(2026, 9, 10),
+        ),
+      ];
+
+      final purged = await useCase.purgePublishedDeletions(
+        uid: 'u1',
+        adapter: adapter(),
+      );
+
+      expect(purged, 0);
+      expect(remote.deleted, isEmpty);
+      expect(stored, hasLength(1));
+    });
+
+    test('never touches a live row', () async {
+      stored = [expense('e1', ESyncStatus.synced)];
+
+      final purged = await useCase.purgePublishedDeletions(
+        uid: 'u1',
+        adapter: adapter(),
+      );
+
+      expect(purged, 0);
+      expect(remote.deleted, isEmpty);
+      expect(stored, hasLength(1));
+    });
+
+    test('nothing to purge is not an error', () async {
+      stored = [];
+
+      expect(
+        await useCase.purgePublishedDeletions(uid: 'u1', adapter: adapter()),
+        0,
+      );
     });
   });
 }

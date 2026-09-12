@@ -26,6 +26,7 @@ abstract class AppIcons {
   static const chevronDown = '${_path}chevron_down$_ext';
   static const close = '${_path}close$_ext';
   static const edit = '${_path}edit$_ext';
+  static const moreVertical = '${_path}more_vertical$_ext';
   static const trash = '${_path}trash$_ext';
   static const search = '${_path}search$_ext';
   static const receipt = '${_path}receipt$_ext';

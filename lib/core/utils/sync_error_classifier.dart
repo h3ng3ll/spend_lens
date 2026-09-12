@@ -21,9 +21,14 @@ SyncFailure classifySyncError(Object error) {
       // time. Firestore has already queued any write locally.
       'unavailable' ||
       'deadline-exceeded' ||
-      'resource-exhausted' ||
       'aborted' ||
       'cancelled' => const SyncOfflineFailure(),
+
+      // The account is at its storage quota. NOT offline — it used to be
+      // grouped with the codes above, which told a user on a perfectly good
+      // connection that they were offline while their records silently
+      // never uploaded. Waiting cannot fix this one.
+      'resource-exhausted' => const SyncQuotaExceededFailure(),
 
       // Rules said no, or the session is gone.
       'permission-denied' ||

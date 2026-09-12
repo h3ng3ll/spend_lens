@@ -17,8 +17,12 @@ import '../../../../../sync/presentation/bloc/sync_bloc/sync_bloc.dart';
 class CloudSyncRow extends StatelessWidget {
   const CloudSyncRow({super.key});
 
+  /// `fullResync: true` — a tap here is a USER-initiated retry, same as
+  /// Settings' Synchronize button. An incremental pull cannot see anything
+  /// the stored cursor has already passed, so a repair attempt has to ignore
+  /// it. Automatic cycles stay incremental.
   void _onRetry(BuildContext context) {
-    context.read<SyncBloc>().add(const SyncEvent.syncNow());
+    context.read<SyncBloc>().add(const SyncEvent.syncNow(fullResync: true));
   }
 
   @override

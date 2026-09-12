@@ -50,6 +50,36 @@ class SyncFirestoreRepository implements ISyncRemoteRepository {
   }
 
   @override
+  Future<void> deleteRecords({
+    required String uid,
+    required ESyncCollection collection,
+    required List<String> ids,
+  }) async {
+    if (ids.isEmpty) return;
+
+    final reference = _firestoreService.records(uid, collection);
+
+    // Same 500-op batching as [pushRecords], for the same reason.
+    for (
+      var offset = 0;
+      offset < ids.length;
+      offset += FirebaseFirestoreService.kBatchLimit
+    ) {
+      final end = (offset + FirebaseFirestoreService.kBatchLimit).clamp(
+        0,
+        ids.length,
+      );
+      final batch = _firestoreService.batch();
+
+      for (final id in ids.sublist(offset, end)) {
+        batch.delete(reference.doc(id));
+      }
+
+      await batch.commit();
+    }
+  }
+
+  @override
   Future<List<RemoteRecord>> fetchRecords({
     required String uid,
     required ESyncCollection collection,

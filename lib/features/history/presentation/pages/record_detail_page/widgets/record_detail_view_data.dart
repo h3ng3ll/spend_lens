@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../../../core/models/e_sync_status.dart';
+import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
+import '../../../../../../core/services/sync_status_presenter/sync_status_presenter.dart';
 import '../../../../../category/domain/models/category/category.dart';
 import '../../../../../expense/domain/models/expense/e_expense_source.dart';
 import '../../../../../expense/domain/models/expense/expense.dart';
@@ -41,6 +44,17 @@ class RecordDetailViewData {
   /// `dDeleteLabel` — "Delete receipt" or "Delete expense".
   final String deleteLabel;
 
+  /// The sync badge's label, or null when there is no receipt to report on.
+  ///
+  /// Null for a cash expense DELIBERATELY. A receipt and its mirrored
+  /// expense are two separate rows stamped independently, so their
+  /// `syncStatus` values drift — showing the expense's status on a screen
+  /// the user reads as "the receipt" would misreport it.
+  final String? syncLabel;
+
+  /// Dot colour paired with [syncLabel]; null whenever that is null.
+  final Color? syncDotColor;
+
   const RecordDetailViewData({
     required this.initial,
     required this.tileBackground,
@@ -55,6 +69,8 @@ class RecordDetailViewData {
     required this.isReceipt,
     required this.typeLabel,
     required this.deleteLabel,
+    required this.syncLabel,
+    required this.syncDotColor,
   });
 
   factory RecordDetailViewData.resolve({
@@ -63,11 +79,15 @@ class RecordDetailViewData {
     required List<Store> stores,
     required Receipt? receipt,
     required AppLocalizations lo,
+    required AppColorScheme scheme,
+    SyncStatusPresenter syncStatusPresenter = const SyncStatusPresenter(),
   }) {
     final categoryById = {for (final c in categories) c.id: c};
     final category = categoryById[expense.categoryId];
 
-    final categoryLabel = category != null ? resolveCategoryName(lo, category) : lo.catOther;
+    final categoryLabel = category != null
+        ? resolveCategoryName(lo, category)
+        : lo.catOther;
     final color = category != null
         ? resolveCategoryColor(category)
         : resolveCategoryColorForOther();
@@ -93,6 +113,9 @@ class RecordDetailViewData {
     final occurredAt = receipt?.purchasedAt ?? expense.occurredAt;
     final typeLabel = isReceipt ? lo.receipt : lo.cashType;
 
+    // Reported from the RECEIPT's own row — see [syncLabel].
+    final ESyncStatus? syncStatus = isReceipt ? receipt?.syncStatus : null;
+
     return RecordDetailViewData(
       initial: displayName.isNotEmpty ? displayName[0].toUpperCase() : '?',
       tileBackground: color.withValues(alpha: 0.13),
@@ -107,6 +130,12 @@ class RecordDetailViewData {
       isReceipt: isReceipt,
       typeLabel: typeLabel,
       deleteLabel: isReceipt ? lo.deleteReceipt : lo.deleteExpense,
+      syncLabel: syncStatus == null
+          ? null
+          : syncStatusPresenter.label(syncStatus, lo),
+      syncDotColor: syncStatus == null
+          ? null
+          : syncStatusPresenter.color(syncStatus, scheme),
     );
   }
 }

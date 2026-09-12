@@ -58,7 +58,9 @@ class RecordDetailBody extends StatelessWidget {
     final snapshot = state.snapshot;
     final expense = snapshot?.expense;
     final viewData = this.viewData;
-    if (!state.isReady || snapshot == null || expense == null ||
+    if (!state.isReady ||
+        snapshot == null ||
+        expense == null ||
         viewData == null) {
       return const LoadingDataWidget();
     }
@@ -86,6 +88,8 @@ class RecordDetailBody extends StatelessWidget {
               typeLabel: viewData.typeLabel,
               categoryLabel: viewData.categoryLabel,
               categoryDotColor: viewData.categoryDotColor,
+              syncLabel: viewData.syncLabel,
+              syncDotColor: viewData.syncDotColor,
             ),
             if (items.isNotEmpty) RecordDetailItemsCard(items: items),
             if (note != null && note.trim().isNotEmpty)
@@ -98,7 +102,6 @@ class RecordDetailBody extends StatelessWidget {
                 onChooseLibrary: onChoosePhoto,
               ),
             RecordDetailDeleteButton(
-              recordId: expense.id,
               label: viewData.deleteLabel,
             ),
           ],
