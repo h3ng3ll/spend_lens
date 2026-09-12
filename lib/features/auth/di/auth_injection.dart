@@ -2,9 +2,8 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import '../../../core/services/receipt_image_store/receipt_image_store.dart';
-import '../../receipt/domain/repositories/i_receipt_item_local_repository.dart';
 import '../../receipt/domain/repositories/i_receipt_local_repository.dart';
-import '../../store/domain/repositories/i_store_local_repository.dart';
+import '../../sync/domain/adapters/sync_entity_adapters.dart';
 import '../../../core/services/firebase/firebase_firestore_service.dart';
 import '../../sync/domain/use_cases/clear_synced_local_records_use_case.dart';
 import '../../sync/domain/use_cases/run_full_sync_use_case.dart';
@@ -98,8 +97,7 @@ Future<bool> initAuthFeature() async {
   getIt.registerLazySingleton(
     () => ClearSyncedLocalRecordsUseCase(
       receiptLocalRepository: getIt<IReceiptLocalRepository>(),
-      receiptItemLocalRepository: getIt<IReceiptItemLocalRepository>(),
-      storeLocalRepository: getIt<IStoreLocalRepository>(),
+      adapters: getIt<SyncEntityAdapters>(),
       imageStore: getIt<ReceiptImageStore>(),
       runFullSync: getIt<RunFullSyncUseCase>(),
       firestoreService: getIt<FirebaseFirestoreService>(),

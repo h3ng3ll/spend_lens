@@ -85,18 +85,45 @@ class SyncFirestoreRepository implements ISyncRemoteRepository {
     required ESyncCollection collection,
     String? sinceUpdatedAt,
   }) async {
-    var query = _firestoreService.records(uid, collection).orderBy('updatedAt');
+    final records = _firestoreService.records(uid, collection);
 
+    // NO `orderBy('updatedAt')`. Firestore SILENTLY excludes every document
+    // that lacks the ordered field — not an error, just an empty result —
+    // so a single document written without `updatedAt` became permanently
+    // invisible to every device, and the cycle reported success with
+    // `pulled: 0` while the list never changed. Ordering is done on the
+    // client below instead, where a missing field costs nothing.
+    final QueryRef query;
     if (sinceUpdatedAt != null && sinceUpdatedAt.isNotEmpty) {
       // String comparison is correct here: `toIso8601String()` is
       // fixed-width and zero-padded, so lexicographic == chronological.
-      query = query.where('updatedAt', isGreaterThan: sinceUpdatedAt);
+      //
+      // This `where` carries the same exclusion (an inequality filter also
+      // drops documents missing the field), which is why a full resync
+      // sends no filter at all — that is the path that repairs such rows.
+      query = records.where('updatedAt', isGreaterThan: sinceUpdatedAt);
+    } else {
+      query = records;
     }
 
     final snapshot = await query.get();
-    return snapshot.docs
+    final result = snapshot.docs
         .map((doc) => RemoteRecord(id: doc.id, json: doc.data()))
         .toList();
+
+    // Oldest first, so a partially-applied pull always leaves the cursor on
+    // a contiguous prefix. A document with no `updatedAt` sorts first: it is
+    // the legacy shape, and treating it as oldest lets a local row win
+    // last-write-wins instead of an absent timestamp beating a real edit.
+    result.sort((a, b) {
+      final left = a.updatedAtRaw;
+      final right = b.updatedAtRaw;
+      if (left == null) return right == null ? 0 : -1;
+      if (right == null) return 1;
+      return left.compareTo(right);
+    });
+
+    return result;
   }
 
   @override

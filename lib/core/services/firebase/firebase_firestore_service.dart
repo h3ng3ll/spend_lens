@@ -9,6 +9,7 @@ typedef DocRef = DocumentReference<Map<String, dynamic>>;
 typedef DocSnap = DocumentSnapshot<Map<String, dynamic>>;
 typedef QuerySnap = QuerySnapshot<Map<String, dynamic>>;
 typedef ColRef = CollectionReference<Map<String, dynamic>>;
+typedef QueryRef = Query<Map<String, dynamic>>;
 
 /// The single Firestore access point: reference paths, the auth gate, and
 /// batching. Every remote repository resolves this one instance rather than

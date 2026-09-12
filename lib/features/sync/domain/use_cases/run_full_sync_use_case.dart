@@ -116,12 +116,18 @@ class RunFullSyncUseCase {
       // FIRST-SYNC BACKFILL. Rows created before sync existed default to
       // `synced` but were never uploaded, so nothing would ever push them.
       // When the account is genuinely empty, re-mark everything local as
-      // pendingCreate once. Gated on the remote being empty, not on the
-      // cursor alone: a reinstall has a null cursor but a populated account,
-      // and re-uploading there would be pointless traffic.
-      final isFirstSync =
-          settings.lastSyncedAt == null &&
-          !await _remoteRepository.hasAnyRecords(uid: uid);
+      // pendingCreate once.
+      //
+      // Gated ONLY on the remote being empty — deliberately NOT on
+      // `lastSyncedAt == null` as well. That extra condition made the
+      // backfill unreachable after the very first cycle: once a cursor was
+      // stored, a local row that had never actually been uploaded stayed
+      // `synced` forever, so `readPending` could not see it, the push
+      // skipped it, and the sign-out cleanup then refused to clear it
+      // (correctly — it cannot prove the server has it). An empty account
+      // with local rows means exactly one thing, whatever the cursor says:
+      // nothing here has been published yet.
+      final isFirstSync = !await _remoteRepository.hasAnyRecords(uid: uid);
 
       var pushed = 0;
       for (final adapter in adapters) {
@@ -161,9 +167,25 @@ class RunFullSyncUseCase {
       final photosUploaded = await _uploadReceiptPhotos(uid: uid);
 
       var pulled = 0;
+
+      // LEGACY RECOVERY. A document written without `updatedAt` is excluded
+      // from `where('updatedAt' > cursor)` by Firestore itself — silently,
+      // as an empty result rather than an error. So an incremental pull can
+      // never retrieve one, and the user sees a cycle report success while
+      // the record stays invisible.
+      //
+      // The manual "Synchronize now" already repairs this by passing
+      // `fullResync`, but nothing automatic ever does: every listener- and
+      // lifecycle-driven cycle passes false, so the repair path only ran if
+      // the user happened to tap the row. Running it once per install makes
+      // recovery automatic, which is the point — the stranded record is on
+      // the device the user is already holding.
+      final needsLegacyPull = !settings.legacyPullCompleted;
+      final unfiltered = fullResync || needsLegacyPull;
+
       // A full resync starts from nothing, so the server returns everything
       // and any previously-stranded record comes back.
-      var cursor = fullResync ? null : settings.lastSyncedAt;
+      var cursor = unfiltered ? null : settings.lastSyncedAt;
       for (final adapter in adapters) {
         final result = await _pullRemoteChanges(
           uid: uid,
@@ -181,10 +203,17 @@ class RunFullSyncUseCase {
         }
       }
 
-      if (cursor != null && cursor != settings.lastSyncedAt) {
+      final cursorMoved = cursor != null && cursor != settings.lastSyncedAt;
+      if (cursorMoved || needsLegacyPull) {
         final latest = await _settingsLocalRepository.get();
         await _settingsLocalRepository.save(
-          latest.copyWith(lastSyncedAt: cursor),
+          latest.copyWith(
+            lastSyncedAt: cursorMoved ? cursor : latest.lastSyncedAt,
+            // Set even when the sweep found nothing: it ran, and an empty
+            // account has no legacy rows to find. Leaving it false would
+            // re-read every collection on every cycle forever.
+            legacyPullCompleted: true,
+          ),
         );
       }
 

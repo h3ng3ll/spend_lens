@@ -1,10 +1,9 @@
 import '../../../../core/models/e_sync_status.dart';
 import '../../../../core/services/logger_service.dart';
 import '../../../../core/services/receipt_image_store/receipt_image_store.dart';
-import '../../../receipt/domain/repositories/i_receipt_item_local_repository.dart';
 import '../../../receipt/domain/repositories/i_receipt_local_repository.dart';
 import '../../../../core/services/firebase/firebase_firestore_service.dart';
-import '../../../store/domain/repositories/i_store_local_repository.dart';
+import '../adapters/sync_entity_adapters.dart';
 import 'run_full_sync_use_case.dart';
 
 /// Drops local copies of records the server already holds, on sign-out.
@@ -19,6 +18,15 @@ import 'run_full_sync_use_case.dart';
 /// would push tombstones on the next sync and erase the user's cloud data —
 /// the exact opposite of the intent. Every removal here goes through
 /// `deleteLocalOnly`, which leaves no tombstone.
+///
+/// **Every synced entity, not just receipts.** It used to clear receipts,
+/// their items and orphaned stores only — so after sign-out the receipt and
+/// its photo disappeared while the EXPENSE the receipt created stayed on
+/// Home, still naming the amount and store. Half-cleared is worse than not
+/// cleared: the user is signed out and still looking at their spending.
+/// Sweeping [SyncEntityAdapters] covers all seven and means a future entity
+/// is included by existing in the adapter list, rather than by someone
+/// remembering to add a line here.
 ///
 /// Photos go too, because [DownloadReceiptPhotosUseCase] fetches them back
 /// on the next sign-in. Without that download path this would lose images
@@ -37,8 +45,7 @@ import 'run_full_sync_use_case.dart';
 /// handles — so the cycle's result is not inspected here at all.
 class ClearSyncedLocalRecordsUseCase {
   final IReceiptLocalRepository _receiptLocalRepository;
-  final IReceiptItemLocalRepository _receiptItemLocalRepository;
-  final IStoreLocalRepository _storeLocalRepository;
+  final SyncEntityAdapters _adapters;
   final ReceiptImageStore _imageStore;
   final RunFullSyncUseCase _runFullSync;
   final FirebaseFirestoreService _firestoreService;
@@ -46,39 +53,52 @@ class ClearSyncedLocalRecordsUseCase {
 
   const ClearSyncedLocalRecordsUseCase({
     required this._receiptLocalRepository,
-    required this._receiptItemLocalRepository,
-    required this._storeLocalRepository,
+    required this._adapters,
     required this._imageStore,
     required this._runFullSync,
     required this._firestoreService,
     required this._loggerService,
   });
 
-  /// Returns how many receipts were cleared.
+  /// Returns how many rows were cleared, across every synced entity.
   Future<int> call() async {
     await _publishPendingWork();
 
-    final receipts = await _receiptLocalRepository.getAll();
+    // Photos first, while the receipt rows that name them still exist.
+    // Doing this after the sweep would leave orphaned JPEGs no record
+    // points at, and no way left to find them.
+    await _clearSyncedPhotos();
 
-    final cleared = <String>{};
-    for (final receipt in receipts) {
-      if (receipt.syncStatus != ESyncStatus.synced) continue;
+    var cleared = 0;
+    for (final adapter in _adapters.all()) {
+      for (final entity in await adapter.readAllIncludingDeleted()) {
+        // The safety property: only rows the server provably holds. A row
+        // with unpublished work exists NOWHERE else, so removing it would
+        // destroy the user's only copy. It stays, and syncs on next sign-in.
+        if (adapter.syncStatusOf(entity) != ESyncStatus.synced) continue;
 
-      // The photo first: if this throws we have not yet dropped the row, so
-      // a retry still knows the file is owed. The reverse order would leave
-      // an orphaned JPEG no record points at.
-      await _imageStore.delete(receipt.imagePath);
-
-      for (final itemId in receipt.itemIds) {
-        await _receiptItemLocalRepository.deleteLocalOnly(itemId);
+        // HARD delete, never the repositories' soft delete: a tombstone
+        // would publish on the next sync and erase the user's cloud data —
+        // the exact opposite of the intent.
+        await adapter.purgeLocal(adapter.idOf(entity));
+        cleared++;
       }
-      await _receiptLocalRepository.deleteLocalOnly(receipt.id);
-      cleared.add(receipt.id);
     }
 
-    await _clearOrphanedStores();
+    return cleared;
+  }
 
-    return cleared.length;
+  /// Deletes the image files of receipts that are about to be cleared.
+  ///
+  /// Gated on `synced` for the same reason the sweep is: a receipt that has
+  /// not reached the server keeps its photo, because the download path
+  /// could never bring that file back.
+  Future<void> _clearSyncedPhotos() async {
+    final receipts = await _receiptLocalRepository.getAllIncludingDeleted();
+    for (final receipt in receipts) {
+      if (receipt.syncStatus != ESyncStatus.synced) continue;
+      await _imageStore.delete(receipt.imagePath);
+    }
   }
 
   /// Pushes everything outstanding so it becomes eligible for clearing.
@@ -124,27 +144,5 @@ class ClearSyncedLocalRecordsUseCase {
         '${report.pushed} record(s).',
       ),
     );
-  }
-
-  /// Removes synced stores nothing local still points at.
-  ///
-  /// Re-reads the receipts AFTER the deletions above, so "still referenced"
-  /// means referenced by what actually remains. A store a
-  /// not-synchronized receipt points at is kept — dropping it would leave
-  /// that receipt naming a store this device no longer has.
-  Future<void> _clearOrphanedStores() async {
-    final remaining = await _receiptLocalRepository.getAll();
-    final referenced = {
-      for (final receipt in remaining)
-        if (receipt.storeId != null) receipt.storeId!,
-    };
-
-    final stores = await _storeLocalRepository.getAll();
-    for (final store in stores) {
-      if (store.syncStatus != ESyncStatus.synced) continue;
-      if (referenced.contains(store.id)) continue;
-
-      await _storeLocalRepository.deleteLocalOnly(store.id);
-    }
   }
 }

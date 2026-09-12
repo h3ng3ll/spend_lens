@@ -149,6 +149,13 @@ void main() async {
   final subscriptionRepository = getIt<ISubscriptionRepository>();
   await subscriptionRepository.init(getIt<Env>());
 
+  // BEFORE any bloc is constructed. Installed after them, the observer
+  // missed `AuthBloc` and `SyncBloc` entirely — both are built here and
+  // dispatch their `watch()` immediately, so every event and transition
+  // they made was invisible in the logs. That cost real diagnostic signal:
+  // a silent sync looked identical to a dead one.
+  Bloc.observer = AppObserver.instance();
+
   final settingsBloc = SettingsBloc(
     initialSettings: initialSettings,
     watchSettingsUseCase: getIt<WatchSettingsUseCase>(),
@@ -172,8 +179,6 @@ void main() async {
 
   final authBloc = getIt<AuthBloc>()..add(const AuthEvent.watch());
   final syncBloc = getIt<SyncBloc>()..add(const SyncEvent.watch());
-
-  Bloc.observer = AppObserver.instance();
 
   final router = initRouter(
     refreshListenable: GoRouterRefreshListenable(
@@ -244,6 +249,17 @@ class _SpendLensAppState extends State<SpendLensApp>
     context.read<SyncBloc>().add(const SyncEvent.syncNow());
   }
 
+  /// Signing in is the moment an account's records become reachable, so it
+  /// must start a cycle explicitly.
+  ///
+  /// `SyncBloc.needsSync` deliberately fires only on PENDING work, so it
+  /// cannot cover this: a device signing in with nothing outstanding has a
+  /// pending count of 0 and would sit idle while the account's records stay
+  /// on the server. This listener is what pulls them down.
+  void _onSignedIn(BuildContext context, AuthState state) {
+    context.read<SyncBloc>().add(const SyncEvent.syncNow());
+  }
+
   /// Coming back to the foreground is a reconnect opportunity the
   /// connectivity stream can miss (the OS may not re-emit if the transition
   /// happened while the process was suspended).
@@ -282,10 +298,21 @@ class _SpendLensAppState extends State<SpendLensApp>
       // `needsSync` on its state and the dispatch happens here. Do not
       // "simplify" this into an `add()` inside `_onWatch` — that is the
       // rule violation, and it also re-enters the handler that is emitting.
-      child: BlocListener<SyncBloc, SyncState>(
-        listenWhen: (previous, current) =>
-            !previous.needsSync && current.needsSync,
-        listener: _onSyncNeeded,
+      child: MultiBlocListener(
+        listeners: [
+          BlocListener<SyncBloc, SyncState>(
+            listenWhen: (previous, current) =>
+                !previous.needsSync && current.needsSync,
+            listener: _onSyncNeeded,
+          ),
+          // Fires on the TRANSITION into signed-in only, so a rebuild or a
+          // token refresh cannot re-trigger a cycle.
+          BlocListener<AuthBloc, AuthState>(
+            listenWhen: (previous, current) =>
+                !previous.isSignedIn && current.isSignedIn,
+            listener: _onSignedIn,
+          ),
+        ],
         child: BlocBuilder<SettingsBloc, SettingsState>(
           builder: (context, state) {
             return MaterialApp.router(

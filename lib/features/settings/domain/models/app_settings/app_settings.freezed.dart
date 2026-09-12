@@ -39,7 +39,22 @@ mixin _$AppSettings {
 /// A String rather than a DateTime so it is compared exactly as
 /// Firestore stores and orders `updatedAt`, with no parse/format round
 /// trip that could drift the boundary and skip a record.
- String? get lastSyncedAt;
+ String? get lastSyncedAt;/// Whether this device has run the one-time unfiltered pull that
+/// recovers documents written without an `updatedAt` field.
+///
+/// Field index 7, APPENDED (see the doc comment above — trailing only).
+///
+/// Those documents predate `updatedAt` being stamped on every save.
+/// Firestore EXCLUDES a document missing the field from any query that
+/// orders or filters on it, silently and without error, so an
+/// incremental pull (`where('updatedAt' > cursor)`) can never see them:
+/// they were stranded on the server permanently, invisible to every
+/// device, and no ordinary sync would ever ask for them again.
+///
+/// A one-shot unfiltered fetch repairs that. Flagged rather than
+/// repeated because it reads every collection whole — acceptable once
+/// per install, wasteful every cycle.
+ bool get legacyPullCompleted;
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -52,16 +67,16 @@ $AppSettingsCopyWith<AppSettings> get copyWith => _$AppSettingsCopyWithImpl<AppS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared)&&(identical(other.lastSyncedAt, lastSyncedAt) || other.lastSyncedAt == lastSyncedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared)&&(identical(other.lastSyncedAt, lastSyncedAt) || other.lastSyncedAt == lastSyncedAt)&&(identical(other.legacyPullCompleted, legacyPullCompleted) || other.legacyPullCompleted == legacyPullCompleted));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared,lastSyncedAt);
+int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared,lastSyncedAt,legacyPullCompleted);
 
 @override
 String toString() {
-  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared, lastSyncedAt: $lastSyncedAt)';
+  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared, lastSyncedAt: $lastSyncedAt, legacyPullCompleted: $legacyPullCompleted)';
 }
 
 
@@ -72,7 +87,7 @@ abstract mixin class $AppSettingsCopyWith<$Res>  {
   factory $AppSettingsCopyWith(AppSettings value, $Res Function(AppSettings) _then) = _$AppSettingsCopyWithImpl;
 @useResult
 $Res call({
- String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared, String? lastSyncedAt
+ String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared, String? lastSyncedAt, bool legacyPullCompleted
 });
 
 
@@ -89,7 +104,7 @@ class _$AppSettingsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,Object? lastSyncedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,Object? lastSyncedAt = freezed,Object? legacyPullCompleted = null,}) {
   return _then(_self.copyWith(
 localeCode: freezed == localeCode ? _self.localeCode : localeCode // ignore: cast_nullable_to_non_nullable
 as String?,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
@@ -98,7 +113,8 @@ as EAppThemeMode,onboardingCompleted: null == onboardingCompleted ? _self.onboar
 as bool,flashMode: null == flashMode ? _self.flashMode : flashMode // ignore: cast_nullable_to_non_nullable
 as EFlashMode,dataCleared: null == dataCleared ? _self.dataCleared : dataCleared // ignore: cast_nullable_to_non_nullable
 as bool,lastSyncedAt: freezed == lastSyncedAt ? _self.lastSyncedAt : lastSyncedAt // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,legacyPullCompleted: null == legacyPullCompleted ? _self.legacyPullCompleted : legacyPullCompleted // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -180,10 +196,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppSettings() when $default != null:
-return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt);case _:
+return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted);case _:
   return orElse();
 
 }
@@ -201,10 +217,10 @@ return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboar
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted)  $default,) {final _that = this;
 switch (_that) {
 case _AppSettings():
-return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt);}
+return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -218,10 +234,10 @@ return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboar
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted)?  $default,) {final _that = this;
 switch (_that) {
 case _AppSettings() when $default != null:
-return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt);case _:
+return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted);case _:
   return null;
 
 }
@@ -233,7 +249,7 @@ return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboar
 @JsonSerializable()
 
 class _AppSettings implements AppSettings {
-  const _AppSettings({this.localeCode, this.currencyCode = 'MDL', this.themeMode = EAppThemeMode.system, this.onboardingCompleted = false, this.flashMode = EFlashMode.auto, this.dataCleared = false, this.lastSyncedAt});
+  const _AppSettings({this.localeCode, this.currencyCode = 'MDL', this.themeMode = EAppThemeMode.system, this.onboardingCompleted = false, this.flashMode = EFlashMode.auto, this.dataCleared = false, this.lastSyncedAt, this.legacyPullCompleted = false});
   factory _AppSettings.fromJson(Map<String, dynamic> json) => _$AppSettingsFromJson(json);
 
 /// `null` = follow the device locale. Never defaulted to a concrete
@@ -267,6 +283,22 @@ class _AppSettings implements AppSettings {
 /// Firestore stores and orders `updatedAt`, with no parse/format round
 /// trip that could drift the boundary and skip a record.
 @override final  String? lastSyncedAt;
+/// Whether this device has run the one-time unfiltered pull that
+/// recovers documents written without an `updatedAt` field.
+///
+/// Field index 7, APPENDED (see the doc comment above — trailing only).
+///
+/// Those documents predate `updatedAt` being stamped on every save.
+/// Firestore EXCLUDES a document missing the field from any query that
+/// orders or filters on it, silently and without error, so an
+/// incremental pull (`where('updatedAt' > cursor)`) can never see them:
+/// they were stranded on the server permanently, invisible to every
+/// device, and no ordinary sync would ever ask for them again.
+///
+/// A one-shot unfiltered fetch repairs that. Flagged rather than
+/// repeated because it reads every collection whole — acceptable once
+/// per install, wasteful every cycle.
+@override@JsonKey() final  bool legacyPullCompleted;
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -281,16 +313,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared)&&(identical(other.lastSyncedAt, lastSyncedAt) || other.lastSyncedAt == lastSyncedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared)&&(identical(other.lastSyncedAt, lastSyncedAt) || other.lastSyncedAt == lastSyncedAt)&&(identical(other.legacyPullCompleted, legacyPullCompleted) || other.legacyPullCompleted == legacyPullCompleted));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared,lastSyncedAt);
+int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared,lastSyncedAt,legacyPullCompleted);
 
 @override
 String toString() {
-  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared, lastSyncedAt: $lastSyncedAt)';
+  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared, lastSyncedAt: $lastSyncedAt, legacyPullCompleted: $legacyPullCompleted)';
 }
 
 
@@ -301,7 +333,7 @@ abstract mixin class _$AppSettingsCopyWith<$Res> implements $AppSettingsCopyWith
   factory _$AppSettingsCopyWith(_AppSettings value, $Res Function(_AppSettings) _then) = __$AppSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared, String? lastSyncedAt
+ String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared, String? lastSyncedAt, bool legacyPullCompleted
 });
 
 
@@ -318,7 +350,7 @@ class __$AppSettingsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,Object? lastSyncedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,Object? lastSyncedAt = freezed,Object? legacyPullCompleted = null,}) {
   return _then(_AppSettings(
 localeCode: freezed == localeCode ? _self.localeCode : localeCode // ignore: cast_nullable_to_non_nullable
 as String?,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
@@ -327,7 +359,8 @@ as EAppThemeMode,onboardingCompleted: null == onboardingCompleted ? _self.onboar
 as bool,flashMode: null == flashMode ? _self.flashMode : flashMode // ignore: cast_nullable_to_non_nullable
 as EFlashMode,dataCleared: null == dataCleared ? _self.dataCleared : dataCleared // ignore: cast_nullable_to_non_nullable
 as bool,lastSyncedAt: freezed == lastSyncedAt ? _self.lastSyncedAt : lastSyncedAt // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,legacyPullCompleted: null == legacyPullCompleted ? _self.legacyPullCompleted : legacyPullCompleted // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

@@ -20,6 +20,12 @@ class PullResult {
 /// * local row absent            -> take remote
 /// * local `synced`              -> take remote only if strictly newer
 /// * local PENDING (any state)   -> keep local, always
+/// * remote has no `updatedAt`   -> take it ONLY if absent locally
+///
+/// That last case is the legacy shape written before `updatedAt` was
+/// stamped on every save. Such a document loses every conflict and never
+/// moves the cursor, so adopting it can only ever ADD a record this device
+/// was missing.
 ///
 /// The pending exception is what stops sync from eating an offline edit: such
 /// a row has changes the server has never seen, so overwriting it would
@@ -70,13 +76,30 @@ class PullRemoteChangesUseCase {
 
     for (final record in remote) {
       final raw = record.updatedAtRaw;
-      // A document with no parseable `updatedAt` cannot be ordered against
-      // anything, so it is skipped rather than guessed at — see
-      // RemoteRecord.updatedAt on why a `now()` fallback is poison.
       final remoteUpdatedAt = record.updatedAt;
-      if (raw == null || remoteUpdatedAt == null) continue;
+
+      // A document with no parseable `updatedAt` is LEGACY, not garbage: it
+      // was written before the field was stamped on every save. It used to
+      // be skipped outright, which combined with the pull query's
+      // `orderBy` to make such rows unreachable forever.
+      //
+      // It is treated as the OLDEST possible record — it loses every
+      // conflict against a local row, and never advances the cursor (it
+      // carries no position to advance to). So it is adopted only when this
+      // device has no copy at all, which is exactly the repair wanted, and
+      // it can never clobber real local work. This is still not a
+      // `DateTime.now()` fallback: that would make it win every conflict,
+      // which is the poison `RemoteRecord.updatedAt` documents.
+      final isLegacy = raw == null || remoteUpdatedAt == null;
 
       final local = localById[record.id];
+      if (isLegacy) {
+        if (local == null) {
+          winners.add(adapter.fromJson(_withEpochUpdatedAt(record.json)));
+        }
+        continue;
+      }
+
       if (local != null) {
         // Local has unpublished work — keep it, and do NOT advance the
         // cursor past this record. See the cursor note above: moving past a
@@ -103,4 +126,20 @@ class PullRemoteChangesUseCase {
 
     return PullResult(applied: winners.length, newestUpdatedAt: newest);
   }
+}
+
+/// The timestamp a legacy document is decoded with.
+///
+/// `updatedAt` is REQUIRED on every model, so `fromJson` throws outright on a
+/// null — the document cannot be adopted without one. The epoch is chosen
+/// deliberately over `DateTime.now()`: it makes the row lose every future
+/// last-write-wins comparison, so the next genuine edit on any device
+/// overwrites it. A `now()` stamp would do the opposite and let a record with
+/// no real timestamp beat every real one.
+final DateTime _kLegacyUpdatedAt = DateTime.fromMillisecondsSinceEpoch(0);
+
+Map<String, dynamic> _withEpochUpdatedAt(Map<String, dynamic> json) {
+  final copy = Map<String, dynamic>.of(json);
+  copy['updatedAt'] = _kLegacyUpdatedAt.toIso8601String();
+  return copy;
 }

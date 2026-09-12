@@ -12,6 +12,12 @@ import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_item_l
 import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_local_repository.dart';
 import 'package:spend_lens/features/store/domain/models/store/store.dart';
 import 'package:spend_lens/features/store/domain/repositories/i_store_local_repository.dart';
+import 'package:spend_lens/core/services/firebase/e_sync_collection.dart';
+import 'package:spend_lens/features/expense/domain/models/expense/e_expense_source.dart';
+import 'package:spend_lens/features/expense/domain/models/expense/expense.dart';
+import 'package:spend_lens/features/expense/domain/repositories/i_expense_local_repository.dart';
+import 'package:spend_lens/features/sync/domain/adapters/sync_entity_adapter.dart';
+import 'package:spend_lens/features/sync/domain/adapters/sync_entity_adapters.dart';
 import 'package:dartz/dartz.dart';
 import 'package:spend_lens/core/failures/failure.dart';
 import 'package:spend_lens/core/failures/sync_failures.dart';
@@ -25,6 +31,7 @@ void main() {
   late _FakeReceipts receipts;
   late _FakeItems items;
   late _FakeStores stores;
+  late _FakeExpenses expenses;
   late _RecordingImageStore imageStore;
   late _SpyFullSync fullSync;
 
@@ -33,8 +40,12 @@ void main() {
   ClearSyncedLocalRecordsUseCase buildUseCase() =>
       ClearSyncedLocalRecordsUseCase(
         receiptLocalRepository: receipts,
-        receiptItemLocalRepository: items,
-        storeLocalRepository: stores,
+        adapters: _adaptersFor(
+          receipts: receipts,
+          items: items,
+          stores: stores,
+          expenses: expenses,
+        ),
         imageStore: imageStore,
         runFullSync: fullSync,
         firestoreService: _FakeFirestore(),
@@ -67,6 +78,7 @@ void main() {
     receipts = _FakeReceipts();
     items = _FakeItems();
     stores = _FakeStores();
+    expenses = _FakeExpenses();
     imageStore = _RecordingImageStore();
     fullSync = _SpyFullSync();
   });
@@ -91,6 +103,7 @@ void main() {
       receipts = _FakeReceipts();
       items = _FakeItems();
       stores = _FakeStores();
+      expenses = _FakeExpenses();
       imageStore = _RecordingImageStore();
       fullSync = _SpyFullSync();
       await receipts.save(receipt('r1', status));
@@ -115,18 +128,21 @@ void main() {
     expect(receipts.hardDeleted, contains('r1'));
   });
 
-  test('removes the receipt items belonging to a cleared receipt', () async {
+  test('removes receipt items by their OWN sync status', () async {
+    // Not by parent linkage. Every synced row is on the server, so it is
+    // eligible whether or not a cleared receipt happens to list it — and an
+    // item the server does NOT have survives even when its parent goes.
     await receipts.save(
       receipt('r1', ESyncStatus.synced, itemIds: const ['i1', 'i2']),
     );
     await items.save(_item('i1'));
     await items.save(_item('i2'));
-    await items.save(_item('other'));
+    await items.save(_item('unsynced', status: ESyncStatus.pendingCreate));
 
     await buildUseCase()();
 
     final remaining = (await items.getAll()).map((i) => i.id).toList();
-    expect(remaining, ['other']);
+    expect(remaining, ['unsynced']);
   });
 
   test('deletes the photo of a cleared receipt', () async {
@@ -150,7 +166,7 @@ void main() {
   });
 
   group('stores', () {
-    test('a synced store nothing references is cleared', () async {
+    test('a synced store is cleared', () async {
       await stores.save(store('s1', ESyncStatus.synced));
       await receipts.save(
         receipt('r1', ESyncStatus.synced, storeId: 's1'),
@@ -161,13 +177,12 @@ void main() {
       expect(await stores.getAll(), isEmpty);
     });
 
-    test('a store a REMAINING receipt still points at is kept', () async {
-      // Dropping it would leave that receipt naming a store this device no
-      // longer has.
-      await stores.save(store('s1', ESyncStatus.synced));
-      await receipts.save(
-        receipt('r1', ESyncStatus.synced, storeId: 's1'),
-      );
+    test('a store a receipt that SURVIVES still points at is kept', () async {
+      // The surviving receipt is unsynced, so it exists only here. Its store
+      // must stay too, or that receipt names a store this device no longer
+      // has. The synced-only rule delivers this without a reference check:
+      // an unsynced store is never eligible in the first place.
+      await stores.save(store('s1', ESyncStatus.pendingCreate));
       await receipts.save(
         receipt('r2', ESyncStatus.pendingCreate, storeId: 's1'),
       );
@@ -184,6 +199,42 @@ void main() {
       await buildUseCase()();
 
       expect(await stores.getAll(), hasLength(1));
+    });
+  });
+
+  group('every synced entity, not just receipts', () {
+    // THE REGRESSION. The cleanup swept receipts, their items and orphaned
+    // stores only — so after sign-out the receipt and its photo vanished
+    // while the EXPENSE the receipt created stayed on Home, still showing
+    // the amount and store. A hot restart then re-read it from Hive and it
+    // "came back", because it had never actually been deleted.
+    test('clears a synced expense', () async {
+      await expenses.save(_expense('e1', ESyncStatus.synced));
+
+      final cleared = await buildUseCase()();
+
+      expect(await expenses.getAll(), isEmpty);
+      expect(cleared, 1);
+    });
+
+    test('KEEPS an expense that is not synchronized', () async {
+      await expenses.save(_expense('e1', ESyncStatus.pendingCreate));
+
+      await buildUseCase()();
+
+      expect(await expenses.getAll(), hasLength(1));
+    });
+
+    test('survives a re-read — the row is gone from the box, not hidden',
+        () async {
+      await expenses.save(_expense('e1', ESyncStatus.synced));
+
+      await buildUseCase()();
+
+      // `getAll()` hides tombstones, so it alone cannot prove a HARD delete.
+      // Reading including-deleted is what distinguishes "removed" from
+      // "soft-deleted and about to reappear on the next restart".
+      expect(await expenses.getAllIncludingDeleted(), isEmpty);
     });
   });
 
@@ -220,8 +271,10 @@ void main() {
   });
 }
 
-ReceiptItem _item(String id) => ReceiptItem(
+ReceiptItem _item(String id, {ESyncStatus status = ESyncStatus.synced}) =>
+    ReceiptItem(
       id: id,
+      syncStatus: status,
       rawName: id,
       normalizedName: id,
       quantity: 1.0,
@@ -410,6 +463,117 @@ class _SpyFullSync implements RunFullSyncUseCase {
 class _FakeFirestore implements FirebaseFirestoreService {
   @override
   String? get currentUid => 'u1';
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+Expense _expense(String id, ESyncStatus status) => Expense(
+  id: id,
+  amount: 1.0,
+  currencyCode: 'MDL',
+  categoryId: 'catOther',
+  occurredAt: DateTime(2026, 9, 12),
+  source: EExpenseSource.receipt,
+  updatedAt: DateTime(2026, 9, 12),
+  syncStatus: status,
+);
+
+/// Binds only the entities these cases exercise. The real
+/// [SyncEntityAdapters] needs all seven repositories; the use case only ever
+/// walks `all()`, so a narrower list keeps each case readable.
+SyncEntityAdapters _adaptersFor({
+  required IReceiptLocalRepository receipts,
+  required IReceiptItemLocalRepository items,
+  required IStoreLocalRepository stores,
+  required IExpenseLocalRepository expenses,
+}) => _TestAdapters(receipts, items, stores, expenses);
+
+class _TestAdapters implements SyncEntityAdapters {
+  final IReceiptLocalRepository _receipts;
+  final IReceiptItemLocalRepository _items;
+  final IStoreLocalRepository _stores;
+  final IExpenseLocalRepository _expenses;
+
+  _TestAdapters(this._receipts, this._items, this._stores, this._expenses);
+
+  @override
+  List<SyncEntityAdapter<Object>> all() => [
+    _wrap<Store>(
+      ESyncCollection.stores,
+      _stores.getAllIncludingDeleted,
+      (e) => e.id,
+      (e) => e.syncStatus,
+      _stores.deleteLocalOnly,
+    ),
+    _wrap<Receipt>(
+      ESyncCollection.receipts,
+      _receipts.getAllIncludingDeleted,
+      (e) => e.id,
+      (e) => e.syncStatus,
+      _receipts.deleteLocalOnly,
+    ),
+    _wrap<ReceiptItem>(
+      ESyncCollection.receiptItems,
+      _items.getAllIncludingDeleted,
+      (e) => e.id,
+      (e) => e.syncStatus,
+      _items.deleteLocalOnly,
+    ),
+    _wrap<Expense>(
+      ESyncCollection.expenses,
+      _expenses.getAllIncludingDeleted,
+      (e) => e.id,
+      (e) => e.syncStatus,
+      _expenses.deleteLocalOnly,
+    ),
+  ];
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// Only the five members the cleanup actually calls are real; the rest would
+/// be dead weight in a test whose subject is which rows get removed.
+SyncEntityAdapter<Object> _wrap<T extends Object>(
+  ESyncCollection collection,
+  Future<List<T>> Function() readAll,
+  String Function(T) idOf,
+  ESyncStatus Function(T) statusOf,
+  Future<void> Function(String) purge,
+) => SyncEntityAdapter<Object>(
+  collection: collection,
+  readAllIncludingDeleted: () async => (await readAll()).cast<Object>(),
+  readPending: () async => const [],
+  writeAllVerbatim: (_) async {},
+  toJson: (e) => const {},
+  fromJson: (_) => throw UnimplementedError(),
+  idOf: (e) => idOf(e as T),
+  updatedAtOf: (_) => DateTime(2026, 9, 12),
+  syncStatusOf: (e) => statusOf(e as T),
+  markSynced: (e) => e,
+  deletedAtOf: (_) => null,
+  purgeLocal: purge,
+  watchAll: () => const Stream<void>.empty(),
+);
+
+class _FakeExpenses implements IExpenseLocalRepository {
+  final Map<String, Expense> _box = {};
+
+  @override
+  Future<List<Expense>> getAll() async =>
+      _box.values.where((e) => e.deletedAt == null).toList();
+
+  @override
+  Future<List<Expense>> getAllIncludingDeleted() async =>
+      _box.values.toList();
+
+  @override
+  Future<void> save(Expense expense, {bool markPending = true}) async =>
+      _box[expense.id] = expense;
+
+  @override
+  Future<void> deleteLocalOnly(String id) async => _box.remove(id);
 
   @override
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

@@ -31,11 +31,23 @@ extension SyncStateExt on SyncState {
     return (usedBytes / quotaBytes).clamp(0.0, 1.0);
   }
 
-  /// Whether a cycle is worth starting: there is something to upload (or
-  /// nothing has run yet), the device is online, and sync is enabled.
+  /// Whether a cycle is worth starting: there is something to upload, the
+  /// device is online, and sync is enabled.
   ///
   /// Read by a `BlocListener`, never by a handler — dispatching an event
   /// from inside a handler is forbidden by this project's BLoC rules.
+  ///
+  /// Gated on `hasPendingChanges` ALONE. It used to also fire on `isIdle`,
+  /// meaning "nothing has run yet" — but `_stateFrom` reports `idle`
+  /// whenever `lastSyncedAt` is null, so before the first successful cycle
+  /// EVERY snapshot emission re-satisfied this and the listener
+  /// re-dispatched `syncNow` continuously. `droppable()` hid the symptom by
+  /// discarding the duplicates, which is why it never surfaced as a hang.
+  ///
+  /// Nothing is lost by dropping that disjunct: the sign-in transition, app
+  /// resume, and the reconnect edge each dispatch a cycle explicitly, so a
+  /// first sync on an empty device still runs without a pending row to
+  /// trigger it.
   bool get needsSync =>
-      !isDisabled && !isSyncing && isOnline && (hasPendingChanges || isIdle);
+      !isDisabled && !isSyncing && isOnline && hasPendingChanges;
 }

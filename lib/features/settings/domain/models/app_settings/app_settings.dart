@@ -60,6 +60,23 @@ sealed class AppSettings with _$AppSettings {
     /// Firestore stores and orders `updatedAt`, with no parse/format round
     /// trip that could drift the boundary and skip a record.
     String? lastSyncedAt,
+
+    /// Whether this device has run the one-time unfiltered pull that
+    /// recovers documents written without an `updatedAt` field.
+    ///
+    /// Field index 7, APPENDED (see the doc comment above — trailing only).
+    ///
+    /// Those documents predate `updatedAt` being stamped on every save.
+    /// Firestore EXCLUDES a document missing the field from any query that
+    /// orders or filters on it, silently and without error, so an
+    /// incremental pull (`where('updatedAt' > cursor)`) can never see them:
+    /// they were stranded on the server permanently, invisible to every
+    /// device, and no ordinary sync would ever ask for them again.
+    ///
+    /// A one-shot unfiltered fetch repairs that. Flagged rather than
+    /// repeated because it reads every collection whole — acceptable once
+    /// per install, wasteful every cycle.
+    @Default(false) bool legacyPullCompleted,
   }) = _AppSettings;
 
   factory AppSettings.fromJson(Map<String, dynamic> json) =>

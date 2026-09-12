@@ -235,7 +235,7 @@ $Res call({
 });
 
 
-
+$HomeSnapshotCopyWith<$Res>? get snapshot;
 
 }
 /// @nodoc
@@ -256,7 +256,19 @@ as HomeSnapshot?,errorMessage: null == errorMessage ? _self.errorMessage : error
 as String,
   ));
 }
+/// Create a copy of HomeState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$HomeSnapshotCopyWith<$Res>? get snapshot {
+    if (_self.snapshot == null) {
+    return null;
+  }
 
+  return $HomeSnapshotCopyWith<$Res>(_self.snapshot!, (value) {
+    return _then(_self.copyWith(snapshot: value));
+  });
+}
 }
 
 
@@ -429,7 +441,7 @@ $Res call({
 });
 
 
-
+@override $HomeSnapshotCopyWith<$Res>? get snapshot;
 
 }
 /// @nodoc
@@ -451,7 +463,19 @@ as String,
   ));
 }
 
+/// Create a copy of HomeState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$HomeSnapshotCopyWith<$Res>? get snapshot {
+    if (_self.snapshot == null) {
+    return null;
+  }
 
+  return $HomeSnapshotCopyWith<$Res>(_self.snapshot!, (value) {
+    return _then(_self.copyWith(snapshot: value));
+  });
+}
 }
 
 // dart format on

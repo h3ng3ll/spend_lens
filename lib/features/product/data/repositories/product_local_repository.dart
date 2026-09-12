@@ -102,6 +102,13 @@ class ProductLocalRepository implements IProductLocalRepository {
     if (!markPending) return entity;
     final isNew = box.get(entity.id) == null;
     return entity.copyWith(
+      // Stamped HERE, not left to the caller. `updatedAt` is the sync
+      // engine's ordering key: the pull query filters on it and
+      // last-write-wins compares it, so a row that reaches the server
+      // without one is invisible to every device forever. Every write
+      // passes through this method, so stamping it here is the only
+      // placement no call site can forget.
+      updatedAt: DateTime.now(),
       syncStatus:
           isNew ? ESyncStatus.pendingCreate : ESyncStatus.pendingUpdate,
     );

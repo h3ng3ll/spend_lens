@@ -177,18 +177,70 @@ void main() {
     expect(result.newestUpdatedAt, DateTime(2026, 9, 8).toIso8601String());
   });
 
-  test('a document with no updatedAt is skipped, never guessed at', () async {
-    remote.toReturn = [
-      RemoteRecord(id: 'e1', json: {
-        ...expense('e1', updatedAt: DateTime(2026, 9, 2)).toJson(),
+  group('a document with no updatedAt (the legacy shape)', () {
+    // Written before `updatedAt` was stamped on every save. It must still be
+    // recoverable — combined with the pull query's old `orderBy('updatedAt')`
+    // (which silently drops documents missing the field), skipping these made
+    // them unreachable by any device, forever.
+    RemoteRecord legacy(String id) => RemoteRecord(
+      id: id,
+      json: {
+        ...expense(id, updatedAt: DateTime(2026, 9, 2)).toJson(),
         'updatedAt': null,
-      }),
-    ];
+      },
+    );
 
-    final result = await useCase(uid: 'u1', adapter: adapter());
+    test('is adopted when this device has no copy at all', () async {
+      remote.toReturn = [legacy('e1')];
 
-    expect(result.applied, 0);
-    expect(result.newestUpdatedAt, isNull);
+      final result = await useCase(uid: 'u1', adapter: adapter());
+
+      expect(result.applied, 1);
+      // No timestamp means no position to advance to — never guessed at.
+      expect(result.newestUpdatedAt, isNull);
+    });
+
+    test('never overwrites a local row, even a synced one', () async {
+      local = [expense('e1', updatedAt: DateTime(2026, 9, 1))];
+      remote.toReturn = [legacy('e1')];
+
+      final result = await useCase(uid: 'u1', adapter: adapter());
+
+      // It loses every conflict: an absent timestamp must not beat a real
+      // local edit, which is what a `DateTime.now()` fallback would cause.
+      expect(result.applied, 0);
+      expect(result.newestUpdatedAt, isNull);
+    });
+
+    test('never overwrites a row with unpublished local work', () async {
+      local = [
+        expense(
+          'e1',
+          updatedAt: DateTime(2026, 9, 1),
+          syncStatus: ESyncStatus.pendingUpdate,
+        ),
+      ];
+      remote.toReturn = [legacy('e1')];
+
+      final result = await useCase(uid: 'u1', adapter: adapter());
+
+      expect(result.applied, 0);
+    });
+
+    test('does not drag the cursor backwards', () async {
+      remote.toReturn = [
+        legacy('e1'),
+        record(expense('e2', updatedAt: DateTime(2026, 9, 6))),
+      ];
+
+      final result = await useCase(uid: 'u1', adapter: adapter());
+
+      expect(result.applied, 2);
+      expect(
+        result.newestUpdatedAt,
+        DateTime(2026, 9, 6).toIso8601String(),
+      );
+    });
   });
 
   test('an empty remote page leaves the cursor untouched', () async {
