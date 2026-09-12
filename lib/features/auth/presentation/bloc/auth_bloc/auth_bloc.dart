@@ -66,19 +66,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // also cancels a previous subscription if it is ever re-dispatched.
     on<_Watch>((event, emit) => _onWatch(emit), transformer: restartable());
 
-    // The finite, user-initiated actions keep `sequential()` AMONG THEMSELVES —
-    // which is what that transformer was actually for: a double-tap must not
-    // race two sign-in calls against Firebase. Each concrete type is registered
-    // on its own; a single `on<AuthEvent>` here would also match `_Watch`
-    // (bloc filters with `event is E`) and handle it a second time.
+    // The sign-in actions are `droppable()`, NOT `sequential()`.
+    //
+    // The intent was always "a double-tap must not race two sign-in calls
+    // against Firebase" — but `sequential()` does not prevent a double tap,
+    // it QUEUES it: both taps run, one after the other. The observed result
+    // was that the first tap signed in successfully and a queued second tap
+    // then opened a redundant Credential Manager sheet, which Android
+    // immediately cancelled (`[16] Cancelled by user.`). That cancellation
+    // was reported as `EAuthStatus.failed`, so a WORKING session was
+    // overwritten with "Google sign-in failed." while the user stayed signed
+    // in underneath.
+    //
+    // `droppable()` discards a tap that arrives while one is in flight,
+    // which is what the original comment described.
     on<_SignInGoogle>(
       (event, emit) => _onSignInGoogle(emit),
-      transformer: sequential(),
+      transformer: droppable(),
     );
     on<_SignInApple>(
       (event, emit) => _onSignInApple(emit),
-      transformer: sequential(),
+      transformer: droppable(),
     );
+    // Sign-out stays `sequential()`: it is idempotent and must never be
+    // dropped — a discarded sign-out leaves the user signed in while the UI
+    // has already moved on.
     on<_SignOut>(
       (event, emit) => _onSignOut(emit),
       transformer: sequential(),
@@ -119,7 +131,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignInGoogle(Emitter<AuthState> emit) async {
-    emit(state.copyWith(status: EAuthStatus.signingIn));
+    if (_isAlreadySignedIn()) return;
+    emit(_startingSignIn());
 
     final result = await _googleSignInUseCase();
     // `Either<Failure, T>`: fold(left = failure, right = success).
@@ -134,7 +147,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignInApple(Emitter<AuthState> emit) async {
-    emit(state.copyWith(status: EAuthStatus.signingIn));
+    if (_isAlreadySignedIn()) return;
+    emit(_startingSignIn());
 
     final result = await _appleSignInUseCase();
     // `Either<Failure, T>`: fold(left = failure, right = success).
@@ -145,6 +159,31 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       },
     );
   }
+
+  /// The `signingIn` state, with any previous failure CLEARED.
+  ///
+  /// `copyWith(status: signingIn)` alone carried the old `errorMessage`
+  /// forward, so a state that had once failed kept the message through every
+  /// later attempt. Profile's listener fires on `errorMessage` changing, so
+  /// a stale message re-toasted "Google sign-in failed." on each new
+  /// sign-in — including ones that went on to SUCCEED. A new attempt starts
+  /// from no error, always.
+  AuthState _startingSignIn() =>
+      state.copyWith(status: EAuthStatus.signingIn, errorMessage: '');
+
+  /// Whether a session already exists, making a sign-in request redundant.
+  ///
+  /// `droppable()` only discards taps that arrive while one is IN FLIGHT. A
+  /// tap arriving after a successful sign-in is a fresh event, and running it
+  /// re-opens the platform credential sheet for an account that is already
+  /// signed in. Android cancels that redundant sheet immediately
+  /// (`[16] Cancelled by user.`), the cancellation is reported as a failure,
+  /// and a WORKING session ends up displaying "Google sign-in failed."
+  ///
+  /// Checked against the repository rather than `state`, because `state` is
+  /// updated asynchronously by `watchUser()` and can still read `signingIn`
+  /// at the moment the next tap lands.
+  bool _isAlreadySignedIn() => _authRepository.currentUser != null;
 
   /// The ONE place a sign-in failure becomes visible.
   ///

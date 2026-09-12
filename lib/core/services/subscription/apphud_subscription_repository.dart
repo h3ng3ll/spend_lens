@@ -259,8 +259,8 @@ class ApphudSubscriptionRepository implements ISubscriptionRepository {
         _loggerService.warning(
           'ApphudSubscriptionRepository: no placement with a paywall screen.',
         );
-        return Left(
-          [],
+        return Right(
+          NoSubscriptionsFound(),
         );
       }
 

@@ -46,3 +46,8 @@ class RestorePurchaseFailure implements SubscriptionFailures {
   @override
   String get message => 'Failed to restore purchase , details: $details';
 }
+
+class NoSubscriptionsFound implements SubscriptionFailures {
+  @override
+  String get message => 'No subscriptions found';
+}

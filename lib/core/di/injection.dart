@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:get_it/get_it.dart';
 
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -128,8 +130,12 @@ Future<void> initDependencies() async {
   // mirroring `GoogleSignInService`'s pattern — a missing API key degrades
   // to `isConfigured == false` rather than throwing.
   getIt.registerLazySingleton<ISubscriptionRepository>(
-    () => ApphudSubscriptionRepository(
-      loggerService: getIt<LoggerService>(),
-    ),
+    () => Platform.isAndroid
+        ? RevenueCatSubscriptionRepository(
+            loggerService: getIt<LoggerService>(),
+          )
+        : ApphudSubscriptionRepository(
+            loggerService: getIt<LoggerService>(),
+          ),
   );
 }

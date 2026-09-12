@@ -1,4 +1,5 @@
 import 'package:dartz/dartz.dart';
+import 'package:flutter/services.dart';
 import 'package:purchases_flutter/purchases_flutter.dart';
 import 'package:purchases_ui_flutter/purchases_ui_flutter.dart';
 
@@ -13,6 +14,7 @@ class RevenueCatSubscriptionRepository implements ISubscriptionRepository {
   final LoggerService _loggerService;
   bool _started = false;
   bool _hasPro = false;
+  final _proEntitlementKey = 'hengell_pro';
 
   RevenueCatSubscriptionRepository({
     required this._loggerService,
@@ -41,8 +43,9 @@ class RevenueCatSubscriptionRepository implements ISubscriptionRepository {
           env.revenueCatKey,
         ),
       );
-      CustomerInfo ci = await Purchases.getCustomerInfo();
-      final hasPro = ci.entitlements.active.containsKey('hengell_pro');
+      _started = true;
+      // CustomerInfo ci = await Purchases.getCustomerInfo();
+      // final hasPro = ci.entitlements.active.containsKey('hengell_pro');
     } catch (error) {
       _loggerService.info(
         'Failed to configure Purchases.configure() , RevenueCat',
@@ -60,7 +63,6 @@ class RevenueCatSubscriptionRepository implements ISubscriptionRepository {
   }
 
   @override
-  // TODO: implement isConfigured
   bool get isConfigured => _started;
 
   /// Return true if paywall were purchased
@@ -74,27 +76,105 @@ class RevenueCatSubscriptionRepository implements ISubscriptionRepository {
   PurchaseHandlingType purchasePlan(
     String planId,
   ) async {
-    // TODO: implement restorePurchases
-    throw UnimplementedError();
-    // CustomerInfo ci = await Purchases.getCustomerInfo();
-    // final hasPro = ci.entitlements.active.containsKey('hengell_pro');
-    // final offerings = await Purchases.getOfferings();
-    // final current = offerings.current;
-    // print(current);
-    // return false;
+    try {
+      final Offerings offerings = await Purchases.getOfferings();
+
+      final offering = offerings.current;
+      if (offering == null) {
+        _loggerService.warning(
+          'No subscriptions found',
+        );
+        return Right(
+          NoSubscriptionsFound(),
+        );
+      }
+      final Package package = offering.availablePackages.firstWhere(
+        (e) => e.storeProduct.identifier == planId,
+      );
+
+      final PurchaseResult res = await Purchases.purchase(
+        PurchaseParams.package(package),
+      );
+
+      // Purchases.purchase(PurchaseParams.subscriptionOption(package.presentedOfferingContext))
+      final containEntitlement = res.customerInfo.entitlements.all.containsKey(
+        _proEntitlementKey,
+      );
+      _loggerService.info(
+        'After Purchase entitlements: $containEntitlement',
+      );
+      return Left(
+        containEntitlement
+            ? ESubscriptionStatus.purchased
+            : ESubscriptionStatus.failed,
+      );
+    } on PlatformException catch (err) {
+      return Right(
+        FailedPurchaseFailure(
+          details: err.message ?? err.details.toString(),
+        ),
+      );
+    } catch (err) {
+      return Right(
+        FailedPurchaseFailure(
+          details: err.toString(),
+        ),
+      );
+    }
   }
 
   @override
-  PurchaseHandlingType
-  restorePurchases() async {
-    // TODO: implement restorePurchases
-    throw UnimplementedError();
+  PurchaseHandlingType restorePurchases() async {
+    try {
+      CustomerInfo ci = await Purchases.getCustomerInfo();
+      final isContainKey = ci.entitlements.active.containsKey(
+        _proEntitlementKey,
+      );
+      return Left(
+        isContainKey
+            ? ESubscriptionStatus.restored
+            : ESubscriptionStatus.nothingToRestore,
+      );
+    } catch (err) {
+      _loggerService.error(
+        'Failed to restore purchase $err',
+      );
+      return Right(
+        UnknownSubscriptionFailure(),
+      );
+    }
   }
 
   @override
   Future<Either<List<SubscriptionOffer>, SubscriptionFailures>>
-  getSubscriptionOffers() {
-    // TODO: implement getSubscriptionOffers
-    throw UnimplementedError();
+  getSubscriptionOffers() async {
+    final Offerings offerings = await Purchases.getOfferings();
+
+    final offering = offerings.current;
+    if (offering == null) {
+      _loggerService.warning(
+        'No subscriptions found',
+      );
+      return Right(
+        NoSubscriptionsFound(),
+      );
+    }
+
+    final subscriptionOffer = offering.availablePackages.map(
+      (e) {
+        final subscriptionId = e.identifier;
+        print(subscriptionId);
+        return SubscriptionOffer(
+          id: e.storeProduct.identifier,
+          name: e.storeProduct.title,
+          description: e.storeProduct.description,
+          price: e.storeProduct.priceString,
+        );
+      },
+    ).toList();
+
+    return Left(
+      subscriptionOffer,
+    );
   }
 }
