@@ -86,6 +86,11 @@ workflows:
           echo "$FIREBASE_OPTIONS" > "$CM_BUILD_DIR/lib/firebase_options.dart"
           echo "firebase_options.dart contents:"
           cat "$CM_BUILD_DIR/lib/firebase_options.dart"
+      - name: Create GoogleService-Info.plist file
+        script: |
+          echo "GOOGLE_SERVICE_INFO_PLIST" > "$CM_BUILD_DIR/ios/Runner/GoogleService-Info.plist"
+          echo "GoogleService-Info.plist contents:"
+          cat "$CM_BUILD_DIR/ios/Runner/GoogleService-Info.plist"
       - name: Detach Xcode project from any developer account
         script: |
           # Remove account-specific signing keys so Codemagic resolves the
