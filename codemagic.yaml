@@ -72,6 +72,10 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
+      - name: Install FlutterFire CLI
+        script: |
+          dart pub global activate flutterfire_cli
+          export PATH="$PATH:$HOME/.pub-cache/bin"
       - name: Restore .env
         script: |
           echo "GOOGLE_SERVER_CLIENT_ID=$GOOGLE_SERVER_CLIENT_ID
