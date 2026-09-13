@@ -14,7 +14,7 @@
          so a swipe-back on a pushed route EXITED THE APP rather than
          popping — while the in-app Cancel button popped correctly. -->
     <application
-        android:label="spend_lens"
+        android:label="Finance Spend Lens"
         android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon"
         android:enableOnBackInvokedCallback="true">
