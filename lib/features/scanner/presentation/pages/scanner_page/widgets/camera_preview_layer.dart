@@ -10,8 +10,7 @@ import '../../../../../../core/services/logger_service.dart';
 import '../../../../../settings/domain/models/app_settings/e_flash_mode.dart';
 import '../../../../presentation/bloc/scanner_bloc/scanner_bloc.dart';
 import 'scanner_capture_flash.dart';
-import 'scanner_corner_overlay.dart';
-import 'scanner_scan_line.dart';
+import 'scanner_frame_area.dart';
 import 'scanner_shutter_button.dart';
 
 /// How long `availableCameras()` / `CameraController.initialize()` may run
@@ -376,11 +375,14 @@ class _CameraPreviewLayerState extends State<CameraPreviewLayer>
                 ? null
                 : const Center(child: CircularProgressIndicator()),
           ),
-        if (state.isSearching) const ScannerScanLine(),
+        // One widget now owns the dim mask, the corner brackets and the
+        // sweeping line, because all three are laid out against the SAME
+        // user-configurable window — splitting them meant three widgets each
+        // guessing at the frame's geometry from its own constants.
         if (state.isSearching || state.isDetected)
-          ScannerCornerOverlay(
+          ScannerFrameArea(
             isDetected: state.isDetected,
-            bounds: state.detectedBounds,
+            showScanLine: state.isSearching,
           ),
         if (state.isCapturing) const ScannerCaptureFlash(),
         if (!state.isProcessing)

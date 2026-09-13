@@ -3,6 +3,13 @@ import 'package:flutter/material.dart';
 /// Paints four L-shaped corner brackets framing the receipt-detection area
 /// (`SpendLens.dc.html`'s `corners()` component). Own file, per the
 /// project's painter-separation rule.
+///
+/// The brackets hug the painter's OWN box, not a hardcoded screen inset:
+/// the painter is sized to the user-configurable scan window by
+/// [ScannerFrameArea], so a frame the user narrows or drags carries its
+/// corners with it. The `_horizontalInset`/`_verticalInset` constants this
+/// once used assumed the painter covered the whole screen and left the
+/// brackets stranded mid-preview once the window became movable.
 class ScannerCornerPainter extends CustomPainter {
   final Color color;
   final double opacity;
@@ -15,8 +22,6 @@ class ScannerCornerPainter extends CustomPainter {
   });
 
   static const _cornerLength = 34.0;
-  static const _horizontalInset = 44.0;
-  static const _verticalInset = 170.0;
 
   @override
   void paint(Canvas canvas, Size size) {
@@ -26,11 +31,21 @@ class ScannerCornerPainter extends CustomPainter {
       ..strokeWidth = strokeWidth
       ..strokeCap = StrokeCap.round;
 
-    final rect = Rect.fromLTRB(
-      _horizontalInset,
-      _verticalInset,
-      size.width - _horizontalInset,
-      size.height - _verticalInset,
+    // Inset by half the stroke so the bracket's painted width sits INSIDE
+    // the window rather than straddling its edge — a stroke centred on the
+    // boundary would spill into the dimmed area and read as a blurred edge.
+    final rect = Rect.fromLTWH(
+      strokeWidth / 2.0,
+      strokeWidth / 2.0,
+      size.width - strokeWidth,
+      size.height - strokeWidth,
+    );
+
+    // A window narrower than two brackets would draw them crossing over
+    // each other; clamping keeps each arm at most half the shorter side.
+    final cornerLength = _cornerLength.clamp(
+      0.0,
+      (rect.shortestSide / 2.0).clamp(0.0, _cornerLength),
     );
 
     void drawCorner(Offset corner, Offset toH, Offset toV) {
@@ -41,26 +56,26 @@ class ScannerCornerPainter extends CustomPainter {
     // Top-left
     drawCorner(
       rect.topLeft,
-      rect.topLeft + const Offset(_cornerLength, 0),
-      rect.topLeft + const Offset(0, _cornerLength),
+      rect.topLeft + Offset(cornerLength, 0),
+      rect.topLeft + Offset(0, cornerLength),
     );
     // Top-right
     drawCorner(
       rect.topRight,
-      rect.topRight + const Offset(-_cornerLength, 0),
-      rect.topRight + const Offset(0, _cornerLength),
+      rect.topRight + Offset(-cornerLength, 0),
+      rect.topRight + Offset(0, cornerLength),
     );
     // Bottom-left
     drawCorner(
       rect.bottomLeft,
-      rect.bottomLeft + const Offset(_cornerLength, 0),
-      rect.bottomLeft + const Offset(0, -_cornerLength),
+      rect.bottomLeft + Offset(cornerLength, 0),
+      rect.bottomLeft + Offset(0, -cornerLength),
     );
     // Bottom-right
     drawCorner(
       rect.bottomRight,
-      rect.bottomRight + const Offset(-_cornerLength, 0),
-      rect.bottomRight + const Offset(0, -_cornerLength),
+      rect.bottomRight + Offset(-cornerLength, 0),
+      rect.bottomRight + Offset(0, -cornerLength),
     );
   }
 

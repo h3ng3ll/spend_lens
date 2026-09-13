@@ -8,8 +8,17 @@ import '../../../../../../core/widgets/app_container.dart';
 /// alternate). Presentation-only duration, kept exactly per
 /// design_spendlens.md §8; the controller is scoped to this widget and
 /// disposed with it, and only ever mounted while the scanner is actually
-/// searching (see `CameraPreviewLayer.build`), so it never runs above the
+/// searching (see `ScannerFrameArea.build`), so it never runs above the
 /// router or outlives this screen.
+///
+/// The sweep is bounded to THIS WIDGET'S BOX, which
+/// [ScannerFrameArea] sizes to the user-configurable scan window — so the
+/// line can never travel outside the rectangle where the camera image is
+/// actually visible. It previously carried its own hardcoded
+/// `Positioned(left: 44, right: 44, top: 0, bottom: 0)` and swept the full
+/// screen height, which put it across the dimmed area once the window
+/// became movable. It is also clipped, so the glow's blur cannot bleed past
+/// the frame either.
 class ScannerScanLine extends StatefulWidget {
   const ScannerScanLine({super.key});
 
@@ -47,27 +56,10 @@ class _ScannerScanLineState extends State<ScannerScanLine>
   Widget build(BuildContext context) {
     final scheme = AppColorScheme.of(context);
 
-    // `Positioned` is the OUTERMOST widget here, so it lands as a direct
-    // child of `CameraPreviewLayer`'s `Stack`. It is a `ParentDataWidget`:
-    // it hands `StackParentData` to whatever render object sits directly
-    // above it, so any widget between it and the `Stack` breaks the
-    // relationship. Previously `IgnorePointer`/`LayoutBuilder`/
-    // `AnimatedBuilder` sat in between and the frame threw
-    // "Incorrect use of ParentDataWidget" on every animation tick —
-    // `LayoutBuilder`'s render box accepts only `BoxParentData`.
-    //
-    // `Positioned.fill` + `heightFactor`-free fractional placement replaces
-    // the `LayoutBuilder`: `top`/`bottom` are resolved against the Stack's
-    // own height by the Stack itself, so the sweep needs no measured
-    // `constraints.maxHeight` of its own. `IgnorePointer` moves INSIDE, and
-    // `AnimatedBuilder` now rebuilds only the aligned child rather than the
-    // parent-data widget.
-    return Positioned(
-      left: 44.0,
-      right: 44.0,
-      top: 0.0,
-      bottom: 0.0,
-      child: IgnorePointer(
+    // Clipping via `AppContainer` rather than a bare `ClipRect` — the
+    // project bans `ClipRect`/`ClipRRect` in favour of the shared container.
+    return IgnorePointer(
+      child: AppContainer(
         child: AnimatedBuilder(
           animation: _position,
           builder: (context, child) {
