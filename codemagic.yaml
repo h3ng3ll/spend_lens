@@ -20,6 +20,11 @@ workflows:
           echo "$FIREBASE_OPTIONS" > "$CM_BUILD_DIR/lib/firebase_options.dart"
           echo "firebase_options.dart contents:"
           cat "$CM_BUILD_DIR/lib/firebase_options.dart"
+      - name: Create google-services.json file
+        script: |
+          echo "GOOGLE_SERVICES_JSON" > "$CM_BUILD_DIR/android/app/google-services.json"
+          echo "google-services.json contents:"
+          cat "$CM_BUILD_DIR/android/app/google-services.json"
       - name: Restore key
         script: |
           echo "$KEY_PROPERTY" > android/key.properties
@@ -140,7 +145,7 @@ workflows:
     environment:
       xcode: 16.2
       groups:
-        - store_credentials
+        - apple_credentials
       vars:
         IOS_BUNDLE_ID: "com.hengell.spendlens"
         APP_NAME: $APPSTORE_APP_NAME
