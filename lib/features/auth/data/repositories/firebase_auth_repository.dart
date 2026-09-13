@@ -367,10 +367,16 @@ class FirebaseAuthRepository implements IAuthRepository {
 
     try {
       await user.delete();
-      // The Google session survives `user.delete()` — only the Firebase user is
+      // The Google grant survives `user.delete()` — only the Firebase user is
       // gone. Left behind, the next sign-in silently reuses the same account
       // instead of showing the picker.
-      await _googleSignInService.signOut();
+      //
+      // `disconnect()`, not `signOut()`: the account is now genuinely deleted,
+      // so revoking the authorization is both correct and safe here. It is NOT
+      // safe before this line — revoking early is what broke the
+      // re-authentication this deletion depends on (see
+      // `GoogleSignInService.signOut`).
+      await _googleSignInService.disconnect();
       return const Right(unit);
     } on FirebaseAuthException catch (e, stackTrace) {
       return Left(

@@ -245,7 +245,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignInGoogle(Emitter<AuthState> emit) async {
-    if (_isAlreadySignedIn()) return;
+    if (_resyncedAlreadySignedIn(emit)) return;
     emit(_startingSignIn());
 
     final result = await _googleSignInUseCase();
@@ -270,7 +270,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignInApple(Emitter<AuthState> emit) async {
-    if (_isAlreadySignedIn()) return;
+    if (_resyncedAlreadySignedIn(emit)) return;
     emit(_startingSignIn());
 
     final result = await _appleSignInUseCase();
@@ -313,7 +313,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   AuthState _startingSignIn() =>
       state.copyWith(status: EAuthStatus.signingIn, errorMessage: '');
 
-  /// Whether a session already exists, making a sign-in request redundant.
+  /// Whether a session already exists — and if so, RE-ASSERTS it on the state
+  /// before the caller returns.
   ///
   /// `droppable()` only discards taps that arrive while one is IN FLIGHT. A
   /// tap arriving after a successful sign-in is a fresh event, and running it
@@ -325,7 +326,38 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   /// Checked against the repository rather than `state`, because `state` is
   /// updated asynchronously by `watchUser()` and can still read `signingIn`
   /// at the moment the next tap lands.
-  bool _isAlreadySignedIn() => _authRepository.currentUser != null;
+  ///
+  /// **THE BUG THE EMIT FIXES.** This used to be a bare `return` that emitted
+  /// NOTHING. When the state disagreed with reality — a live session sitting
+  /// on a `failed` status after a deletion attempt aborted — the Profile
+  /// screen rendered the signed-out card, and every tap on its Google/Apple
+  /// buttons was swallowed here. The events were dispatched and received; no
+  /// transition followed and no error appeared, which is indistinguishable
+  /// from an unwired button and invisible to `flutter analyze`. This is the
+  /// same failure mode as the `sequential()` starvation documented in the
+  /// constructor, reached by a different route: a handler that returns without
+  /// emitting.
+  ///
+  /// Re-asserting `signedIn` makes the disagreement self-correcting — the UI
+  /// snaps back to the state the user is actually in, rather than offering an
+  /// action that cannot work.
+  bool _resyncedAlreadySignedIn(Emitter<AuthState> emit) {
+    final user = _authRepository.currentUser;
+    if (user == null) return false;
+
+    emit(
+      state.copyWith(
+        status: EAuthStatus.signedIn,
+        errorMessage: '',
+        email: user.email ?? '',
+        uid: user.uid,
+        isGoogleAccount: user.providerData.any(
+          (info) => info.providerId == 'google.com',
+        ),
+      ),
+    );
+    return true;
+  }
 
   /// The ONE place a sign-in failure becomes visible.
   ///
@@ -383,11 +415,39 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         // signed-in state silently rather than reporting a failure. Same
         // treatment a cancelled sign-in gets.
         final isCanceled = failure is AccountDeletionCanceledFailure;
+
+        // A FAILED deletion leaves the account intact, so the status must be
+        // derived from the session rather than hardcoded to `failed`.
+        //
+        // THE BUG THIS FIXES: `failed` is neither `signedIn` nor `signedOut`,
+        // so `isNotSignedIn` was true for a user who was still very much
+        // signed in. Profile then rendered the signed-out sign-in card, whose
+        // buttons could not work — the session they would create already
+        // existed. Combined with the silent guard in
+        // `_resyncedAlreadySignedIn`, that produced a dead-ended screen with
+        // no way forward and no error explaining it.
+        //
+        // The error still reaches the user as a toast below; it just no longer
+        // misreports the session as broken.
+        final stillSignedIn = _authRepository.currentUser != null;
         emit(
           state.copyWith(
-            status: isCanceled ? EAuthStatus.signedIn : EAuthStatus.failed,
+            status: isCanceled || stillSignedIn
+                ? EAuthStatus.signedIn
+                : EAuthStatus.failed,
             errorMessage: isCanceled ? '' : failure.message,
           ),
+        );
+
+        if (isCanceled) return;
+
+        // Previously the `failed` status was the only signal, and it was
+        // rendered as a screen state rather than an alert. With the status now
+        // reflecting the surviving session, the failure needs its own voice —
+        // otherwise a deletion could fail completely silently.
+        final verbose = failure is AuthFailure ? failure.verboseMessage : null;
+        UiMessageService.showError(
+          kDebugMode && verbose != null ? verbose : failure.message,
         );
       },
       (_) {
@@ -400,6 +460,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   }
 
   Future<void> _onSignOut(Emitter<AuthState> emit) async {
+    // A sign-out DURING a deletion would destroy the flow it is racing.
+    //
+    // Deletion runs in a fixed order — wipe the cloud records and photos,
+    // then delete the Firebase user — and every step after the first needs
+    // the session that signing out ends. Cut in halfway and the cloud data is
+    // already gone while the account survives, with no session left to finish
+    // the job and nothing on the server to sync back. That is the exact
+    // half-deleted state the ordering exists to prevent.
+    //
+    // `DeletingAccountOverlay` blocks this in the UI, but the guarantee
+    // belongs here too: a scrim is a property of one screen, while the
+    // invariant is a property of the flow. Sign-out is also the one action
+    // deliberately registered as `sequential()` rather than `droppable()`, so
+    // without this check it would QUEUE behind the deletion and fire the
+    // moment it finished.
+    if (state.isDeleting) return;
+
     // BEFORE signing out, while the session still exists: drop local copies
     // of records the server already holds. They are fetched back — photos
     // included — on the next sign-in.

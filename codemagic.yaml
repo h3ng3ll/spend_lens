@@ -43,7 +43,9 @@ workflows:
       app_store_connect: file_sharing_plus
     environment:
       groups:
-        - store_credentials
+        - general
+        - google_credentials
+        - purchase
       ios_signing:
         distribution_type: app_store
         bundle_identifier: "com.hengell.spendlens"
@@ -54,6 +56,16 @@ workflows:
       xcode: latest
       cocoapods: default
     scripts:
+      - name: Restore .env
+        script: |
+          echo "GOOGLE_SERVER_CLIENT_ID=$GOOGLE_SERVER_CLIENT_ID
+                GOOGLE_IOS_CLIENT_ID=$GOOGLE_IOS_CLIENT_ID
+                GOOGLE_IOS_REVERSED_CLIENT_ID=$GOOGLE_IOS_REVERSED_CLIENT_ID
+                REVENUE_CAT_KEY=$REVENUE_CAT_KEY
+                APPHUD_APP_STORE_API_KEY=$APPHUD_APP_STORE_API_KEY
+                APPHUD_GOOGLE_PLAY_API_KEY=$APPHUD_GOOGLE_PLAY_API_KEY
+                FREE_RECEIPT_LIMIT=$FREE_RECEIPT_LIMIT" > .env
+
       - name: Detach Xcode project from any developer account
         script: |
           # Remove account-specific signing keys so Codemagic resolves the

@@ -163,16 +163,52 @@ class GoogleSignInService {
     }
   }
 
+  /// Ends the Google session, leaving the app's OAuth grant INTACT.
+  ///
+  /// **THE BUG THIS FIXES.** This used to call [GoogleSignIn.disconnect],
+  /// which does not end a session — it REVOKES the authorization grant. The
+  /// consequence surfaced in account deletion, which is a two-step flow:
+  /// `user.delete()` rejects a credential older than a few minutes with
+  /// `requires-recent-login`, so the account can only be deleted by
+  /// re-authenticating and retrying. But an earlier attempt had already
+  /// revoked the grant, so when the retry opened Credential Manager it had no
+  /// authorized account to offer, closed immediately, and the plugin reported
+  /// it as `[16] Cancelled by user.` — indistinguishable from the user tapping
+  /// away. The re-auth could therefore NEVER succeed, `user.delete()` was
+  /// never retried, and the account survived every deletion attempt.
+  ///
+  /// Revoking is correct only once the account is genuinely gone — that is
+  /// [disconnect], called from the deletion success path.
   Future<void> signOut() async {
+    if (!_initialized) return;
+    try {
+      await _googleSignIn.signOut();
+    } catch (e, stackTrace) {
+      // Never let a sign-out failure escape as an unhandled error — but
+      // never swallow it silently either: a sign-out that half-worked leaves
+      // the next sign-in in a confusing state, and this log is the only clue.
+      _loggerService.error(
+        'GoogleSignInService.signOut: signOut failed: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+    }
+  }
+
+  /// Revokes the app's OAuth grant entirely.
+  ///
+  /// Separate from [signOut] because the two are not interchangeable: this
+  /// one is irreversible from the app's side and makes the next sign-in a
+  /// fresh authorization. Call it ONLY after the Firebase account has actually
+  /// been deleted — before that point it breaks the re-authentication the
+  /// deletion itself depends on (see [signOut]).
+  Future<void> disconnect() async {
     if (!_initialized) return;
     try {
       await _googleSignIn.disconnect();
     } catch (e, stackTrace) {
-      // Never let a disconnect failure escape as an unhandled error — but
-      // never swallow it silently either: a sign-out that half-worked leaves
-      // the next sign-in in a confusing state, and this log is the only clue.
       _loggerService.error(
-        'GoogleSignInService.signOut: disconnect failed: $e',
+        'GoogleSignInService.disconnect: disconnect failed: $e',
         error: e,
         stackTrace: stackTrace,
       );

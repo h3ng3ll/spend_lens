@@ -20,6 +20,7 @@ import '../../../../backup/presentation/bloc/backup_bloc/backup_bloc.dart';
 import '../../bloc/auth_bloc/auth_bloc.dart';
 import '../../../domain/models/e_account_deletion_scope.dart';
 import 'widgets/delete_account_sheet.dart';
+import 'widgets/deleting_account_overlay.dart';
 import 'widgets/profile_body.dart';
 
 /// `ProfilePageRoute` (design_spendlens.md §5) — a top-level push above the
@@ -286,22 +287,37 @@ class _ProfilePageState extends State<ProfilePage> {
             listener: _onBackupListener,
             child: Scaffold(
               backgroundColor: scheme.bg,
-              body: SafeArea(
-                child: BlocBuilder<AuthBloc, AuthState>(
-                  builder: (context, state) => ProfileBody(
-                    state: state,
-                    onGoogle: _onGoogle,
-                    onApple: _onApple,
-                    onSignOut: _onSignOut,
-                    onExportBackup: _onExportBackup,
-                    onExportSheet: _onExportSheet,
-                    onImportBackup: _onImportBackup,
-                    onEditProfile: _onEditProfile,
-                    onDeleteAccount: _onDeleteAccount,
-                    isPurchaseAvailable:
-                        getIt<ISubscriptionRepository>().isConfigured,
-                    onUpgrade: _onUpgrade,
-                  ),
+              body: BlocBuilder<AuthBloc, AuthState>(
+                builder: (context, state) => Stack(
+                  children: [
+                    SafeArea(
+                      child: ProfileBody(
+                        state: state,
+                        onGoogle: _onGoogle,
+                        onApple: _onApple,
+                        onSignOut: _onSignOut,
+                        onExportBackup: _onExportBackup,
+                        onExportSheet: _onExportSheet,
+                        onImportBackup: _onImportBackup,
+                        onEditProfile: _onEditProfile,
+                        onDeleteAccount: _onDeleteAccount,
+                        isPurchaseAvailable:
+                            getIt<ISubscriptionRepository>().isConfigured,
+                        onUpgrade: _onUpgrade,
+                      ),
+                    ),
+                    // Deliberately OUTSIDE the `SafeArea`, and last in the
+                    // stack: the scrim has to cover the notch and the home
+                    // indicator too, or a deletion in flight leaves live,
+                    // tappable strips at both edges of the screen.
+                    //
+                    // `Positioned.fill` rather than a bare child, because a
+                    // `Stack` sizes itself to its non-positioned children and
+                    // the overlay must match the page, not the other way
+                    // round.
+                    if (state.isDeleting)
+                      const Positioned.fill(child: DeletingAccountOverlay()),
+                  ],
                 ),
               ),
             ),
