@@ -22,10 +22,19 @@ class ImageCompressionService {
   static const int _kMinQuality = 20;
   static const int _kQualityStep = 10;
 
+  /// The plugin requires a positive bound, so "no limit" is expressed as a
+  /// value no phone camera exceeds rather than as null.
+  static const int _kNoDimensionLimit = 100000;
+
   const ImageCompressionService();
 
   /// Returns [input] re-encoded as JPEG at or under [kTargetSizeKB] where
   /// achievable, stepping quality down until it fits or the floor is reached.
+  ///
+  /// [maxDimension] bounds the longer edge. Receipts deliberately pass none —
+  /// their resolution is what keeps the printed text legible when the user
+  /// opens the photo. An avatar rendered at 96dp has no such need, and
+  /// resizing it first is what keeps this off the ANR path.
   ///
   /// Returns the smallest result produced rather than the last one, so a
   /// non-monotonic encoder can never make the output larger than a step we
@@ -34,9 +43,15 @@ class ImageCompressionService {
   Future<Uint8List> compressToTargetSize(
     Uint8List input, {
     int targetSizeKB = kTargetSizeKB,
+    int? maxDimension,
   }) async {
     final targetBytes = targetSizeKB * 1024;
-    if (input.lengthInBytes <= targetBytes) return input;
+    // The size check cannot short-circuit a RESIZE request: a small file can
+    // still be 4000px wide, and returning it unchanged would hand the caller
+    // the full-resolution image it explicitly asked to bound.
+    if (input.lengthInBytes <= targetBytes && maxDimension == null) {
+      return input;
+    }
 
     Uint8List? best;
 
@@ -50,6 +65,16 @@ class ImageCompressionService {
           input,
           quality: quality,
           format: CompressFormat.jpeg,
+          // Bounds the LONGER edge when the caller asks for it. Without a
+          // resize, quality is the only lever, so a full-resolution phone
+          // photo runs every iteration below — each one decoding and
+          // re-encoding millions of pixels. That is what made avatar upload
+          // block long enough for Android to raise an ANR.
+          //
+          // `minWidth`/`minHeight` are the plugin's own names for a maximum:
+          // it scales down to fit inside the box and never scales up.
+          minWidth: maxDimension ?? _kNoDimensionLimit,
+          minHeight: maxDimension ?? _kNoDimensionLimit,
         ),
       );
 

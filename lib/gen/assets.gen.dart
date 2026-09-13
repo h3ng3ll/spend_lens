@@ -155,8 +155,11 @@ class $AssetsLegalGen {
   /// File path: assets/legal/privacy_policy.md
   String get privacyPolicy => 'assets/legal/privacy_policy.md';
 
+  /// File path: assets/legal/terms_of_use.md
+  String get termsOfUse => 'assets/legal/terms_of_use.md';
+
   /// List of all assets
-  List<String> get values => [privacyPolicy];
+  List<String> get values => [privacyPolicy, termsOfUse];
 }
 
 class $AssetsSplashGen {

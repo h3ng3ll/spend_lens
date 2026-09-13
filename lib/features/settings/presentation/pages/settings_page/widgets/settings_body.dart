@@ -35,6 +35,7 @@ class SettingsBody extends StatelessWidget {
   final ValueChanged<EAppThemeMode> onPickTheme;
   final VoidCallback onDeleteAll;
   final VoidCallback onPrivacy;
+  final VoidCallback onTerms;
   final VoidCallback onAbout;
   /// `null` while the capability probe is in flight — passed straight
   /// through to [ScanCapabilityRow], which renders a neutral "checking"
@@ -55,6 +56,7 @@ class SettingsBody extends StatelessWidget {
     required this.onPickTheme,
     required this.onDeleteAll,
     required this.onPrivacy,
+    required this.onTerms,
     required this.onAbout,
     required this.scanCapability,
     required this.onOpenScanSettings,
@@ -70,14 +72,25 @@ class SettingsBody extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 16.0,
           children: [
-            SettingsHeaderRow(onAvatarTap: onProfile),
             // Subscribed to AuthBloc so signing in/out on the Profile screen
             // is reflected here immediately. AuthBloc is the app-lifetime
             // singleton provided in main(); this only listens to it.
+            //
+            // ONE builder feeds both surfaces: the header avatar and the
+            // summary card must never disagree about who is signed in, and a
+            // second subscription is how they would drift apart.
             BlocBuilder<AuthBloc, AuthState>(
-              builder: (context, authState) => ProfileSummaryCard(
-                state: authState,
-                onTap: onProfile,
+              builder: (context, authState) => Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                spacing: 16.0,
+                children: [
+                  SettingsHeaderRow(
+                    onAvatarTap: onProfile,
+                    avatarFilename: authState.avatarFilename,
+                  ),
+                  ProfileSummaryCard(state: authState, onTap: onProfile),
+                ],
               ),
             ),
             BlocBuilder<CategoriesBloc, CategoriesState>(
@@ -100,6 +113,7 @@ class SettingsBody extends StatelessWidget {
             DeleteAllCard(onTap: onDeleteAll),
             LegalCard(
               onPrivacy: onPrivacy,
+              onTerms: onTerms,
               onAbout: onAbout,
               versionLabel: versionLabel,
             ),

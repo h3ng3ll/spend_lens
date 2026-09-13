@@ -1506,4 +1506,99 @@ class AppLocalizationsRu extends AppLocalizations {
   @override
   String get signOutConfirmBody =>
       'Записи, уже сохранённые в облаке, будут удалены с этого устройства и восстановлены при следующем входе. Несинхронизированные останутся.';
+
+  @override
+  String get editProfile => 'Редактировать профиль';
+
+  @override
+  String get firstName => 'Имя';
+
+  @override
+  String get lastName => 'Фамилия';
+
+  @override
+  String get emailLabel => 'Эл. почта';
+
+  @override
+  String get changePhoto => 'Изменить фото';
+
+  @override
+  String get takePhoto => 'Сделать фото';
+
+  @override
+  String get chooseFromGallery => 'Выбрать из галереи';
+
+  @override
+  String get removePhoto => 'Удалить фото';
+
+  @override
+  String get nameHint => 'Не указано';
+
+  @override
+  String get tProfileSaved => 'Профиль обновлён';
+
+  @override
+  String get tProfileSaveFailed => 'Не удалось сохранить профиль';
+
+  @override
+  String get termsOfUse => 'Условия использования';
+
+  @override
+  String get deleteAccount => 'Удалить аккаунт';
+
+  @override
+  String get deleteAccountSheetTitle => 'Удалить аккаунт';
+
+  @override
+  String get deleteAccountEverywhere => 'Удалить везде';
+
+  @override
+  String get deleteAccountEverywhereBody =>
+      'Ваш аккаунт, все данные в облаке И все записи на этом устройстве. Ничего не сохранится.';
+
+  @override
+  String get deleteAccountCloudOnly => 'Удалить аккаунт и данные в облаке';
+
+  @override
+  String get deleteAccountCloudOnlyBody =>
+      'Удаляет аккаунт и всё, что хранится в облаке. Записи на этом устройстве сохранятся.';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Удалить аккаунт?';
+
+  @override
+  String get deleteAccountConfirmEverywhere =>
+      'Аккаунт, все данные в облаке и каждая запись, фото чека, магазин и категория на этом устройстве будут удалены навсегда. Отменить нельзя.';
+
+  @override
+  String get deleteAccountConfirmCloudOnly =>
+      'Аккаунт и всё, что хранится в облаке, будет удалено навсегда. Записи на этом устройстве сохранятся. Отменить нельзя.';
+
+  @override
+  String get deleteAccountConfirm => 'Удалить аккаунт';
+
+  @override
+  String get deletingAccount => 'Удаление аккаунта…';
+
+  @override
+  String get tAccountDeleted => 'Ваш аккаунт удалён';
+
+  @override
+  String get deleteAccountSubscriptionTitle => 'Подписка останется активной';
+
+  @override
+  String get deleteAccountSubscriptionBody =>
+      'Удаление аккаунта не отменяет подписку Premium — оплата управляется App Store и продолжится, пока вы не отмените её там.';
+
+  @override
+  String get deleteAccountSubscriptionAction => 'Управление подпиской';
+
+  @override
+  String get savingProfile => 'Сохранение…';
+
+  @override
+  String get uploadingPhoto => 'Загрузка фото…';
+
+  @override
+  String get processingPhoto => 'Обработка фото…';
 }

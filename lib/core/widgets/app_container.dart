@@ -43,6 +43,19 @@ class AppContainer extends StatelessWidget {
   Widget build(BuildContext context) {
     final hasShadow = boxShadow != null && boxShadow!.isNotEmpty;
 
+    // A `decoration` border INSETS the child by its width, so a 96px circle
+    // with a 3px border lays its child out at 90px and centres it. The clip
+    // path is still the full 96px circle, so it is LARGER than the child and
+    // never bites: a photo renders as a square with barely-rounded corners
+    // instead of a circle — the reported "cropped on the left and right".
+    //
+    // Drawing the border as a FOREGROUND decoration keeps the child at full
+    // size, so the clip actually crops it, and paints the border over the
+    // image edge where an avatar ring belongs. Only done when there is a
+    // child to clip; a plain bordered box is unaffected.
+    final drawBorderOnTop =
+        border != null && child != null && clipBehavior != Clip.none;
+
     final decoratedBox = Container(
       width: width,
       height: height,
@@ -55,9 +68,16 @@ class AppContainer extends StatelessWidget {
         gradient: gradient,
         borderRadius: shape == BoxShape.circle ? null : borderRadius,
         shape: shape,
-        border: border,
+        border: drawBorderOnTop ? null : border,
         boxShadow: hasShadow ? null : boxShadow,
       ),
+      foregroundDecoration: drawBorderOnTop
+          ? BoxDecoration(
+              borderRadius: shape == BoxShape.circle ? null : borderRadius,
+              shape: shape,
+              border: border,
+            )
+          : null,
       child: child,
     );
 

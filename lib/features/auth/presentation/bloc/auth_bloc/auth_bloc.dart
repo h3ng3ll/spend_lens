@@ -7,10 +7,16 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../../../core/failures/failure.dart';
 import '../../../../../core/services/ui_message_service.dart';
 import '../../../domain/failures/auth_failures.dart';
+import '../../../domain/models/e_account_deletion_scope.dart';
+import '../../../domain/models/user_profile/user_profile.dart';
 import '../../../domain/repositories/i_auth_repository.dart';
+import '../../../domain/repositories/i_user_profile_local_repository.dart';
 import '../../../domain/use_cases/apple_sign_in_use_case.dart';
+import '../../../domain/use_cases/delete_account_use_case.dart';
 import '../../../domain/use_cases/google_sign_in_use_case.dart';
+import '../../../domain/use_cases/seed_profile_from_credentials_use_case.dart';
 import '../../../domain/use_cases/sign_out_use_case.dart';
+import '../../../domain/use_cases/watch_user_profile_use_case.dart';
 import '../../../../sync/domain/use_cases/clear_synced_local_records_use_case.dart';
 
 part 'auth_event.dart';
@@ -36,6 +42,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final AppleSignInUseCase _appleSignInUseCase;
   final SignOutUseCase _signOutUseCase;
   final ClearSyncedLocalRecordsUseCase _clearSyncedLocalRecords;
+  final DeleteAccountUseCase _deleteAccountUseCase;
+  final SeedProfileFromCredentialsUseCase _seedProfileFromCredentials;
+  final WatchUserProfileUseCase _watchUserProfile;
+  final IUserProfileLocalRepository _userProfileLocalRepository;
 
   AuthBloc({
     required this._authRepository,
@@ -43,6 +53,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this._appleSignInUseCase,
     required this._signOutUseCase,
     required this._clearSyncedLocalRecords,
+    required this._deleteAccountUseCase,
+    required this._seedProfileFromCredentials,
+    required this._watchUserProfile,
+    required this._userProfileLocalRepository,
   }) : super(const AuthState(status: EAuthStatus.signedOut)) {
     // `_Watch` is registered SEPARATELY from the action events, and this is
     // load-bearing.
@@ -65,6 +79,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // queue with user-initiated actions. `_Watch` gets `restartable()`, which
     // also cancels a previous subscription if it is ever re-dispatched.
     on<_Watch>((event, emit) => _onWatch(emit), transformer: restartable());
+
+    // The profile stream is registered SEPARATELY from `_Watch` for the same
+    // reason `_Watch` is separate from the actions: it is another infinite
+    // stream whose handler Future never completes, so sharing a sequential
+    // queue with it would starve everything behind it.
+    on<_WatchProfile>(
+      (event, emit) => _onWatchProfile(emit),
+      transformer: restartable(),
+    );
+    on<_WatchAvatar>(
+      (event, emit) => _onWatchAvatar(emit),
+      transformer: restartable(),
+    );
+
+    // `sequential()`: seeds for different uids must not interleave their
+    // read-modify-write on the same stored profile.
+    on<_SeedProfile>(_onSeedProfile, transformer: sequential());
 
     // The sign-in actions are `droppable()`, NOT `sequential()`.
     //
@@ -95,6 +126,10 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       (event, emit) => _onSignOut(emit),
       transformer: sequential(),
     );
+    // `droppable()`, like the sign-in actions: deletion is irreversible and
+    // makes several round trips, so a second tap while one is in flight must
+    // be discarded rather than queued behind it.
+    on<_DeleteAccount>(_onDeleteAccount, transformer: droppable());
   }
 
   Future<void> _onWatch(Emitter<AuthState> emit) async {
@@ -106,18 +141,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           // identity, and leaving the previous session's value behind makes
           // the Profile status pill name the WRONG provider on the next
           // sign-in until `providerData` is read again.
+          // `uid`, `firstName`, `lastName` and `avatarFilename` are reset
+          // alongside `email` for the same reason `isGoogleAccount` is: they
+          // are IDENTITY, and leaving them behind would show the previous
+          // user's name and face to whoever signs in next on this device.
           return state.copyWith(
             status: EAuthStatus.signedOut,
             email: '',
             isGoogleAccount: false,
+            uid: '',
+            firstName: '',
+            lastName: '',
+            avatarFilename: '',
           );
         }
+        // A session RESTORED at launch never passes through a sign-in
+        // handler, so seeding could not be left there alone.
+        //
+        // THE BUG THIS FIXES: Edit Profile read its email from the stored
+        // `UserProfile`, while Profile read it live from `AuthState`. Anyone
+        // already signed in when this feature shipped had no stored profile at
+        // all, so Profile showed the address and the edit screen showed an
+        // empty field — for the same account, on adjacent screens.
+        //
+        // Seeding is idempotent (it only fills EMPTY fields), so running it on
+        // every restore cannot overwrite a name the user has since edited.
+        _ensureProfileSeeded(user);
+
         return state.copyWith(
           status: EAuthStatus.signedIn,
           isGoogleAccount: user.providerData.any(
             (info) => info.providerId == 'google.com',
           ),
           email: user.email ?? '',
+          uid: user.uid,
         );
       },
       // Carries a message, because a `failed` state with an empty
@@ -130,18 +187,84 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
+  /// Requests a seed for [user] unless one is already in flight for them.
+  ///
+  /// `onData` must return a state synchronously, so the async work is handed to
+  /// a dedicated event instead of awaited here. The uid guard keeps a token
+  /// refresh — `watchUser()` can emit repeatedly for one session — from
+  /// queueing a redundant Firestore read on every tick.
+  void _ensureProfileSeeded(User user) {
+    if (_seededUid == user.uid) return;
+    _seededUid = user.uid;
+    add(const AuthEvent.seedProfile());
+  }
+
+  /// The uid already seeded this session, so a repeat emission is a no-op.
+  /// Cleared on sign-out so the next user is seeded properly.
+  String? _seededUid;
+
+  Future<void> _onSeedProfile(
+    _SeedProfile event,
+    Emitter<AuthState> emit,
+  ) async {
+    // Re-read rather than taking the user off the event — see the event's doc
+    // comment: a `User` payload would be logged verbatim by `AppObserver`.
+    final user = _authRepository.currentUser;
+    if (user == null) return;
+
+    // No `appleCredentials`: a restored session has none to offer. Apple sends
+    // the name only at first authorization, and that path is handled in
+    // `_onSignInApple` where the credentials actually exist.
+    await _seedProfileFromCredentials(user: user);
+  }
+
+  /// Projects the stored profile onto [AuthState].
+  ///
+  /// The name/photo live in Hive rather than on the Firebase user, so they
+  /// need their own subscription — but they are surfaced through the state the
+  /// three avatar surfaces ALREADY watch, so none of them opens a second one.
+  Future<void> _onWatchProfile(Emitter<AuthState> emit) async {
+    await emit.forEach<UserProfile?>(
+      _watchUserProfile(),
+      onData: (profile) => state.copyWith(
+        firstName: profile?.firstName ?? '',
+        lastName: profile?.lastName ?? '',
+      ),
+      // A profile read failure must NOT flip the auth status to failed: the
+      // session is fine, only the decoration is missing. Fall back to no name.
+      onError: (error, _) => state.copyWith(firstName: '', lastName: ''),
+    );
+  }
+
+  Future<void> _onWatchAvatar(Emitter<AuthState> emit) async {
+    await emit.forEach<String?>(
+      _userProfileLocalRepository.watchAvatarFilename(),
+      onData: (filename) => state.copyWith(avatarFilename: filename ?? ''),
+      onError: (error, _) => state.copyWith(avatarFilename: ''),
+    );
+  }
+
   Future<void> _onSignInGoogle(Emitter<AuthState> emit) async {
     if (_isAlreadySignedIn()) return;
     emit(_startingSignIn());
 
     final result = await _googleSignInUseCase();
     // `Either<Failure, T>`: fold(left = failure, right = success).
-    result.fold(
-      (failure) => _reportFailure(emit, failure),
-      (_) {
+    //
+    // The success value is no longer DISCARDED. Google resends
+    // `displayName`/`photoURL` on every sign-in, so this is not the
+    // irreversible case Apple is — but it is the same seeding path, and
+    // routing both providers through it keeps one place responsible for
+    // deciding what a sign-in contributes to the profile.
+    await result.fold(
+      (failure) async => _reportFailure(emit, failure),
+      (credential) async {
         // watchUser() picks up the new signed-in user reactively — no
         // further emit needed here (the bloc must not emit a status the
         // stream will immediately overwrite).
+        final user = credential.user;
+        if (user == null) return;
+        await _seedProfileFromCredentials(user: user);
       },
     );
   }
@@ -152,10 +275,29 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     final result = await _appleSignInUseCase();
     // `Either<Failure, T>`: fold(left = failure, right = success).
-    result.fold(
-      (failure) => _reportFailure(emit, failure),
-      (_) {
+    //
+    // **THE BUG THIS FIXES.** The success branch used to be `(_) {}` — the
+    // result was discarded entirely. Apple returns `givenName`/`familyName`
+    // ONLY on the first authorization for this app; every later sign-in sends
+    // nulls, permanently, unless the user revokes the app in iOS Settings.
+    // `FirebaseAuthRepository` captured those names correctly into
+    // `AppleSignInResult.credentials`, and then this callback threw them away
+    // — so the single moment the name was obtainable was lost, and no amount
+    // of signing in again could recover it.
+    //
+    // Seeding is awaited rather than fire-and-forget: `unawaited` is banned in
+    // `lib/`, and this is exactly the class of defect that ban exists for — a
+    // dropped persistence write that fails silently.
+    await result.fold(
+      (failure) async => _reportFailure(emit, failure),
+      (appleResult) async {
         // watchUser() picks up the new signed-in user reactively.
+        final user = appleResult.userCredential.user;
+        if (user == null) return;
+        await _seedProfileFromCredentials(
+          user: user,
+          appleCredentials: appleResult.credentials,
+        );
       },
     );
   }
@@ -222,6 +364,41 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
+  /// Deletes the account, then lets `watchUser()` settle the signed-out state.
+  ///
+  /// Emits `deleted` on success as a ONE-SHOT signal for the UI to leave the
+  /// Profile screen. It is not a resting state: the auth stream reports the
+  /// user as gone moments later and overwrites it with `signedOut`.
+  Future<void> _onDeleteAccount(
+    _DeleteAccount event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(state.copyWith(status: EAuthStatus.deleting, errorMessage: ''));
+
+    final result = await _deleteAccountUseCase(scope: event.scope);
+
+    result.fold(
+      (failure) {
+        // A cancelled re-auth sheet is the user's own choice — return to the
+        // signed-in state silently rather than reporting a failure. Same
+        // treatment a cancelled sign-in gets.
+        final isCanceled = failure is AccountDeletionCanceledFailure;
+        emit(
+          state.copyWith(
+            status: isCanceled ? EAuthStatus.signedIn : EAuthStatus.failed,
+            errorMessage: isCanceled ? '' : failure.message,
+          ),
+        );
+      },
+      (_) {
+        // Re-arm seeding: the guard holds the deleted uid, and without this a
+        // new sign-in on this device would skip building its profile.
+        _seededUid = null;
+        emit(state.copyWith(status: EAuthStatus.deleted, errorMessage: ''));
+      },
+    );
+  }
+
   Future<void> _onSignOut(Emitter<AuthState> emit) async {
     // BEFORE signing out, while the session still exists: drop local copies
     // of records the server already holds. They are fetched back — photos
@@ -237,6 +414,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     } catch (_) {
       // Intentionally swallowed — see above.
     }
+
+    // The cached profile and avatar are dropped on the way out. Without this
+    // the next user to sign in on this device sees the PREVIOUS user's name
+    // and face until their own profile loads — a privacy defect, and the same
+    // class of leak the `isGoogleAccount` reset above already guards against.
+    //
+    // Same last-resort shape as the cleanup above: a local housekeeping
+    // failure must never block sign-out.
+    try {
+      await _userProfileLocalRepository.clear();
+    } catch (_) {
+      // Intentionally swallowed — see above.
+    }
+
+    // Re-arm seeding, so signing in as a different user rebuilds the profile
+    // rather than being skipped by the previous session's guard.
+    _seededUid = null;
 
     await _signOutUseCase();
     // watchUser() picks up the signed-out state reactively.

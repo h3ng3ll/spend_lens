@@ -1489,4 +1489,100 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get signOutConfirmBody =>
       'Les enregistrements déjà sauvegardés seront supprimés de cet appareil et restaurés à votre prochaine connexion. Ceux non synchronisés sont conservés.';
+
+  @override
+  String get editProfile => 'Modifier le profil';
+
+  @override
+  String get firstName => 'Prénom';
+
+  @override
+  String get lastName => 'Nom';
+
+  @override
+  String get emailLabel => 'E-mail';
+
+  @override
+  String get changePhoto => 'Changer la photo';
+
+  @override
+  String get takePhoto => 'Prendre une photo';
+
+  @override
+  String get chooseFromGallery => 'Choisir dans la galerie';
+
+  @override
+  String get removePhoto => 'Supprimer la photo';
+
+  @override
+  String get nameHint => 'Non défini';
+
+  @override
+  String get tProfileSaved => 'Profil mis à jour';
+
+  @override
+  String get tProfileSaveFailed => 'Impossible d\'enregistrer le profil';
+
+  @override
+  String get termsOfUse => 'Conditions d\'utilisation';
+
+  @override
+  String get deleteAccount => 'Supprimer le compte';
+
+  @override
+  String get deleteAccountSheetTitle => 'Supprimer le compte';
+
+  @override
+  String get deleteAccountEverywhere => 'Tout supprimer';
+
+  @override
+  String get deleteAccountEverywhereBody =>
+      'Votre compte, toutes les données du cloud ET chaque enregistrement sur cet appareil. Rien n\'est conservé.';
+
+  @override
+  String get deleteAccountCloudOnly =>
+      'Supprimer le compte et les données du cloud';
+
+  @override
+  String get deleteAccountCloudOnlyBody =>
+      'Supprime votre compte et tout ce qui est stocké dans le cloud. Les enregistrements sur cet appareil sont conservés.';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Supprimer le compte ?';
+
+  @override
+  String get deleteAccountConfirmEverywhere =>
+      'Cela supprime définitivement votre compte, toutes les données du cloud et chaque enregistrement, photo de reçu, magasin et catégorie sur cet appareil. Cette action est irréversible.';
+
+  @override
+  String get deleteAccountConfirmCloudOnly =>
+      'Cela supprime définitivement votre compte et tout ce qui est stocké dans le cloud. Les enregistrements sur cet appareil sont conservés. Cette action est irréversible.';
+
+  @override
+  String get deleteAccountConfirm => 'Supprimer le compte';
+
+  @override
+  String get deletingAccount => 'Suppression du compte…';
+
+  @override
+  String get tAccountDeleted => 'Votre compte a été supprimé';
+
+  @override
+  String get deleteAccountSubscriptionTitle => 'Votre abonnement reste actif';
+
+  @override
+  String get deleteAccountSubscriptionBody =>
+      'La suppression de votre compte n\'annule pas votre abonnement Premium — la facturation est gérée par l\'App Store et se poursuit jusqu\'à ce que vous l\'annuliez là-bas.';
+
+  @override
+  String get deleteAccountSubscriptionAction => 'Gérer l\'abonnement';
+
+  @override
+  String get savingProfile => 'Enregistrement…';
+
+  @override
+  String get uploadingPhoto => 'Envoi de la photo…';
+
+  @override
+  String get processingPhoto => 'Traitement de la photo…';
 }

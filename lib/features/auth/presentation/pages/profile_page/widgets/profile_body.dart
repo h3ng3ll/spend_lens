@@ -27,6 +27,11 @@ class ProfileBody extends StatelessWidget {
   final VoidCallback onExportSheet;
   final VoidCallback onImportBackup;
 
+  /// Opens the edit screen from the avatar. Ignored while signed out, where
+  /// the avatar renders inert.
+  final VoidCallback onEditProfile;
+  final VoidCallback onDeleteAccount;
+
   /// Whether the purchase SDK started, so the Upgrade button can degrade
   /// honestly rather than looking live and doing nothing.
   final bool isPurchaseAvailable;
@@ -41,6 +46,8 @@ class ProfileBody extends StatelessWidget {
     required this.onExportBackup,
     required this.onExportSheet,
     required this.onImportBackup,
+    required this.onEditProfile,
+    required this.onDeleteAccount,
     required this.isPurchaseAvailable,
     required this.onUpgrade,
   });
@@ -59,7 +66,7 @@ class ProfileBody extends StatelessWidget {
           spacing: 16.0,
           children: [
             const ProfileHeaderRow(),
-            ProfileIdentityColumn(state: state),
+            ProfileIdentityColumn(state: state, onEdit: onEditProfile),
             if (state.isNotSignedIn)
               KeepDataSafeCard(
                 deviceNoun: lo.thisDevice,
@@ -70,6 +77,7 @@ class ProfileBody extends StatelessWidget {
               SignedInAccountCard(
                 email: state.email,
                 onSignOut: onSignOut,
+                onDeleteAccount: onDeleteAccount,
               ),
             StorageCard(
               deviceNoun: lo.thisDevice,

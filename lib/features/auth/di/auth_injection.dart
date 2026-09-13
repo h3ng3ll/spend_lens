@@ -8,18 +8,34 @@ import '../../settings/domain/repositories/i_settings_local_repository.dart';
 import '../../../core/services/firebase/firebase_firestore_service.dart';
 import '../../sync/domain/use_cases/clear_synced_local_records_use_case.dart';
 import '../../sync/domain/use_cases/run_full_sync_use_case.dart';
+import '../../sync/domain/repositories/i_sync_remote_repository.dart';
 
 import '../../../core/di/injection.dart';
 import '../../../core/services/crypto_service.dart';
 import '../../../core/services/google_sign_in_service/google_sign_in_service.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/utils/env/env.dart';
+import '../../../core/services/avatar_image_store/avatar_image_store.dart';
+import '../../../core/services/firebase/firebase_storage_service.dart';
+import '../../../core/services/image_compression_service.dart';
+import '../../../core/hive/hive_database.dart';
 import '../data/repositories/firebase_auth_repository.dart';
 import '../data/repositories/unconfigured_auth_repository.dart';
+import '../data/repositories/unconfigured_user_profile_repository.dart';
+import '../data/repositories/user_profile_firestore_repository.dart';
+import '../data/repositories/user_profile_local_repository.dart';
 import '../domain/repositories/i_auth_repository.dart';
+import '../domain/repositories/i_user_profile_local_repository.dart';
+import '../domain/repositories/i_user_profile_remote_repository.dart';
 import '../domain/use_cases/apple_sign_in_use_case.dart';
+import '../domain/use_cases/delete_account_use_case.dart';
 import '../domain/use_cases/google_sign_in_use_case.dart';
+import '../domain/use_cases/remove_avatar_use_case.dart';
+import '../domain/use_cases/save_user_profile_use_case.dart';
+import '../domain/use_cases/seed_profile_from_credentials_use_case.dart';
 import '../domain/use_cases/sign_out_use_case.dart';
+import '../domain/use_cases/upload_avatar_use_case.dart';
+import '../domain/use_cases/watch_user_profile_use_case.dart';
 import '../presentation/bloc/auth_bloc/auth_bloc.dart';
 
 /// Registers the auth slice (design_spendlens.md §5/§9 — M9).
@@ -90,6 +106,82 @@ Future<bool> initAuthFeature() async {
   );
   getIt.registerLazySingleton(() => SignOutUseCase(getIt<IAuthRepository>()));
 
+  // Profile slice. The remote half follows the SAME availability probe as the
+  // auth repository above: with no Firebase config it resolves to the
+  // unconfigured no-op, so a profile edit still saves locally and the screen
+  // reports honest success rather than a crash.
+  getIt.registerLazySingleton<IUserProfileLocalRepository>(
+    () => UserProfileLocalRepository(getIt<HiveDatabase>()),
+  );
+
+  if (firebaseReady) {
+    getIt.registerLazySingleton<IUserProfileRemoteRepository>(
+      () => UserProfileFirestoreRepository(
+        firestoreService: getIt<FirebaseFirestoreService>(),
+        storageService: getIt<FirebaseStorageService>(),
+      ),
+    );
+  } else {
+    getIt.registerLazySingleton<IUserProfileRemoteRepository>(
+      () => const UnconfiguredUserProfileRepository(),
+    );
+  }
+
+  getIt.registerLazySingleton(
+    () => WatchUserProfileUseCase(getIt<IUserProfileLocalRepository>()),
+  );
+  getIt.registerLazySingleton(
+    () => SaveUserProfileUseCase(
+      localRepository: getIt<IUserProfileLocalRepository>(),
+      remoteRepository: getIt<IUserProfileRemoteRepository>(),
+      loggerService: getIt<LoggerService>(),
+    ),
+  );
+  // Avatar bytes live on the FILESYSTEM, never in Hive or a bloc state —
+  // see `AvatarImageStore` for the two defects that rule prevents.
+  getIt.registerLazySingleton(() => const AvatarImageStore());
+  getIt.registerLazySingleton(
+    () => UploadAvatarUseCase(
+      localRepository: getIt<IUserProfileLocalRepository>(),
+      remoteRepository: getIt<IUserProfileRemoteRepository>(),
+      compressionService: getIt<ImageCompressionService>(),
+      imageStore: getIt<AvatarImageStore>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => RemoveAvatarUseCase(
+      localRepository: getIt<IUserProfileLocalRepository>(),
+      remoteRepository: getIt<IUserProfileRemoteRepository>(),
+      imageStore: getIt<AvatarImageStore>(),
+    ),
+  );
+  // Registered before AuthBloc, which depends on it. Its own dependencies
+  // (sync remote repo, adapters, the record repositories) are registered by
+  // the sync/feature slices that ran earlier, and every registration is lazy.
+  getIt.registerLazySingleton(
+    () => DeleteAccountUseCase(
+      authRepository: getIt<IAuthRepository>(),
+      syncRemoteRepository: getIt<ISyncRemoteRepository>(),
+      profileRemoteRepository: getIt<IUserProfileRemoteRepository>(),
+      profileLocalRepository: getIt<IUserProfileLocalRepository>(),
+      storageService: getIt<FirebaseStorageService>(),
+      adapters: getIt<SyncEntityAdapters>(),
+      receiptLocalRepository: getIt<IReceiptLocalRepository>(),
+      settingsLocalRepository: getIt<ISettingsLocalRepository>(),
+      imageStore: getIt<ReceiptImageStore>(),
+      loggerService: getIt<LoggerService>(),
+    ),
+  );
+
+  getIt.registerLazySingleton(
+    () => SeedProfileFromCredentialsUseCase(
+      localRepository: getIt<IUserProfileLocalRepository>(),
+      remoteRepository: getIt<IUserProfileRemoteRepository>(),
+      saveUserProfile: getIt<SaveUserProfileUseCase>(),
+      loggerService: getIt<LoggerService>(),
+    ),
+  );
+
   // Registered here rather than in the sync slice because `AuthBloc`
   // depends on it and auth is initialized first. Its own dependencies (the
   // receipt/store repositories and the image store) are all registered
@@ -114,6 +206,10 @@ Future<bool> initAuthFeature() async {
       appleSignInUseCase: getIt<AppleSignInUseCase>(),
       signOutUseCase: getIt<SignOutUseCase>(),
       clearSyncedLocalRecords: getIt<ClearSyncedLocalRecordsUseCase>(),
+      deleteAccountUseCase: getIt<DeleteAccountUseCase>(),
+      seedProfileFromCredentials: getIt<SeedProfileFromCredentialsUseCase>(),
+      watchUserProfile: getIt<WatchUserProfileUseCase>(),
+      userProfileLocalRepository: getIt<IUserProfileLocalRepository>(),
     ),
   );
 

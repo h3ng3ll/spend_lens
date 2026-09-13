@@ -28,6 +28,15 @@ class FirebaseStorageService {
   Reference _receiptsFolder(String uid) =>
       _firebaseStorage.ref().child('users/$uid/receipts');
 
+  /// The avatar object, in its own `profile/` folder.
+  ///
+  /// Kept OUT of `receipts/` on purpose: [usedBytes] sums that folder to drive
+  /// the Profile storage bar, which the UI describes to the user as receipt
+  /// photos. An avatar filed there would silently inflate a figure the user is
+  /// told means something else.
+  Reference _avatarRef(String uid) =>
+      _firebaseStorage.ref().child('users/$uid/profile/avatar.jpg');
+
   Reference _receiptRef(String uid, String receiptId) =>
       _receiptsFolder(uid).child('$receiptId.jpg');
 
@@ -113,6 +122,29 @@ class FirebaseStorageService {
     } while (pageToken != null);
 
     return ids;
+  }
+
+  /// Uploads the user's avatar, replacing any existing object, and returns
+  /// its download URL for the Firestore profile document.
+  Future<String> uploadAvatar({
+    required String uid,
+    required Uint8List bytes,
+  }) async {
+    final ref = _avatarRef(uid);
+    await ref.putData(bytes, SettableMetadata(contentType: 'image/jpeg'));
+    return ref.getDownloadURL();
+  }
+
+  /// Removes the avatar object. Already-gone is success, not failure — the
+  /// same contract as [deleteReceiptPhoto], and it is what lets a remove be
+  /// retried safely after a partial failure.
+  Future<void> deleteAvatar({required String uid}) async {
+    try {
+      await _avatarRef(uid).delete();
+    } on FirebaseException catch (error) {
+      if (error.code == 'object-not-found') return;
+      rethrow;
+    }
   }
 
   /// Total bytes this user occupies, summed from real object metadata.

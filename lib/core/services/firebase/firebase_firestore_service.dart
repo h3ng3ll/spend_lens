@@ -126,4 +126,43 @@ class FirebaseFirestoreService {
       userDocument(uid).collection(collection.path);
 
   WriteBatch batch() => _firebaseFirestore.batch();
+
+  /// The user's own profile document at `/users/{uid}`.
+  ///
+  /// Until now [userDocument] was used ONLY to build subcollection paths via
+  /// [records] — the document itself was never read or written, so a signed-in
+  /// user left no identity record on the server at all.
+  Future<Map<String, dynamic>?> fetchUserDocument(String uid) async {
+    final snapshot = await userDocument(uid).get();
+    return snapshot.data();
+  }
+
+  /// Writes [data] into `/users/{uid}`.
+  ///
+  /// `merge` defaults to TRUE here — deliberately the opposite of
+  /// [SyncFirestoreRepository.pushRecords], which sets records wholesale
+  /// because the local row is the whole truth for that document.
+  ///
+  /// The user document is not like that: it is written by several independent
+  /// paths (first-sign-in seeding, a later name edit, an avatar upload), each
+  /// of which owns only some of the fields. A full overwrite from any one of
+  /// them would erase what the others wrote — most damagingly, an avatar
+  /// upload would blank the name Apple handed over once and will never send
+  /// again.
+  Future<void> setUserDocument(
+    String uid,
+    Map<String, dynamic> data, {
+    bool merge = true,
+  }) async {
+    await userDocument(uid).set(data, SetOptions(merge: merge));
+  }
+
+  /// Deletes the `/users/{uid}` document.
+  ///
+  /// Firestore does NOT cascade: this removes the document's own fields and
+  /// leaves its subcollections untouched, so account deletion must clear the
+  /// record collections separately (and does).
+  Future<void> deleteUserDocument(String uid) async {
+    await userDocument(uid).delete();
+  }
 }

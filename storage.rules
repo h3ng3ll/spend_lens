@@ -1,0 +1,115 @@
+rules_version = '2';
+
+// Per-user object storage, scoped exactly like the Firestore records.
+//
+// Photos are compressed client-side before upload (see
+// `ImageCompressionService`), so the free-tier quota is meaningful and the
+// usage figure the Profile screen reports is measured from real object
+// metadata rather than estimated.
+//
+// As with `firestore.rules`, this is the ONLY server-side check. The
+// constraints below are not restatements of what the client already does —
+// they are what holds when the client does something else.
+//
+// **Storage denies any path no `match` block covers.** There is no inherited
+// or wildcard fallthrough, so every folder the app writes needs its own block:
+// an uploader targeting an unlisted path fails with `403 Permission denied`
+// and a `-13021` StorageException, which is exactly how the avatar upload
+// broke when only `receipts/` existed here.
+service firebase.storage {
+  match /b/{bucket}/o {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // 20 MB, matching `_kMaxPhotoBytes` in `FirebaseStorageService`, which
+    // bounds `getData` because that call buffers the whole object in
+    // memory. Keeping the ceiling identical on both sides means a stored
+    // object is always one the download path can actually read back — an
+    // object larger than the client limit would be permanently
+    // undownloadable while still consuming the user's quota.
+    //
+    // Compressed receipts land near 200 KB, so this is far above any
+    // legitimate file; it exists to stop a hostile or corrupt upload from
+    // exhausting memory or the quota.
+    function isWithinSizeLimit() {
+      return request.resource.size <= 20 * 1024 * 1024;
+    }
+
+    // The app uploads JPEG only (`SettableMetadata(contentType:
+    // 'image/jpeg')`). Restricting the type stops the per-user folder from
+    // being used as general file storage, and keeps every object something
+    // the receipt viewer can actually render.
+    function isJpeg() {
+      return request.resource.contentType == 'image/jpeg';
+    }
+
+    // LIST permission, which is granted on the FOLDER PREFIX rather than on
+    // any object.
+    //
+    // `Reference.list()` does not read a file — it enumerates a prefix — so the
+    // per-file rules below never authorise it, no matter how permissive they
+    // are. Without this block `FirebaseStorageService.uploadedReceiptIds` and
+    // `usedBytes` both fail with `[firebase_storage/unauthorized]`, which takes
+    // the whole sync cycle down: `UploadReceiptPhotosUseCase` calls
+    // `uploadedReceiptIds` first to decide what still needs uploading.
+    //
+    // `{prefix=**}` is required: Storage matches the folder path itself, and a
+    // single-segment wildcard does not cover it.
+    match /users/{uid}/receipts/{prefix=**} {
+      allow list: if isOwner(uid);
+    }
+
+    // `<receiptId>.jpg` — the shape `_receiptRef` writes. Anything else is
+    // not a photo this app can associate with a record, so it would be an
+    // orphan consuming quota that no code path would ever clean up.
+    //
+    // The id is matched loosely on purpose. Receipt ids are numeric
+    // microsecond stamps today, but other entities in this app already use
+    // suffixed (`..._manual`) and semantic (`catFood`) ids, so pinning
+    // `[0-9]+` here would reject perfectly valid uploads the first time
+    // receipt id generation changes. The `.jpg` suffix and the content-type
+    // check are what actually matter; the id shape is the client's business.
+    match /users/{uid}/receipts/{fileName} {
+      allow read: if isOwner(uid);
+
+      allow write: if isOwner(uid)
+                   && isWithinSizeLimit()
+                   && isJpeg()
+                   && fileName.matches('[A-Za-z0-9_-]+\\.jpg');
+
+      allow delete: if isOwner(uid);
+    }
+
+    // The profile avatar — `users/{uid}/profile/avatar.jpg`, written by
+    // `FirebaseStorageService.uploadAvatar`.
+    //
+    // A SEPARATE block rather than a widened receipts rule, and a separate
+    // folder rather than a file inside `receipts/`, because
+    // `FirebaseStorageService.usedBytes` sums the `receipts/` folder to drive
+    // the Profile storage bar — which the UI describes to the user as receipt
+    // photos. An avatar filed there would silently inflate a figure the user
+    // is told means something else.
+    //
+    // The filename is pinned to exactly `avatar.jpg`: there is one avatar per
+    // user, `uploadAvatar` always overwrites that single object, and allowing
+    // arbitrary names here would turn this folder into unmetered storage that
+    // `usedBytes` does not count and nothing ever cleans up.
+    match /users/{uid}/profile/avatar.jpg {
+      allow read: if isOwner(uid);
+
+      // 2 MB — far above the 100 KB the client compresses to
+      // (`_kAvatarTargetKB` in `UploadAvatarUseCase`), with room for a
+      // compressor that cannot reach the target on an unusual source image,
+      // since that path returns the original bytes rather than failing.
+      allow write: if isOwner(uid)
+                   && isJpeg()
+                   && request.resource.size <= 2 * 1024 * 1024;
+
+      // Required by account deletion (`DeleteAccountUseCase`) and by the
+      // staged "Remove photo" action on the edit screen.
+      allow delete: if isOwner(uid);
+    }
+  }
+}

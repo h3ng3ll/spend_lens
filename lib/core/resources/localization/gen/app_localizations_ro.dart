@@ -1498,4 +1498,99 @@ class AppLocalizationsRo extends AppLocalizations {
   @override
   String get signOutConfirmBody =>
       'Înregistrările deja salvate în cloud vor fi eliminate de pe acest dispozitiv și restaurate la următoarea conectare. Cele nesincronizate rămân.';
+
+  @override
+  String get editProfile => 'Editează profilul';
+
+  @override
+  String get firstName => 'Prenume';
+
+  @override
+  String get lastName => 'Nume';
+
+  @override
+  String get emailLabel => 'E-mail';
+
+  @override
+  String get changePhoto => 'Schimbă fotografia';
+
+  @override
+  String get takePhoto => 'Fă o fotografie';
+
+  @override
+  String get chooseFromGallery => 'Alege din galerie';
+
+  @override
+  String get removePhoto => 'Elimină fotografia';
+
+  @override
+  String get nameHint => 'Nesetat';
+
+  @override
+  String get tProfileSaved => 'Profil actualizat';
+
+  @override
+  String get tProfileSaveFailed => 'Profilul nu a putut fi salvat';
+
+  @override
+  String get termsOfUse => 'Termeni de utilizare';
+
+  @override
+  String get deleteAccount => 'Șterge contul';
+
+  @override
+  String get deleteAccountSheetTitle => 'Șterge contul';
+
+  @override
+  String get deleteAccountEverywhere => 'Șterge peste tot';
+
+  @override
+  String get deleteAccountEverywhereBody =>
+      'Contul tău, toate datele din cloud ȘI fiecare înregistrare de pe acest dispozitiv. Nu se păstrează nimic.';
+
+  @override
+  String get deleteAccountCloudOnly => 'Șterge contul și datele din cloud';
+
+  @override
+  String get deleteAccountCloudOnlyBody =>
+      'Elimină contul și tot ce este stocat în cloud. Înregistrările de pe acest dispozitiv sunt păstrate.';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Ștergi contul?';
+
+  @override
+  String get deleteAccountConfirmEverywhere =>
+      'Aceasta șterge definitiv contul, toate datele din cloud și fiecare înregistrare, poză de bon, magazin și categorie de pe acest dispozitiv. Acțiunea este ireversibilă.';
+
+  @override
+  String get deleteAccountConfirmCloudOnly =>
+      'Aceasta șterge definitiv contul și tot ce este stocat în cloud. Înregistrările de pe acest dispozitiv sunt păstrate. Acțiunea este ireversibilă.';
+
+  @override
+  String get deleteAccountConfirm => 'Șterge contul';
+
+  @override
+  String get deletingAccount => 'Se șterge contul…';
+
+  @override
+  String get tAccountDeleted => 'Contul tău a fost șters';
+
+  @override
+  String get deleteAccountSubscriptionTitle => 'Abonamentul tău rămâne activ';
+
+  @override
+  String get deleteAccountSubscriptionBody =>
+      'Ștergerea contului nu anulează abonamentul Premium — facturarea este gestionată de App Store și continuă până când îl anulezi acolo.';
+
+  @override
+  String get deleteAccountSubscriptionAction => 'Gestionează abonamentul';
+
+  @override
+  String get savingProfile => 'Se salvează…';
+
+  @override
+  String get uploadingPhoto => 'Se încarcă fotografia…';
+
+  @override
+  String get processingPhoto => 'Se procesează fotografia…';
 }

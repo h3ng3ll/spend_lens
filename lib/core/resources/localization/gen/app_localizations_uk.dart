@@ -1507,4 +1507,100 @@ class AppLocalizationsUk extends AppLocalizations {
   @override
   String get signOutConfirmBody =>
       'Записи, уже збережені в хмарі, буде видалено з цього пристрою та відновлено під час наступного входу. Несинхронізовані залишаться.';
+
+  @override
+  String get editProfile => 'Редагувати профіль';
+
+  @override
+  String get firstName => 'Ім\'я';
+
+  @override
+  String get lastName => 'Прізвище';
+
+  @override
+  String get emailLabel => 'Ел. пошта';
+
+  @override
+  String get changePhoto => 'Змінити фото';
+
+  @override
+  String get takePhoto => 'Зробити фото';
+
+  @override
+  String get chooseFromGallery => 'Вибрати з галереї';
+
+  @override
+  String get removePhoto => 'Видалити фото';
+
+  @override
+  String get nameHint => 'Не вказано';
+
+  @override
+  String get tProfileSaved => 'Профіль оновлено';
+
+  @override
+  String get tProfileSaveFailed => 'Не вдалося зберегти профіль';
+
+  @override
+  String get termsOfUse => 'Умови використання';
+
+  @override
+  String get deleteAccount => 'Видалити акаунт';
+
+  @override
+  String get deleteAccountSheetTitle => 'Видалити акаунт';
+
+  @override
+  String get deleteAccountEverywhere => 'Видалити всюди';
+
+  @override
+  String get deleteAccountEverywhereBody =>
+      'Ваш акаунт, усі дані в хмарі ТА всі записи на цьому пристрої. Нічого не збережеться.';
+
+  @override
+  String get deleteAccountCloudOnly => 'Видалити акаунт і дані в хмарі';
+
+  @override
+  String get deleteAccountCloudOnlyBody =>
+      'Видаляє акаунт і все, що зберігається в хмарі. Записи на цьому пристрої залишаться.';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Видалити акаунт?';
+
+  @override
+  String get deleteAccountConfirmEverywhere =>
+      'Акаунт, усі дані в хмарі та кожен запис, фото чека, магазин і категорію на цьому пристрої буде видалено назавжди. Скасувати неможливо.';
+
+  @override
+  String get deleteAccountConfirmCloudOnly =>
+      'Акаунт і все, що зберігається в хмарі, буде видалено назавжди. Записи на цьому пристрої залишаться. Скасувати неможливо.';
+
+  @override
+  String get deleteAccountConfirm => 'Видалити акаунт';
+
+  @override
+  String get deletingAccount => 'Видалення акаунта…';
+
+  @override
+  String get tAccountDeleted => 'Ваш акаунт видалено';
+
+  @override
+  String get deleteAccountSubscriptionTitle =>
+      'Ваша підписка залишиться активною';
+
+  @override
+  String get deleteAccountSubscriptionBody =>
+      'Видалення акаунта не скасовує підписку Premium — оплатою керує App Store, і вона триватиме, доки ви не скасуєте її там.';
+
+  @override
+  String get deleteAccountSubscriptionAction => 'Керувати підпискою';
+
+  @override
+  String get savingProfile => 'Збереження…';
+
+  @override
+  String get uploadingPhoto => 'Завантаження фото…';
+
+  @override
+  String get processingPhoto => 'Обробка фото…';
 }

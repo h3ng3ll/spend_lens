@@ -28,4 +28,21 @@ abstract interface class IAuthRepository {
   Future<Either<Failure, AppleSignInResult>> signInWithApple();
 
   Future<void> signOut();
+
+  /// Permanently deletes the Firebase user.
+  ///
+  /// Apple Guideline 5.1.1(v) requires an in-app path to this for any app that
+  /// offers account creation.
+  ///
+  /// Firebase treats this as a security-critical operation and rejects it with
+  /// `requires-recent-login` unless the user authenticated recently — which is
+  /// the NORMAL case, since a session stays valid indefinitely while the last
+  /// authentication ages out in minutes. [reauthenticate] exists to clear that,
+  /// and the delete use case retries through it rather than surfacing an error
+  /// the user cannot act on.
+  Future<Either<Failure, Unit>> deleteAccount();
+
+  /// Re-runs the provider sign-in for the CURRENT user, refreshing the
+  /// credential age so [deleteAccount] can proceed.
+  Future<Either<Failure, Unit>> reauthenticate();
 }

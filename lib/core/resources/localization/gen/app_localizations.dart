@@ -2417,6 +2417,186 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Records already backed up will be removed from this device and restored when you sign in again. Anything not synchronized stays.'**
   String get signOutConfirmBody;
+
+  /// No description provided for @editProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit profile'**
+  String get editProfile;
+
+  /// No description provided for @firstName.
+  ///
+  /// In en, this message translates to:
+  /// **'First name'**
+  String get firstName;
+
+  /// No description provided for @lastName.
+  ///
+  /// In en, this message translates to:
+  /// **'Last name'**
+  String get lastName;
+
+  /// No description provided for @emailLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Email'**
+  String get emailLabel;
+
+  /// No description provided for @changePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get changePhoto;
+
+  /// No description provided for @takePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Take photo'**
+  String get takePhoto;
+
+  /// No description provided for @chooseFromGallery.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose from gallery'**
+  String get chooseFromGallery;
+
+  /// No description provided for @removePhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get removePhoto;
+
+  /// No description provided for @nameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set'**
+  String get nameHint;
+
+  /// No description provided for @tProfileSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile updated'**
+  String get tProfileSaved;
+
+  /// No description provided for @tProfileSaveFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t save your profile'**
+  String get tProfileSaveFailed;
+
+  /// No description provided for @termsOfUse.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Use'**
+  String get termsOfUse;
+
+  /// No description provided for @deleteAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccount;
+
+  /// No description provided for @deleteAccountSheetTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccountSheetTitle;
+
+  /// No description provided for @deleteAccountEverywhere.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete everywhere'**
+  String get deleteAccountEverywhere;
+
+  /// No description provided for @deleteAccountEverywhereBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account, all cloud data AND every record on this device. Nothing is kept.'**
+  String get deleteAccountEverywhereBody;
+
+  /// No description provided for @deleteAccountCloudOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account and cloud data'**
+  String get deleteAccountCloudOnly;
+
+  /// No description provided for @deleteAccountCloudOnlyBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Removes your account and everything stored in the cloud. Records on this device are kept.'**
+  String get deleteAccountCloudOnlyBody;
+
+  /// No description provided for @deleteAccountConfirmTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account?'**
+  String get deleteAccountConfirmTitle;
+
+  /// No description provided for @deleteAccountConfirmEverywhere.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently deletes your account, all cloud data, and every record, receipt photo, store and category on this device. This cannot be undone.'**
+  String get deleteAccountConfirmEverywhere;
+
+  /// No description provided for @deleteAccountConfirmCloudOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'This permanently deletes your account and everything stored in the cloud. Records on this device are kept. This cannot be undone.'**
+  String get deleteAccountConfirmCloudOnly;
+
+  /// No description provided for @deleteAccountConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete account'**
+  String get deleteAccountConfirm;
+
+  /// No description provided for @deletingAccount.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting your account…'**
+  String get deletingAccount;
+
+  /// No description provided for @tAccountDeleted.
+  ///
+  /// In en, this message translates to:
+  /// **'Your account has been deleted'**
+  String get tAccountDeleted;
+
+  /// No description provided for @deleteAccountSubscriptionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your subscription stays active'**
+  String get deleteAccountSubscriptionTitle;
+
+  /// No description provided for @deleteAccountSubscriptionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Deleting your account does not cancel your Premium subscription — billing is handled by the App Store and continues until you cancel it there.'**
+  String get deleteAccountSubscriptionBody;
+
+  /// No description provided for @deleteAccountSubscriptionAction.
+  ///
+  /// In en, this message translates to:
+  /// **'Manage subscription'**
+  String get deleteAccountSubscriptionAction;
+
+  /// No description provided for @savingProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get savingProfile;
+
+  /// No description provided for @uploadingPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Uploading photo…'**
+  String get uploadingPhoto;
+
+  /// No description provided for @processingPhoto.
+  ///
+  /// In en, this message translates to:
+  /// **'Processing photo…'**
+  String get processingPhoto;
 }
 
 class _AppLocalizationsDelegate

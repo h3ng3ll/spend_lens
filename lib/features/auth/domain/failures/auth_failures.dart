@@ -60,6 +60,21 @@ class AppleSignInUnsupportedPlatformFailure extends AuthFailure {
     : super('Sign in with Apple is not supported on this platform.');
 }
 
+class AccountDeletionFailure extends AuthFailure {
+  const AccountDeletionFailure({super.diagnostic})
+    : super("Couldn't delete your account.");
+}
+
+/// The user dismissed the re-authentication sheet that account deletion needs.
+///
+/// Distinct from [AccountDeletionFailure] so the UI can stay quiet, exactly as
+/// a cancelled sign-in does: the user chose to back out, and telling them their
+/// deletion "failed" would misrepresent their own decision.
+class AccountDeletionCanceledFailure extends AuthFailure {
+  const AccountDeletionCanceledFailure({super.diagnostic})
+    : super('Account deletion was canceled.');
+}
+
 class AuthUnavailableFailure extends AuthFailure {
   const AuthUnavailableFailure({super.diagnostic})
     : super('Sign-in is not available right now.');

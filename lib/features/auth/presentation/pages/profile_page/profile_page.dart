@@ -1,18 +1,25 @@
+import 'dart:io';
+
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../../core/di/injection.dart';
+import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/services/subscription/i_subscription_repository.dart';
 import '../../../../../core/services/ui_message_service.dart';
+import '../../../../../core/utils/extensions/go_router_x.dart';
 import '../../../../subscription/presentation/sheets/subscription_sheet/subscription_sheet.dart';
 import '../../../../sync/presentation/bloc/sync_bloc/sync_bloc.dart';
 import '../../../../../core/widgets/confirm_dialog.dart';
 import '../../../../backup/presentation/bloc/backup_bloc/backup_bloc.dart';
 import '../../bloc/auth_bloc/auth_bloc.dart';
+import '../../../domain/models/e_account_deletion_scope.dart';
+import 'widgets/delete_account_sheet.dart';
 import 'widgets/profile_body.dart';
 
 /// `ProfilePageRoute` (design_spendlens.md §5) — a top-level push above the
@@ -79,6 +86,74 @@ class _ProfilePageState extends State<ProfilePage> {
     );
   }
 
+  void _onEditProfile() => const EditProfilePageRoute().push<void>(context);
+
+  /// Opens the platform's subscription-management screen.
+  ///
+  /// The app cannot cancel a subscription itself — billing belongs to the App
+  /// Store / Play, which is the whole reason the warning exists. The best it
+  /// can do is take the user to the place where they can.
+  Future<void> _onManageSubscription() async {
+    // Resolved BEFORE the await: reading localizations off `context` after a
+    // suspension point is unsafe once the sheet above this has been dismissed.
+    final lo = AppLocalizations.of(context);
+
+    final uri = Uri.parse(
+      Platform.isIOS
+          ? 'https://apps.apple.com/account/subscriptions'
+          : 'https://play.google.com/store/account/subscriptions',
+    );
+
+    if (!await launchUrl(uri, mode: LaunchMode.externalApplication)) {
+      UiMessageService.showError(lo.importUnexpected);
+    }
+  }
+
+  /// Apple Guideline 5.1.1(v) account deletion.
+  ///
+  /// Two deliberate gates before anything is destroyed: the user picks the
+  /// SCOPE, then confirms it against copy naming exactly what that scope
+  /// destroys. The confirm body is chosen from the scope rather than being one
+  /// generic sentence — "records on this device are kept" is the entire
+  /// difference between the two, and a shared message would hide it.
+  Future<void> _onDeleteAccount() async {
+    final lo = AppLocalizations.of(context);
+    final authBloc = context.read<AuthBloc>();
+
+    // Read from the LIVE SyncBloc state rather than re-querying the purchase
+    // SDK: the Plan badge on this same screen is already driven by it, so the
+    // warning and the badge can never disagree about whether a subscription is
+    // active.
+    final hasActiveSubscription = context.read<SyncBloc>().state.isPremium;
+
+    final scope = await DeleteAccountSheet.show(
+      context,
+      hasActiveSubscription: hasActiveSubscription,
+      onManageSubscription: _onManageSubscription,
+    );
+    if (scope == null || !mounted) return;
+
+    final scopeBody = switch (scope) {
+      EAccountDeletionScope.everywhere => lo.deleteAccountConfirmEverywhere,
+      EAccountDeletionScope.accountAndCloud => lo.deleteAccountConfirmCloudOnly,
+    };
+
+    await ConfirmDialog.show(
+      context,
+      title: lo.deleteAccountConfirmTitle,
+      // The subscription warning is REPEATED here, on the last screen before
+      // an irreversible action. A user can dismiss the sheet's notice without
+      // reading it; this is the point of no return, so the consequence that
+      // outlives the account is restated rather than assumed absorbed.
+      body: hasActiveSubscription
+          ? '$scopeBody\n\n${lo.deleteAccountSubscriptionBody}'
+          : scopeBody,
+      confirmLabel: lo.deleteAccountConfirm,
+      cancelLabel: lo.cancel,
+      onConfirm: () => authBloc.add(AuthEvent.deleteAccount(scope)),
+    );
+  }
+
   void _onExportBackup() => _backupBloc.add(const BackupEvent.exportBackup());
 
   void _onExportSheet() => _backupBloc.add(const BackupEvent.exportCsv());
@@ -131,6 +206,19 @@ class _ProfilePageState extends State<ProfilePage> {
     UiMessageService.showError(state.errorMessage);
   }
 
+  /// Leaves Profile once the account is gone.
+  ///
+  /// Staying would leave the user looking at a signed-out Profile screen for a
+  /// deleted account — the sign-in card offering to re-create what they just
+  /// asked to destroy.
+  bool _listenWhenDeleted(AuthState previous, AuthState current) =>
+      !previous.isDeleted && current.isDeleted;
+
+  void _onDeleted(BuildContext context, AuthState state) {
+    UiMessageService.showSuccess(AppLocalizations.of(context).tAccountDeleted);
+    context.goBack();
+  }
+
   void _onBackupListener(BuildContext context, BackupState state) {
     final lo = AppLocalizations.of(context);
 
@@ -167,13 +255,6 @@ class _ProfilePageState extends State<ProfilePage> {
   /// The sheet reports its own outcome via a toast and closes itself on
   /// success, so this only has to refresh what the rest of Profile shows.
   Future<void> _onUpgrade() async {
-    // if (!isPurchaseAvailable) {
-    //   UiMessageService.showInfo(
-    //     AppLocalizations.of(context).purchasesUnavailable,
-    //   );
-    //   return;
-    // }
-
     await SubscriptionSheet.show(context);
     if (!mounted) return;
 
@@ -198,23 +279,29 @@ class _ProfilePageState extends State<ProfilePage> {
         listenWhen: (previous, current) =>
             previous.errorMessage != current.errorMessage,
         listener: _onAuthListener,
-        child: BlocListener<BackupBloc, BackupState>(
-          listener: _onBackupListener,
-          child: Scaffold(
-            backgroundColor: scheme.bg,
-            body: SafeArea(
-              child: BlocBuilder<AuthBloc, AuthState>(
-                builder: (context, state) => ProfileBody(
-                  state: state,
-                  onGoogle: _onGoogle,
-                  onApple: _onApple,
-                  onSignOut: _onSignOut,
-                  onExportBackup: _onExportBackup,
-                  onExportSheet: _onExportSheet,
-                  onImportBackup: _onImportBackup,
-                  isPurchaseAvailable:
-                      getIt<ISubscriptionRepository>().isConfigured,
-                  onUpgrade: _onUpgrade,
+        child: BlocListener<AuthBloc, AuthState>(
+          listenWhen: _listenWhenDeleted,
+          listener: _onDeleted,
+          child: BlocListener<BackupBloc, BackupState>(
+            listener: _onBackupListener,
+            child: Scaffold(
+              backgroundColor: scheme.bg,
+              body: SafeArea(
+                child: BlocBuilder<AuthBloc, AuthState>(
+                  builder: (context, state) => ProfileBody(
+                    state: state,
+                    onGoogle: _onGoogle,
+                    onApple: _onApple,
+                    onSignOut: _onSignOut,
+                    onExportBackup: _onExportBackup,
+                    onExportSheet: _onExportSheet,
+                    onImportBackup: _onImportBackup,
+                    onEditProfile: _onEditProfile,
+                    onDeleteAccount: _onDeleteAccount,
+                    isPurchaseAvailable:
+                        getIt<ISubscriptionRepository>().isConfigured,
+                    onUpgrade: _onUpgrade,
+                  ),
                 ),
               ),
             ),

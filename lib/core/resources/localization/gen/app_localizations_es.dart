@@ -1486,4 +1486,99 @@ class AppLocalizationsEs extends AppLocalizations {
   @override
   String get signOutConfirmBody =>
       'Los registros ya respaldados se eliminarán de este dispositivo y se restaurarán al volver a iniciar sesión. Los no sincronizados se conservan.';
+
+  @override
+  String get editProfile => 'Editar perfil';
+
+  @override
+  String get firstName => 'Nombre';
+
+  @override
+  String get lastName => 'Apellido';
+
+  @override
+  String get emailLabel => 'Correo electrónico';
+
+  @override
+  String get changePhoto => 'Cambiar foto';
+
+  @override
+  String get takePhoto => 'Hacer una foto';
+
+  @override
+  String get chooseFromGallery => 'Elegir de la galería';
+
+  @override
+  String get removePhoto => 'Eliminar foto';
+
+  @override
+  String get nameHint => 'Sin definir';
+
+  @override
+  String get tProfileSaved => 'Perfil actualizado';
+
+  @override
+  String get tProfileSaveFailed => 'No se pudo guardar el perfil';
+
+  @override
+  String get termsOfUse => 'Términos de uso';
+
+  @override
+  String get deleteAccount => 'Eliminar cuenta';
+
+  @override
+  String get deleteAccountSheetTitle => 'Eliminar cuenta';
+
+  @override
+  String get deleteAccountEverywhere => 'Eliminar en todas partes';
+
+  @override
+  String get deleteAccountEverywhereBody =>
+      'Tu cuenta, todos los datos en la nube Y todos los registros de este dispositivo. No se conserva nada.';
+
+  @override
+  String get deleteAccountCloudOnly => 'Eliminar cuenta y datos en la nube';
+
+  @override
+  String get deleteAccountCloudOnlyBody =>
+      'Elimina tu cuenta y todo lo almacenado en la nube. Los registros de este dispositivo se conservan.';
+
+  @override
+  String get deleteAccountConfirmTitle => '¿Eliminar cuenta?';
+
+  @override
+  String get deleteAccountConfirmEverywhere =>
+      'Esto elimina permanentemente tu cuenta, todos los datos en la nube y cada registro, foto de ticket, tienda y categoría de este dispositivo. No se puede deshacer.';
+
+  @override
+  String get deleteAccountConfirmCloudOnly =>
+      'Esto elimina permanentemente tu cuenta y todo lo almacenado en la nube. Los registros de este dispositivo se conservan. No se puede deshacer.';
+
+  @override
+  String get deleteAccountConfirm => 'Eliminar cuenta';
+
+  @override
+  String get deletingAccount => 'Eliminando tu cuenta…';
+
+  @override
+  String get tAccountDeleted => 'Tu cuenta ha sido eliminada';
+
+  @override
+  String get deleteAccountSubscriptionTitle => 'Tu suscripción sigue activa';
+
+  @override
+  String get deleteAccountSubscriptionBody =>
+      'Eliminar tu cuenta no cancela tu suscripción Premium: la facturación la gestiona la App Store y continúa hasta que la canceles allí.';
+
+  @override
+  String get deleteAccountSubscriptionAction => 'Gestionar suscripción';
+
+  @override
+  String get savingProfile => 'Guardando…';
+
+  @override
+  String get uploadingPhoto => 'Subiendo la foto…';
+
+  @override
+  String get processingPhoto => 'Procesando la foto…';
 }

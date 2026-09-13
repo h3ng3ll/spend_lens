@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../features/analytics/presentation/pages/analytics_page/analytics_page.dart';
 import '../../../features/analytics/presentation/pages/price_history_page/price_history_page.dart';
+import '../../../features/auth/presentation/pages/edit_profile_page/edit_profile_page.dart';
 import '../../../features/auth/presentation/pages/profile_page/profile_page.dart';
 import '../../../features/category/presentation/pages/category_page/category_page.dart';
 import '../../../features/category/presentation/pages/new_category_page/new_category_page.dart';
@@ -20,6 +21,7 @@ import '../../../features/receipt/presentation/pages/review_page/review_page.dar
 import '../../../features/scanner/presentation/pages/scanner_page/scanner_page.dart';
 import '../../../features/settings/presentation/pages/about_page/about_page.dart';
 import '../../../features/settings/presentation/pages/privacy_page/privacy_page.dart';
+import '../../../features/settings/presentation/pages/terms_page/terms_page.dart';
 import '../../../features/settings/presentation/pages/settings_page/settings_page.dart';
 import '../../../features/store/presentation/pages/choose_store_page/choose_store_page.dart';
 import '../../../features/store/presentation/pages/new_store_page/new_store_page.dart';
@@ -464,6 +466,25 @@ class ProfilePageRoute extends GoRouteData with $ProfilePageRoute {
   }
 }
 
+/// Registered as a SIBLING of `/profile`, not a child of it.
+///
+/// `go_router_builder` nests routes by the `routes:` argument, not by path
+/// prefix, so a literal `/profile/edit` here is an independent top-level entry
+/// — which is what this screen wants: it pushes above the shell on the root
+/// navigator and owns its own back control.
+@TypedGoRoute<EditProfilePageRoute>(path: '/profile/edit')
+class EditProfilePageRoute extends GoRouteData with $EditProfilePageRoute {
+  const EditProfilePageRoute();
+
+  static final GlobalKey<NavigatorState> $parentNavigatorKey =
+      rootNavigatorKey;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return appPage(const EditProfilePage());
+  }
+}
+
 @TypedGoRoute<PrivacyPageRoute>(path: '/privacy')
 class PrivacyPageRoute extends GoRouteData with $PrivacyPageRoute {
   const PrivacyPageRoute();
@@ -474,6 +495,19 @@ class PrivacyPageRoute extends GoRouteData with $PrivacyPageRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return appPage(const PrivacyPage());
+  }
+}
+
+@TypedGoRoute<TermsPageRoute>(path: '/terms')
+class TermsPageRoute extends GoRouteData with $TermsPageRoute {
+  const TermsPageRoute();
+
+  static final GlobalKey<NavigatorState> $parentNavigatorKey =
+      rootNavigatorKey;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return appPage(const TermsPage());
   }
 }
 

@@ -1486,4 +1486,99 @@ class AppLocalizationsDe extends AppLocalizations {
   @override
   String get signOutConfirmBody =>
       'Bereits gesicherte Datensätze werden von diesem Gerät entfernt und bei der nächsten Anmeldung wiederhergestellt. Nicht synchronisierte bleiben erhalten.';
+
+  @override
+  String get editProfile => 'Profil bearbeiten';
+
+  @override
+  String get firstName => 'Vorname';
+
+  @override
+  String get lastName => 'Nachname';
+
+  @override
+  String get emailLabel => 'E-Mail';
+
+  @override
+  String get changePhoto => 'Foto ändern';
+
+  @override
+  String get takePhoto => 'Foto aufnehmen';
+
+  @override
+  String get chooseFromGallery => 'Aus Galerie wählen';
+
+  @override
+  String get removePhoto => 'Foto entfernen';
+
+  @override
+  String get nameHint => 'Nicht festgelegt';
+
+  @override
+  String get tProfileSaved => 'Profil aktualisiert';
+
+  @override
+  String get tProfileSaveFailed => 'Profil konnte nicht gespeichert werden';
+
+  @override
+  String get termsOfUse => 'Nutzungsbedingungen';
+
+  @override
+  String get deleteAccount => 'Konto löschen';
+
+  @override
+  String get deleteAccountSheetTitle => 'Konto löschen';
+
+  @override
+  String get deleteAccountEverywhere => 'Überall löschen';
+
+  @override
+  String get deleteAccountEverywhereBody =>
+      'Dein Konto, alle Cloud-Daten UND jeder Eintrag auf diesem Gerät. Nichts bleibt erhalten.';
+
+  @override
+  String get deleteAccountCloudOnly => 'Konto und Cloud-Daten löschen';
+
+  @override
+  String get deleteAccountCloudOnlyBody =>
+      'Entfernt dein Konto und alles in der Cloud. Einträge auf diesem Gerät bleiben erhalten.';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Konto löschen?';
+
+  @override
+  String get deleteAccountConfirmEverywhere =>
+      'Dies löscht dauerhaft dein Konto, alle Cloud-Daten sowie jeden Eintrag, jedes Belegfoto, jedes Geschäft und jede Kategorie auf diesem Gerät. Das kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get deleteAccountConfirmCloudOnly =>
+      'Dies löscht dauerhaft dein Konto und alles in der Cloud. Einträge auf diesem Gerät bleiben erhalten. Das kann nicht rückgängig gemacht werden.';
+
+  @override
+  String get deleteAccountConfirm => 'Konto löschen';
+
+  @override
+  String get deletingAccount => 'Konto wird gelöscht…';
+
+  @override
+  String get tAccountDeleted => 'Dein Konto wurde gelöscht';
+
+  @override
+  String get deleteAccountSubscriptionTitle => 'Dein Abo bleibt aktiv';
+
+  @override
+  String get deleteAccountSubscriptionBody =>
+      'Das Löschen deines Kontos kündigt dein Premium-Abo nicht — die Abrechnung erfolgt über den App Store und läuft weiter, bis du dort kündigst.';
+
+  @override
+  String get deleteAccountSubscriptionAction => 'Abo verwalten';
+
+  @override
+  String get savingProfile => 'Wird gespeichert…';
+
+  @override
+  String get uploadingPhoto => 'Foto wird hochgeladen…';
+
+  @override
+  String get processingPhoto => 'Foto wird verarbeitet…';
 }

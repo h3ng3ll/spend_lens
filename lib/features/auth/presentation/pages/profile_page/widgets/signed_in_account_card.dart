@@ -22,10 +22,15 @@ class SignedInAccountCard extends StatelessWidget {
   final String email;
   final VoidCallback onSignOut;
 
+  /// Apple Guideline 5.1.1(v): an app offering account creation must offer
+  /// account deletion from inside the app.
+  final VoidCallback onDeleteAccount;
+
   const SignedInAccountCard({
     super.key,
     required this.email,
     required this.onSignOut,
+    required this.onDeleteAccount,
   });
 
   @override
@@ -61,8 +66,17 @@ class SignedInAccountCard extends StatelessWidget {
             label: lo.signOut,
             labelColor: scheme.warn,
             showChevron: false,
-            showBottomDivider: false,
             onTap: onSignOut,
+          ),
+          // Last row, and the only one using the ERROR token rather than
+          // `warn`: sign-out is reversible, this is not, and the two must not
+          // read as equally weighted choices sitting next to each other.
+          SettingsRow(
+            label: lo.deleteAccount,
+            labelColor: scheme.error,
+            showChevron: false,
+            showBottomDivider: false,
+            onTap: onDeleteAccount,
           ),
         ],
       ),

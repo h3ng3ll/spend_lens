@@ -354,4 +354,78 @@ class FirebaseAuthRepository implements IAuthRepository {
     await _googleSignInService.signOut();
     await _auth.signOut();
   }
+
+  @override
+  Future<Either<Failure, Unit>> deleteAccount() async {
+    final user = _auth.currentUser;
+    if (user == null) {
+      // Nothing to delete is SUCCESS, not failure: the caller's goal — no
+      // account on this device — already holds, and reporting an error here
+      // would strand the delete flow after it has wiped the data.
+      return const Right(unit);
+    }
+
+    try {
+      await user.delete();
+      // The Google session survives `user.delete()` — only the Firebase user is
+      // gone. Left behind, the next sign-in silently reuses the same account
+      // instead of showing the picker.
+      await _googleSignInService.signOut();
+      return const Right(unit);
+    } on FirebaseAuthException catch (e, stackTrace) {
+      return Left(
+        _logged(
+          'Account deletion',
+          AccountDeletionFailure(diagnostic: _describe(e)),
+          e,
+          stackTrace,
+        ),
+      );
+    } catch (e, stackTrace) {
+      return Left(
+        _logged(
+          'Account deletion',
+          AccountDeletionFailure(diagnostic: _describe(e)),
+          e,
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  /// Re-runs the CURRENT user's provider sign-in to refresh credential age.
+  ///
+  /// Dispatches on `providerData` rather than asking the caller, so the flow
+  /// cannot send an Apple account through the Google sheet. A user with neither
+  /// provider (which this app never creates) is reported rather than guessed at.
+  @override
+  Future<Either<Failure, Unit>> reauthenticate() async {
+    final user = _auth.currentUser;
+    if (user == null) return const Right(unit);
+
+    final isGoogle = user.providerData.any(
+      (info) => info.providerId == 'google.com',
+    );
+
+    // Re-uses the SAME sign-in paths as first authentication, so every fix
+    // already made there (the nonce pairing, the `AppleAuthProvider` branch,
+    // the Google `serverClientId`) applies here too rather than being
+    // reimplemented subtly differently.
+    final result = isGoogle
+        ? await signInWithGoogle()
+        : await signInWithApple();
+
+    return result.fold((failure) {
+      // A dismissed sheet is the user's choice, not a malfunction — mapped so
+      // the UI can stay silent about it.
+      final isCanceled =
+          failure is GoogleSignInCanceledFailure ||
+          failure is AppleSignInCanceledFailure;
+      return Left(
+        isCanceled
+            ? AccountDeletionCanceledFailure(diagnostic: failure.message)
+            : AccountDeletionFailure(diagnostic: failure.message),
+      );
+    }, (_) => const Right(unit));
+  }
 }

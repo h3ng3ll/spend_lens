@@ -1,0 +1,54 @@
+rules_version = '2';
+
+// Per-user record sync, plus the profile document.
+//
+// This is the ONLY server-side check: the client's own validation is a
+// convenience, and every constraint below is what holds when the client does
+// something else.
+//
+// **Firestore denies any path no `match` block covers**, and a `match` on a
+// document does NOT cascade to its subcollections. The profile document and
+// the seven record collections therefore need separate rules — granting one
+// does not grant the other.
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    function isOwner(uid) {
+      return request.auth != null && request.auth.uid == uid;
+    }
+
+    // The seven collections `ESyncCollection` names. The rules allowlist these
+    // exact names, so adding an entity means adding it to that enum AND here —
+    // the enum's own doc comment records this coupling.
+    function isSyncedCollection(name) {
+      return name in [
+        'receipts',
+        'receiptItems',
+        'products',
+        'stores',
+        'categories',
+        'expenses',
+        'priceObservations'
+      ];
+    }
+
+    // The profile document itself: name, email, avatar URL, provider.
+    //
+    // `delete` is required by account deletion (Apple Guideline 5.1.1(v)) —
+    // `FirebaseFirestoreService.deleteUserDocument`. Without it the deletion
+    // flow wipes the subcollections and then fails on the parent, leaving the
+    // user's name and email behind on a server they can no longer reach.
+    match /users/{uid} {
+      allow read, write, delete: if isOwner(uid);
+    }
+
+    // The record subcollections under that document.
+    //
+    // Declared separately because a rule on `/users/{uid}` grants nothing on
+    // `/users/{uid}/receipts/{id}` — Firestore rules do not cascade downward.
+    match /users/{uid}/{collection}/{docId} {
+      allow read, write, delete: if isOwner(uid)
+                                 && isSyncedCollection(collection);
+    }
+  }
+}

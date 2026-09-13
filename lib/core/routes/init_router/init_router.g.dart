@@ -24,7 +24,9 @@ List<RouteBase> get $appRoutes => [
   $cashExpensePageRoute,
   $priceHistoryPageRoute,
   $profilePageRoute,
+  $editProfilePageRoute,
   $privacyPageRoute,
+  $termsPageRoute,
   $aboutPageRoute,
 ];
 
@@ -655,6 +657,34 @@ mixin $ProfilePageRoute on GoRouteData {
   void replace(BuildContext context) => context.replace(location);
 }
 
+RouteBase get $editProfilePageRoute => GoRouteData.$route(
+  path: '/profile/edit',
+  hasOverriddenOnExit: false,
+  parentNavigatorKey: EditProfilePageRoute.$parentNavigatorKey,
+  factory: $EditProfilePageRoute._fromState,
+);
+
+mixin $EditProfilePageRoute on GoRouteData {
+  static EditProfilePageRoute _fromState(GoRouterState state) =>
+      const EditProfilePageRoute();
+
+  @override
+  String get location => GoRouteData.$location('/profile/edit');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
 RouteBase get $privacyPageRoute => GoRouteData.$route(
   path: '/privacy',
   hasOverriddenOnExit: false,
@@ -668,6 +698,34 @@ mixin $PrivacyPageRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/privacy');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $termsPageRoute => GoRouteData.$route(
+  path: '/terms',
+  hasOverriddenOnExit: false,
+  parentNavigatorKey: TermsPageRoute.$parentNavigatorKey,
+  factory: $TermsPageRoute._fromState,
+);
+
+mixin $TermsPageRoute on GoRouteData {
+  static TermsPageRoute _fromState(GoRouterState state) =>
+      const TermsPageRoute();
+
+  @override
+  String get location => GoRouteData.$location('/terms');
 
   @override
   void go(BuildContext context) => context.go(location);

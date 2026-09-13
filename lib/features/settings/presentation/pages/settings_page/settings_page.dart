@@ -116,6 +116,8 @@ class _SettingsPageState extends State<SettingsPage>
 
   void _onPrivacy(BuildContext context) => PrivacyPageRoute().push(context);
 
+  void _onTerms(BuildContext context) => const TermsPageRoute().push(context);
+
   void _onAbout(BuildContext context) => AboutPageRoute().push(context);
 
   /// `ConfirmDialog.onConfirm` is a plain `VoidCallback` (it must stay a
@@ -225,6 +227,7 @@ class _SettingsPageState extends State<SettingsPage>
                       onPickTheme: (mode) => _onPickTheme(context, mode),
                       onDeleteAll: () => _onDeleteAll(context),
                       onPrivacy: () => _onPrivacy(context),
+                      onTerms: () => _onTerms(context),
                       onAbout: () => _onAbout(context),
                       scanCapability: capability,
                       onOpenScanSettings: _onOpenScanSettings,

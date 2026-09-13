@@ -39,4 +39,13 @@ class UnconfiguredAuthRepository implements IAuthRepository {
 
   @override
   Future<void> signOut() async {}
+
+  /// Succeeds vacuously: with no Firebase there is no account to delete, so
+  /// the caller's goal already holds. Reporting a failure would block the
+  /// local-data wipe that the delete flow performs alongside this.
+  @override
+  Future<Either<Failure, Unit>> deleteAccount() async => const Right(unit);
+
+  @override
+  Future<Either<Failure, Unit>> reauthenticate() async => const Right(unit);
 }

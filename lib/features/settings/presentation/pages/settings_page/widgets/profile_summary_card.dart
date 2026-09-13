@@ -4,8 +4,8 @@ import '../../../../../../core/resources/app_icons.dart';
 import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../../core/resources/text/app_text_theme.dart';
-import '../../../../../../core/widgets/app_container.dart';
 import '../../../../../../core/widgets/app_section_card.dart';
+import '../../../../../../core/widgets/build_avatar.dart';
 import '../../../../../../core/widgets/app_svg_icon.dart';
 import '../../../../../auth/presentation/bloc/auth_bloc/auth_bloc.dart';
 
@@ -40,10 +40,12 @@ class ProfileSummaryCard extends StatelessWidget {
     final textTheme = AppTextTheme.of(context);
     final lo = AppLocalizations.of(context);
 
-    // Same derivation as ProfileIdentityColumn — signed in shows the account
-    // email, signed out keeps the neutral local-account copy.
-    final displayName = state.isSignedIn && state.email.isNotEmpty
-        ? state.email
+    // Same derivation as ProfileIdentityColumn — the NAME when one is set,
+    // otherwise the account email, and the neutral local-account copy when
+    // signed out. Both surfaces read the same getters so they can never
+    // disagree about who is signed in.
+    final displayName = state.isSignedIn && state.identityPrimary.isNotEmpty
+        ? state.identityPrimary
         : lo.localAccount;
     final statusLabel = switch (state) {
       _ when state.isNotSignedIn => lo.notSignedIn,
@@ -60,18 +62,7 @@ class ProfileSummaryCard extends StatelessWidget {
         child: Row(
           spacing: 14.0,
           children: [
-            AppContainer(
-              width: _avatarSize,
-              height: _avatarSize,
-              color: scheme.accentTint,
-              shape: BoxShape.circle,
-              alignment: Alignment.center,
-              child: AppSvgIcon(
-                asset: AppIcons.user,
-                color: scheme.accent,
-                size: 24.0,
-              ),
-            ),
+            BuildAvatar(filename: state.avatarFilename, size: _avatarSize),
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,

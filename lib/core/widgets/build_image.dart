@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
@@ -18,6 +19,15 @@ import 'app_container.dart';
 class BuildImage extends StatelessWidget {
   final Uint8List? bytes;
   final String? asset;
+
+  /// A file on disk — the preferred source for user photos.
+  ///
+  /// `Image.file` decodes straight from storage, so the caller never has to
+  /// hold a `Uint8List` to show a picture. That matters beyond tidiness: bytes
+  /// held in a bloc state drag `DeepCollectionEquality` into `==`/`hashCode`
+  /// and the raw array into `toString()`, which is what tombstoned this app
+  /// once already. See `AvatarImageStore`.
+  final File? file;
   final double? width;
   final double? height;
 
@@ -30,6 +40,7 @@ class BuildImage extends StatelessWidget {
     super.key,
     this.bytes,
     this.asset,
+    this.file,
     this.width,
     this.height,
     this.shape = BoxShape.rectangle,
@@ -38,7 +49,7 @@ class BuildImage extends StatelessWidget {
     this.border,
   });
 
-  bool get _hasImage => bytes != null || asset != null;
+  bool get _hasImage => bytes != null || asset != null || file != null;
 
   @override
   Widget build(BuildContext context) {
@@ -48,9 +59,17 @@ class BuildImage extends StatelessWidget {
       return _placeholder(colorScheme);
     }
 
-    final Widget image = bytes != null
-        ? Image.memory(bytes!, fit: fit)
-        : Image.asset(asset!, fit: fit);
+    final Widget image = switch (true) {
+      _ when file != null => Image.file(
+        file!,
+        fit: fit,
+        // A file deleted between the state emit and this build must degrade to
+        // the placeholder, not to a broken-image icon.
+        errorBuilder: (context, _, _) => _placeholder(colorScheme),
+      ),
+      _ when bytes != null => Image.memory(bytes!, fit: fit),
+      _ => Image.asset(asset!, fit: fit),
+    };
 
     return _wrap(image);
   }

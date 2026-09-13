@@ -177,7 +177,10 @@ void main() async {
   )..add(const StoresEvent.watch());
   getIt.registerLazySingleton<StoresBloc>(() => storesBloc);
 
-  final authBloc = getIt<AuthBloc>()..add(const AuthEvent.watch());
+  final authBloc = getIt<AuthBloc>()
+    ..add(const AuthEvent.watch())
+    ..add(const AuthEvent.watchProfile())
+    ..add(const AuthEvent.watchAvatar());
   final syncBloc = getIt<SyncBloc>()..add(const SyncEvent.watch());
 
   final router = initRouter(

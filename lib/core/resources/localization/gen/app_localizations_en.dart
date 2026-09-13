@@ -1479,4 +1479,99 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get signOutConfirmBody =>
       'Records already backed up will be removed from this device and restored when you sign in again. Anything not synchronized stays.';
+
+  @override
+  String get editProfile => 'Edit profile';
+
+  @override
+  String get firstName => 'First name';
+
+  @override
+  String get lastName => 'Last name';
+
+  @override
+  String get emailLabel => 'Email';
+
+  @override
+  String get changePhoto => 'Change photo';
+
+  @override
+  String get takePhoto => 'Take photo';
+
+  @override
+  String get chooseFromGallery => 'Choose from gallery';
+
+  @override
+  String get removePhoto => 'Remove photo';
+
+  @override
+  String get nameHint => 'Not set';
+
+  @override
+  String get tProfileSaved => 'Profile updated';
+
+  @override
+  String get tProfileSaveFailed => 'Couldn\'t save your profile';
+
+  @override
+  String get termsOfUse => 'Terms of Use';
+
+  @override
+  String get deleteAccount => 'Delete account';
+
+  @override
+  String get deleteAccountSheetTitle => 'Delete account';
+
+  @override
+  String get deleteAccountEverywhere => 'Delete everywhere';
+
+  @override
+  String get deleteAccountEverywhereBody =>
+      'Your account, all cloud data AND every record on this device. Nothing is kept.';
+
+  @override
+  String get deleteAccountCloudOnly => 'Delete account and cloud data';
+
+  @override
+  String get deleteAccountCloudOnlyBody =>
+      'Removes your account and everything stored in the cloud. Records on this device are kept.';
+
+  @override
+  String get deleteAccountConfirmTitle => 'Delete account?';
+
+  @override
+  String get deleteAccountConfirmEverywhere =>
+      'This permanently deletes your account, all cloud data, and every record, receipt photo, store and category on this device. This cannot be undone.';
+
+  @override
+  String get deleteAccountConfirmCloudOnly =>
+      'This permanently deletes your account and everything stored in the cloud. Records on this device are kept. This cannot be undone.';
+
+  @override
+  String get deleteAccountConfirm => 'Delete account';
+
+  @override
+  String get deletingAccount => 'Deleting your account…';
+
+  @override
+  String get tAccountDeleted => 'Your account has been deleted';
+
+  @override
+  String get deleteAccountSubscriptionTitle => 'Your subscription stays active';
+
+  @override
+  String get deleteAccountSubscriptionBody =>
+      'Deleting your account does not cancel your Premium subscription — billing is handled by the App Store and continues until you cancel it there.';
+
+  @override
+  String get deleteAccountSubscriptionAction => 'Manage subscription';
+
+  @override
+  String get savingProfile => 'Saving…';
+
+  @override
+  String get uploadingPhoto => 'Uploading photo…';
+
+  @override
+  String get processingPhoto => 'Processing photo…';
 }
