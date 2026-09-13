@@ -15,6 +15,11 @@ workflows:
           echo "$FIREBASE_JSON" > "$CM_BUILD_DIR/firebase.json"
           echo "firebase.json contents:"
           cat "$CM_BUILD_DIR/firebase.json"
+      - name: Create firebase_options.dart file
+        script: |
+          echo "FIREBASE_OPTIONS" > "$CM_BUILD_DIR/lib/firebase_options.dart"
+          echo "firebase_options.dart contents:"
+          cat "$CM_BUILD_DIR/lib/firebase_options.dart"
       - name: Restore key
         script: |
           echo "$KEY_PROPERTY" > android/key.properties
