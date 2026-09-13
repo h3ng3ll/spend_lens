@@ -22,7 +22,7 @@ workflows:
           cat "$CM_BUILD_DIR/lib/firebase_options.dart"
       - name: Create google-services.json file
         script: |
-          echo "GOOGLE_SERVICES_JSON" > "$CM_BUILD_DIR/android/app/google-services.json"
+          echo "$GOOGLE_SERVICES_JSON" > "$CM_BUILD_DIR/android/app/google-services.json"
           echo "google-services.json contents:"
           cat "$CM_BUILD_DIR/android/app/google-services.json"
       - name: Restore key
@@ -93,7 +93,7 @@ workflows:
           cat "$CM_BUILD_DIR/lib/firebase_options.dart"
       - name: Create GoogleService-Info.plist file
         script: |
-          echo "GOOGLE_SERVICE_INFO_PLIST" > "$CM_BUILD_DIR/ios/Runner/GoogleService-Info.plist"
+          echo "$GOOGLE_SERVICE_INFO_PLIST" > "$CM_BUILD_DIR/ios/Runner/GoogleService-Info.plist"
           echo "GoogleService-Info.plist contents:"
           cat "$CM_BUILD_DIR/ios/Runner/GoogleService-Info.plist"
       - name: Detach Xcode project from any developer account
