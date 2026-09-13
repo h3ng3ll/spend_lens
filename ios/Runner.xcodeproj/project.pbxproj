@@ -193,7 +193,12 @@
 		331C8080294A63A400263BE5 /* RunnerTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 331C8087294A63A400263BE5 /* Build configuration list for PBXNativeTarget "RunnerTests" */;
-
+			buildPhases = (
+				2CBB3D2D4BE6840F61C66FA3 /* [CP] Check Pods Manifest.lock */,
+				331C807D294A63A400263BE5 /* Sources */,
+				331C807F294A63A400263BE5 /* Resources */,
+				687D7F91E8AD8B90A7A6CBD1 /* Frameworks */,
+			);
 			buildRules = (
 			);
 			dependencies = (
@@ -215,7 +220,6 @@
 				97C146EC1CF9000F007C117D /* Resources */,
 				9705A1C41CF9048500538489 /* Embed Frameworks */,
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
-				EB4EB3B712475E64588E059D /* FlutterFire: "flutterfire upload-crashlytics-symbols" */,
 				FA3916D1329A78721A791F32 /* [CP] Embed Pods Frameworks */,
 				5A45543E8D4429167C97713E /* [CP] Copy Pods Resources */,
 			);
