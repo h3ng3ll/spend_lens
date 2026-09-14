@@ -133,6 +133,7 @@ workflows:
       - name: Flutter build ipa
         script: |
           flutter build ipa --release \
+          --export-options-plist=ios/export_options.plist
       - name: View keys
         script: |
           echo "KEY_ID=$APPSTORE_KEY_ID"
