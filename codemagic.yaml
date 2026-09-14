@@ -62,6 +62,7 @@ workflows:
         - general
         - google_credentials
         - purchase
+        - apple_credentials
       ios_signing:
         distribution_type: app_store
         bundle_identifier: "com.hengell.spendlens"
