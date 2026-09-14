@@ -76,6 +76,10 @@ workflows:
         script: |
           dart pub global activate flutterfire_cli
           export PATH="$PATH:$HOME/.pub-cache/bin"
+      - name: Check key validity
+        script: |
+          echo "$APPSTORE_P8" > /tmp/key.p8
+          openssl pkey -in /tmp/key.p8 -check -noout
       - name: Restore .env
         script: |
           echo "GOOGLE_SERVER_CLIENT_ID=$GOOGLE_SERVER_CLIENT_ID
@@ -128,7 +132,15 @@ workflows:
       - name: Flutter build ipa
         script: |
           flutter build ipa --release \
-            --export-options-plist=ios/export_options.plist
+      - name: View keys
+        script: |
+          echo "KEY_ID=$APPSTORE_KEY_ID"
+          echo "ISSUER_ID=$APPSTORE_ISSUER_ID"
+
+          echo "PRIVATE KEY length: ${#APP_STORE_CONNECT_PUBLISHER_PRIVATE_KEY}"
+
+          printf '%s' "$APP_STORE_CONNECT_PUBLISHER_PRIVATE_KEY" | head -c 40
+          echo
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
