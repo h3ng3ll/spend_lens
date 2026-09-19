@@ -40,6 +40,15 @@ class FirebaseStorageService {
   Reference _receiptRef(String uid, String receiptId) =>
       _receiptsFolder(uid).child('$receiptId.jpg');
 
+  /// A store's logo object, in its own `stores/` folder.
+  ///
+  /// Kept OUT of `receipts/` for the same reason as the avatar: [usedBytes]
+  /// sums that folder to drive the Profile storage bar, which the UI
+  /// describes to the user as receipt photos. A logo filed there would
+  /// silently inflate a figure the user is told means something else.
+  Reference _storeLogoRef(String uid, String storeId) =>
+      _firebaseStorage.ref().child('users/$uid/stores/$storeId.jpg');
+
   /// Uploads [bytes] as this receipt's photo, replacing any existing object.
   /// Returns the stored byte count so the caller can update usage without a
   /// second round-trip.
@@ -91,6 +100,58 @@ class FirebaseStorageService {
     } on FirebaseException catch (error) {
       // Already gone is success, not a failure — deleting a receipt whose
       // photo never uploaded must not surface an error.
+      if (error.code == 'object-not-found') return;
+      rethrow;
+    }
+  }
+
+  /// Uploads [bytes] as this store's logo, replacing any existing object,
+  /// and returns its download URL for the store record.
+  ///
+  /// The URL is what makes the logo travel: it rides the ordinary record sync
+  /// on `Store.logoUrl`, so another device learns a logo exists from the
+  /// document alone and fetches the bytes in the photo pass.
+  Future<String> uploadStoreLogo({
+    required String uid,
+    required String storeId,
+    required Uint8List bytes,
+  }) async {
+    final ref = _storeLogoRef(uid, storeId);
+    await ref.putData(bytes, SettableMetadata(contentType: 'image/jpeg'));
+    return ref.getDownloadURL();
+  }
+
+  /// Downloads this store's logo, or null when the object is absent.
+  ///
+  /// Bounded by [_kMaxPhotoBytes] for the same reason as
+  /// [downloadReceiptPhoto] — `getData` buffers the whole object in memory,
+  /// and a logo is compressed far below this ceiling.
+  ///
+  /// Returns null rather than throwing when the object is missing: a store
+  /// whose logo never uploaded (offline, or a full account) is a normal
+  /// state, not an error.
+  Future<Uint8List?> downloadStoreLogo({
+    required String uid,
+    required String storeId,
+  }) async {
+    try {
+      return await _storeLogoRef(uid, storeId).getData(_kMaxPhotoBytes);
+    } on FirebaseException catch (error) {
+      if (error.code == 'object-not-found') return null;
+      rethrow;
+    }
+  }
+
+  /// Removes a store's logo object. Already-gone is success, not failure —
+  /// the same contract as [deleteReceiptPhoto] and [deleteAvatar], and it is
+  /// what lets a remove be retried safely after a partial failure.
+  Future<void> deleteStoreLogo({
+    required String uid,
+    required String storeId,
+  }) async {
+    try {
+      await _storeLogoRef(uid, storeId).delete();
+    } on FirebaseException catch (error) {
       if (error.code == 'object-not-found') return;
       rethrow;
     }

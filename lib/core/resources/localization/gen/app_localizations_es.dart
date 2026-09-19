@@ -524,6 +524,21 @@ class AppLocalizationsEs extends AppLocalizations {
   String get newStore => 'Nueva tienda';
 
   @override
+  String get editStore => 'Editar tienda';
+
+  @override
+  String get changeStoreLogo => 'Cambiar logotipo';
+
+  @override
+  String get removeStoreLogo => 'Eliminar logotipo';
+
+  @override
+  String get savingStore => 'Guardando…';
+
+  @override
+  String get tStoreSaved => 'Tienda actualizada';
+
+  @override
   String get storesIntro =>
       'Creado automáticamente a partir de tus tickets. Abre una tienda para ver sus productos y comparar precios.';
 

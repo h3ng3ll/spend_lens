@@ -17,6 +17,8 @@ _Store _$StoreFromJson(Map<String, dynamic> json) => _Store(
   type:
       $enumDecodeNullable(_$EStoreTypeEnumMap, json['type']) ??
       EStoreType.other,
+  logoFilename: json['logoFilename'] as String?,
+  logoUrl: json['logoUrl'] as String? ?? '',
   updatedAt: DateTime.parse(json['updatedAt'] as String),
   deletedAt: json['deletedAt'] == null
       ? null
@@ -31,6 +33,8 @@ Map<String, dynamic> _$StoreToJson(_Store instance) => <String, dynamic>{
   'name': instance.name,
   'receiptAliases': instance.receiptAliases,
   'type': _$EStoreTypeEnumMap[instance.type]!,
+  'logoFilename': instance.logoFilename,
+  'logoUrl': instance.logoUrl,
   'updatedAt': instance.updatedAt.toIso8601String(),
   'deletedAt': instance.deletedAt?.toIso8601String(),
   'syncStatus': _$ESyncStatusEnumMap[instance.syncStatus]!,

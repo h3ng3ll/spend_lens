@@ -531,6 +531,21 @@ class AppLocalizationsUk extends AppLocalizations {
   String get newStore => 'Новий магазин';
 
   @override
+  String get editStore => 'Редагувати магазин';
+
+  @override
+  String get changeStoreLogo => 'Змінити логотип';
+
+  @override
+  String get removeStoreLogo => 'Видалити логотип';
+
+  @override
+  String get savingStore => 'Збереження…';
+
+  @override
+  String get tStoreSaved => 'Магазин оновлено';
+
+  @override
   String get storesIntro =>
       'Створюється автоматично з чеків. Відкрийте магазин, щоб побачити товари та порівняння цін.';
 

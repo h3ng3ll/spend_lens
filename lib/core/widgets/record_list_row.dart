@@ -27,6 +27,17 @@ class RecordListRow extends StatelessWidget {
   final VoidCallback? onTap;
   final bool showBottomDivider;
 
+  /// Replaces the [InitialTile] when the record has a real image of its own —
+  /// today, a store with a logo.
+  ///
+  /// Optional so every existing caller keeps the initial tile unchanged, and
+  /// so [initial] stays the fallback rather than becoming dead: a store
+  /// without a logo still renders its letter through the default path.
+  ///
+  /// It must keep the tile's 36dp box; see [InitialTile] on why that fixed
+  /// square is not the row-height chronic bug.
+  final Widget? leading;
+
   const RecordListRow({
     super.key,
     required this.initial,
@@ -37,6 +48,7 @@ class RecordListRow extends StatelessWidget {
     required this.amountText,
     this.onTap,
     this.showBottomDivider = true,
+    this.leading,
   });
 
   @override
@@ -50,11 +62,12 @@ class RecordListRow extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.center,
         spacing: 12.0,
         children: [
-          InitialTile(
-            initial: initial,
-            background: tileBackground,
-            foreground: tileForeground,
-          ),
+          leading ??
+              InitialTile(
+                initial: initial,
+                background: tileBackground,
+                foreground: tileForeground,
+              ),
           Expanded(
             child: Column(
               mainAxisSize: MainAxisSize.min,

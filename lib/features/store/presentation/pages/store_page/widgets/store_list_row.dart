@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../../core/routes/init_router/init_router.dart';
+import '../../../../../../core/widgets/build_store_logo.dart';
 import '../../../../../../core/widgets/record_list_row.dart';
 import '../../../../../expense/domain/models/expense/expense.dart';
 import '../../../../domain/models/store/e_store_type.dart';
@@ -61,6 +62,16 @@ class StoreListRow extends StatelessWidget {
           amountText: amountText,
           onTap: () => _onTap(context),
           showBottomDivider: showBottomDivider,
+          // Only when a logo actually exists — otherwise the row keeps the
+          // shared initial tile, so a store without a logo looks exactly as it
+          // did before logos existed.
+          leading: (store.logoFilename ?? '').isEmpty
+              ? null
+              : BuildStoreLogo(
+                  filename: store.logoFilename ?? '',
+                  storeName: store.name,
+                  size: 36.0,
+                ),
         ),
       ],
     );

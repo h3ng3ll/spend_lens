@@ -113,7 +113,7 @@ types:
         index: 8
   Store:
     typeId: 4
-    nextIndex: 7
+    nextIndex: 9
     fields:
       id:
         index: 0
@@ -129,6 +129,10 @@ types:
         index: 5
       syncStatus:
         index: 6
+      logoFilename:
+        index: 7
+      logoUrl:
+        index: 8
   Category:
     typeId: 5
     nextIndex: 8

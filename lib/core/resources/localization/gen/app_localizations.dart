@@ -918,6 +918,36 @@ abstract class AppLocalizations {
   /// **'New store'**
   String get newStore;
 
+  /// No description provided for @editStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit store'**
+  String get editStore;
+
+  /// No description provided for @changeStoreLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Change logo'**
+  String get changeStoreLogo;
+
+  /// No description provided for @removeStoreLogo.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove logo'**
+  String get removeStoreLogo;
+
+  /// No description provided for @savingStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Saving…'**
+  String get savingStore;
+
+  /// No description provided for @tStoreSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Store updated'**
+  String get tStoreSaved;
+
   /// No description provided for @storesIntro.
   ///
   /// In en, this message translates to:

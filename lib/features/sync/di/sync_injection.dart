@@ -1,4 +1,5 @@
 import '../../../core/services/receipt_image_store/receipt_image_store.dart';
+import '../../../core/services/store_logo_image_store/store_logo_image_store.dart';
 import '../../../core/di/injection.dart';
 import '../../../core/services/logger_service.dart';
 import '../../../core/services/firebase/firebase_firestore_service.dart';
@@ -20,6 +21,7 @@ import '../domain/repositories/i_sync_remote_repository.dart';
 import '../domain/use_cases/pull_remote_changes_use_case.dart';
 import '../domain/use_cases/push_pending_changes_use_case.dart';
 import '../domain/use_cases/download_receipt_photos_use_case.dart';
+import '../domain/use_cases/download_store_logos_use_case.dart';
 import '../domain/use_cases/upload_receipt_photos_use_case.dart';
 import '../domain/use_cases/run_full_sync_use_case.dart';
 import '../presentation/bloc/sync_bloc/sync_bloc.dart';
@@ -74,12 +76,20 @@ void initSyncFeature({required bool isFirebaseReady}) {
     ),
   );
   getIt.registerLazySingleton(
+    () => DownloadStoreLogosUseCase(
+      storeLocalRepository: getIt<IStoreLocalRepository>(),
+      imageStore: getIt<StoreLogoImageStore>(),
+      storageService: getIt<FirebaseStorageService>(),
+    ),
+  );
+  getIt.registerLazySingleton(
     () => RunFullSyncUseCase(
       remoteRepository: getIt<ISyncRemoteRepository>(),
       pushPendingChanges: getIt<PushPendingChangesUseCase>(),
       pullRemoteChanges: getIt<PullRemoteChangesUseCase>(),
       uploadReceiptPhotos: getIt<UploadReceiptPhotosUseCase>(),
       downloadReceiptPhotos: getIt<DownloadReceiptPhotosUseCase>(),
+      downloadStoreLogos: getIt<DownloadStoreLogosUseCase>(),
       adapters: getIt<SyncEntityAdapters>(),
       settingsLocalRepository: getIt<ISettingsLocalRepository>(),
       loggerService: getIt<LoggerService>(),

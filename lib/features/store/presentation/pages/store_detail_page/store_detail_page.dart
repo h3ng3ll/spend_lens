@@ -11,6 +11,7 @@ import '../../../../expense/domain/repositories/i_expense_local_repository.dart'
 import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../bloc/store_detail_bloc/store_detail_bloc.dart';
 import '../../../domain/repositories/i_store_local_repository.dart';
+import 'widgets/edit_store_sheet/edit_store_sheet.dart';
 import 'widgets/store_detail_body.dart';
 import 'widgets/store_detail_header.dart';
 
@@ -53,6 +54,15 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
     context.goBack();
   }
 
+  /// Opens the edit sheet for this store's name and logo.
+  ///
+  /// Nothing is read back from it: `StoreDetailBloc` is already subscribed to
+  /// the store box, so a committed save repaints this screen through the same
+  /// stream that any other write would.
+  Future<void> _onEdit() async {
+    await EditStoreSheet.show(context, storeId: widget.storeId);
+  }
+
   bool _listenWhenNotFound(
     StoreDetailState previous,
     StoreDetailState current,
@@ -91,6 +101,7 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
                 return StoreDetailBody(
                   snapshot: state.snapshot!,
                   onClose: _onClose,
+                  onEdit: _onEdit,
                 );
               }
               // Covers isInitial, isLoading and isNotFound (the listener

@@ -521,6 +521,21 @@ class AppLocalizationsEn extends AppLocalizations {
   String get newStore => 'New store';
 
   @override
+  String get editStore => 'Edit store';
+
+  @override
+  String get changeStoreLogo => 'Change logo';
+
+  @override
+  String get removeStoreLogo => 'Remove logo';
+
+  @override
+  String get savingStore => 'Saving…';
+
+  @override
+  String get tStoreSaved => 'Store updated';
+
+  @override
   String get storesIntro =>
       'Built automatically from your receipts. Open a store to see its products and how their prices compare elsewhere.';
 

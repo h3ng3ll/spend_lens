@@ -6,10 +6,14 @@ import 'package:spend_lens/core/services/logger_service.dart';
 import 'package:spend_lens/features/expense/domain/models/expense/e_expense_source.dart';
 import 'package:spend_lens/core/services/firebase/firebase_storage_service.dart';
 import 'package:spend_lens/core/services/receipt_image_store/receipt_image_store.dart';
+import 'package:spend_lens/core/services/store_logo_image_store/store_logo_image_store.dart';
 import 'package:spend_lens/features/expense/domain/models/expense/expense.dart';
 import 'package:spend_lens/features/receipt/domain/models/receipt/receipt.dart';
 import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_local_repository.dart';
+import 'package:spend_lens/features/store/domain/models/store/store.dart';
+import 'package:spend_lens/features/store/domain/repositories/i_store_local_repository.dart';
 import 'package:spend_lens/features/sync/domain/use_cases/download_receipt_photos_use_case.dart';
+import 'package:spend_lens/features/sync/domain/use_cases/download_store_logos_use_case.dart';
 import 'package:spend_lens/features/sync/domain/use_cases/upload_receipt_photos_use_case.dart';
 import 'package:spend_lens/features/settings/domain/models/app_settings/app_settings.dart';
 import 'package:spend_lens/features/settings/domain/repositories/i_settings_local_repository.dart';
@@ -90,6 +94,11 @@ void main() {
     downloadReceiptPhotos: DownloadReceiptPhotosUseCase(
       receiptLocalRepository: _EmptyReceipts(),
       imageStore: ReceiptImageStore(),
+      storageService: _UnusedStorage(),
+    ),
+    downloadStoreLogos: DownloadStoreLogosUseCase(
+      storeLocalRepository: _EmptyStores(),
+      imageStore: StoreLogoImageStore(),
       storageService: _UnusedStorage(),
     ),
     adapters: _FakeAdapters([adapter()]),
@@ -197,6 +206,11 @@ void main() {
         downloadReceiptPhotos: DownloadReceiptPhotosUseCase(
           receiptLocalRepository: _EmptyReceipts(),
           imageStore: ReceiptImageStore(),
+          storageService: _UnusedStorage(),
+        ),
+        downloadStoreLogos: DownloadStoreLogosUseCase(
+          storeLocalRepository: _EmptyStores(),
+          imageStore: StoreLogoImageStore(),
           storageService: _UnusedStorage(),
         ),
         adapters: _FakeAdapters([
@@ -367,6 +381,17 @@ class _FakeAdapters implements SyncEntityAdapters {
 class _EmptyReceipts implements IReceiptLocalRepository {
   @override
   Future<List<Receipt>> getAll() async => const [];
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// Empty, for the same reason as [_EmptyReceipts]: `DownloadStoreLogosUseCase`
+/// short-circuits on `getAll()` returning nothing, so no Firebase touch is
+/// possible from these cases.
+class _EmptyStores implements IStoreLocalRepository {
+  @override
+  Future<List<Store>> getAll() async => const [];
 
   @override
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

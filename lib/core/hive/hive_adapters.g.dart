@@ -293,6 +293,8 @@ class StoreAdapter extends TypeAdapter<Store> {
           ? []
           : (fields[2] as List).cast<String>(),
       type: fields[3] == null ? EStoreType.other : fields[3] as EStoreType,
+      logoFilename: fields[7] as String?,
+      logoUrl: fields[8] == null ? '' : fields[8] as String,
       updatedAt: fields[4] as DateTime,
       deletedAt: fields[5] as DateTime?,
       syncStatus: fields[6] == null
@@ -304,7 +306,7 @@ class StoreAdapter extends TypeAdapter<Store> {
   @override
   void write(BinaryWriter writer, Store obj) {
     writer
-      ..writeByte(7)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -318,7 +320,11 @@ class StoreAdapter extends TypeAdapter<Store> {
       ..writeByte(5)
       ..write(obj.deletedAt)
       ..writeByte(6)
-      ..write(obj.syncStatus);
+      ..write(obj.syncStatus)
+      ..writeByte(7)
+      ..write(obj.logoFilename)
+      ..writeByte(8)
+      ..write(obj.logoUrl);
   }
 
   @override

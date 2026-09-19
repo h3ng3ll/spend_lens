@@ -523,6 +523,21 @@ class AppLocalizationsDe extends AppLocalizations {
   String get newStore => 'Neuer Laden';
 
   @override
+  String get editStore => 'Laden bearbeiten';
+
+  @override
+  String get changeStoreLogo => 'Logo ändern';
+
+  @override
+  String get removeStoreLogo => 'Logo entfernen';
+
+  @override
+  String get savingStore => 'Wird gespeichert…';
+
+  @override
+  String get tStoreSaved => 'Laden aktualisiert';
+
+  @override
   String get storesIntro =>
       'Automatisch aus deinen Belegen erstellt. Öffne einen Laden für Produkte und Preisvergleiche.';
 

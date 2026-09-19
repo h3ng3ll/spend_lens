@@ -530,6 +530,21 @@ class AppLocalizationsRu extends AppLocalizations {
   String get newStore => 'Новый магазин';
 
   @override
+  String get editStore => 'Редактировать магазин';
+
+  @override
+  String get changeStoreLogo => 'Изменить логотип';
+
+  @override
+  String get removeStoreLogo => 'Удалить логотип';
+
+  @override
+  String get savingStore => 'Сохранение…';
+
+  @override
+  String get tStoreSaved => 'Магазин обновлён';
+
+  @override
   String get storesIntro =>
       'Создаётся автоматически из чеков. Откройте магазин, чтобы увидеть товары и сравнение цен.';
 

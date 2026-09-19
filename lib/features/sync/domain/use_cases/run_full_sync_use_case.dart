@@ -9,6 +9,7 @@ import '../repositories/i_sync_remote_repository.dart';
 import 'pull_remote_changes_use_case.dart';
 import 'push_pending_changes_use_case.dart';
 import 'download_receipt_photos_use_case.dart';
+import 'download_store_logos_use_case.dart';
 import 'upload_receipt_photos_use_case.dart';
 
 /// What one sync cycle accomplished.
@@ -24,6 +25,11 @@ class SyncReport {
   /// back.
   final int photosDownloaded;
 
+  /// Store logos restored FROM cloud storage this cycle. Counted separately
+  /// from [photosDownloaded] so the log line stays diagnosable: the two pass
+  /// over different collections and fail for different reasons.
+  final int logosDownloaded;
+
   /// Remote documents removed because their deletion had been published.
   final int purged;
 
@@ -32,6 +38,7 @@ class SyncReport {
     required this.pulled,
     this.photosUploaded = 0,
     this.photosDownloaded = 0,
+    this.logosDownloaded = 0,
     this.purged = 0,
   });
 
@@ -40,6 +47,7 @@ class SyncReport {
       pulled > 0 ||
       photosUploaded > 0 ||
       photosDownloaded > 0 ||
+      logosDownloaded > 0 ||
       purged > 0;
 }
 
@@ -56,6 +64,7 @@ class RunFullSyncUseCase {
   final PullRemoteChangesUseCase _pullRemoteChanges;
   final UploadReceiptPhotosUseCase _uploadReceiptPhotos;
   final DownloadReceiptPhotosUseCase _downloadReceiptPhotos;
+  final DownloadStoreLogosUseCase _downloadStoreLogos;
   final SyncEntityAdapters _adapters;
   final ISettingsLocalRepository _settingsLocalRepository;
   final LoggerService _loggerService;
@@ -66,6 +75,7 @@ class RunFullSyncUseCase {
     required PullRemoteChangesUseCase pullRemoteChanges,
     required UploadReceiptPhotosUseCase uploadReceiptPhotos,
     required DownloadReceiptPhotosUseCase downloadReceiptPhotos,
+    required DownloadStoreLogosUseCase downloadStoreLogos,
     required SyncEntityAdapters adapters,
     required ISettingsLocalRepository settingsLocalRepository,
     required LoggerService loggerService,
@@ -75,6 +85,7 @@ class RunFullSyncUseCase {
          pullRemoteChanges,
          uploadReceiptPhotos,
          downloadReceiptPhotos,
+         downloadStoreLogos,
          adapters,
          settingsLocalRepository,
          loggerService,
@@ -86,6 +97,7 @@ class RunFullSyncUseCase {
     this._pullRemoteChanges,
     this._uploadReceiptPhotos,
     this._downloadReceiptPhotos,
+    this._downloadStoreLogos,
     this._adapters,
     this._settingsLocalRepository,
     this._loggerService,
@@ -254,13 +266,18 @@ class RunFullSyncUseCase {
       // cleanup that clears synced records.
       final photosDownloaded = await _downloadReceiptPhotos(uid: uid);
 
+      // Same ordering rule as the photos above: the store row must exist
+      // locally before its logo has anything to attach to.
+      final logosDownloaded = await _downloadStoreLogos(uid: uid);
+
       // One line per cycle, deliberately kept. Every sync bug in this
       // feature presented as "the UI says up to date and nothing happened",
       // and without an outcome line that state is indistinguishable from a
       // healthy no-op.
       _loggerService.info(
         'RunFullSync: pushed=$pushed pulled=$pulled purged=$purged '
-        'photosUp=$photosUploaded photosDown=$photosDownloaded',
+        'photosUp=$photosUploaded photosDown=$photosDownloaded '
+        'logosDown=$logosDownloaded',
         name: 'Sync',
       );
 
@@ -270,6 +287,7 @@ class RunFullSyncUseCase {
           pulled: pulled,
           photosUploaded: photosUploaded,
           photosDownloaded: photosDownloaded,
+          logosDownloaded: logosDownloaded,
           purged: purged,
         ),
       );

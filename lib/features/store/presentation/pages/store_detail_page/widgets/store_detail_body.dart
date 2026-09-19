@@ -20,10 +20,14 @@ class StoreDetailBody extends StatelessWidget {
   final StoreDetailSnapshot snapshot;
   final VoidCallback onClose;
 
+  /// Opens the edit-store sheet for this store's name and logo.
+  final VoidCallback onEdit;
+
   const StoreDetailBody({
     super.key,
     required this.snapshot,
     required this.onClose,
+    required this.onEdit,
   });
 
   @override
@@ -42,7 +46,11 @@ class StoreDetailBody extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 16.0,
         children: [
-          StoreDetailHeader(storeName: store.name, onClose: onClose),
+          StoreDetailHeader(
+            storeName: store.name,
+            onClose: onClose,
+            onEdit: onEdit,
+          ),
           HorizontalPadding(
             child: Column(
               mainAxisSize: MainAxisSize.min,

@@ -111,5 +111,38 @@ service firebase.storage {
       // staged "Remove photo" action on the edit screen.
       allow delete: if isOwner(uid);
     }
+
+    // Store logos — `users/{uid}/stores/{storeId}.jpg`, written by
+    // `FirebaseStorageService.uploadStoreLogo`.
+    //
+    // Its own block for the same two reasons the avatar has one: Storage
+    // denies any path no `match` covers, so without this the logo upload
+    // fails with `403` / `-13021` exactly as the avatar once did; and the
+    // folder is kept out of `receipts/` because `usedBytes` sums that prefix
+    // to drive the Profile storage bar, which the UI describes to the user as
+    // receipt photos.
+    //
+    // The id is matched loosely, for the reason given on the receipts block:
+    // store ids are microsecond stamps today, but ids elsewhere in this app
+    // are already suffixed and semantic, so pinning a numeric shape would
+    // reject valid uploads the first time id generation changes. The `.jpg`
+    // suffix and the content type are what actually matter.
+    match /users/{uid}/stores/{fileName} {
+      allow read: if isOwner(uid);
+
+      // 2 MB — the avatar's ceiling, and for the same reason: the client
+      // compresses to 100 KB (`_kStoreLogoTargetKB` in
+      // `SaveStoreLogoUseCase`), but that path returns the ORIGINAL bytes
+      // when the compressor cannot reach the target on an unusual source
+      // image, so the server limit must leave room rather than reject it.
+      allow write: if isOwner(uid)
+                   && isJpeg()
+                   && request.resource.size <= 2 * 1024 * 1024
+                   && fileName.matches('[A-Za-z0-9_-]+\\.jpg');
+
+      // Required by the staged "Remove logo" action, which deletes the remote
+      // object on Save.
+      allow delete: if isOwner(uid);
+    }
   }
 }

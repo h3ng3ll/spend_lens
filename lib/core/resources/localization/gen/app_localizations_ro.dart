@@ -526,6 +526,21 @@ class AppLocalizationsRo extends AppLocalizations {
   String get newStore => 'Magazin nou';
 
   @override
+  String get editStore => 'Editează magazinul';
+
+  @override
+  String get changeStoreLogo => 'Schimbă logoul';
+
+  @override
+  String get removeStoreLogo => 'Elimină logoul';
+
+  @override
+  String get savingStore => 'Se salvează…';
+
+  @override
+  String get tStoreSaved => 'Magazin actualizat';
+
+  @override
   String get storesIntro =>
       'Creat automat din bonurile tale. Deschide un magazin pentru produse și comparații de preț.';
 
