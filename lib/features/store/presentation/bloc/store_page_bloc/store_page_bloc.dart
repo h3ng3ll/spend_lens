@@ -2,7 +2,9 @@ import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../../core/utils/combine_latest_streams.dart';
+import '../../../../analytics/domain/repositories/i_price_observation_local_repository.dart';
 import '../../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../domain/models/store_page_snapshot/store_page_snapshot.dart';
 import '../../../domain/repositories/i_store_local_repository.dart';
 
@@ -24,17 +26,28 @@ part 'store_page_bloc.freezed.dart';
 /// (BLoC rule A3.1) — the combined snapshot is stored, and every per-store
 /// number is a pure function computed in the widget layer.
 ///
-/// Reactive, not static (hive_rules.md §6/§10): combines stores + expenses
-/// into ONE [StorePageSnapshot] stream via `combineLatest2` and subscribes
-/// with a SINGLE `emit.forEach` — never parallel `emit.forEach` calls, never
-/// a Dart record type for the combined value.
+/// Reactive, not static (hive_rules.md §6/§10): combines stores + expenses +
+/// products + price observations into ONE [StorePageSnapshot] stream via
+/// `combineLatest4` and subscribes with a SINGLE `emit.forEach` — never
+/// parallel `emit.forEach` calls, never a Dart record type for the combined
+/// value.
+///
+/// Products and price observations are in the combine because the row's
+/// "{visits} visits · {products} products" meta needs them. Watching them —
+/// rather than reading once — is what makes the count LIVE: saving a receipt
+/// writes observations, the box emits, and the list re-renders while the
+/// user is still standing on it.
 class StorePageBloc extends Bloc<StorePageEvent, StorePageState> {
   final IStoreLocalRepository _storeLocalRepository;
   final IExpenseLocalRepository _expenseLocalRepository;
+  final IProductLocalRepository _productLocalRepository;
+  final IPriceObservationLocalRepository _priceObservationLocalRepository;
 
   StorePageBloc({
     required this._storeLocalRepository,
     required this._expenseLocalRepository,
+    required this._productLocalRepository,
+    required this._priceObservationLocalRepository,
   }) : super(const StorePageState()) {
     on<_Watch>(_onWatch);
   }
@@ -43,11 +56,17 @@ class StorePageBloc extends Bloc<StorePageEvent, StorePageState> {
     emit(state.copyWith(status: EStorePageStatus.loading));
 
     await emit.forEach<StorePageSnapshot>(
-      combineLatest2(
+      combineLatest4(
         _storeLocalRepository.watchAll(),
         _expenseLocalRepository.watchAll(),
-        (stores, expenses) =>
-            StorePageSnapshot(stores: stores, expenses: expenses),
+        _productLocalRepository.watchAll(),
+        _priceObservationLocalRepository.watchAll(),
+        (stores, expenses, products, priceObservations) => StorePageSnapshot(
+          stores: stores,
+          expenses: expenses,
+          products: products,
+          priceObservations: priceObservations,
+        ),
       ),
       onData: (snapshot) =>
           state.copyWith(status: EStorePageStatus.ready, snapshot: snapshot),

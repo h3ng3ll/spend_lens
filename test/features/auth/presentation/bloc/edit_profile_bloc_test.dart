@@ -27,12 +27,24 @@ void main() {
 
   /// Drains the bloc's microtask + I/O queue.
   ///
-  /// The avatar handlers await real filesystem work now (staging a pick,
+  /// The avatar handlers await real filesystem work (staging a pick,
   /// discarding it), so a single `Duration.zero` no longer settles them — it
   /// yields once, while a copy takes several turns.
+  ///
+  /// The delay is non-zero DELIBERATELY. `Duration.zero` drains the microtask
+  /// queue but does not let the event loop service real disk I/O, so the
+  /// filesystem-backed tests (`picking after removing cancels the removal`,
+  /// the upload-failure and save-progress cases) asserted against a bloc
+  /// whose file copy had not landed yet, and failed.
+  ///
+  /// This used to read `await settle();` — a call to ITSELF, not a delay.
+  /// That recursed 8-ways per level without a base case, allocating futures
+  /// until the test process exhausted system memory (observed: a single
+  /// `flutter_tester` at 9.2 GB) and never terminated, so `flutter test`
+  /// could not complete a run at all.
   Future<void> settle() async {
     for (var i = 0; i < 8; i++) {
-      await settle();
+      await Future<void>.delayed(const Duration(milliseconds: 5));
     }
   }
 
@@ -157,21 +169,24 @@ void main() {
   });
 
   group('the live identity fills gaps in the stored profile', () {
-    test('an email-less stored profile still shows the account email', () async {
-      // The shipped bug: Profile read the email from AuthState (live), while
-      // Edit Profile read it from the stored UserProfile. A user already
-      // signed in when the feature shipped had no stored profile, so the
-      // address appeared on one screen and the field was blank on the next.
-      local.profile = const UserProfile(uid: 'u1');
+    test(
+      'an email-less stored profile still shows the account email',
+      () async {
+        // The shipped bug: Profile read the email from AuthState (live), while
+        // Edit Profile read it from the stored UserProfile. A user already
+        // signed in when the feature shipped had no stored profile, so the
+        // address appeared on one screen and the field was blank on the next.
+        local.profile = const UserProfile(uid: 'u1');
 
-      final bloc = build();
-      bloc.add(const EditProfileEvent.started(uid: 'u1', email: 'live@b.c'));
-      await settle();
+        final bloc = build();
+        bloc.add(const EditProfileEvent.started(uid: 'u1', email: 'live@b.c'));
+        await settle();
 
-      expect(bloc.state.email, 'live@b.c');
+        expect(bloc.state.email, 'live@b.c');
 
-      await bloc.close();
-    });
+        await bloc.close();
+      },
+    );
 
     test('no stored profile at all still shows the account email', () async {
       local.profile = null;

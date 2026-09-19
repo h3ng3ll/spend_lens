@@ -5,6 +5,7 @@ import '../../../../../../core/resources/localization/gen/app_localizations.dart
 import '../../../../../../core/routes/init_router/init_router.dart';
 import '../../../../../../core/widgets/build_store_logo.dart';
 import '../../../../../../core/widgets/record_list_row.dart';
+import '../../../../../analytics/domain/models/price_observation/price_observation.dart';
 import '../../../../../expense/domain/models/expense/expense.dart';
 import '../../../../domain/models/store/e_store_type.dart';
 import '../../../../domain/models/store/store.dart';
@@ -20,12 +21,14 @@ import '../../../utils/store_aggregates.dart';
 class StoreListRow extends StatelessWidget {
   final Store store;
   final List<Expense> expenses;
+  final List<PriceObservation> priceObservations;
   final bool showBottomDivider;
 
   const StoreListRow({
     super.key,
     required this.store,
     required this.expenses,
+    required this.priceObservations,
     required this.showBottomDivider,
   });
 
@@ -42,9 +45,11 @@ class StoreListRow extends StatelessWidget {
     final visits = visitCount(storeExpenses);
     final thisMonth = totalSpentThisMonth(storeExpenses, DateTime.now());
 
+    final products = productCountForStore(priceObservations, store.id);
+
     final meta = visits == 0
         ? lo.storeEmpty(_storeTypeLabel(lo, store))
-        : lo.storeMeta(visits, 0);
+        : lo.storeMeta(visits, products);
 
     final amountText = thisMonth == null
         ? '—'

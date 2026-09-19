@@ -17,6 +17,13 @@ sealed class EditReceiptEvent with _$EditReceiptEvent {
   const factory EditReceiptEvent.setStore(String storeId, String storeName) =
       _SetStore;
 
+  /// Applies a category picked on the Categories page.
+  ///
+  /// Carries the id only — the label and dot colour are resolved in the
+  /// widget layer from `CategoriesBloc`, exactly as Review does, so the
+  /// editor state never holds a denormalized copy of a category's name.
+  const factory EditReceiptEvent.setCategory(String categoryId) = _SetCategory;
+
   const factory EditReceiptEvent.setPurchasedAt(DateTime purchasedAt) =
       _SetPurchasedAt;
 

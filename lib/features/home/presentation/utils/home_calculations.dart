@@ -39,13 +39,72 @@ List<Expense> expensesInMonth(
   required int month,
 }) {
   return expenses
-      .where((e) => e.occurredAt.year == year && e.occurredAt.month - 1 == month)
+      .where(
+        (e) => e.occurredAt.year == year && e.occurredAt.month - 1 == month,
+      )
       .toList();
 }
 
 /// Sums [expenses]' `amount`.
 double sumAmounts(List<Expense> expenses) =>
     expenses.fold(0.0, (total, e) => total + e.amount);
+
+/// One calendar day's spend, for Home's month chart.
+///
+/// [hasData] is NOT redundant with `amount == 0`: a day with no expenses and
+/// a day that genuinely netted zero must render differently. Painting a
+/// zero-value bar with the data fill makes an empty day read as a measured
+/// one — the recorded chronic
+/// `chart-zero-value-bar-paints-the-data-fill-so-empty-reads-as-measured`,
+/// which `PriceHistoryBarPainter` already guards against by drawing an
+/// outline-only stub.
+class DailySpend {
+  /// 1-based day of the month, so it matches what a date shows.
+  final int day;
+  final double amount;
+  final bool hasData;
+
+  const DailySpend({
+    required this.day,
+    required this.amount,
+    required this.hasData,
+  });
+}
+
+/// Every day of [year]/[month] (0-based) with that day's total spend.
+///
+/// Returns the FULL month — one entry per calendar day, including days with
+/// nothing spent — so the chart's x-axis is the month itself rather than
+/// only the days that happen to have data. A sparse series would space three
+/// purchases evenly across the width and imply a rhythm that is not there.
+List<DailySpend> dailySpendInMonth(
+  List<Expense> expenses, {
+  required int year,
+  required int month,
+}) {
+  final inMonth = expensesInMonth(expenses, year: year, month: month);
+
+  final totalByDay = <int, double>{};
+  for (final expense in inMonth) {
+    totalByDay.update(
+      expense.occurredAt.day,
+      (total) => total + expense.amount,
+      ifAbsent: () => expense.amount,
+    );
+  }
+
+  // `month` is 0-based here but DateUtils takes a real month number.
+  final dayCount = DateUtils.getDaysInMonth(year, month + 1);
+
+  return [
+    for (var day = 1; day <= dayCount; day++)
+      DailySpend(
+        day: day,
+        amount: totalByDay[day] ?? 0.0,
+        hasData: totalByDay.containsKey(day),
+      ),
+  ];
+}
 
 /// The previous calendar month/year relative to [year]/[month] (0-based).
 ({int year, int month}) previousMonth({required int year, required int month}) {
@@ -72,11 +131,17 @@ List<HomeCategorySpend> topCategoriesThisMonth(
 
   final categoryById = {for (final c in categories) c.id: c};
 
-  final spends = byCategory.entries
-      .where((entry) => categoryById.containsKey(entry.key) && entry.value > 0.0)
-      .map((entry) => (category: categoryById[entry.key]!, amount: entry.value))
-      .toList()
-    ..sort((a, b) => b.amount.compareTo(a.amount));
+  final spends =
+      byCategory.entries
+          .where(
+            (entry) => categoryById.containsKey(entry.key) && entry.value > 0.0,
+          )
+          .map(
+            (entry) =>
+                (category: categoryById[entry.key]!, amount: entry.value),
+          )
+          .toList()
+        ..sort((a, b) => b.amount.compareTo(a.amount));
 
   final top = spends.take(kHomeTopCategoryCount).toList();
   final maxAmount = top.isEmpty ? 0.0 : top.first.amount;
@@ -97,7 +162,8 @@ List<HomeCategorySpend> topCategoriesThisMonth(
 /// month — the design's "Recent" card shows the latest activity regardless
 /// of period).
 List<Expense> recentExpenses(List<Expense> expenses) {
-  final sorted = [...expenses]..sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
+  final sorted = [...expenses]
+    ..sort((a, b) => b.occurredAt.compareTo(a.occurredAt));
   return sorted.take(kHomeRecentCount).toList();
 }
 
@@ -206,7 +272,9 @@ List<HomeRecentEntry> buildRecentEntries(
 
   return expenses.map((expense) {
     final category = categoryById[expense.categoryId];
-    final name = category != null ? resolveCategoryName(lo, category) : lo.catOther;
+    final name = category != null
+        ? resolveCategoryName(lo, category)
+        : lo.catOther;
     final color = category != null
         ? resolveCategoryColor(category)
         : resolveCategoryColorForOther();
@@ -224,7 +292,8 @@ List<HomeRecentEntry> buildRecentEntries(
       tileForeground: color,
       title: title,
       meta: recentExpenseMeta(lo, expense, name),
-      amountText: '${numberFormat.format(expense.amount.round())} $currencyCode',
+      amountText:
+          '${numberFormat.format(expense.amount.round())} $currencyCode',
     );
   }).toList();
 }

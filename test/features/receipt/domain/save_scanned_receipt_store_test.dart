@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:spend_lens/features/analytics/domain/models/price_observation/price_observation.dart';
+import 'package:spend_lens/features/analytics/domain/repositories/i_price_observation_local_repository.dart';
 import 'package:spend_lens/features/expense/domain/models/expense/expense.dart';
 import 'package:spend_lens/features/expense/domain/repositories/i_expense_local_repository.dart';
 import 'package:spend_lens/features/product/domain/models/product/e_unit.dart';
@@ -10,6 +12,7 @@ import 'package:spend_lens/features/receipt/domain/models/receipt_item/receipt_i
 import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_item_local_repository.dart';
 import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_local_repository.dart';
 import 'package:spend_lens/features/receipt/domain/use_cases/create_expense_from_receipt_use_case.dart';
+import 'package:spend_lens/features/receipt/domain/use_cases/record_price_observations_use_case.dart';
 import 'package:spend_lens/features/receipt/domain/use_cases/save_scanned_receipt_use_case.dart';
 import 'package:spend_lens/features/scanner/domain/pending_receipt_draft_store.dart';
 import 'package:spend_lens/features/store/domain/models/store/store.dart';
@@ -32,6 +35,7 @@ void main() {
   late _FakeProducts products;
   late _FakeStores stores;
   late _FakeExpenses expenses;
+  late _FakePriceObservations priceObservations;
   late SaveScannedReceiptUseCase saveScannedReceipt;
 
   ScannedReceiptInput input({
@@ -70,6 +74,7 @@ void main() {
     products = _FakeProducts();
     stores = _FakeStores();
     expenses = _FakeExpenses();
+    priceObservations = _FakePriceObservations();
 
     saveScannedReceipt = SaveScannedReceiptUseCase(
       receiptRepository: receipts,
@@ -77,9 +82,27 @@ void main() {
       productRepository: products,
       storeRepository: stores,
       createExpenseFromReceipt: CreateExpenseFromReceiptUseCase(expenses),
+      recordPriceObservations: RecordPriceObservationsUseCase(
+        priceObservationRepository: priceObservations,
+      ),
       learnStoreAlias: LearnStoreAliasUseCase(repository: stores),
       draftStore: PendingReceiptDraftStore(),
     );
+  });
+
+  test('records a price observation per line, linking product to store', () async {
+    // REGRESSION: nothing outside backup import ever wrote a
+    // PriceObservation, and it is the ONLY entity joining a product to a
+    // store. Products and the store were both saved, but the edge between
+    // them never was — so every store counted 0 products and "Products
+    // bought here" stayed empty no matter how much was scanned.
+    await saveScannedReceipt(input(storeId: 'store-1'));
+
+    expect(priceObservations.saved, hasLength(1));
+    final observation = priceObservations.saved.single;
+    expect(observation.storeId, 'store-1');
+    expect(observation.productId, products.saved.single.id);
+    expect(observation.comparableUnitPrice, 17.98);
   });
 
   test('the picked store reaches BOTH the receipt and the expense', () async {
@@ -201,6 +224,29 @@ class _FakeExpenses implements IExpenseLocalRepository {
   @override
   Future<void> save(Expense expense, {bool markPending = true}) async {
     saved.add(expense);
+  }
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakePriceObservations implements IPriceObservationLocalRepository {
+  final List<PriceObservation> saved = [];
+
+  @override
+  Future<List<PriceObservation>> getAllIncludingDeleted() async => saved;
+
+  @override
+  Future<void> saveAll(
+    List<PriceObservation> items, {
+    bool markPending = true,
+  }) async {
+    saved.addAll(items);
+  }
+
+  @override
+  Future<void> deleteLocalOnly(String id) async {
+    saved.removeWhere((observation) => observation.id == id);
   }
 
   @override

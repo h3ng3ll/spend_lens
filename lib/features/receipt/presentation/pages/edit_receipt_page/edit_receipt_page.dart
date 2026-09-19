@@ -12,6 +12,7 @@ import '../../../../store/domain/repositories/i_store_local_repository.dart';
 import '../../../domain/repositories/i_receipt_item_local_repository.dart';
 import '../../../domain/repositories/i_receipt_local_repository.dart';
 import '../../../domain/use_cases/create_expense_from_receipt_use_case.dart';
+import '../../../domain/use_cases/record_price_observations_use_case.dart';
 import '../../bloc/edit_receipt_bloc/edit_receipt_bloc.dart';
 import 'widgets/edit_receipt_scaffold.dart';
 
@@ -42,6 +43,7 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
     productRepository: getIt<IProductLocalRepository>(),
     storeRepository: getIt<IStoreLocalRepository>(),
     createExpenseFromReceipt: getIt<CreateExpenseFromReceiptUseCase>(),
+    recordPriceObservations: getIt<RecordPriceObservationsUseCase>(),
   )..add(EditReceiptEvent.load(widget.receiptId));
 
   final Map<String, TextEditingController> _nameControllers = {};
@@ -115,6 +117,14 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
     final pickedId = await ChooseStorePageRoute().push<String>(context);
     if (pickedId == null || !context.mounted) return;
     _bloc.add(EditReceiptEvent.pickStore(pickedId));
+  }
+
+  /// Mirrors [_onPickStore] — the Categories page doubles as the picker and
+  /// pops the chosen id.
+  Future<void> _onPickCategory(BuildContext context) async {
+    final pickedId = await CategoriesPageRoute().push<String>(context);
+    if (pickedId == null || !context.mounted) return;
+    _bloc.add(EditReceiptEvent.setCategory(pickedId));
   }
 
   /// Cycles the item unit. NO payload beyond the id — the bloc reads the
@@ -196,6 +206,7 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
           onCancel: _onCancel,
           onDone: _onDone,
           onPickStore: () => _onPickStore(context),
+          onPickCategory: () => _onPickCategory(context),
           onRemoveItem: _onRemoveItem,
           onCycleItemUnit: _onCycleItemUnit,
           onAddItem: _onAddItem,

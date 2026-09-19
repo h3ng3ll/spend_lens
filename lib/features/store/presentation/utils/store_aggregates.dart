@@ -6,11 +6,32 @@
 /// recomputed from the snapshot on every build, never stored.
 library;
 
+import '../../../analytics/domain/models/price_observation/price_observation.dart';
 import '../../../expense/domain/models/expense/expense.dart';
 
 /// All expenses linked to [storeId] via `expense.storeId`.
 List<Expense> expensesForStore(List<Expense> expenses, String storeId) {
   return expenses.where((expense) => expense.storeId == storeId).toList();
+}
+
+/// The number of DISTINCT products ever recorded at [storeId].
+///
+/// [PriceObservation] is the only entity joining a product to a store, so it
+/// is the only thing this can be counted from. Distinct by `productId`
+/// because one product bought on five visits is one product, not five, and
+/// tombstoned rows are excluded — the same predicate `ProductsHereCard` uses,
+/// so the list's number and the detail page's list can never disagree.
+int productCountForStore(
+  List<PriceObservation> observations,
+  String storeId,
+) {
+  final productIds = <String>{};
+  for (final observation in observations) {
+    if (observation.storeId != storeId) continue;
+    if (observation.deletedAt != null) continue;
+    productIds.add(observation.productId);
+  }
+  return productIds.length;
 }
 
 /// The number of distinct calendar days [storeExpenses] were incurred on —

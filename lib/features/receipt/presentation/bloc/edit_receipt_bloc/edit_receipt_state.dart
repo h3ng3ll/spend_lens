@@ -14,6 +14,12 @@ sealed class EditReceiptState with _$EditReceiptState {
     /// auto-match. Carried onto the draft so the save path can decide
     /// whether learning an alias from this receipt is justified.
     @Default(false) bool isStoreUserPicked,
+
+    /// The receipt's category. Seeded from `Receipt.categoryId` on load and
+    /// written back on save, which `CreateExpenseFromReceiptUseCase` then
+    /// mirrors onto the `Expense` — so the record-detail screen's category
+    /// chip follows an edit made here.
+    String? categoryId,
     DateTime? purchasedAt,
     double? printedTotal,
     @Default(<EditDraftItem>[]) List<EditDraftItem> items,

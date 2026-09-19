@@ -1,4 +1,6 @@
+import '../../../../analytics/domain/models/price_observation/price_observation.dart';
 import '../../../../expense/domain/models/expense/expense.dart';
+import '../../../../product/domain/models/product/product.dart';
 import '../store/store.dart';
 
 /// Named snapshot class combining the streams [StorePageBloc] reacts to
@@ -13,5 +15,21 @@ class StorePageSnapshot {
   final List<Store> stores;
   final List<Expense> expenses;
 
-  const StorePageSnapshot({required this.stores, required this.expenses});
+  /// Carried so a row can resolve a product id to a product. The COUNT only
+  /// needs [priceObservations], but keeping the two together matches
+  /// `StoreDetailSnapshot` and means a future row detail does not need
+  /// another stream added to the combine.
+  final List<Product> products;
+
+  /// The product<->store edge (`PriceObservation.storeId` +
+  /// `.productId`) — the only link between the two, and therefore the only
+  /// thing a per-store product count can be derived from.
+  final List<PriceObservation> priceObservations;
+
+  const StorePageSnapshot({
+    required this.stores,
+    required this.expenses,
+    required this.products,
+    required this.priceObservations,
+  });
 }

@@ -55,13 +55,14 @@ extension EditReceiptEventPatterns on EditReceiptEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Load value)?  load,TResult Function( _PickStore value)?  pickStore,TResult Function( _SetStore value)?  setStore,TResult Function( _SetPurchasedAt value)?  setPurchasedAt,TResult Function( _SetPrintedTotal value)?  setPrintedTotal,TResult Function( _UpdateItemName value)?  updateItemName,TResult Function( _CycleItemUnit value)?  cycleItemUnit,TResult Function( _UpdateItemQuantity value)?  updateItemQuantity,TResult Function( _UpdateItemPrice value)?  updateItemPrice,TResult Function( _RemoveItem value)?  removeItem,TResult Function( _AddItem value)?  addItem,TResult Function( _Save value)?  save,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Load value)?  load,TResult Function( _PickStore value)?  pickStore,TResult Function( _SetStore value)?  setStore,TResult Function( _SetCategory value)?  setCategory,TResult Function( _SetPurchasedAt value)?  setPurchasedAt,TResult Function( _SetPrintedTotal value)?  setPrintedTotal,TResult Function( _UpdateItemName value)?  updateItemName,TResult Function( _CycleItemUnit value)?  cycleItemUnit,TResult Function( _UpdateItemQuantity value)?  updateItemQuantity,TResult Function( _UpdateItemPrice value)?  updateItemPrice,TResult Function( _RemoveItem value)?  removeItem,TResult Function( _AddItem value)?  addItem,TResult Function( _Save value)?  save,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Load() when load != null:
 return load(_that);case _PickStore() when pickStore != null:
 return pickStore(_that);case _SetStore() when setStore != null:
-return setStore(_that);case _SetPurchasedAt() when setPurchasedAt != null:
+return setStore(_that);case _SetCategory() when setCategory != null:
+return setCategory(_that);case _SetPurchasedAt() when setPurchasedAt != null:
 return setPurchasedAt(_that);case _SetPrintedTotal() when setPrintedTotal != null:
 return setPrintedTotal(_that);case _UpdateItemName() when updateItemName != null:
 return updateItemName(_that);case _CycleItemUnit() when cycleItemUnit != null:
@@ -88,13 +89,14 @@ return save(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Load value)  load,required TResult Function( _PickStore value)  pickStore,required TResult Function( _SetStore value)  setStore,required TResult Function( _SetPurchasedAt value)  setPurchasedAt,required TResult Function( _SetPrintedTotal value)  setPrintedTotal,required TResult Function( _UpdateItemName value)  updateItemName,required TResult Function( _CycleItemUnit value)  cycleItemUnit,required TResult Function( _UpdateItemQuantity value)  updateItemQuantity,required TResult Function( _UpdateItemPrice value)  updateItemPrice,required TResult Function( _RemoveItem value)  removeItem,required TResult Function( _AddItem value)  addItem,required TResult Function( _Save value)  save,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Load value)  load,required TResult Function( _PickStore value)  pickStore,required TResult Function( _SetStore value)  setStore,required TResult Function( _SetCategory value)  setCategory,required TResult Function( _SetPurchasedAt value)  setPurchasedAt,required TResult Function( _SetPrintedTotal value)  setPrintedTotal,required TResult Function( _UpdateItemName value)  updateItemName,required TResult Function( _CycleItemUnit value)  cycleItemUnit,required TResult Function( _UpdateItemQuantity value)  updateItemQuantity,required TResult Function( _UpdateItemPrice value)  updateItemPrice,required TResult Function( _RemoveItem value)  removeItem,required TResult Function( _AddItem value)  addItem,required TResult Function( _Save value)  save,}){
 final _that = this;
 switch (_that) {
 case _Load():
 return load(_that);case _PickStore():
 return pickStore(_that);case _SetStore():
-return setStore(_that);case _SetPurchasedAt():
+return setStore(_that);case _SetCategory():
+return setCategory(_that);case _SetPurchasedAt():
 return setPurchasedAt(_that);case _SetPrintedTotal():
 return setPrintedTotal(_that);case _UpdateItemName():
 return updateItemName(_that);case _CycleItemUnit():
@@ -117,13 +119,14 @@ return save(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Load value)?  load,TResult? Function( _PickStore value)?  pickStore,TResult? Function( _SetStore value)?  setStore,TResult? Function( _SetPurchasedAt value)?  setPurchasedAt,TResult? Function( _SetPrintedTotal value)?  setPrintedTotal,TResult? Function( _UpdateItemName value)?  updateItemName,TResult? Function( _CycleItemUnit value)?  cycleItemUnit,TResult? Function( _UpdateItemQuantity value)?  updateItemQuantity,TResult? Function( _UpdateItemPrice value)?  updateItemPrice,TResult? Function( _RemoveItem value)?  removeItem,TResult? Function( _AddItem value)?  addItem,TResult? Function( _Save value)?  save,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Load value)?  load,TResult? Function( _PickStore value)?  pickStore,TResult? Function( _SetStore value)?  setStore,TResult? Function( _SetCategory value)?  setCategory,TResult? Function( _SetPurchasedAt value)?  setPurchasedAt,TResult? Function( _SetPrintedTotal value)?  setPrintedTotal,TResult? Function( _UpdateItemName value)?  updateItemName,TResult? Function( _CycleItemUnit value)?  cycleItemUnit,TResult? Function( _UpdateItemQuantity value)?  updateItemQuantity,TResult? Function( _UpdateItemPrice value)?  updateItemPrice,TResult? Function( _RemoveItem value)?  removeItem,TResult? Function( _AddItem value)?  addItem,TResult? Function( _Save value)?  save,}){
 final _that = this;
 switch (_that) {
 case _Load() when load != null:
 return load(_that);case _PickStore() when pickStore != null:
 return pickStore(_that);case _SetStore() when setStore != null:
-return setStore(_that);case _SetPurchasedAt() when setPurchasedAt != null:
+return setStore(_that);case _SetCategory() when setCategory != null:
+return setCategory(_that);case _SetPurchasedAt() when setPurchasedAt != null:
 return setPurchasedAt(_that);case _SetPrintedTotal() when setPrintedTotal != null:
 return setPrintedTotal(_that);case _UpdateItemName() when updateItemName != null:
 return updateItemName(_that);case _CycleItemUnit() when cycleItemUnit != null:
@@ -149,12 +152,13 @@ return save(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String receiptId)?  load,TResult Function( String storeId)?  pickStore,TResult Function( String storeId,  String storeName)?  setStore,TResult Function( DateTime purchasedAt)?  setPurchasedAt,TResult Function( double? printedTotal)?  setPrintedTotal,TResult Function( String itemId,  String name)?  updateItemName,TResult Function( String itemId)?  cycleItemUnit,TResult Function( String itemId,  double quantity)?  updateItemQuantity,TResult Function( String itemId,  double lineTotal)?  updateItemPrice,TResult Function( String itemId)?  removeItem,TResult Function()?  addItem,TResult Function()?  save,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String receiptId)?  load,TResult Function( String storeId)?  pickStore,TResult Function( String storeId,  String storeName)?  setStore,TResult Function( String categoryId)?  setCategory,TResult Function( DateTime purchasedAt)?  setPurchasedAt,TResult Function( double? printedTotal)?  setPrintedTotal,TResult Function( String itemId,  String name)?  updateItemName,TResult Function( String itemId)?  cycleItemUnit,TResult Function( String itemId,  double quantity)?  updateItemQuantity,TResult Function( String itemId,  double lineTotal)?  updateItemPrice,TResult Function( String itemId)?  removeItem,TResult Function()?  addItem,TResult Function()?  save,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Load() when load != null:
 return load(_that.receiptId);case _PickStore() when pickStore != null:
 return pickStore(_that.storeId);case _SetStore() when setStore != null:
-return setStore(_that.storeId,_that.storeName);case _SetPurchasedAt() when setPurchasedAt != null:
+return setStore(_that.storeId,_that.storeName);case _SetCategory() when setCategory != null:
+return setCategory(_that.categoryId);case _SetPurchasedAt() when setPurchasedAt != null:
 return setPurchasedAt(_that.purchasedAt);case _SetPrintedTotal() when setPrintedTotal != null:
 return setPrintedTotal(_that.printedTotal);case _UpdateItemName() when updateItemName != null:
 return updateItemName(_that.itemId,_that.name);case _CycleItemUnit() when cycleItemUnit != null:
@@ -181,12 +185,13 @@ return save();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String receiptId)  load,required TResult Function( String storeId)  pickStore,required TResult Function( String storeId,  String storeName)  setStore,required TResult Function( DateTime purchasedAt)  setPurchasedAt,required TResult Function( double? printedTotal)  setPrintedTotal,required TResult Function( String itemId,  String name)  updateItemName,required TResult Function( String itemId)  cycleItemUnit,required TResult Function( String itemId,  double quantity)  updateItemQuantity,required TResult Function( String itemId,  double lineTotal)  updateItemPrice,required TResult Function( String itemId)  removeItem,required TResult Function()  addItem,required TResult Function()  save,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String receiptId)  load,required TResult Function( String storeId)  pickStore,required TResult Function( String storeId,  String storeName)  setStore,required TResult Function( String categoryId)  setCategory,required TResult Function( DateTime purchasedAt)  setPurchasedAt,required TResult Function( double? printedTotal)  setPrintedTotal,required TResult Function( String itemId,  String name)  updateItemName,required TResult Function( String itemId)  cycleItemUnit,required TResult Function( String itemId,  double quantity)  updateItemQuantity,required TResult Function( String itemId,  double lineTotal)  updateItemPrice,required TResult Function( String itemId)  removeItem,required TResult Function()  addItem,required TResult Function()  save,}) {final _that = this;
 switch (_that) {
 case _Load():
 return load(_that.receiptId);case _PickStore():
 return pickStore(_that.storeId);case _SetStore():
-return setStore(_that.storeId,_that.storeName);case _SetPurchasedAt():
+return setStore(_that.storeId,_that.storeName);case _SetCategory():
+return setCategory(_that.categoryId);case _SetPurchasedAt():
 return setPurchasedAt(_that.purchasedAt);case _SetPrintedTotal():
 return setPrintedTotal(_that.printedTotal);case _UpdateItemName():
 return updateItemName(_that.itemId,_that.name);case _CycleItemUnit():
@@ -209,12 +214,13 @@ return save();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String receiptId)?  load,TResult? Function( String storeId)?  pickStore,TResult? Function( String storeId,  String storeName)?  setStore,TResult? Function( DateTime purchasedAt)?  setPurchasedAt,TResult? Function( double? printedTotal)?  setPrintedTotal,TResult? Function( String itemId,  String name)?  updateItemName,TResult? Function( String itemId)?  cycleItemUnit,TResult? Function( String itemId,  double quantity)?  updateItemQuantity,TResult? Function( String itemId,  double lineTotal)?  updateItemPrice,TResult? Function( String itemId)?  removeItem,TResult? Function()?  addItem,TResult? Function()?  save,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String receiptId)?  load,TResult? Function( String storeId)?  pickStore,TResult? Function( String storeId,  String storeName)?  setStore,TResult? Function( String categoryId)?  setCategory,TResult? Function( DateTime purchasedAt)?  setPurchasedAt,TResult? Function( double? printedTotal)?  setPrintedTotal,TResult? Function( String itemId,  String name)?  updateItemName,TResult? Function( String itemId)?  cycleItemUnit,TResult? Function( String itemId,  double quantity)?  updateItemQuantity,TResult? Function( String itemId,  double lineTotal)?  updateItemPrice,TResult? Function( String itemId)?  removeItem,TResult? Function()?  addItem,TResult? Function()?  save,}) {final _that = this;
 switch (_that) {
 case _Load() when load != null:
 return load(_that.receiptId);case _PickStore() when pickStore != null:
 return pickStore(_that.storeId);case _SetStore() when setStore != null:
-return setStore(_that.storeId,_that.storeName);case _SetPurchasedAt() when setPurchasedAt != null:
+return setStore(_that.storeId,_that.storeName);case _SetCategory() when setCategory != null:
+return setCategory(_that.categoryId);case _SetPurchasedAt() when setPurchasedAt != null:
 return setPurchasedAt(_that.purchasedAt);case _SetPrintedTotal() when setPrintedTotal != null:
 return setPrintedTotal(_that.printedTotal);case _UpdateItemName() when updateItemName != null:
 return updateItemName(_that.itemId,_that.name);case _CycleItemUnit() when cycleItemUnit != null:
@@ -424,6 +430,72 @@ class __$SetStoreCopyWithImpl<$Res>
   return _then(_SetStore(
 null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String,null == storeName ? _self.storeName : storeName // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _SetCategory implements EditReceiptEvent {
+  const _SetCategory(this.categoryId);
+  
+
+ final  String categoryId;
+
+/// Create a copy of EditReceiptEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SetCategoryCopyWith<_SetCategory> get copyWith => __$SetCategoryCopyWithImpl<_SetCategory>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SetCategory&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,categoryId);
+
+@override
+String toString() {
+  return 'EditReceiptEvent.setCategory(categoryId: $categoryId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SetCategoryCopyWith<$Res> implements $EditReceiptEventCopyWith<$Res> {
+  factory _$SetCategoryCopyWith(_SetCategory value, $Res Function(_SetCategory) _then) = __$SetCategoryCopyWithImpl;
+@useResult
+$Res call({
+ String categoryId
+});
+
+
+
+
+}
+/// @nodoc
+class __$SetCategoryCopyWithImpl<$Res>
+    implements _$SetCategoryCopyWith<$Res> {
+  __$SetCategoryCopyWithImpl(this._self, this._then);
+
+  final _SetCategory _self;
+  final $Res Function(_SetCategory) _then;
+
+/// Create a copy of EditReceiptEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? categoryId = null,}) {
+  return _then(_SetCategory(
+null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -969,7 +1041,11 @@ mixin _$EditReceiptState {
  EEditReceiptStatus get status; String? get receiptId; String? get storeId; String get storeName;/// Whether [storeId] came from an explicit user pick rather than an
 /// auto-match. Carried onto the draft so the save path can decide
 /// whether learning an alias from this receipt is justified.
- bool get isStoreUserPicked; DateTime? get purchasedAt; double? get printedTotal; List<EditDraftItem> get items; bool get matchesTotal; String? get errorMessage;
+ bool get isStoreUserPicked;/// The receipt's category. Seeded from `Receipt.categoryId` on load and
+/// written back on save, which `CreateExpenseFromReceiptUseCase` then
+/// mirrors onto the `Expense` — so the record-detail screen's category
+/// chip follows an edit made here.
+ String? get categoryId; DateTime? get purchasedAt; double? get printedTotal; List<EditDraftItem> get items; bool get matchesTotal; String? get errorMessage;
 /// Create a copy of EditReceiptState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -980,16 +1056,16 @@ $EditReceiptStateCopyWith<EditReceiptState> get copyWith => _$EditReceiptStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EditReceiptState&&(identical(other.status, status) || other.status == status)&&(identical(other.receiptId, receiptId) || other.receiptId == receiptId)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.storeName, storeName) || other.storeName == storeName)&&(identical(other.isStoreUserPicked, isStoreUserPicked) || other.isStoreUserPicked == isStoreUserPicked)&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt)&&(identical(other.printedTotal, printedTotal) || other.printedTotal == printedTotal)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.matchesTotal, matchesTotal) || other.matchesTotal == matchesTotal)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EditReceiptState&&(identical(other.status, status) || other.status == status)&&(identical(other.receiptId, receiptId) || other.receiptId == receiptId)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.storeName, storeName) || other.storeName == storeName)&&(identical(other.isStoreUserPicked, isStoreUserPicked) || other.isStoreUserPicked == isStoreUserPicked)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt)&&(identical(other.printedTotal, printedTotal) || other.printedTotal == printedTotal)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.matchesTotal, matchesTotal) || other.matchesTotal == matchesTotal)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,receiptId,storeId,storeName,isStoreUserPicked,purchasedAt,printedTotal,const DeepCollectionEquality().hash(items),matchesTotal,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,receiptId,storeId,storeName,isStoreUserPicked,categoryId,purchasedAt,printedTotal,const DeepCollectionEquality().hash(items),matchesTotal,errorMessage);
 
 @override
 String toString() {
-  return 'EditReceiptState(status: $status, receiptId: $receiptId, storeId: $storeId, storeName: $storeName, isStoreUserPicked: $isStoreUserPicked, purchasedAt: $purchasedAt, printedTotal: $printedTotal, items: $items, matchesTotal: $matchesTotal, errorMessage: $errorMessage)';
+  return 'EditReceiptState(status: $status, receiptId: $receiptId, storeId: $storeId, storeName: $storeName, isStoreUserPicked: $isStoreUserPicked, categoryId: $categoryId, purchasedAt: $purchasedAt, printedTotal: $printedTotal, items: $items, matchesTotal: $matchesTotal, errorMessage: $errorMessage)';
 }
 
 
@@ -1000,7 +1076,7 @@ abstract mixin class $EditReceiptStateCopyWith<$Res>  {
   factory $EditReceiptStateCopyWith(EditReceiptState value, $Res Function(EditReceiptState) _then) = _$EditReceiptStateCopyWithImpl;
 @useResult
 $Res call({
- EEditReceiptStatus status, String? receiptId, String? storeId, String storeName, bool isStoreUserPicked, DateTime? purchasedAt, double? printedTotal, List<EditDraftItem> items, bool matchesTotal, String? errorMessage
+ EEditReceiptStatus status, String? receiptId, String? storeId, String storeName, bool isStoreUserPicked, String? categoryId, DateTime? purchasedAt, double? printedTotal, List<EditDraftItem> items, bool matchesTotal, String? errorMessage
 });
 
 
@@ -1017,14 +1093,15 @@ class _$EditReceiptStateCopyWithImpl<$Res>
 
 /// Create a copy of EditReceiptState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? receiptId = freezed,Object? storeId = freezed,Object? storeName = null,Object? isStoreUserPicked = null,Object? purchasedAt = freezed,Object? printedTotal = freezed,Object? items = null,Object? matchesTotal = null,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? receiptId = freezed,Object? storeId = freezed,Object? storeName = null,Object? isStoreUserPicked = null,Object? categoryId = freezed,Object? purchasedAt = freezed,Object? printedTotal = freezed,Object? items = null,Object? matchesTotal = null,Object? errorMessage = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as EEditReceiptStatus,receiptId: freezed == receiptId ? _self.receiptId : receiptId // ignore: cast_nullable_to_non_nullable
 as String?,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String?,storeName: null == storeName ? _self.storeName : storeName // ignore: cast_nullable_to_non_nullable
 as String,isStoreUserPicked: null == isStoreUserPicked ? _self.isStoreUserPicked : isStoreUserPicked // ignore: cast_nullable_to_non_nullable
-as bool,purchasedAt: freezed == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
+as bool,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
+as String?,purchasedAt: freezed == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,printedTotal: freezed == printedTotal ? _self.printedTotal : printedTotal // ignore: cast_nullable_to_non_nullable
 as double?,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<EditDraftItem>,matchesTotal: null == matchesTotal ? _self.matchesTotal : matchesTotal // ignore: cast_nullable_to_non_nullable
@@ -1111,10 +1188,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EEditReceiptStatus status,  String? receiptId,  String? storeId,  String storeName,  bool isStoreUserPicked,  DateTime? purchasedAt,  double? printedTotal,  List<EditDraftItem> items,  bool matchesTotal,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EEditReceiptStatus status,  String? receiptId,  String? storeId,  String storeName,  bool isStoreUserPicked,  String? categoryId,  DateTime? purchasedAt,  double? printedTotal,  List<EditDraftItem> items,  bool matchesTotal,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EditReceiptState() when $default != null:
-return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that.isStoreUserPicked,_that.purchasedAt,_that.printedTotal,_that.items,_that.matchesTotal,_that.errorMessage);case _:
+return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that.isStoreUserPicked,_that.categoryId,_that.purchasedAt,_that.printedTotal,_that.items,_that.matchesTotal,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -1132,10 +1209,10 @@ return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EEditReceiptStatus status,  String? receiptId,  String? storeId,  String storeName,  bool isStoreUserPicked,  DateTime? purchasedAt,  double? printedTotal,  List<EditDraftItem> items,  bool matchesTotal,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EEditReceiptStatus status,  String? receiptId,  String? storeId,  String storeName,  bool isStoreUserPicked,  String? categoryId,  DateTime? purchasedAt,  double? printedTotal,  List<EditDraftItem> items,  bool matchesTotal,  String? errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _EditReceiptState():
-return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that.isStoreUserPicked,_that.purchasedAt,_that.printedTotal,_that.items,_that.matchesTotal,_that.errorMessage);}
+return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that.isStoreUserPicked,_that.categoryId,_that.purchasedAt,_that.printedTotal,_that.items,_that.matchesTotal,_that.errorMessage);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -1149,10 +1226,10 @@ return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EEditReceiptStatus status,  String? receiptId,  String? storeId,  String storeName,  bool isStoreUserPicked,  DateTime? purchasedAt,  double? printedTotal,  List<EditDraftItem> items,  bool matchesTotal,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EEditReceiptStatus status,  String? receiptId,  String? storeId,  String storeName,  bool isStoreUserPicked,  String? categoryId,  DateTime? purchasedAt,  double? printedTotal,  List<EditDraftItem> items,  bool matchesTotal,  String? errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _EditReceiptState() when $default != null:
-return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that.isStoreUserPicked,_that.purchasedAt,_that.printedTotal,_that.items,_that.matchesTotal,_that.errorMessage);case _:
+return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that.isStoreUserPicked,_that.categoryId,_that.purchasedAt,_that.printedTotal,_that.items,_that.matchesTotal,_that.errorMessage);case _:
   return null;
 
 }
@@ -1164,7 +1241,7 @@ return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that
 
 
 class _EditReceiptState implements EditReceiptState {
-  const _EditReceiptState({this.status = EEditReceiptStatus.initial, this.receiptId, this.storeId, this.storeName = '', this.isStoreUserPicked = false, this.purchasedAt, this.printedTotal, final  List<EditDraftItem> items = const <EditDraftItem>[], this.matchesTotal = true, this.errorMessage}): _items = items;
+  const _EditReceiptState({this.status = EEditReceiptStatus.initial, this.receiptId, this.storeId, this.storeName = '', this.isStoreUserPicked = false, this.categoryId, this.purchasedAt, this.printedTotal, final  List<EditDraftItem> items = const <EditDraftItem>[], this.matchesTotal = true, this.errorMessage}): _items = items;
   
 
 @override@JsonKey() final  EEditReceiptStatus status;
@@ -1175,6 +1252,11 @@ class _EditReceiptState implements EditReceiptState {
 /// auto-match. Carried onto the draft so the save path can decide
 /// whether learning an alias from this receipt is justified.
 @override@JsonKey() final  bool isStoreUserPicked;
+/// The receipt's category. Seeded from `Receipt.categoryId` on load and
+/// written back on save, which `CreateExpenseFromReceiptUseCase` then
+/// mirrors onto the `Expense` — so the record-detail screen's category
+/// chip follows an edit made here.
+@override final  String? categoryId;
 @override final  DateTime? purchasedAt;
 @override final  double? printedTotal;
  final  List<EditDraftItem> _items;
@@ -1197,16 +1279,16 @@ _$EditReceiptStateCopyWith<_EditReceiptState> get copyWith => __$EditReceiptStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EditReceiptState&&(identical(other.status, status) || other.status == status)&&(identical(other.receiptId, receiptId) || other.receiptId == receiptId)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.storeName, storeName) || other.storeName == storeName)&&(identical(other.isStoreUserPicked, isStoreUserPicked) || other.isStoreUserPicked == isStoreUserPicked)&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt)&&(identical(other.printedTotal, printedTotal) || other.printedTotal == printedTotal)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.matchesTotal, matchesTotal) || other.matchesTotal == matchesTotal)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EditReceiptState&&(identical(other.status, status) || other.status == status)&&(identical(other.receiptId, receiptId) || other.receiptId == receiptId)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.storeName, storeName) || other.storeName == storeName)&&(identical(other.isStoreUserPicked, isStoreUserPicked) || other.isStoreUserPicked == isStoreUserPicked)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt)&&(identical(other.printedTotal, printedTotal) || other.printedTotal == printedTotal)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.matchesTotal, matchesTotal) || other.matchesTotal == matchesTotal)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,receiptId,storeId,storeName,isStoreUserPicked,purchasedAt,printedTotal,const DeepCollectionEquality().hash(_items),matchesTotal,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,receiptId,storeId,storeName,isStoreUserPicked,categoryId,purchasedAt,printedTotal,const DeepCollectionEquality().hash(_items),matchesTotal,errorMessage);
 
 @override
 String toString() {
-  return 'EditReceiptState(status: $status, receiptId: $receiptId, storeId: $storeId, storeName: $storeName, isStoreUserPicked: $isStoreUserPicked, purchasedAt: $purchasedAt, printedTotal: $printedTotal, items: $items, matchesTotal: $matchesTotal, errorMessage: $errorMessage)';
+  return 'EditReceiptState(status: $status, receiptId: $receiptId, storeId: $storeId, storeName: $storeName, isStoreUserPicked: $isStoreUserPicked, categoryId: $categoryId, purchasedAt: $purchasedAt, printedTotal: $printedTotal, items: $items, matchesTotal: $matchesTotal, errorMessage: $errorMessage)';
 }
 
 
@@ -1217,7 +1299,7 @@ abstract mixin class _$EditReceiptStateCopyWith<$Res> implements $EditReceiptSta
   factory _$EditReceiptStateCopyWith(_EditReceiptState value, $Res Function(_EditReceiptState) _then) = __$EditReceiptStateCopyWithImpl;
 @override @useResult
 $Res call({
- EEditReceiptStatus status, String? receiptId, String? storeId, String storeName, bool isStoreUserPicked, DateTime? purchasedAt, double? printedTotal, List<EditDraftItem> items, bool matchesTotal, String? errorMessage
+ EEditReceiptStatus status, String? receiptId, String? storeId, String storeName, bool isStoreUserPicked, String? categoryId, DateTime? purchasedAt, double? printedTotal, List<EditDraftItem> items, bool matchesTotal, String? errorMessage
 });
 
 
@@ -1234,14 +1316,15 @@ class __$EditReceiptStateCopyWithImpl<$Res>
 
 /// Create a copy of EditReceiptState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? receiptId = freezed,Object? storeId = freezed,Object? storeName = null,Object? isStoreUserPicked = null,Object? purchasedAt = freezed,Object? printedTotal = freezed,Object? items = null,Object? matchesTotal = null,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? receiptId = freezed,Object? storeId = freezed,Object? storeName = null,Object? isStoreUserPicked = null,Object? categoryId = freezed,Object? purchasedAt = freezed,Object? printedTotal = freezed,Object? items = null,Object? matchesTotal = null,Object? errorMessage = freezed,}) {
   return _then(_EditReceiptState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as EEditReceiptStatus,receiptId: freezed == receiptId ? _self.receiptId : receiptId // ignore: cast_nullable_to_non_nullable
 as String?,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String?,storeName: null == storeName ? _self.storeName : storeName // ignore: cast_nullable_to_non_nullable
 as String,isStoreUserPicked: null == isStoreUserPicked ? _self.isStoreUserPicked : isStoreUserPicked // ignore: cast_nullable_to_non_nullable
-as bool,purchasedAt: freezed == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
+as bool,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
+as String?,purchasedAt: freezed == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,printedTotal: freezed == printedTotal ? _self.printedTotal : printedTotal // ignore: cast_nullable_to_non_nullable
 as double?,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
 as List<EditDraftItem>,matchesTotal: null == matchesTotal ? _self.matchesTotal : matchesTotal // ignore: cast_nullable_to_non_nullable

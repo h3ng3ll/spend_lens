@@ -57,7 +57,11 @@ class StoreDetailBody extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               spacing: 16.0,
               children: [
-                StoreStatsRow(storeExpenses: storeExpenses),
+                StoreStatsRow(
+                  storeExpenses: storeExpenses,
+                  priceObservations: snapshot.priceObservations,
+                  storeId: store.id,
+                ),
                 ProductsHereCard(
                   storeId: store.id,
                   products: snapshot.products,

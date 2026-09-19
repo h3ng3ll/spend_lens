@@ -5,7 +5,9 @@ import '../../../../../core/di/injection.dart';
 import '../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../core/routes/presentation/error_message_widget.dart';
 import '../../../../../core/routes/presentation/loading_data_widget.dart';
+import '../../../../analytics/domain/repositories/i_price_observation_local_repository.dart';
 import '../../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../bloc/store_page_bloc/store_page_bloc.dart';
 import '../../bloc/stores_bloc/stores_bloc.dart';
 import '../../../domain/repositories/i_store_local_repository.dart';
@@ -41,6 +43,8 @@ class _StorePageState extends State<StorePage> {
   late final StorePageBloc _storePageBloc = StorePageBloc(
     storeLocalRepository: getIt<IStoreLocalRepository>(),
     expenseLocalRepository: getIt<IExpenseLocalRepository>(),
+    productLocalRepository: getIt<IProductLocalRepository>(),
+    priceObservationLocalRepository: getIt<IPriceObservationLocalRepository>(),
   )..add(const StorePageEvent.watch());
 
   @override

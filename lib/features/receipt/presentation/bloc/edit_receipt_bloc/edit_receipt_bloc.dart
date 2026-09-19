@@ -11,6 +11,7 @@ import '../../../domain/models/receipt_item/receipt_item.dart';
 import '../../../domain/repositories/i_receipt_item_local_repository.dart';
 import '../../../domain/repositories/i_receipt_local_repository.dart';
 import '../../../domain/use_cases/create_expense_from_receipt_use_case.dart';
+import '../../../domain/use_cases/record_price_observations_use_case.dart';
 import '../../../../scanner/domain/pending_receipt_draft_store.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../domain/parser/parsed_receipt.dart';
@@ -44,6 +45,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
   final ProductNormalizer _productNormalizer;
   final PendingReceiptDraftStore _draftStore;
   final CreateExpenseFromReceiptUseCase _createExpenseFromReceipt;
+  final RecordPriceObservationsUseCase _recordPriceObservations;
   final ReceiptReconciler _reconciler;
   final DateTime Function() _now;
 
@@ -54,6 +56,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
     required this._productRepository,
     required this._storeRepository,
     required this._createExpenseFromReceipt,
+    required this._recordPriceObservations,
     this._productNormalizer = const ProductNormalizer(),
     this._reconciler = const ReceiptReconciler(),
     this._now = DateTime.now,
@@ -61,6 +64,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
     on<_Load>(_onLoad);
     on<_PickStore>(_onPickStore);
     on<_SetStore>(_onSetStore);
+    on<_SetCategory>(_onSetCategory);
     on<_SetPurchasedAt>(_onSetPurchasedAt);
     on<_SetPrintedTotal>(_onSetPrintedTotal);
     on<_UpdateItemName>(_onUpdateItemName);
@@ -118,6 +122,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
         // The id alone left the Store row rendering its placeholder on a
         // saved receipt that definitely had one.
         storeName: await _storeNameFor(receipt.storeId),
+        categoryId: receipt.categoryId,
         purchasedAt: receipt.purchasedAt,
         printedTotal: receipt.printedTotal,
         items: items,
@@ -266,6 +271,10 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
     emit(state.copyWith(storeId: event.storeId, storeName: event.storeName));
   }
 
+  void _onSetCategory(_SetCategory event, Emitter<EditReceiptState> emit) {
+    emit(state.copyWith(categoryId: event.categoryId));
+  }
+
   void _onSetPurchasedAt(
     _SetPurchasedAt event,
     Emitter<EditReceiptState> emit,
@@ -396,6 +405,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
       final mutableProducts = List.of(existingProducts);
 
       final itemIds = <String>[];
+      final savedItems = <ReceiptItem>[];
       for (var i = 0; i < state.items.length; i++) {
         final draftItem = state.items[i];
         final isManuallyAdded = draftItem.rawName.isEmpty;
@@ -430,11 +440,16 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
           syncStatus: ESyncStatus.pendingUpdate,
         );
         await _receiptItemRepository.save(item);
+        savedItems.add(item);
         itemIds.add(item.id);
       }
 
       final updatedReceipt = existing.copyWith(
         storeId: state.storeId,
+        // `CreateExpenseFromReceiptUseCase` below mirrors this onto the
+        // `Expense`, which is what the record-detail screen's category chip
+        // actually reads — so a category changed here follows through to it.
+        categoryId: state.categoryId,
         purchasedAt: state.purchasedAt ?? existing.purchasedAt,
         printedTotal: state.printedTotal,
         itemsTotal: state.itemsTotal,
@@ -468,6 +483,19 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
       await _createExpenseFromReceipt(
         receipt: updatedReceipt,
         storeId: updatedReceipt.storeId,
+      );
+
+      // Re-derive the product<->store edges from the CORRECTED lines. The
+      // use case replaces this receipt's previous observations rather than
+      // appending, so a renamed or removed line does not leave a superseded
+      // row inflating the store's product count.
+      await _recordPriceObservations(
+        receiptId: updatedReceipt.id,
+        storeId: updatedReceipt.storeId,
+        items: savedItems,
+        observedAt: updatedReceipt.purchasedAt,
+        currencyCode: updatedReceipt.currencyCode,
+        now: now,
       );
 
       emit(state.copyWith(status: EEditReceiptStatus.saved));

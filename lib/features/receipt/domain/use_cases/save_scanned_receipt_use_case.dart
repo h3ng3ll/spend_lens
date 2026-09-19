@@ -13,6 +13,7 @@ import '../models/receipt_item/receipt_item.dart';
 import '../repositories/i_receipt_item_local_repository.dart';
 import '../repositories/i_receipt_local_repository.dart';
 import 'create_expense_from_receipt_use_case.dart';
+import 'record_price_observations_use_case.dart';
 
 /// One reviewed scan, flattened to exactly what persistence needs.
 ///
@@ -101,6 +102,7 @@ class SaveScannedReceiptUseCase {
   final IProductLocalRepository _productRepository;
   final IStoreLocalRepository _storeRepository;
   final CreateExpenseFromReceiptUseCase _createExpenseFromReceipt;
+  final RecordPriceObservationsUseCase _recordPriceObservations;
   final LearnStoreAliasUseCase _learnStoreAlias;
   final PendingReceiptDraftStore _draftStore;
   final ProductNormalizer _productNormalizer;
@@ -113,6 +115,7 @@ class SaveScannedReceiptUseCase {
     required IProductLocalRepository productRepository,
     required IStoreLocalRepository storeRepository,
     required CreateExpenseFromReceiptUseCase createExpenseFromReceipt,
+    required RecordPriceObservationsUseCase recordPriceObservations,
     required LearnStoreAliasUseCase learnStoreAlias,
     required PendingReceiptDraftStore draftStore,
     ProductNormalizer productNormalizer = const ProductNormalizer(),
@@ -124,6 +127,7 @@ class SaveScannedReceiptUseCase {
          productRepository,
          storeRepository,
          createExpenseFromReceipt,
+         recordPriceObservations,
          learnStoreAlias,
          draftStore,
          productNormalizer,
@@ -137,6 +141,7 @@ class SaveScannedReceiptUseCase {
     this._productRepository,
     this._storeRepository,
     this._createExpenseFromReceipt,
+    this._recordPriceObservations,
     this._learnStoreAlias,
     this._draftStore,
     this._productNormalizer,
@@ -164,6 +169,18 @@ class SaveScannedReceiptUseCase {
     // per-store screens aggregate `Expense.storeId`, and it was never passed,
     // so every scanned receipt landed store-less.
     await _createExpenseFromReceipt(receipt: receipt, storeId: input.storeId);
+
+    // The product<->store edge. Without this the products and the store are
+    // both saved but nothing joins them, so the Stores list counts 0 products
+    // and "Products bought here" stays empty no matter how much is scanned.
+    await _recordPriceObservations(
+      receiptId: receiptId,
+      storeId: input.storeId,
+      items: receiptItems,
+      observedAt: receipt.purchasedAt,
+      currencyCode: receipt.currencyCode,
+      now: now,
+    );
 
     await _learnAlias(input);
 

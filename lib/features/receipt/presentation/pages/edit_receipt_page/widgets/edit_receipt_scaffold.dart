@@ -7,8 +7,12 @@ import '../../../../../../core/resources/text/app_text_theme.dart';
 import '../../../../../../core/widgets/app_container.dart';
 import '../../../../../../core/widgets/gradient_cta_button.dart';
 import '../../../../../../core/widgets/padding/horizontal_padding.dart';
+import '../../../../../category/domain/models/category/category.dart';
+import '../../../../../category/domain/models/category/category_display_x.dart';
+import '../../../../../category/presentation/bloc/categories_bloc/categories_bloc.dart';
 import '../../../../../product/domain/models/product/e_unit.dart';
 import '../../../bloc/edit_receipt_bloc/edit_receipt_bloc.dart';
+import '../../review_page/widgets/review_category_card.dart';
 import 'edit_item_row.dart';
 
 /// The Edit Receipt screen's scaffold — one widget per file
@@ -26,6 +30,7 @@ class EditReceiptScaffold extends StatelessWidget {
   final VoidCallback onCancel;
   final VoidCallback onDone;
   final VoidCallback onPickStore;
+  final VoidCallback onPickCategory;
   final void Function(String itemId) onRemoveItem;
   final VoidCallback onAddItem;
   final void Function(String itemId, String value) onItemNameChanged;
@@ -43,6 +48,7 @@ class EditReceiptScaffold extends StatelessWidget {
     required this.onCancel,
     required this.onDone,
     required this.onPickStore,
+    required this.onPickCategory,
     required this.onRemoveItem,
     required this.onAddItem,
     required this.onItemNameChanged,
@@ -52,12 +58,22 @@ class EditReceiptScaffold extends StatelessWidget {
     required this.onPrintedTotalChanged,
   });
 
+  Category? _findCategory(List<Category> categories, String? categoryId) {
+    if (categoryId == null) return null;
+    for (final category in categories) {
+      if (category.id == categoryId) return category;
+    }
+    return null;
+  }
+
   @override
   Widget build(BuildContext context) {
     final scheme = AppColorScheme.of(context);
     final textTheme = AppTextTheme.of(context);
     final lo = AppLocalizations.of(context);
     final state = context.watch<EditReceiptBloc>().state;
+    final categories = context.watch<CategoriesBloc>().state.categories;
+    final category = _findCategory(categories, state.categoryId);
 
     // The printed-total controller is seeded EXACTLY ONCE by a
     // `BlocListener` in `EditReceiptPage.build()` (never here, never
@@ -204,6 +220,19 @@ class EditReceiptScaffold extends StatelessWidget {
                           ),
                         ],
                       ),
+                    ),
+                    // Category sits directly below Store, mirroring the
+                    // read-only record-detail screen's order. Reuses Review's
+                    // card — it is layout-only, so the two pickers cannot
+                    // drift apart visually.
+                    ReviewCategoryCard(
+                      sectionLabel: lo.category,
+                      dotColor: category == null
+                          ? null
+                          : AppColorScheme.categoryColor(category.id),
+                      categoryLabel: category?.displayName(lo) ?? lo.category,
+                      changeLabel: lo.change,
+                      onTap: onPickCategory,
                     ),
                     AppContainer(
                       color: scheme.card,

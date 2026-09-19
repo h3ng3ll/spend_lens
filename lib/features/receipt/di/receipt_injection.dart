@@ -1,5 +1,6 @@
 import '../../../core/di/injection.dart';
 import '../../../core/hive/hive_database.dart';
+import '../../analytics/domain/repositories/i_price_observation_local_repository.dart';
 import '../../expense/domain/repositories/i_expense_local_repository.dart';
 import '../data/repositories/receipt_item_local_repository.dart';
 import '../data/repositories/receipt_local_repository.dart';
@@ -14,6 +15,7 @@ import '../../scanner/domain/pending_receipt_draft_store.dart';
 import '../../store/domain/repositories/i_store_local_repository.dart';
 import '../../store/domain/use_cases/learn_store_alias_use_case.dart';
 import '../domain/use_cases/create_expense_from_receipt_use_case.dart';
+import '../domain/use_cases/record_price_observations_use_case.dart';
 import '../domain/use_cases/save_scanned_receipt_use_case.dart';
 import '../domain/use_cases/update_saved_receipt_use_case.dart';
 
@@ -51,6 +53,14 @@ void initReceiptFeature() {
   // The two save paths. Both are use cases rather than bloc code because
   // every rule inside them is domain policy — the `rawName` invariant, the
   // mirroring expense, alias learning — see each class doc.
+  // The product<->store edge, shared by BOTH save paths so a scan and a
+  // correction record identical rows.
+  getIt.registerLazySingleton(
+    () => RecordPriceObservationsUseCase(
+      priceObservationRepository: getIt<IPriceObservationLocalRepository>(),
+    ),
+  );
+
   getIt.registerLazySingleton(
     () => SaveScannedReceiptUseCase(
       receiptRepository: getIt<IReceiptLocalRepository>(),
@@ -58,6 +68,7 @@ void initReceiptFeature() {
       productRepository: getIt<IProductLocalRepository>(),
       storeRepository: getIt<IStoreLocalRepository>(),
       createExpenseFromReceipt: getIt<CreateExpenseFromReceiptUseCase>(),
+      recordPriceObservations: getIt<RecordPriceObservationsUseCase>(),
       learnStoreAlias: getIt<LearnStoreAliasUseCase>(),
       draftStore: getIt<PendingReceiptDraftStore>(),
       imageStore: getIt<ReceiptImageStore>(),

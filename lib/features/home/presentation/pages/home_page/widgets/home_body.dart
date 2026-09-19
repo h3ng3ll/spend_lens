@@ -15,6 +15,7 @@ import 'home_categories_container.dart';
 import 'home_empty_state.dart';
 import 'home_header_container.dart';
 import 'home_hero_container.dart';
+import 'home_month_chart_container.dart';
 import 'home_recent_container.dart';
 
 /// Populated / truly-empty presentation for `HomePage`
@@ -88,6 +89,7 @@ class HomeBody extends StatelessWidget {
           children: [
             const HomeHeaderContainer(),
             HomeHeroContainer(snapshot: snapshot),
+            HomeMonthChartContainer(snapshot: snapshot),
             HomeActionButtons(
               scanIconAsset: AppIcons.scanFrame,
               onScanReceipt: () => _onScanReceipt(context),

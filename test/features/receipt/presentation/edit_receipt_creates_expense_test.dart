@@ -1,5 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:spend_lens/features/analytics/domain/models/price_observation/price_observation.dart';
+import 'package:spend_lens/features/analytics/domain/repositories/i_price_observation_local_repository.dart';
 import 'package:spend_lens/features/expense/domain/models/expense/e_expense_source.dart';
 import 'package:spend_lens/features/expense/domain/models/expense/expense.dart';
 import 'package:spend_lens/features/expense/domain/repositories/i_expense_local_repository.dart';
@@ -10,6 +12,7 @@ import 'package:spend_lens/features/receipt/domain/models/receipt_item/receipt_i
 import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_item_local_repository.dart';
 import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_local_repository.dart';
 import 'package:spend_lens/features/receipt/domain/use_cases/create_expense_from_receipt_use_case.dart';
+import 'package:spend_lens/features/receipt/domain/use_cases/record_price_observations_use_case.dart';
 import 'package:spend_lens/features/receipt/presentation/bloc/edit_receipt_bloc/edit_receipt_bloc.dart';
 import 'package:spend_lens/features/scanner/domain/pending_receipt_draft_store.dart';
 import 'package:spend_lens/features/store/domain/models/store/store.dart';
@@ -32,6 +35,7 @@ void main() {
   late _FakeProductRepository products;
   late _FakeStoreRepository stores;
   late _FakeExpenseRepository expenses;
+  late _FakePriceObservationRepository priceObservations;
 
   final now = DateTime(2026, 9, 9, 14, 30);
 
@@ -42,6 +46,9 @@ void main() {
         productRepository: products,
         storeRepository: stores,
         createExpenseFromReceipt: CreateExpenseFromReceiptUseCase(expenses),
+        recordPriceObservations: RecordPriceObservationsUseCase(
+          priceObservationRepository: priceObservations,
+        ),
         now: () => now,
       );
 
@@ -61,6 +68,7 @@ void main() {
     products = _FakeProductRepository();
     stores = _FakeStoreRepository();
     expenses = _FakeExpenseRepository();
+    priceObservations = _FakePriceObservationRepository();
   });
 
   test('manual entry then save creates the mirrored expense', () async {
@@ -323,4 +331,28 @@ class _FakeExpenseRepository implements IExpenseLocalRepository {
 
   @override
   Stream<List<Expense>> watchAll() => Stream.value(_store.values.toList());
+}
+
+class _FakePriceObservationRepository
+    implements IPriceObservationLocalRepository {
+  final List<PriceObservation> saved = [];
+
+  @override
+  Future<List<PriceObservation>> getAllIncludingDeleted() async => saved;
+
+  @override
+  Future<void> saveAll(
+    List<PriceObservation> items, {
+    bool markPending = true,
+  }) async {
+    saved.addAll(items);
+  }
+
+  @override
+  Future<void> deleteLocalOnly(String id) async {
+    saved.removeWhere((observation) => observation.id == id);
+  }
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

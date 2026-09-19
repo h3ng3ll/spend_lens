@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/widgets/app_section_card.dart';
+import '../../../../../analytics/domain/models/price_observation/price_observation.dart';
 import '../../../../../expense/domain/models/expense/expense.dart';
 import '../../../../domain/models/store/store.dart';
 import 'store_list_row.dart';
@@ -11,11 +12,13 @@ import 'store_list_row.dart';
 class StoreListCard extends StatelessWidget {
   final List<Store> stores;
   final List<Expense> expenses;
+  final List<PriceObservation> priceObservations;
 
   const StoreListCard({
     super.key,
     required this.stores,
     required this.expenses,
+    required this.priceObservations,
   });
 
   @override
@@ -29,6 +32,7 @@ class StoreListCard extends StatelessWidget {
             StoreListRow(
               store: stores[i],
               expenses: expenses,
+              priceObservations: priceObservations,
               showBottomDivider: i != stores.length - 1,
             ),
         ],

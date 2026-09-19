@@ -24,6 +24,7 @@ class StoreBody extends StatelessWidget {
 
     final stores = snapshot?.stores ?? const [];
     final expenses = snapshot?.expenses ?? const [];
+    final priceObservations = snapshot?.priceObservations ?? const [];
 
     return SingleChildScrollView(
       child: HorizontalPadding(
@@ -43,7 +44,11 @@ class StoreBody extends StatelessWidget {
                 body: lo.storesEmptyBody,
               )
             else
-              StoreListCard(stores: stores, expenses: expenses),
+              StoreListCard(
+                stores: stores,
+                expenses: expenses,
+                priceObservations: priceObservations,
+              ),
           ],
         ),
       ),
