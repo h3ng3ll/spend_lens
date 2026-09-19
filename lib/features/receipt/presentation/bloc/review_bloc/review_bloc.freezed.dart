@@ -530,7 +530,15 @@ String toString() {
 /// @nodoc
 mixin _$ReviewState {
 
- EReviewStatus get status; String? get storeName; DateTime? get purchasedAt; double? get printedTotal; List<ReviewDraftItem> get items; String? get categoryId; String? get editingItemId; bool get isReconciled; double? get reconciliationDifference; bool get isLikelyDuplicate; String? get imageFilename; String? get savedReceiptId; String? get errorMessage;
+ EReviewStatus get status;/// The store name as PRINTED on the receipt — raw OCR text, displayed on
+/// the store card and kept for price history (spec §11).
+ String? get storeName;/// The resolved store this receipt belongs to, or null when nothing
+/// matched. Written into `Receipt.storeId` AND `Expense.storeId` on
+/// save; before this field existed both were always null, so a scanned
+/// receipt never appeared under any store.
+ String? get storeId;/// Whether [storeId] was chosen by the user rather than auto-matched.
+/// Gates alias learning — see `LearnStoreAliasUseCase`.
+ bool get isStoreUserPicked; DateTime? get purchasedAt; double? get printedTotal; List<ReviewDraftItem> get items; String? get categoryId; String? get editingItemId; bool get isReconciled; double? get reconciliationDifference; bool get isLikelyDuplicate; String? get imageFilename; String? get savedReceiptId; String? get errorMessage;
 /// Create a copy of ReviewState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -541,16 +549,16 @@ $ReviewStateCopyWith<ReviewState> get copyWith => _$ReviewStateCopyWithImpl<Revi
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReviewState&&(identical(other.status, status) || other.status == status)&&(identical(other.storeName, storeName) || other.storeName == storeName)&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt)&&(identical(other.printedTotal, printedTotal) || other.printedTotal == printedTotal)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.editingItemId, editingItemId) || other.editingItemId == editingItemId)&&(identical(other.isReconciled, isReconciled) || other.isReconciled == isReconciled)&&(identical(other.reconciliationDifference, reconciliationDifference) || other.reconciliationDifference == reconciliationDifference)&&(identical(other.isLikelyDuplicate, isLikelyDuplicate) || other.isLikelyDuplicate == isLikelyDuplicate)&&(identical(other.imageFilename, imageFilename) || other.imageFilename == imageFilename)&&(identical(other.savedReceiptId, savedReceiptId) || other.savedReceiptId == savedReceiptId)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ReviewState&&(identical(other.status, status) || other.status == status)&&(identical(other.storeName, storeName) || other.storeName == storeName)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.isStoreUserPicked, isStoreUserPicked) || other.isStoreUserPicked == isStoreUserPicked)&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt)&&(identical(other.printedTotal, printedTotal) || other.printedTotal == printedTotal)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.editingItemId, editingItemId) || other.editingItemId == editingItemId)&&(identical(other.isReconciled, isReconciled) || other.isReconciled == isReconciled)&&(identical(other.reconciliationDifference, reconciliationDifference) || other.reconciliationDifference == reconciliationDifference)&&(identical(other.isLikelyDuplicate, isLikelyDuplicate) || other.isLikelyDuplicate == isLikelyDuplicate)&&(identical(other.imageFilename, imageFilename) || other.imageFilename == imageFilename)&&(identical(other.savedReceiptId, savedReceiptId) || other.savedReceiptId == savedReceiptId)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,storeName,purchasedAt,printedTotal,const DeepCollectionEquality().hash(items),categoryId,editingItemId,isReconciled,reconciliationDifference,isLikelyDuplicate,imageFilename,savedReceiptId,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,storeName,storeId,isStoreUserPicked,purchasedAt,printedTotal,const DeepCollectionEquality().hash(items),categoryId,editingItemId,isReconciled,reconciliationDifference,isLikelyDuplicate,imageFilename,savedReceiptId,errorMessage);
 
 @override
 String toString() {
-  return 'ReviewState(status: $status, storeName: $storeName, purchasedAt: $purchasedAt, printedTotal: $printedTotal, items: $items, categoryId: $categoryId, editingItemId: $editingItemId, isReconciled: $isReconciled, reconciliationDifference: $reconciliationDifference, isLikelyDuplicate: $isLikelyDuplicate, imageFilename: $imageFilename, savedReceiptId: $savedReceiptId, errorMessage: $errorMessage)';
+  return 'ReviewState(status: $status, storeName: $storeName, storeId: $storeId, isStoreUserPicked: $isStoreUserPicked, purchasedAt: $purchasedAt, printedTotal: $printedTotal, items: $items, categoryId: $categoryId, editingItemId: $editingItemId, isReconciled: $isReconciled, reconciliationDifference: $reconciliationDifference, isLikelyDuplicate: $isLikelyDuplicate, imageFilename: $imageFilename, savedReceiptId: $savedReceiptId, errorMessage: $errorMessage)';
 }
 
 
@@ -561,7 +569,7 @@ abstract mixin class $ReviewStateCopyWith<$Res>  {
   factory $ReviewStateCopyWith(ReviewState value, $Res Function(ReviewState) _then) = _$ReviewStateCopyWithImpl;
 @useResult
 $Res call({
- EReviewStatus status, String? storeName, DateTime? purchasedAt, double? printedTotal, List<ReviewDraftItem> items, String? categoryId, String? editingItemId, bool isReconciled, double? reconciliationDifference, bool isLikelyDuplicate, String? imageFilename, String? savedReceiptId, String? errorMessage
+ EReviewStatus status, String? storeName, String? storeId, bool isStoreUserPicked, DateTime? purchasedAt, double? printedTotal, List<ReviewDraftItem> items, String? categoryId, String? editingItemId, bool isReconciled, double? reconciliationDifference, bool isLikelyDuplicate, String? imageFilename, String? savedReceiptId, String? errorMessage
 });
 
 
@@ -578,11 +586,13 @@ class _$ReviewStateCopyWithImpl<$Res>
 
 /// Create a copy of ReviewState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? storeName = freezed,Object? purchasedAt = freezed,Object? printedTotal = freezed,Object? items = null,Object? categoryId = freezed,Object? editingItemId = freezed,Object? isReconciled = null,Object? reconciliationDifference = freezed,Object? isLikelyDuplicate = null,Object? imageFilename = freezed,Object? savedReceiptId = freezed,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? storeName = freezed,Object? storeId = freezed,Object? isStoreUserPicked = null,Object? purchasedAt = freezed,Object? printedTotal = freezed,Object? items = null,Object? categoryId = freezed,Object? editingItemId = freezed,Object? isReconciled = null,Object? reconciliationDifference = freezed,Object? isLikelyDuplicate = null,Object? imageFilename = freezed,Object? savedReceiptId = freezed,Object? errorMessage = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as EReviewStatus,storeName: freezed == storeName ? _self.storeName : storeName // ignore: cast_nullable_to_non_nullable
-as String?,purchasedAt: freezed == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
+as String?,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
+as String?,isStoreUserPicked: null == isStoreUserPicked ? _self.isStoreUserPicked : isStoreUserPicked // ignore: cast_nullable_to_non_nullable
+as bool,purchasedAt: freezed == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,printedTotal: freezed == printedTotal ? _self.printedTotal : printedTotal // ignore: cast_nullable_to_non_nullable
 as double?,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<ReviewDraftItem>,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
@@ -675,10 +685,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EReviewStatus status,  String? storeName,  DateTime? purchasedAt,  double? printedTotal,  List<ReviewDraftItem> items,  String? categoryId,  String? editingItemId,  bool isReconciled,  double? reconciliationDifference,  bool isLikelyDuplicate,  String? imageFilename,  String? savedReceiptId,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EReviewStatus status,  String? storeName,  String? storeId,  bool isStoreUserPicked,  DateTime? purchasedAt,  double? printedTotal,  List<ReviewDraftItem> items,  String? categoryId,  String? editingItemId,  bool isReconciled,  double? reconciliationDifference,  bool isLikelyDuplicate,  String? imageFilename,  String? savedReceiptId,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ReviewState() when $default != null:
-return $default(_that.status,_that.storeName,_that.purchasedAt,_that.printedTotal,_that.items,_that.categoryId,_that.editingItemId,_that.isReconciled,_that.reconciliationDifference,_that.isLikelyDuplicate,_that.imageFilename,_that.savedReceiptId,_that.errorMessage);case _:
+return $default(_that.status,_that.storeName,_that.storeId,_that.isStoreUserPicked,_that.purchasedAt,_that.printedTotal,_that.items,_that.categoryId,_that.editingItemId,_that.isReconciled,_that.reconciliationDifference,_that.isLikelyDuplicate,_that.imageFilename,_that.savedReceiptId,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -696,10 +706,10 @@ return $default(_that.status,_that.storeName,_that.purchasedAt,_that.printedTota
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EReviewStatus status,  String? storeName,  DateTime? purchasedAt,  double? printedTotal,  List<ReviewDraftItem> items,  String? categoryId,  String? editingItemId,  bool isReconciled,  double? reconciliationDifference,  bool isLikelyDuplicate,  String? imageFilename,  String? savedReceiptId,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EReviewStatus status,  String? storeName,  String? storeId,  bool isStoreUserPicked,  DateTime? purchasedAt,  double? printedTotal,  List<ReviewDraftItem> items,  String? categoryId,  String? editingItemId,  bool isReconciled,  double? reconciliationDifference,  bool isLikelyDuplicate,  String? imageFilename,  String? savedReceiptId,  String? errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _ReviewState():
-return $default(_that.status,_that.storeName,_that.purchasedAt,_that.printedTotal,_that.items,_that.categoryId,_that.editingItemId,_that.isReconciled,_that.reconciliationDifference,_that.isLikelyDuplicate,_that.imageFilename,_that.savedReceiptId,_that.errorMessage);}
+return $default(_that.status,_that.storeName,_that.storeId,_that.isStoreUserPicked,_that.purchasedAt,_that.printedTotal,_that.items,_that.categoryId,_that.editingItemId,_that.isReconciled,_that.reconciliationDifference,_that.isLikelyDuplicate,_that.imageFilename,_that.savedReceiptId,_that.errorMessage);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -713,10 +723,10 @@ return $default(_that.status,_that.storeName,_that.purchasedAt,_that.printedTota
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EReviewStatus status,  String? storeName,  DateTime? purchasedAt,  double? printedTotal,  List<ReviewDraftItem> items,  String? categoryId,  String? editingItemId,  bool isReconciled,  double? reconciliationDifference,  bool isLikelyDuplicate,  String? imageFilename,  String? savedReceiptId,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EReviewStatus status,  String? storeName,  String? storeId,  bool isStoreUserPicked,  DateTime? purchasedAt,  double? printedTotal,  List<ReviewDraftItem> items,  String? categoryId,  String? editingItemId,  bool isReconciled,  double? reconciliationDifference,  bool isLikelyDuplicate,  String? imageFilename,  String? savedReceiptId,  String? errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _ReviewState() when $default != null:
-return $default(_that.status,_that.storeName,_that.purchasedAt,_that.printedTotal,_that.items,_that.categoryId,_that.editingItemId,_that.isReconciled,_that.reconciliationDifference,_that.isLikelyDuplicate,_that.imageFilename,_that.savedReceiptId,_that.errorMessage);case _:
+return $default(_that.status,_that.storeName,_that.storeId,_that.isStoreUserPicked,_that.purchasedAt,_that.printedTotal,_that.items,_that.categoryId,_that.editingItemId,_that.isReconciled,_that.reconciliationDifference,_that.isLikelyDuplicate,_that.imageFilename,_that.savedReceiptId,_that.errorMessage);case _:
   return null;
 
 }
@@ -728,11 +738,21 @@ return $default(_that.status,_that.storeName,_that.purchasedAt,_that.printedTota
 
 
 class _ReviewState implements ReviewState {
-  const _ReviewState({this.status = EReviewStatus.initial, this.storeName, this.purchasedAt, this.printedTotal, final  List<ReviewDraftItem> items = const <ReviewDraftItem>[], this.categoryId, this.editingItemId, this.isReconciled = false, this.reconciliationDifference, this.isLikelyDuplicate = false, this.imageFilename, this.savedReceiptId, this.errorMessage}): _items = items;
+  const _ReviewState({this.status = EReviewStatus.initial, this.storeName, this.storeId, this.isStoreUserPicked = false, this.purchasedAt, this.printedTotal, final  List<ReviewDraftItem> items = const <ReviewDraftItem>[], this.categoryId, this.editingItemId, this.isReconciled = false, this.reconciliationDifference, this.isLikelyDuplicate = false, this.imageFilename, this.savedReceiptId, this.errorMessage}): _items = items;
   
 
 @override@JsonKey() final  EReviewStatus status;
+/// The store name as PRINTED on the receipt — raw OCR text, displayed on
+/// the store card and kept for price history (spec §11).
 @override final  String? storeName;
+/// The resolved store this receipt belongs to, or null when nothing
+/// matched. Written into `Receipt.storeId` AND `Expense.storeId` on
+/// save; before this field existed both were always null, so a scanned
+/// receipt never appeared under any store.
+@override final  String? storeId;
+/// Whether [storeId] was chosen by the user rather than auto-matched.
+/// Gates alias learning — see `LearnStoreAliasUseCase`.
+@override@JsonKey() final  bool isStoreUserPicked;
 @override final  DateTime? purchasedAt;
 @override final  double? printedTotal;
  final  List<ReviewDraftItem> _items;
@@ -761,16 +781,16 @@ _$ReviewStateCopyWith<_ReviewState> get copyWith => __$ReviewStateCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReviewState&&(identical(other.status, status) || other.status == status)&&(identical(other.storeName, storeName) || other.storeName == storeName)&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt)&&(identical(other.printedTotal, printedTotal) || other.printedTotal == printedTotal)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.editingItemId, editingItemId) || other.editingItemId == editingItemId)&&(identical(other.isReconciled, isReconciled) || other.isReconciled == isReconciled)&&(identical(other.reconciliationDifference, reconciliationDifference) || other.reconciliationDifference == reconciliationDifference)&&(identical(other.isLikelyDuplicate, isLikelyDuplicate) || other.isLikelyDuplicate == isLikelyDuplicate)&&(identical(other.imageFilename, imageFilename) || other.imageFilename == imageFilename)&&(identical(other.savedReceiptId, savedReceiptId) || other.savedReceiptId == savedReceiptId)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _ReviewState&&(identical(other.status, status) || other.status == status)&&(identical(other.storeName, storeName) || other.storeName == storeName)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.isStoreUserPicked, isStoreUserPicked) || other.isStoreUserPicked == isStoreUserPicked)&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt)&&(identical(other.printedTotal, printedTotal) || other.printedTotal == printedTotal)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.editingItemId, editingItemId) || other.editingItemId == editingItemId)&&(identical(other.isReconciled, isReconciled) || other.isReconciled == isReconciled)&&(identical(other.reconciliationDifference, reconciliationDifference) || other.reconciliationDifference == reconciliationDifference)&&(identical(other.isLikelyDuplicate, isLikelyDuplicate) || other.isLikelyDuplicate == isLikelyDuplicate)&&(identical(other.imageFilename, imageFilename) || other.imageFilename == imageFilename)&&(identical(other.savedReceiptId, savedReceiptId) || other.savedReceiptId == savedReceiptId)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,storeName,purchasedAt,printedTotal,const DeepCollectionEquality().hash(_items),categoryId,editingItemId,isReconciled,reconciliationDifference,isLikelyDuplicate,imageFilename,savedReceiptId,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,storeName,storeId,isStoreUserPicked,purchasedAt,printedTotal,const DeepCollectionEquality().hash(_items),categoryId,editingItemId,isReconciled,reconciliationDifference,isLikelyDuplicate,imageFilename,savedReceiptId,errorMessage);
 
 @override
 String toString() {
-  return 'ReviewState(status: $status, storeName: $storeName, purchasedAt: $purchasedAt, printedTotal: $printedTotal, items: $items, categoryId: $categoryId, editingItemId: $editingItemId, isReconciled: $isReconciled, reconciliationDifference: $reconciliationDifference, isLikelyDuplicate: $isLikelyDuplicate, imageFilename: $imageFilename, savedReceiptId: $savedReceiptId, errorMessage: $errorMessage)';
+  return 'ReviewState(status: $status, storeName: $storeName, storeId: $storeId, isStoreUserPicked: $isStoreUserPicked, purchasedAt: $purchasedAt, printedTotal: $printedTotal, items: $items, categoryId: $categoryId, editingItemId: $editingItemId, isReconciled: $isReconciled, reconciliationDifference: $reconciliationDifference, isLikelyDuplicate: $isLikelyDuplicate, imageFilename: $imageFilename, savedReceiptId: $savedReceiptId, errorMessage: $errorMessage)';
 }
 
 
@@ -781,7 +801,7 @@ abstract mixin class _$ReviewStateCopyWith<$Res> implements $ReviewStateCopyWith
   factory _$ReviewStateCopyWith(_ReviewState value, $Res Function(_ReviewState) _then) = __$ReviewStateCopyWithImpl;
 @override @useResult
 $Res call({
- EReviewStatus status, String? storeName, DateTime? purchasedAt, double? printedTotal, List<ReviewDraftItem> items, String? categoryId, String? editingItemId, bool isReconciled, double? reconciliationDifference, bool isLikelyDuplicate, String? imageFilename, String? savedReceiptId, String? errorMessage
+ EReviewStatus status, String? storeName, String? storeId, bool isStoreUserPicked, DateTime? purchasedAt, double? printedTotal, List<ReviewDraftItem> items, String? categoryId, String? editingItemId, bool isReconciled, double? reconciliationDifference, bool isLikelyDuplicate, String? imageFilename, String? savedReceiptId, String? errorMessage
 });
 
 
@@ -798,11 +818,13 @@ class __$ReviewStateCopyWithImpl<$Res>
 
 /// Create a copy of ReviewState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? storeName = freezed,Object? purchasedAt = freezed,Object? printedTotal = freezed,Object? items = null,Object? categoryId = freezed,Object? editingItemId = freezed,Object? isReconciled = null,Object? reconciliationDifference = freezed,Object? isLikelyDuplicate = null,Object? imageFilename = freezed,Object? savedReceiptId = freezed,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? storeName = freezed,Object? storeId = freezed,Object? isStoreUserPicked = null,Object? purchasedAt = freezed,Object? printedTotal = freezed,Object? items = null,Object? categoryId = freezed,Object? editingItemId = freezed,Object? isReconciled = null,Object? reconciliationDifference = freezed,Object? isLikelyDuplicate = null,Object? imageFilename = freezed,Object? savedReceiptId = freezed,Object? errorMessage = freezed,}) {
   return _then(_ReviewState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as EReviewStatus,storeName: freezed == storeName ? _self.storeName : storeName // ignore: cast_nullable_to_non_nullable
-as String?,purchasedAt: freezed == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
+as String?,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
+as String?,isStoreUserPicked: null == isStoreUserPicked ? _self.isStoreUserPicked : isStoreUserPicked // ignore: cast_nullable_to_non_nullable
+as bool,purchasedAt: freezed == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,printedTotal: freezed == printedTotal ? _self.printedTotal : printedTotal // ignore: cast_nullable_to_non_nullable
 as double?,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
 as List<ReviewDraftItem>,categoryId: freezed == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable

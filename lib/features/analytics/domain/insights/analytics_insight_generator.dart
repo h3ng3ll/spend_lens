@@ -31,7 +31,8 @@ List<AnalyticsInsight> generateInsights({
   }
 
   final topShare = summary.categoryShares.first;
-  final isFoodTop = topShare.categoryId == topCategoryId &&
+  final isFoodTop =
+      topShare.categoryId == topCategoryId &&
       _isFoodCategory(topShare.categoryId);
 
   if (isFoodTop && topShare.sharePercent > 0) {
@@ -45,10 +46,18 @@ List<AnalyticsInsight> generateInsights({
             : [topCategoryId, topShare.sharePercent.round()],
       ),
     );
-  } else if (!isCurrentMonth && topShare.sharePercent > 0) {
+  } else if (topShare.sharePercent > 0) {
     // insA1 template is "{category} represented {percent}%..." — genuinely
-    // category-parameterized (unlike ins1), so a non-Food top category can
-    // still use it for a past month.
+    // category-parameterized (unlike ins1), so a non-Food top category uses
+    // it in EITHER month.
+    //
+    // This branch used to be gated on `!isCurrentMonth`, which meant a user
+    // whose top category was not Food got NO top-category insight at all for
+    // the current month — and since the other two insights also need
+    // prior-month data, the whole Insights card collapsed to
+    // `SizedBox.shrink()`. The gate was never protecting anything: insA1 is
+    // category-generic and localized in all 7 locales, so the only thing
+    // `isCurrentMonth` changed here was whether the user saw anything.
     insights.add(
       AnalyticsInsight(
         key: EAnalyticsInsightKey.insA1,

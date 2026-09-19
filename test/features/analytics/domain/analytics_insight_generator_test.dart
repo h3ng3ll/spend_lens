@@ -8,6 +8,7 @@ import 'package:spend_lens/features/analytics/domain/models/monthly_summary/mont
 MonthlySummary _summary({
   required List<CategoryShare> shares,
   double? previousMonthTotal,
+  double? previousMonthAveragePurchase,
   double total = 100.0,
   int month = 8,
 }) {
@@ -21,6 +22,7 @@ MonthlySummary _summary({
     cashShare: 0.5,
     categoryShares: shares,
     previousMonthTotal: previousMonthTotal,
+    previousMonthAveragePurchase: previousMonthAveragePurchase,
   );
 }
 
@@ -57,6 +59,71 @@ void main() {
         expect(insight.key, isA<EAnalyticsInsightKey>());
         expect(insight.params, isA<List<Object>>());
       }
+    });
+
+    test(
+      'a NON-Food top category still produces an insight in the CURRENT month',
+      () {
+        // Regression: this branch used to be gated on `!isCurrentMonth`, so a
+        // user whose top category was not Food got NO top-category insight at
+        // all for the current month. Combined with the other two insights
+        // needing prior-month data, the whole Insights card collapsed to
+        // `SizedBox.shrink()` — the screen's "doesn't informate" symptom.
+        final summary = _summary(
+          shares: const [
+            CategoryShare(
+              categoryId: 'catTransport',
+              amount: 62.0,
+              count: 3,
+              sharePercent: 62.0,
+            ),
+          ],
+        );
+
+        final insights = generateInsights(
+          summary: summary,
+          isCurrentMonth: true,
+          topCategoryId: 'catTransport',
+        );
+
+        final insA1 = insights.firstWhere(
+          (insight) => insight.key == EAnalyticsInsightKey.insA1,
+        );
+        expect(insA1.params, ['catTransport', 62]);
+      },
+    );
+
+    test('ins3 fires once a previous-month average exists', () {
+      // Regression: `previousMonthAverageDisplay` was hardcoded to null at the
+      // call site and `MonthlySummary` had no field to supply it, so this
+      // insight was structurally impossible to emit.
+      final summary = _summary(
+        shares: const [
+          CategoryShare(
+            categoryId: 'catFood',
+            amount: 57.0,
+            count: 4,
+            sharePercent: 57.0,
+          ),
+        ],
+        previousMonthTotal: 80.0,
+        previousMonthAveragePurchase: 16.0,
+      );
+
+      final insights = generateInsights(
+        summary: summary,
+        isCurrentMonth: true,
+        topCategoryId: 'catFood',
+        previousMonthAverageDisplay: summary.previousMonthAveragePurchase
+            ?.round()
+            .toString(),
+        currentMonthAverageDisplay: summary.averagePurchase.round().toString(),
+      );
+
+      final ins3 = insights.firstWhere(
+        (insight) => insight.key == EAnalyticsInsightKey.ins3,
+      );
+      expect(ins3.params, ['16', '20', 'MDL']);
     });
 
     test('ins1 is emitted (deterministically) when Food is the top category, current month', () {

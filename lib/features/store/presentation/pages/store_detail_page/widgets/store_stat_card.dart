@@ -1,3 +1,4 @@
+import 'package:auto_size_text/auto_size_text.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/resources/colors/app_color_scheme.dart';
@@ -11,7 +12,11 @@ class StoreStatCard extends StatelessWidget {
   final String label;
   final String value;
 
-  const StoreStatCard({super.key, required this.label, required this.value});
+  const StoreStatCard({
+    super.key,
+    required this.label,
+    required this.value,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -28,15 +33,21 @@ class StoreStatCard extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 4.0,
         children: [
-          Text(
-            label,
-            style: textTheme.sectionLabel12.copyWith(color: scheme.ter),
+          Center(
+            child: Text(
+              label,
+              style: textTheme.sectionLabel12.copyWith(color: scheme.ter),
+              textAlign: .center,
+            ),
           ),
-          Text(
-            value,
-            style: textTheme.statValue20.copyWith(
-              color: scheme.ink,
-              fontFeatures: const [FontFeature.tabularFigures()],
+          Center(
+            child: AutoSizeText(
+              value,
+              style: textTheme.statValue20.copyWith(
+                color: scheme.ink,
+              ),
+              textAlign: .center,
+              minFontSize: 8,
             ),
           ),
         ],

@@ -114,7 +114,30 @@ class AppLocalizationsEn extends AppLocalizations {
   String get deleteStore => 'Delete store';
 
   @override
-  String get deleteStoreNote => 'Only possible while no receipts are linked.';
+  String get deleteStoreNote =>
+      'Also deletes every expense and receipt linked to this store.';
+
+  @override
+  String deleteStoreBody(num n) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          'This store has $nString linked records. Deleting the store deletes those records too. This cannot be undone.',
+      one:
+          'This store has 1 linked record. Deleting the store deletes that record too. This cannot be undone.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteStoreBodyEmpty =>
+      'This store has no linked records. This cannot be undone.';
 
   @override
   String storeDeleted(int n) {
@@ -318,11 +341,29 @@ class AppLocalizationsEn extends AppLocalizations {
   String get pdf => 'PDF';
 
   @override
-  String get pdfExportUnavailable => 'PDF export arrives in a later update.';
-
-  @override
   String pdfToast(String m) {
     return '$m report · PDF ready to share';
+  }
+
+  @override
+  String get pdfExportFailed =>
+      'Could not create the PDF report. Please try again.';
+
+  @override
+  String get analyticsEmptyMonthTitle => 'Nothing in this month';
+
+  @override
+  String get analyticsEmptyMonthBody =>
+      'Pick another period to see your spending.';
+
+  @override
+  String analyticsCategoryTotal(String c, String a, String cur) {
+    return '$c · $a $cur';
+  }
+
+  @override
+  String reportGeneratedAt(String d) {
+    return 'Generated $d';
   }
 
   @override

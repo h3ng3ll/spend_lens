@@ -42,7 +42,11 @@ class NewCategoryRow extends StatelessWidget {
               color: scheme.accentTint,
               shape: BoxShape.circle,
               alignment: Alignment.center,
-              child: AppSvgIcon(asset: AppIcons.plus, color: scheme.accent, size: 16.0),
+              child: AppSvgIcon(
+                asset: AppIcons.plus,
+                color: scheme.accent,
+                size: 16.0,
+              ),
             ),
             Expanded(
               child: Text(

@@ -115,7 +115,29 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get deleteStoreNote =>
-      'Nur möglich, solange keine Belege verknüpft sind.';
+      'Löscht auch alle Ausgaben und Belege dieses Geschäfts.';
+
+  @override
+  String deleteStoreBody(num n) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          'Diesem Geschäft sind $nString Einträge zugeordnet. Mit dem Geschäft werden auch diese Einträge gelöscht. Das kann nicht rückgängig gemacht werden.',
+      one:
+          'Diesem Geschäft ist 1 Eintrag zugeordnet. Mit dem Geschäft wird auch dieser Eintrag gelöscht. Das kann nicht rückgängig gemacht werden.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteStoreBodyEmpty =>
+      'Diesem Geschäft sind keine Einträge zugeordnet. Das kann nicht rückgängig gemacht werden.';
 
   @override
   String storeDeleted(int n) {
@@ -319,12 +341,29 @@ class AppLocalizationsDe extends AppLocalizations {
   String get pdf => 'PDF';
 
   @override
-  String get pdfExportUnavailable =>
-      'PDF-Export folgt in einem späteren Update.';
-
-  @override
   String pdfToast(String m) {
     return 'Bericht $m · PDF bereit zum Teilen';
+  }
+
+  @override
+  String get pdfExportFailed =>
+      'Der PDF-Bericht konnte nicht erstellt werden. Bitte erneut versuchen.';
+
+  @override
+  String get analyticsEmptyMonthTitle => 'Nichts in diesem Monat';
+
+  @override
+  String get analyticsEmptyMonthBody =>
+      'Wähle einen anderen Zeitraum, um deine Ausgaben zu sehen.';
+
+  @override
+  String analyticsCategoryTotal(String c, String a, String cur) {
+    return '$c · $a $cur';
+  }
+
+  @override
+  String reportGeneratedAt(String d) {
+    return 'Erstellt $d';
   }
 
   @override

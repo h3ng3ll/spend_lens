@@ -9,6 +9,10 @@ import 'package:spend_lens/features/category/domain/use_cases/seed_categories_us
 class _FakeCategoryLocalRepository implements ICategoryLocalRepository {
   List<Category>? savedCategories;
 
+  /// The exact list handed to the most recent `saveAll` — lets a test assert
+  /// WHAT was written, not just the resulting store contents.
+  List<Category>? lastSaved;
+
   @override
   Future<List<Category>> getAll() async => savedCategories ?? const [];
 
@@ -23,7 +27,8 @@ class _FakeCategoryLocalRepository implements ICategoryLocalRepository {
     List<Category> categories, {
     bool markPending = true,
   }) async {
-    savedCategories = categories;
+    lastSaved = categories;
+    savedCategories = [...?savedCategories, ...categories];
   }
 
   @override
@@ -52,7 +57,7 @@ void main() {
     useCase = SeedCategoriesUseCase(repository);
   });
 
-  group('SeedCategoriesUseCase — THE SEED GUARD IS isEmpty && !dataCleared',
+  group('SeedCategoriesUseCase — built-ins are infrastructure, not user data',
       () {
     test('seeds all 12 built-ins on a genuinely fresh, empty install',
         () async {
@@ -63,26 +68,84 @@ void main() {
     });
 
     test(
-        'does NOT seed when isEmpty but dataCleared is true — the '
-        'delete_all_records_rules.md contract', () async {
+        'RESTORES the built-ins even when dataCleared is true — they are app '
+        'infrastructure, not user records', () async {
+      // Recorded defect: `dataCleared` is set by "Delete all records" and is
+      // only ever reset by *import backup*, so a user who cleared their data
+      // and never imported a backup was left with ZERO categories forever —
+      // the picker read 0, the Analytics breakdown/donut/drill-down/insights
+      // all silently vanished, and every expense fell back to "Other".
+      // Observed on a real device: Settings showed "Categories 0".
       await useCase.call(isEmpty: true, dataCleared: true);
 
+      expect(repository.savedCategories, isNotNull);
+      expect(repository.savedCategories!.length, 12);
       expect(
-        repository.savedCategories,
-        isNull,
-        reason:
-            'Seeding on emptiness alone would silently repopulate a store '
-            'the user deliberately cleared via "Delete all records".',
+        repository.savedCategories!.every((c) => c.isBuiltIn),
+        isTrue,
+        reason: 'Only BUILT-INS come back. Custom categories stay cleared — '
+            'that is what delete_all_records_rules.md actually protects.',
       );
     });
 
-    test('does NOT seed when the store is not empty, regardless of the flag',
-        () async {
-      await useCase.call(isEmpty: false, dataCleared: false);
-      expect(repository.savedCategories, isNull);
+    test('is idempotent — a complete set is left untouched', () async {
+      await useCase.call(isEmpty: true, dataCleared: false);
+      final first = repository.savedCategories;
+      repository.savedCategories = first;
 
-      await useCase.call(isEmpty: false, dataCleared: true);
-      expect(repository.savedCategories, isNull);
+      await useCase.call(isEmpty: false, dataCleared: false);
+
+      expect(
+        repository.savedCategories,
+        same(first),
+        reason: 'Nothing was missing, so saveAll must not be called again.',
+      );
+    });
+
+    test('restores only the MISSING built-ins', () async {
+      await useCase.call(isEmpty: true, dataCleared: false);
+      // Simulate a store that lost everything except Food.
+      repository.savedCategories = repository.savedCategories!
+          .where((c) => c.id == 'catFood')
+          .toList();
+      repository.lastSaved = null;
+
+      await useCase.call(isEmpty: false, dataCleared: false);
+
+      final written = repository.lastSaved!;
+      expect(written.length, 11);
+      expect(
+        written.any((c) => c.id == 'catFood'),
+        isFalse,
+        reason: 'A built-in the user still has is never rewritten.',
+      );
+    });
+
+    test('revives a soft-deleted built-in rather than duplicating it',
+        () async {
+      final now = DateTime(2026, 9, 19);
+      repository.savedCategories = [
+        Category(
+          id: 'catFood',
+          name: 'catFood',
+          colorHex: '#A78BFA',
+          isBuiltIn: true,
+          updatedAt: now,
+          deletedAt: now,
+        ),
+      ];
+      repository.lastSaved = null;
+
+      await useCase.call(isEmpty: false, dataCleared: false);
+
+      final written = repository.lastSaved!;
+      final food = written.firstWhere((c) => c.id == 'catFood');
+      expect(food.deletedAt, isNull);
+      expect(
+        written.where((c) => c.id == 'catFood').length,
+        1,
+        reason: 'Reviving must not write a second row under the same key.',
+      );
     });
 
     test('every seeded category is isBuiltIn and named by an i18n key',

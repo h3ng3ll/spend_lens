@@ -17,8 +17,20 @@ class ProductFuzzyMatcher {
   const ProductFuzzyMatcher();
 
   /// Returns the closest candidate from [existingNormalizedNames] if its
-  /// similarity to [name] clears the conservative threshold, else `null`.
-  String? findClosestMatch(String name, List<String> existingNormalizedNames) {
+  /// similarity to [name] clears the threshold, else `null`.
+  ///
+  /// [minSimilarity] defaults to [_similarityThreshold], so product
+  /// normalization behaves exactly as before. It is overridable for
+  /// non-product callers with a different tolerance for a false merge —
+  /// `ReceiptStoreMatcher` passes a far looser value, because a receipt
+  /// header carries legal-entity noise ("KAUFLAND SA MD-2001") that a store
+  /// name never has, and merging onto the wrong store there is recoverable
+  /// while merging two products corrupts price history.
+  String? findClosestMatch(
+    String name,
+    List<String> existingNormalizedNames, {
+    double minSimilarity = _similarityThreshold,
+  }) {
     String? best;
     double bestSimilarity = 0.0;
 
@@ -30,7 +42,7 @@ class ProductFuzzyMatcher {
       }
     }
 
-    if (best != null && bestSimilarity >= _similarityThreshold) return best;
+    if (best != null && bestSimilarity >= minSimilarity) return best;
     return null;
   }
 

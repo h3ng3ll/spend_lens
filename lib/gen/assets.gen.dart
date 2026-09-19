@@ -11,6 +11,22 @@
 
 import 'package:flutter/widgets.dart';
 
+class $AssetsFontsGen {
+  const $AssetsFontsGen();
+
+  /// File path: assets/fonts/NotoSans-Regular.ttf
+  String get notoSansRegular => 'assets/fonts/NotoSans-Regular.ttf';
+
+  /// File path: assets/fonts/NotoSans-SemiBold.ttf
+  String get notoSansSemiBold => 'assets/fonts/NotoSans-SemiBold.ttf';
+
+  /// File path: assets/fonts/OFL.txt
+  String get ofl => 'assets/fonts/OFL.txt';
+
+  /// List of all assets
+  List<String> get values => [notoSansRegular, notoSansSemiBold, ofl];
+}
+
 class $AssetsIconsGen {
   const $AssetsIconsGen();
 
@@ -175,6 +191,7 @@ class $AssetsSplashGen {
 
 abstract final class Assets {
   static const String aEnv = '.env';
+  static const $AssetsFontsGen fonts = $AssetsFontsGen();
   static const $AssetsIconsGen icons = $AssetsIconsGen();
   static const $AssetsLauncherGen launcher = $AssetsLauncherGen();
   static const $AssetsLegalGen legal = $AssetsLegalGen();

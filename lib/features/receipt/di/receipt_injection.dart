@@ -9,7 +9,13 @@ import '../../../core/services/receipt_image_store/receipt_image_store.dart';
 import '../../../core/services/receipt_size_calculator.dart';
 import '../data/repositories/receipt_repository.dart';
 import '../domain/repositories/i_receipt_repository.dart';
+import '../../product/domain/repositories/i_product_local_repository.dart';
+import '../../scanner/domain/pending_receipt_draft_store.dart';
+import '../../store/domain/repositories/i_store_local_repository.dart';
+import '../../store/domain/use_cases/learn_store_alias_use_case.dart';
 import '../domain/use_cases/create_expense_from_receipt_use_case.dart';
+import '../domain/use_cases/save_scanned_receipt_use_case.dart';
+import '../domain/use_cases/update_saved_receipt_use_case.dart';
 
 /// Registers the receipt slice's two repositories — [Receipt] and
 /// [ReceiptItem] are separate models with separate boxes, per
@@ -40,5 +46,29 @@ void initReceiptFeature() {
   // the `expenses` box rather than `receipts`.
   getIt.registerLazySingleton(
     () => CreateExpenseFromReceiptUseCase(getIt<IExpenseLocalRepository>()),
+  );
+
+  // The two save paths. Both are use cases rather than bloc code because
+  // every rule inside them is domain policy — the `rawName` invariant, the
+  // mirroring expense, alias learning — see each class doc.
+  getIt.registerLazySingleton(
+    () => SaveScannedReceiptUseCase(
+      receiptRepository: getIt<IReceiptLocalRepository>(),
+      receiptItemRepository: getIt<IReceiptItemLocalRepository>(),
+      productRepository: getIt<IProductLocalRepository>(),
+      storeRepository: getIt<IStoreLocalRepository>(),
+      createExpenseFromReceipt: getIt<CreateExpenseFromReceiptUseCase>(),
+      learnStoreAlias: getIt<LearnStoreAliasUseCase>(),
+      draftStore: getIt<PendingReceiptDraftStore>(),
+      imageStore: getIt<ReceiptImageStore>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => UpdateSavedReceiptUseCase(
+      receiptRepository: getIt<IReceiptLocalRepository>(),
+      receiptItemRepository: getIt<IReceiptItemLocalRepository>(),
+      productRepository: getIt<IProductLocalRepository>(),
+      createExpenseFromReceipt: getIt<CreateExpenseFromReceiptUseCase>(),
+    ),
   );
 }

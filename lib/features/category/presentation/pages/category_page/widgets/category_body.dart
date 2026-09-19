@@ -93,7 +93,10 @@ class CategoryBody extends StatelessWidget {
             NewCategoryRow(onTap: onOpenNewCategory),
             Text(
               lo.catNote,
-              style: textTheme.footnote13.copyWith(color: scheme.ter, height: 1.5),
+              style: textTheme.footnote13.copyWith(
+                color: scheme.ter,
+                height: 1.5,
+              ),
             ),
           ],
         ),

@@ -966,7 +966,10 @@ String toString() {
 /// @nodoc
 mixin _$EditReceiptState {
 
- EEditReceiptStatus get status; String? get receiptId; String? get storeId; String get storeName; DateTime? get purchasedAt; double? get printedTotal; List<EditDraftItem> get items; bool get matchesTotal; String? get errorMessage;
+ EEditReceiptStatus get status; String? get receiptId; String? get storeId; String get storeName;/// Whether [storeId] came from an explicit user pick rather than an
+/// auto-match. Carried onto the draft so the save path can decide
+/// whether learning an alias from this receipt is justified.
+ bool get isStoreUserPicked; DateTime? get purchasedAt; double? get printedTotal; List<EditDraftItem> get items; bool get matchesTotal; String? get errorMessage;
 /// Create a copy of EditReceiptState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -977,16 +980,16 @@ $EditReceiptStateCopyWith<EditReceiptState> get copyWith => _$EditReceiptStateCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EditReceiptState&&(identical(other.status, status) || other.status == status)&&(identical(other.receiptId, receiptId) || other.receiptId == receiptId)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.storeName, storeName) || other.storeName == storeName)&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt)&&(identical(other.printedTotal, printedTotal) || other.printedTotal == printedTotal)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.matchesTotal, matchesTotal) || other.matchesTotal == matchesTotal)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EditReceiptState&&(identical(other.status, status) || other.status == status)&&(identical(other.receiptId, receiptId) || other.receiptId == receiptId)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.storeName, storeName) || other.storeName == storeName)&&(identical(other.isStoreUserPicked, isStoreUserPicked) || other.isStoreUserPicked == isStoreUserPicked)&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt)&&(identical(other.printedTotal, printedTotal) || other.printedTotal == printedTotal)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.matchesTotal, matchesTotal) || other.matchesTotal == matchesTotal)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,receiptId,storeId,storeName,purchasedAt,printedTotal,const DeepCollectionEquality().hash(items),matchesTotal,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,receiptId,storeId,storeName,isStoreUserPicked,purchasedAt,printedTotal,const DeepCollectionEquality().hash(items),matchesTotal,errorMessage);
 
 @override
 String toString() {
-  return 'EditReceiptState(status: $status, receiptId: $receiptId, storeId: $storeId, storeName: $storeName, purchasedAt: $purchasedAt, printedTotal: $printedTotal, items: $items, matchesTotal: $matchesTotal, errorMessage: $errorMessage)';
+  return 'EditReceiptState(status: $status, receiptId: $receiptId, storeId: $storeId, storeName: $storeName, isStoreUserPicked: $isStoreUserPicked, purchasedAt: $purchasedAt, printedTotal: $printedTotal, items: $items, matchesTotal: $matchesTotal, errorMessage: $errorMessage)';
 }
 
 
@@ -997,7 +1000,7 @@ abstract mixin class $EditReceiptStateCopyWith<$Res>  {
   factory $EditReceiptStateCopyWith(EditReceiptState value, $Res Function(EditReceiptState) _then) = _$EditReceiptStateCopyWithImpl;
 @useResult
 $Res call({
- EEditReceiptStatus status, String? receiptId, String? storeId, String storeName, DateTime? purchasedAt, double? printedTotal, List<EditDraftItem> items, bool matchesTotal, String? errorMessage
+ EEditReceiptStatus status, String? receiptId, String? storeId, String storeName, bool isStoreUserPicked, DateTime? purchasedAt, double? printedTotal, List<EditDraftItem> items, bool matchesTotal, String? errorMessage
 });
 
 
@@ -1014,13 +1017,14 @@ class _$EditReceiptStateCopyWithImpl<$Res>
 
 /// Create a copy of EditReceiptState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? receiptId = freezed,Object? storeId = freezed,Object? storeName = null,Object? purchasedAt = freezed,Object? printedTotal = freezed,Object? items = null,Object? matchesTotal = null,Object? errorMessage = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? receiptId = freezed,Object? storeId = freezed,Object? storeName = null,Object? isStoreUserPicked = null,Object? purchasedAt = freezed,Object? printedTotal = freezed,Object? items = null,Object? matchesTotal = null,Object? errorMessage = freezed,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as EEditReceiptStatus,receiptId: freezed == receiptId ? _self.receiptId : receiptId // ignore: cast_nullable_to_non_nullable
 as String?,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String?,storeName: null == storeName ? _self.storeName : storeName // ignore: cast_nullable_to_non_nullable
-as String,purchasedAt: freezed == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
+as String,isStoreUserPicked: null == isStoreUserPicked ? _self.isStoreUserPicked : isStoreUserPicked // ignore: cast_nullable_to_non_nullable
+as bool,purchasedAt: freezed == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,printedTotal: freezed == printedTotal ? _self.printedTotal : printedTotal // ignore: cast_nullable_to_non_nullable
 as double?,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<EditDraftItem>,matchesTotal: null == matchesTotal ? _self.matchesTotal : matchesTotal // ignore: cast_nullable_to_non_nullable
@@ -1107,10 +1111,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EEditReceiptStatus status,  String? receiptId,  String? storeId,  String storeName,  DateTime? purchasedAt,  double? printedTotal,  List<EditDraftItem> items,  bool matchesTotal,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EEditReceiptStatus status,  String? receiptId,  String? storeId,  String storeName,  bool isStoreUserPicked,  DateTime? purchasedAt,  double? printedTotal,  List<EditDraftItem> items,  bool matchesTotal,  String? errorMessage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EditReceiptState() when $default != null:
-return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that.purchasedAt,_that.printedTotal,_that.items,_that.matchesTotal,_that.errorMessage);case _:
+return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that.isStoreUserPicked,_that.purchasedAt,_that.printedTotal,_that.items,_that.matchesTotal,_that.errorMessage);case _:
   return orElse();
 
 }
@@ -1128,10 +1132,10 @@ return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EEditReceiptStatus status,  String? receiptId,  String? storeId,  String storeName,  DateTime? purchasedAt,  double? printedTotal,  List<EditDraftItem> items,  bool matchesTotal,  String? errorMessage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EEditReceiptStatus status,  String? receiptId,  String? storeId,  String storeName,  bool isStoreUserPicked,  DateTime? purchasedAt,  double? printedTotal,  List<EditDraftItem> items,  bool matchesTotal,  String? errorMessage)  $default,) {final _that = this;
 switch (_that) {
 case _EditReceiptState():
-return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that.purchasedAt,_that.printedTotal,_that.items,_that.matchesTotal,_that.errorMessage);}
+return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that.isStoreUserPicked,_that.purchasedAt,_that.printedTotal,_that.items,_that.matchesTotal,_that.errorMessage);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -1145,10 +1149,10 @@ return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EEditReceiptStatus status,  String? receiptId,  String? storeId,  String storeName,  DateTime? purchasedAt,  double? printedTotal,  List<EditDraftItem> items,  bool matchesTotal,  String? errorMessage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EEditReceiptStatus status,  String? receiptId,  String? storeId,  String storeName,  bool isStoreUserPicked,  DateTime? purchasedAt,  double? printedTotal,  List<EditDraftItem> items,  bool matchesTotal,  String? errorMessage)?  $default,) {final _that = this;
 switch (_that) {
 case _EditReceiptState() when $default != null:
-return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that.purchasedAt,_that.printedTotal,_that.items,_that.matchesTotal,_that.errorMessage);case _:
+return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that.isStoreUserPicked,_that.purchasedAt,_that.printedTotal,_that.items,_that.matchesTotal,_that.errorMessage);case _:
   return null;
 
 }
@@ -1160,13 +1164,17 @@ return $default(_that.status,_that.receiptId,_that.storeId,_that.storeName,_that
 
 
 class _EditReceiptState implements EditReceiptState {
-  const _EditReceiptState({this.status = EEditReceiptStatus.initial, this.receiptId, this.storeId, this.storeName = '', this.purchasedAt, this.printedTotal, final  List<EditDraftItem> items = const <EditDraftItem>[], this.matchesTotal = true, this.errorMessage}): _items = items;
+  const _EditReceiptState({this.status = EEditReceiptStatus.initial, this.receiptId, this.storeId, this.storeName = '', this.isStoreUserPicked = false, this.purchasedAt, this.printedTotal, final  List<EditDraftItem> items = const <EditDraftItem>[], this.matchesTotal = true, this.errorMessage}): _items = items;
   
 
 @override@JsonKey() final  EEditReceiptStatus status;
 @override final  String? receiptId;
 @override final  String? storeId;
 @override@JsonKey() final  String storeName;
+/// Whether [storeId] came from an explicit user pick rather than an
+/// auto-match. Carried onto the draft so the save path can decide
+/// whether learning an alias from this receipt is justified.
+@override@JsonKey() final  bool isStoreUserPicked;
 @override final  DateTime? purchasedAt;
 @override final  double? printedTotal;
  final  List<EditDraftItem> _items;
@@ -1189,16 +1197,16 @@ _$EditReceiptStateCopyWith<_EditReceiptState> get copyWith => __$EditReceiptStat
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EditReceiptState&&(identical(other.status, status) || other.status == status)&&(identical(other.receiptId, receiptId) || other.receiptId == receiptId)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.storeName, storeName) || other.storeName == storeName)&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt)&&(identical(other.printedTotal, printedTotal) || other.printedTotal == printedTotal)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.matchesTotal, matchesTotal) || other.matchesTotal == matchesTotal)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _EditReceiptState&&(identical(other.status, status) || other.status == status)&&(identical(other.receiptId, receiptId) || other.receiptId == receiptId)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.storeName, storeName) || other.storeName == storeName)&&(identical(other.isStoreUserPicked, isStoreUserPicked) || other.isStoreUserPicked == isStoreUserPicked)&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt)&&(identical(other.printedTotal, printedTotal) || other.printedTotal == printedTotal)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.matchesTotal, matchesTotal) || other.matchesTotal == matchesTotal)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,receiptId,storeId,storeName,purchasedAt,printedTotal,const DeepCollectionEquality().hash(_items),matchesTotal,errorMessage);
+int get hashCode => Object.hash(runtimeType,status,receiptId,storeId,storeName,isStoreUserPicked,purchasedAt,printedTotal,const DeepCollectionEquality().hash(_items),matchesTotal,errorMessage);
 
 @override
 String toString() {
-  return 'EditReceiptState(status: $status, receiptId: $receiptId, storeId: $storeId, storeName: $storeName, purchasedAt: $purchasedAt, printedTotal: $printedTotal, items: $items, matchesTotal: $matchesTotal, errorMessage: $errorMessage)';
+  return 'EditReceiptState(status: $status, receiptId: $receiptId, storeId: $storeId, storeName: $storeName, isStoreUserPicked: $isStoreUserPicked, purchasedAt: $purchasedAt, printedTotal: $printedTotal, items: $items, matchesTotal: $matchesTotal, errorMessage: $errorMessage)';
 }
 
 
@@ -1209,7 +1217,7 @@ abstract mixin class _$EditReceiptStateCopyWith<$Res> implements $EditReceiptSta
   factory _$EditReceiptStateCopyWith(_EditReceiptState value, $Res Function(_EditReceiptState) _then) = __$EditReceiptStateCopyWithImpl;
 @override @useResult
 $Res call({
- EEditReceiptStatus status, String? receiptId, String? storeId, String storeName, DateTime? purchasedAt, double? printedTotal, List<EditDraftItem> items, bool matchesTotal, String? errorMessage
+ EEditReceiptStatus status, String? receiptId, String? storeId, String storeName, bool isStoreUserPicked, DateTime? purchasedAt, double? printedTotal, List<EditDraftItem> items, bool matchesTotal, String? errorMessage
 });
 
 
@@ -1226,13 +1234,14 @@ class __$EditReceiptStateCopyWithImpl<$Res>
 
 /// Create a copy of EditReceiptState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? receiptId = freezed,Object? storeId = freezed,Object? storeName = null,Object? purchasedAt = freezed,Object? printedTotal = freezed,Object? items = null,Object? matchesTotal = null,Object? errorMessage = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? receiptId = freezed,Object? storeId = freezed,Object? storeName = null,Object? isStoreUserPicked = null,Object? purchasedAt = freezed,Object? printedTotal = freezed,Object? items = null,Object? matchesTotal = null,Object? errorMessage = freezed,}) {
   return _then(_EditReceiptState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as EEditReceiptStatus,receiptId: freezed == receiptId ? _self.receiptId : receiptId // ignore: cast_nullable_to_non_nullable
 as String?,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String?,storeName: null == storeName ? _self.storeName : storeName // ignore: cast_nullable_to_non_nullable
-as String,purchasedAt: freezed == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
+as String,isStoreUserPicked: null == isStoreUserPicked ? _self.isStoreUserPicked : isStoreUserPicked // ignore: cast_nullable_to_non_nullable
+as bool,purchasedAt: freezed == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,printedTotal: freezed == printedTotal ? _self.printedTotal : printedTotal // ignore: cast_nullable_to_non_nullable
 as double?,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
 as List<EditDraftItem>,matchesTotal: null == matchesTotal ? _self.matchesTotal : matchesTotal // ignore: cast_nullable_to_non_nullable

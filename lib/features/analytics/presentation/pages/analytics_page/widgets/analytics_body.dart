@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../../../core/resources/app_icons.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
@@ -6,18 +7,24 @@ import '../../../../../../core/utils/selected_period.dart';
 import '../../../../../../core/widgets/app_empty_state.dart';
 import '../../../../../../core/widgets/padding/horizontal_padding.dart';
 import '../../../../../category/domain/models/category/category.dart';
+import '../../../../../category/domain/models/category/category_display_x.dart';
+import '../../../../../expense/domain/models/expense/expense.dart';
+import '../../../../../store/domain/models/store/store.dart';
+import '../../../../../../core/utils/extensions/color_ext.dart';
 import '../../../../domain/calculator/analytics_calculator.dart';
 import '../../../../domain/insights/analytics_insight_generator.dart';
 import '../../../../domain/models/monthly_summary/monthly_summary.dart';
 import '../../../bloc/analytics_bloc/analytics_bloc.dart';
 import '../analytics_category_breakdown_row.dart';
 import '../analytics_insight_resolver.dart';
+import '../analytics_selected_category_entry.dart';
 import '../analytics_view_helpers.dart';
 import 'analytics_cash_receipt_split_card.dart';
 import 'analytics_category_donut_card.dart';
 import 'analytics_header.dart';
 import 'analytics_insights_card.dart';
 import 'analytics_period_pill.dart';
+import 'analytics_selected_category_card.dart';
 import 'analytics_stat_row.dart';
 import 'analytics_stat_tile.dart';
 import 'analytics_total_delta.dart';
@@ -45,6 +52,9 @@ class AnalyticsBody extends StatelessWidget {
   final int selectedCategoryIndex;
   final ValueChanged<int> onSelectCategory;
 
+  final VoidCallback onExportPdf;
+  final bool isExporting;
+
   const AnalyticsBody({
     super.key,
     required this.state,
@@ -53,6 +63,8 @@ class AnalyticsBody extends StatelessWidget {
     required this.onOpenPeriod,
     required this.selectedCategoryIndex,
     required this.onSelectCategory,
+    required this.onExportPdf,
+    required this.isExporting,
   });
 
   @override
@@ -69,6 +81,12 @@ class AnalyticsBody extends StatelessWidget {
         '${monthLabels[selectedPeriod.month]} ${selectedPeriod.year}';
 
     if (periodExpenses.isEmpty) {
+      // Two different situations, and telling them apart matters: a user who
+      // has never scanned anything needs the onboarding nudge, while a user
+      // browsing an empty PAST month just needs to pick another period —
+      // telling them they have "no expenses yet" while their data sits one
+      // month away is simply wrong.
+      final hasAnyExpenses = allExpenses.isNotEmpty;
       return SingleChildScrollView(
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -79,7 +97,10 @@ class AnalyticsBody extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 spacing: 16.0,
                 children: [
-                  const AnalyticsHeader(),
+                  AnalyticsHeader(
+                    onExportPdf: onExportPdf,
+                    isExporting: isExporting,
+                  ),
                   AnalyticsPeriodPill(label: periodLabel, onTap: onOpenPeriod),
                 ],
               ),
@@ -89,8 +110,12 @@ class AnalyticsBody extends StatelessWidget {
               child: HorizontalPadding(
                 child: AppEmptyState(
                   icon: AppIcons.emptyReceipt,
-                  title: lo.homeNoExpensesTitle,
-                  body: lo.homeNoExpensesBody,
+                  title: hasAnyExpenses
+                      ? lo.analyticsEmptyMonthTitle
+                      : lo.homeNoExpensesTitle,
+                  body: hasAnyExpenses
+                      ? lo.analyticsEmptyMonthBody
+                      : lo.homeNoExpensesBody,
                 ),
               ),
             ),
@@ -118,7 +143,10 @@ class AnalyticsBody extends StatelessWidget {
                 summary: summary,
                 isCurrentMonth: isCurrentMonth,
                 topCategoryId: topShare.categoryId,
-                previousMonthAverageDisplay: null,
+                previousMonthAverageDisplay: summary
+                    .previousMonthAveragePurchase
+                    ?.round()
+                    .toString(),
                 currentMonthAverageDisplay: summary.averagePurchase
                     .round()
                     .toString(),
@@ -140,7 +168,10 @@ class AnalyticsBody extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 16.0,
             children: [
-              const AnalyticsHeader(),
+              AnalyticsHeader(
+                onExportPdf: onExportPdf,
+                isExporting: isExporting,
+              ),
               AnalyticsPeriodPill(label: periodLabel, onTap: onOpenPeriod),
               Column(
                 mainAxisSize: MainAxisSize.min,
@@ -184,6 +215,14 @@ class AnalyticsBody extends StatelessWidget {
                   selectedIndex: selectedCategoryIndex,
                   onSelect: onSelectCategory,
                 ),
+              if (rows.isNotEmpty)
+                _selectedCategoryCard(
+                  lo: lo,
+                  rows: rows,
+                  periodExpenses: periodExpenses,
+                  categories: categories,
+                  stores: snapshot?.stores ?? const [],
+                ),
               AnalyticsCashReceiptSplitCard(
                 cashSharePercent: (summary.cashShare * 100).round(),
               ),
@@ -192,6 +231,44 @@ class AnalyticsBody extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+
+  /// The drill-down card for whichever donut slice is selected.
+  ///
+  /// [selectedCategoryIndex] is clamped rather than trusted: the donut and
+  /// this card read the same index, and a month with fewer categories than
+  /// the previous one would otherwise index past the end.
+  Widget _selectedCategoryCard({
+    required AppLocalizations lo,
+    required List<AnalyticsCategoryBreakdownRow> rows,
+    required List<Expense> periodExpenses,
+    required List<Category> categories,
+    required List<Store> stores,
+  }) {
+    final index = selectedCategoryIndex.clamp(0, rows.length - 1);
+    final row = rows[index];
+
+    final entries = buildSelectedCategoryEntries(
+      lo: lo,
+      periodExpenses: periodExpenses,
+      categories: categories,
+      stores: stores,
+      currencyCode: currencyCode,
+      categoryId: row.category.id,
+    );
+
+    final total = selectedCategoryTotal(
+      periodExpenses: periodExpenses,
+      categoryId: row.category.id,
+    );
+
+    return AnalyticsSelectedCategoryCard(
+      categoryName: row.category.displayName(lo),
+      amountText: NumberFormat.decimalPattern().format(total.round()),
+      currencyCode: currencyCode,
+      categoryColor: ColorExtension.fromHex(row.category.colorHex),
+      entries: entries,
     );
   }
 

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:gap/gap.dart';
 
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../expense/domain/models/expense/expense.dart';
@@ -24,18 +25,30 @@ class StoreStatsRow extends StatelessWidget {
         ? '—'
         : '${formatAmount(allTime.amount)} ${allTime.currencyCode}';
 
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      spacing: 10.0,
+    return Column(
       children: [
-        Expanded(
-          child: StoreStatCard(label: lo.visits, value: '$visits'),
+        SizedBox(
+          height: 80.0,
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            spacing: 10.0,
+            children: [
+              Expanded(
+                child: StoreStatCard(
+                  label: lo.visits,
+                  value: '$visits',
+                ),
+              ),
+              Expanded(
+                child: StoreStatCard(label: lo.products, value: '0'),
+              ),
+            ],
+          ),
         ),
-        Expanded(
-          child: StoreStatCard(label: lo.spent, value: spentText),
-        ),
-        Expanded(
-          child: StoreStatCard(label: lo.products, value: '0'),
+        Gap(5.0),
+        StoreStatCard(
+          label: lo.spent,
+          value: spentText,
         ),
       ],
     );

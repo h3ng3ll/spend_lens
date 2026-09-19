@@ -43,14 +43,15 @@ PriceHistorySummary buildPriceHistory({
   required List<PriceObservation> allObservations,
   required String displayCurrencyCode,
 }) {
-  final matching = allObservations
-      .where(
-        (observation) =>
-            observation.productId == productId &&
-            observation.deletedAt == null,
-      )
-      .toList()
-    ..sort((a, b) => a.observedAt.compareTo(b.observedAt));
+  final matching =
+      allObservations
+          .where(
+            (observation) =>
+                observation.productId == productId &&
+                observation.deletedAt == null,
+          )
+          .toList()
+        ..sort((a, b) => a.observedAt.compareTo(b.observedAt));
 
   if (matching.isEmpty) {
     return PriceHistorySummary(
@@ -63,10 +64,13 @@ PriceHistorySummary buildPriceHistory({
 
   final byMonth = <DateTime, PriceObservation>{};
   for (final observation in matching) {
-    final monthKey =
-        DateTime(observation.observedAt.year, observation.observedAt.month);
+    final monthKey = DateTime(
+      observation.observedAt.year,
+      observation.observedAt.month,
+    );
     final existing = byMonth[monthKey];
-    if (existing == null || observation.observedAt.isAfter(existing.observedAt)) {
+    if (existing == null ||
+        observation.observedAt.isAfter(existing.observedAt)) {
       byMonth[monthKey] = observation;
     }
   }

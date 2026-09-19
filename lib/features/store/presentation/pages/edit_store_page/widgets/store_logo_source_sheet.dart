@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../../../core/resources/app_icons.dart';
-import '../../../../../../../../core/resources/colors/app_color_scheme.dart';
-import '../../../../../../../../core/resources/localization/gen/app_localizations.dart';
-import '../../../../../../../../core/widgets/app_container.dart';
-import '../../../../../../../../core/widgets/sheet_close_header.dart';
-import '../../../../../../../auth/presentation/pages/edit_profile_page/widgets/avatar_source_row.dart';
+import '../../../../../../core/resources/app_icons.dart';
+import '../../../../../../core/resources/colors/app_color_scheme.dart';
+import '../../../../../../core/resources/localization/gen/app_localizations.dart';
+import '../../../../../../core/widgets/app_container.dart';
+import '../../../../../../core/widgets/sheet_close_header.dart';
+import '../../../../../auth/presentation/pages/edit_profile_page/widgets/avatar_source_row.dart';
 import 'e_store_logo_source.dart';
 
 /// Picks where the new store logo comes from — or removes the current one.

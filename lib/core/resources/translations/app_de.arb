@@ -20,7 +20,18 @@
   "catDeleted": "{n} gelöscht",
   "noStore": "Kein Laden",
   "deleteStore": "Laden löschen",
-  "deleteStoreNote": "Nur möglich, solange keine Belege verknüpft sind.",
+  "deleteStoreNote": "Löscht auch alle Ausgaben und Belege dieses Geschäfts.",
+  "deleteStoreBody": "{n,plural, =1{Diesem Geschäft ist 1 Eintrag zugeordnet. Mit dem Geschäft wird auch dieser Eintrag gelöscht. Das kann nicht rückgängig gemacht werden.} other{Diesem Geschäft sind {n} Einträge zugeordnet. Mit dem Geschäft werden auch diese Einträge gelöscht. Das kann nicht rückgängig gemacht werden.}}",
+  "@deleteStoreBody": {
+    "description": "Confirm-dialog body when deleting a store that has linked expenses/receipts. Real ICU plural, never string concatenation (recorded bug count-plus-noun-concatenated-without-icu-plural).",
+    "placeholders": {
+      "n": {
+        "type": "num",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "deleteStoreBodyEmpty": "Diesem Geschäft sind keine Einträge zugeordnet. Das kann nicht rückgängig gemacht werden.",
   "storeDeleted": "{n} gelöscht",
   "tabHome": "Start",
   "tabAnalytics": "Analyse",
@@ -82,8 +93,12 @@
   "period": "Zeitraum",
   "periodRange": "Einträge von {a} bis {b}",
   "pdf": "PDF",
-  "pdfExportUnavailable": "PDF-Export folgt in einem späteren Update.",
   "pdfToast": "Bericht {m} · PDF bereit zum Teilen",
+  "pdfExportFailed": "Der PDF-Bericht konnte nicht erstellt werden. Bitte erneut versuchen.",
+  "analyticsEmptyMonthTitle": "Nichts in diesem Monat",
+  "analyticsEmptyMonthBody": "Wähle einen anderen Zeitraum, um deine Ausgaben zu sehen.",
+  "analyticsCategoryTotal": "{c} · {a} {cur}",
+  "reportGeneratedAt": "Erstellt {d}",
   "purchaseCount": "{n,plural, =1{{n} Einkauf} other{{n} Einkäufe}}",
   "top": "Top",
   "ins1": "Lebensmittel machen {p}% deiner Ausgaben aus.",

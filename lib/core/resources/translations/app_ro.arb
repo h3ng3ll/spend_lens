@@ -20,7 +20,18 @@
   "catDeleted": "{n} ștearsă",
   "noStore": "Fără magazin",
   "deleteStore": "Șterge magazinul",
-  "deleteStoreNote": "Posibil doar cât timp nu are bonuri legate.",
+  "deleteStoreNote": "Șterge și toate cheltuielile și bonurile acestui magazin.",
+  "deleteStoreBody": "{n,plural, =1{Acest magazin are 1 înregistrare legată. Ștergerea magazinului șterge și acea înregistrare. Această acțiune nu poate fi anulată.} other{Acest magazin are {n} înregistrări legate. Ștergerea magazinului șterge și acele înregistrări. Această acțiune nu poate fi anulată.}}",
+  "@deleteStoreBody": {
+    "description": "Confirm-dialog body when deleting a store that has linked expenses/receipts. Real ICU plural, never string concatenation (recorded bug count-plus-noun-concatenated-without-icu-plural).",
+    "placeholders": {
+      "n": {
+        "type": "num",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "deleteStoreBodyEmpty": "Acest magazin nu are înregistrări legate. Această acțiune nu poate fi anulată.",
   "storeDeleted": "{n} șters",
   "tabHome": "Acasă",
   "tabAnalytics": "Analiză",
@@ -82,8 +93,12 @@
   "period": "Perioadă",
   "periodRange": "Înregistrări din {a} până în {b}",
   "pdf": "PDF",
-  "pdfExportUnavailable": "Exportul PDF va fi disponibil într-o actualizare viitoare.",
   "pdfToast": "Raport {m} · PDF gata de trimis",
+  "pdfExportFailed": "Raportul PDF nu a putut fi creat. Încearcă din nou.",
+  "analyticsEmptyMonthTitle": "Nimic în această lună",
+  "analyticsEmptyMonthBody": "Alege altă perioadă pentru a-ți vedea cheltuielile.",
+  "analyticsCategoryTotal": "{c} · {a} {cur}",
+  "reportGeneratedAt": "Generat {d}",
   "purchaseCount": "{n,plural, one{{n} cumpărătură} few{{n} cumpărături} other{{n} de cumpărături}}",
   "top": "top",
   "ins1": "Alimentele reprezintă {p}% din cheltuieli.",

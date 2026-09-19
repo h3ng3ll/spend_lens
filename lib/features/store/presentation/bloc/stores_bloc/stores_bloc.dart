@@ -4,6 +4,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import '../../../domain/models/store/e_store_type.dart';
 import '../../../domain/models/store/store.dart';
 import '../../../domain/repositories/i_store_local_repository.dart';
+import '../../../domain/use_cases/delete_store_use_case.dart';
 
 part 'stores_event.dart';
 
@@ -31,9 +32,16 @@ part 'stores_bloc.freezed.dart';
 /// listener.
 class StoresBloc extends Bloc<StoresEvent, StoresState> {
   final IStoreLocalRepository _storeLocalRepository;
+  final DeleteStoreUseCase _deleteStore;
   final DateTime Function() _now;
 
-  StoresBloc({required this._storeLocalRepository, this._now = DateTime.now})
+  StoresBloc({
+    required IStoreLocalRepository storeLocalRepository,
+    required DeleteStoreUseCase deleteStore,
+    DateTime Function() now = DateTime.now,
+  }) : this._(storeLocalRepository, deleteStore, now);
+
+  StoresBloc._(this._storeLocalRepository, this._deleteStore, this._now)
     : super(const StoresState()) {
     on<_Watch>(_onWatch);
     on<_QuickCreate>(_onQuickCreate);
@@ -98,9 +106,16 @@ class StoresBloc extends Bloc<StoresEvent, StoresState> {
     }
   }
 
+  /// Deletes the store AND every record referencing it.
+  ///
+  /// The cascade lives in [DeleteStoreUseCase], not here: it spans five
+  /// repositories, and a bloc reaching across that many slices is the
+  /// layering violation this bloc's own history already records. The user
+  /// has seen the record count in the confirm dialog by the time this
+  /// runs -- see `StoreDeleteSection`.
   Future<void> _onDelete(_Delete event, Emitter<StoresState> emit) async {
     try {
-      await _storeLocalRepository.delete(event.storeId);
+      await _deleteStore(event.storeId);
       emit(state.copyWith(lastWriteFailed: false));
     } catch (_) {
       emit(state.copyWith(lastWriteFailed: true));

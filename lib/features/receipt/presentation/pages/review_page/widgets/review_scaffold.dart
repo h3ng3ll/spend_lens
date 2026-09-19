@@ -113,6 +113,15 @@ class ReviewScaffold extends StatelessWidget {
                       ),
                       autoDetectedLabel: lo.autoDetected,
                     ),
+                    ReviewCategoryCard(
+                      sectionLabel: lo.category,
+                      dotColor: category == null
+                          ? null
+                          : AppColorScheme.categoryColor(category.id),
+                      categoryLabel: category?.displayName(lo) ?? lo.category,
+                      changeLabel: lo.change,
+                      onTap: onPickCategory,
+                    ),
                     ReviewItemsCard(
                       state: state,
                       controllerFor: controllerFor,
@@ -135,15 +144,7 @@ class ReviewScaffold extends StatelessWidget {
                         ),
                       ),
                     ),
-                    ReviewCategoryCard(
-                      sectionLabel: lo.category,
-                      dotColor: category == null
-                          ? null
-                          : AppColorScheme.categoryColor(category.id),
-                      categoryLabel: category?.displayName(lo) ?? lo.category,
-                      changeLabel: lo.change,
-                      onTap: onPickCategory,
-                    ),
+
                   ],
                 ),
               ),

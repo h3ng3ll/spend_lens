@@ -24,6 +24,7 @@ import '../../../features/settings/presentation/pages/privacy_page/privacy_page.
 import '../../../features/settings/presentation/pages/terms_page/terms_page.dart';
 import '../../../features/settings/presentation/pages/settings_page/settings_page.dart';
 import '../../../features/store/presentation/pages/choose_store_page/choose_store_page.dart';
+import '../../../features/store/presentation/pages/edit_store_page/edit_store_page.dart';
 import '../../../features/store/presentation/pages/new_store_page/new_store_page.dart';
 import '../../../features/store/presentation/pages/store_detail_page/store_detail_page.dart';
 import '../../../features/store/presentation/pages/store_page/store_page.dart';
@@ -263,6 +264,26 @@ class NewStorePageRoute extends GoRouteData with $NewStorePageRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return appPage(const NewStorePage());
+  }
+}
+
+// The `/store/:storeId` family: `/store/:storeId/edit` is registered FIRST.
+// go_router matches in registration order, so the bare `:storeId` route
+// declared before it would capture `edit` as a store id and shadow the editor
+// entirely (chronic bug
+// `db:gorouter-parameterised-route-registered-before-literal-shadows-it`).
+@TypedGoRoute<EditStorePageRoute>(path: '/store/:storeId/edit')
+class EditStorePageRoute extends GoRouteData with $EditStorePageRoute {
+  final String storeId;
+
+  const EditStorePageRoute({required this.storeId});
+
+  static final GlobalKey<NavigatorState> $parentNavigatorKey =
+      rootNavigatorKey;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return appPage(EditStorePage(storeId: storeId));
   }
 }
 

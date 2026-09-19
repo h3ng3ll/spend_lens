@@ -6,11 +6,10 @@ import '../../../../../core/di/injection.dart';
 import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../../../core/services/ui_message_service.dart';
-import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../../scanner/domain/pending_receipt_draft_store.dart';
-import '../../../domain/repositories/i_receipt_item_local_repository.dart';
 import '../../../domain/repositories/i_receipt_local_repository.dart';
-import '../../../domain/use_cases/create_expense_from_receipt_use_case.dart';
+import '../../../../store/domain/use_cases/resolve_receipt_store_use_case.dart';
+import '../../../domain/use_cases/save_scanned_receipt_use_case.dart';
 import '../../bloc/review_bloc/review_bloc.dart';
 import 'widgets/review_scaffold.dart';
 
@@ -32,9 +31,8 @@ class _ReviewPageState extends State<ReviewPage> {
   late final ReviewBloc _reviewBloc = ReviewBloc(
     draftStore: getIt<PendingReceiptDraftStore>(),
     receiptRepository: getIt<IReceiptLocalRepository>(),
-    receiptItemRepository: getIt<IReceiptItemLocalRepository>(),
-    productRepository: getIt<IProductLocalRepository>(),
-    createExpenseFromReceipt: getIt<CreateExpenseFromReceiptUseCase>(),
+    saveScannedReceipt: getIt<SaveScannedReceiptUseCase>(),
+    resolveReceiptStore: getIt<ResolveReceiptStoreUseCase>(),
   )..add(const ReviewEvent.load());
 
   final Map<String, TextEditingController> _editControllers = {};

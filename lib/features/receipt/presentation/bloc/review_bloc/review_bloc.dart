@@ -1,21 +1,13 @@
 import 'package:bloc/bloc.dart';
 import 'package:freezed_annotation/freezed_annotation.dart';
 
-import '../../../../../core/models/e_sync_status.dart';
-import '../../../../../core/services/receipt_image_store/receipt_image_store.dart';
-import '../../../../product/domain/models/product/product.dart';
-import '../../../../product/domain/normalizer/product_match_result.dart';
-import '../../../../product/domain/normalizer/product_normalizer.dart';
-import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../../scanner/domain/pending_receipt_draft_store.dart';
+import '../../../../store/domain/use_cases/resolve_receipt_store_use_case.dart';
 import '../../../domain/parser/parsed_receipt.dart';
-import '../../../domain/models/receipt/receipt.dart';
-import '../../../domain/models/receipt_item/receipt_item.dart';
-import '../../../domain/repositories/i_receipt_item_local_repository.dart';
 import '../../../domain/repositories/i_receipt_local_repository.dart';
 import '../../../domain/rules/receipt_duplicate_detector.dart';
 import '../../../domain/rules/receipt_reconciler.dart';
-import '../../../domain/use_cases/create_expense_from_receipt_use_case.dart';
+import '../../../domain/use_cases/save_scanned_receipt_use_case.dart';
 import 'review_draft_item.dart';
 
 part 'review_event.dart';
@@ -42,25 +34,19 @@ part 'review_bloc.freezed.dart';
 class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   final PendingReceiptDraftStore _draftStore;
   final IReceiptLocalRepository _receiptRepository;
-  final IReceiptItemLocalRepository _receiptItemRepository;
-  final IProductLocalRepository _productRepository;
-  final CreateExpenseFromReceiptUseCase _createExpenseFromReceipt;
-  final ProductNormalizer _productNormalizer;
+  final SaveScannedReceiptUseCase _saveScannedReceipt;
+  final ResolveReceiptStoreUseCase _resolveReceiptStore;
   final ReceiptReconciler _reconciler;
   final ReceiptDuplicateDetector _duplicateDetector;
-  final ReceiptImageStore _imageStore;
   final DateTime Function() _now;
 
   ReviewBloc({
     required this._draftStore,
     required this._receiptRepository,
-    required this._receiptItemRepository,
-    required this._productRepository,
-    required this._createExpenseFromReceipt,
-    this._productNormalizer = const ProductNormalizer(),
+    required this._saveScannedReceipt,
+    required this._resolveReceiptStore,
     this._reconciler = const ReceiptReconciler(),
     this._duplicateDetector = const ReceiptDuplicateDetector(),
-    this._imageStore = const ReceiptImageStore(),
     this._now = DateTime.now,
   }) : super(const ReviewState()) {
     on<_Load>(_onLoad);
@@ -109,9 +95,18 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
       itemsTotal: itemsTotal,
     );
 
+    // A store already on the draft wins: it is either a pick the user made
+    // in "Correct receipt" or a match resolved on a previous pass, and
+    // re-matching would silently overrule the person who chose it.
+    final storeId =
+        parsed.storeId ?? (await _resolveReceiptStore(parsed.storeName))?.id;
+
     final existingReceipts = await _receiptRepository.getAll();
     final likelyDuplicate = _duplicateDetector.findLikelyDuplicate(
-      storeId: null,
+      // Was hardcoded `null`, which made the duplicate check store-blind:
+      // two different shops on the same day for the same total looked like
+      // the same receipt.
+      storeId: storeId,
       purchasedAt: parsed.purchasedAt ?? _now(),
       total: parsed.total ?? itemsTotal,
       existingReceipts: existingReceipts,
@@ -121,6 +116,8 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
       state.copyWith(
         status: EReviewStatus.ready,
         storeName: parsed.storeName,
+        storeId: storeId,
+        isStoreUserPicked: parsed.isStoreUserPicked,
         purchasedAt: parsed.purchasedAt ?? _now(),
         printedTotal: parsed.total,
         items: items,
@@ -181,6 +178,10 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     _draftStore.updateParsedReceipt(
       ParsedReceipt(
         storeName: state.storeName,
+        // Without these two the store resolved (or picked) here would be
+        // lost the moment the user tapped Correct.
+        storeId: state.storeId,
+        isStoreUserPicked: state.isStoreUserPicked,
         purchasedAt: state.purchasedAt,
         total: state.printedTotal,
         items: [
@@ -207,101 +208,40 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
   /// Shared persistence path for both [_onSave] and [_onSaveAndCorrect] —
   /// the two differ ONLY in which status/navigation follows, never in what
   /// gets written.
-  Future<String> _persist() async {
-    final now = _now();
-    final receiptId = '${now.microsecondsSinceEpoch}';
-
-    final existingProducts = await _productRepository.getAll();
-    final mutableProducts = List<Product>.of(existingProducts);
-
-    final receiptItems = <ReceiptItem>[];
-    for (var i = 0; i < state.items.length; i++) {
-      final draftItem = state.items[i];
-
-      // Normalizer pipeline: cleanup -> abbreviation -> exact -> fuzzy ->
-      // create (spec §6/§42). A near-miss creates a new product rather
-      // than merging — see `ProductNormalizer`/`ProductFuzzyMatcher`.
-      final ProductMatchResult matchResult = _productNormalizer.normalize(
-        rawName: draftItem.name,
-        existingProducts: mutableProducts,
-        generateId: () =>
-            '${now.microsecondsSinceEpoch}_product_$i',
-        defaultUnit: draftItem.unit,
-      );
-
-      if (matchResult.isNewProduct) {
-        mutableProducts.add(matchResult.product);
-        await _productRepository.save(matchResult.product);
-      }
-
-      // `rawName` is set ONCE, at creation, from the item's ORIGINAL
-      // rawName captured at parse time — never from the (possibly edited)
-      // `name` field. This is the hardest invariant this milestone
-      // protects (spec §11) and the exact reason `ReviewDraftItem` keeps
-      // `rawName` and `name` as two separate fields.
-      receiptItems.add(
-        ReceiptItem(
-          id: draftItem.id,
-          rawName: draftItem.rawName,
-          normalizedName: matchResult.product.displayName,
-          productId: matchResult.product.id,
-          quantity: draftItem.quantity,
-          unit: draftItem.unit,
-          unitPrice: draftItem.unitPrice,
-          lineTotal: draftItem.lineTotal,
-          confidence: draftItem.confidence,
-          isLowConfidence: draftItem.isLowConfidence,
-          isManuallyAdded: draftItem.isManuallyAdded,
-          lineIndex: i,
-          updatedAt: now,
-          syncStatus: ESyncStatus.pendingCreate,
-        ),
-      );
-    }
-
-    for (final item in receiptItems) {
-      await _receiptItemRepository.save(item);
-    }
-
-    // The capture is ALREADY on disk (the scan pipeline wrote it there so
-    // the buffer could be released) — this only gives it the receipt's own
-    // stable `receipt_<id>.jpg` name.
-    final imagePath = await _imageStore.renameToReceipt(
-      receiptId: receiptId,
-      filename: state.imageFilename,
+  ///
+  /// The writing itself lives in [SaveScannedReceiptUseCase]: it is domain
+  /// policy (normalization, the `rawName` invariant, the mirroring expense,
+  /// alias learning), not screen behaviour, and inlining it here put ~120
+  /// lines of persistence rules in a presentation class no test could reach
+  /// without building a bloc.
+  Future<String> _persist() {
+    return _saveScannedReceipt(
+      ScannedReceiptInput(
+        items: [
+          for (final item in state.items)
+            ScannedReceiptItemInput(
+              id: item.id,
+              rawName: item.rawName,
+              name: item.name,
+              quantity: item.quantity,
+              unit: item.unit,
+              unitPrice: item.unitPrice,
+              lineTotal: item.lineTotal,
+              confidence: item.confidence,
+              isLowConfidence: item.isLowConfidence,
+              isManuallyAdded: item.isManuallyAdded,
+            ),
+        ],
+        storeId: state.storeId,
+        storeName: state.storeName,
+        isStoreUserPicked: state.isStoreUserPicked,
+        categoryId: state.categoryId,
+        purchasedAt: state.purchasedAt,
+        printedTotal: state.printedTotal,
+        itemsTotal: state.itemsTotal,
+        isReconciled: state.isReconciled,
+        imageFilename: state.imageFilename,
+      ),
     );
-
-    final itemsTotal = state.itemsTotal;
-    final receipt = Receipt(
-      id: receiptId,
-      purchasedAt: state.purchasedAt ?? now,
-      printedTotal: state.printedTotal,
-      itemsTotal: itemsTotal,
-      currencyCode: 'MDL',
-      categoryId: state.categoryId,
-      imagePath: imagePath,
-      itemIds: receiptItems.map((i) => i.id).toList(),
-      isReconciled: state.isReconciled,
-      updatedAt: now,
-      syncStatus: ESyncStatus.pendingCreate,
-    );
-
-    await _receiptRepository.save(receipt);
-
-    // Saving the `Receipt` alone made it INVISIBLE: Home, History and
-    // Analytics all watch the `expenses` box and none of them reads
-    // `receipts`, so a saved scan appeared nowhere and a restart did not
-    // help — nothing was missing from the boxes actually being watched.
-    // The design's prototype puts both flows in ONE list (`saveReceipt`
-    // prepends `{type:'Receipt'}`, `saveCash` prepends `{type:'Cash'}` to
-    // the same `tx` array Home renders), which is what `EExpenseSource`
-    // encodes.
-    await _createExpenseFromReceipt(receipt: receipt);
-
-    // The draft's job is done — clear it so a later, unrelated scan never
-    // picks up a stale draft (see `PendingReceiptDraftStore` doc comment).
-    _draftStore.clear();
-
-    return receiptId;
   }
 }

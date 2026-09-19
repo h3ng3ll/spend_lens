@@ -32,6 +32,11 @@ class MonthlySummary {
   /// prior-month data to compare against (never fabricated as zero).
   final double? previousMonthTotal;
 
+  /// Previous month's average purchase, or null when there is no prior-month
+  /// data. Feeds the `ins3` insight ("your average purchase changed from A to
+  /// B"), which could never fire while this value did not exist.
+  final double? previousMonthAveragePurchase;
+
   const MonthlySummary({
     required this.year,
     required this.month,
@@ -42,6 +47,7 @@ class MonthlySummary {
     required this.cashShare,
     required this.categoryShares,
     required this.previousMonthTotal,
+    required this.previousMonthAveragePurchase,
   });
 
   /// Percent change vs [previousMonthTotal], or null when there is nothing

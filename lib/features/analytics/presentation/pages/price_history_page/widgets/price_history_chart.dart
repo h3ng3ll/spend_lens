@@ -51,9 +51,8 @@ class PriceHistoryChart extends StatelessWidget {
 
     final maxUnitPrice = points.fold<double>(
       0.0,
-      (max, point) => point.hasData && point.unitPrice > max
-          ? point.unitPrice
-          : max,
+      (max, point) =>
+          point.hasData && point.unitPrice > max ? point.unitPrice : max,
     );
 
     final labelRowHeight = MediaQuery.textScalerOf(context).scale(

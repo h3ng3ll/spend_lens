@@ -4,7 +4,6 @@ import '../../../../../../core/resources/app_icons.dart';
 import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../../core/resources/text/app_text_theme.dart';
-import '../../../../../../core/services/ui_message_service.dart';
 import '../../../../../../core/widgets/app_container.dart';
 import '../../../../../../core/widgets/app_svg_icon.dart';
 
@@ -12,25 +11,32 @@ import '../../../../../../core/widgets/app_svg_icon.dart';
 /// (`SpendLens Prototype.dc.html` `data-screen-label="Analytics"`, the
 /// `exportPdf` row).
 ///
-/// A real PDF export is not in M5's scope (design_spendlens.md §10 — it is
-/// not named in M5's deliverable list); tapping the pill shows an info toast
-/// rather than inventing a working export or silently doing nothing
-/// (recorded global bug: a stub handler that only echoes its own label is
-/// indistinguishable from doing real work — this one is honest about being
-/// unavailable, not a disguised no-op).
+/// The pill now performs a REAL export. It previously showed an
+/// "arrives in a later update" toast — the design prototype's own
+/// `exportPdf` is also only a toast, but a control that advertises an export
+/// and delivers nothing is missing functionality, not a spec to reproduce.
+///
+/// The work itself is owned by `AnalyticsPage` (which holds the period,
+/// currency and snapshot this widget has no access to) and runs on a
+/// background isolate, so this stays a plain presentational pill.
 /// Unscaled base height for the export pill; multiplied by the text scaler
 /// at build time so the label cannot clip (recorded bug
 /// `developer-derived-fixed-dp-cell-height-ignores-textScaleFactor`).
 const double _baseExportChipHeight = 36.0;
 
 class AnalyticsHeader extends StatelessWidget {
-  const AnalyticsHeader({super.key});
+  final VoidCallback onExportPdf;
 
-  void _onExportPdf(BuildContext context) {
-    UiMessageService.showInfo(
-      AppLocalizations.of(context).pdfExportUnavailable,
-    );
-  }
+  /// Dims the pill and drops its tap target while an export is in flight, so
+  /// a second tap cannot start a concurrent render (each one spawns its own
+  /// isolate and writes its own temp file).
+  final bool isExporting;
+
+  const AnalyticsHeader({
+    super.key,
+    required this.onExportPdf,
+    this.isExporting = false,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -49,30 +55,33 @@ class AnalyticsHeader extends StatelessWidget {
           style: textTheme.screenTitle28.copyWith(color: scheme.ink),
         ),
         GestureDetector(
-          onTap: () => _onExportPdf(context),
-          child: AppContainer(
-            height: pdfChipHeight,
-            color: scheme.card,
-            border: Border.all(color: scheme.line, width: 1.0),
-            borderRadius: BorderRadius.circular(999.0),
-            padding: const EdgeInsets.fromLTRB(10.0, 0.0, 12.0, 0.0),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              spacing: 7.0,
-              children: [
-                AppSvgIcon(
-                  asset: AppIcons.pdf,
-                  color: scheme.accent,
-                  size: 16.0,
-                ),
-                Text(
-                  lo.pdf,
-                  style: textTheme.subhead15.copyWith(
+          onTap: isExporting ? null : onExportPdf,
+          child: Opacity(
+            opacity: isExporting ? 0.5 : 1.0,
+            child: AppContainer(
+              height: pdfChipHeight,
+              color: scheme.card,
+              border: Border.all(color: scheme.line, width: 1.0),
+              borderRadius: BorderRadius.circular(999.0),
+              padding: const EdgeInsets.fromLTRB(10.0, 0.0, 12.0, 0.0),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                spacing: 7.0,
+                children: [
+                  AppSvgIcon(
+                    asset: AppIcons.pdf,
                     color: scheme.accent,
-                    fontWeight: FontWeight.w600,
+                    size: 16.0,
                   ),
-                ),
-              ],
+                  Text(
+                    lo.pdf,
+                    style: textTheme.subhead15.copyWith(
+                      color: scheme.accent,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
         ),

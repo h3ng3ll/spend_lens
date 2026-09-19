@@ -168,9 +168,29 @@ class SyncEntityAdapters {
     syncStatusOf: (e) => e.syncStatus,
     markSynced: (e) => e.copyWith(syncStatus: ESyncStatus.synced),
     deletedAtOf: (e) => e.deletedAt,
-    purgeLocal: _categories.deleteLocalOnly,
+    // Built-in categories are app INFRASTRUCTURE, not user records: every
+    // expense's `categoryId` must resolve to one, so purging them locally
+    // leaves the breakdown, donut, drill-down and insights silently empty
+    // with every expense falling back to "Other". `DeleteAllRecordsUseCase`
+    // already skips them (`if (category.isBuiltIn) continue;`); this path
+    // did not, so a tombstoned built-in could still be hard-deleted here.
+    purgeLocal: _purgeCategoryUnlessBuiltIn,
     watchAll: _categories.watchAll,
   );
+
+  /// Drops a category locally unless it is one of the 12 built-ins — those
+  /// are restored by `SeedCategoriesUseCase` on the next cold start anyway,
+  /// so purging them only creates a window where the app has no taxonomy.
+  Future<void> _purgeCategoryUnlessBuiltIn(String id) async {
+    final all = await _categories.getAllIncludingDeleted();
+    final isBuiltIn = all.any(
+      (category) => category.id == id && category.isBuiltIn,
+    );
+    if (isBuiltIn) {
+      return;
+    }
+    await _categories.deleteLocalOnly(id);
+  }
 
   SyncEntityAdapter<Product> products() => SyncEntityAdapter<Product>(
     collection: ESyncCollection.products,

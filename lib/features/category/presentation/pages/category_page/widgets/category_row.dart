@@ -64,7 +64,9 @@ class CategoryRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   spacing: 12.0,
                   children: [
-                    CategoryDot(color: ColorExtension.fromHex(category.colorHex)),
+                    CategoryDot(
+                      color: ColorExtension.fromHex(category.colorHex),
+                    ),
                     Expanded(
                       child: Column(
                         mainAxisSize: MainAxisSize.min,
@@ -79,7 +81,9 @@ class CategoryRow extends StatelessWidget {
                           ),
                           Text(
                             meta,
-                            style: textTheme.footnote13.copyWith(color: scheme.ter),
+                            style: textTheme.footnote13.copyWith(
+                              color: scheme.ter,
+                            ),
                           ),
                         ],
                       ),
@@ -97,7 +101,11 @@ class CategoryRow extends StatelessWidget {
                   color: scheme.field,
                   shape: BoxShape.circle,
                   alignment: Alignment.center,
-                  child: AppSvgIcon(asset: AppIcons.edit, color: scheme.sec, size: 14.0),
+                  child: AppSvgIcon(
+                    asset: AppIcons.edit,
+                    color: scheme.sec,
+                    size: 14.0,
+                  ),
                 ),
               ),
             if (isDeletable)
@@ -109,7 +117,11 @@ class CategoryRow extends StatelessWidget {
                   color: scheme.field,
                   shape: BoxShape.circle,
                   alignment: Alignment.center,
-                  child: AppSvgIcon(asset: AppIcons.close, color: scheme.sec, size: 14.0),
+                  child: AppSvgIcon(
+                    asset: AppIcons.close,
+                    color: scheme.sec,
+                    size: 14.0,
+                  ),
                 ),
               ),
           ],

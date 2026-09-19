@@ -102,7 +102,10 @@ class _RenameCategoryDialogState extends State<RenameCategoryDialog> {
               textInputAction: TextInputAction.done,
               onFieldSubmitted: (_) => _onSave(),
               borderRadius: BorderRadius.circular(14.0),
-              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 14.0),
+              padding: const EdgeInsets.symmetric(
+                horizontal: 16.0,
+                vertical: 14.0,
+              ),
               border: InputBorder.none,
               enabledBorder: InputBorder.none,
               focusedBorder: InputBorder.none,

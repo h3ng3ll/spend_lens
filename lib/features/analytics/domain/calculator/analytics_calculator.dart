@@ -66,11 +66,20 @@ MonthlySummary buildMonthlySummary({
 
   final previousMonth = month == 0 ? 11 : month - 1;
   final previousYear = month == 0 ? year - 1 : year;
-  final previousMonthExpenses =
-      expensesInMonth(allExpenses, previousYear, previousMonth);
+  final previousMonthExpenses = expensesInMonth(
+    allExpenses,
+    previousYear,
+    previousMonth,
+  );
   final previousMonthTotal = previousMonthExpenses.isEmpty
       ? null
       : sumAmounts(previousMonthExpenses);
+  // Null (never 0.0) when there is no prior month: `ins3` compares this
+  // month's average against it, and a fabricated zero would read as
+  // "your average rose from 0" on a user's very first month.
+  final previousMonthAveragePurchase = previousMonthExpenses.isEmpty
+      ? null
+      : sumAmounts(previousMonthExpenses) / previousMonthExpenses.length;
 
   return MonthlySummary(
     year: year,
@@ -82,6 +91,7 @@ MonthlySummary buildMonthlySummary({
     cashShare: cashShare,
     categoryShares: categoryShares,
     previousMonthTotal: previousMonthTotal,
+    previousMonthAveragePurchase: previousMonthAveragePurchase,
   );
 }
 

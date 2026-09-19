@@ -115,6 +115,46 @@ void main() {
 
       expect(summary.previousMonthTotal, isNull);
       expect(summary.percentChangeVsPreviousMonth, isNull);
+      // Null rather than 0.0: `ins3` compares this month's average against
+      // it, and a fabricated zero would read as "your average rose from 0"
+      // on a user's very first month.
+      expect(summary.previousMonthAveragePurchase, isNull);
+    });
+
+    test('previousMonthAveragePurchase is the prior month mean', () {
+      final expenses = [
+        // August: two purchases totalling 100 -> mean 50.
+        _expense(
+          id: 'a1',
+          amount: 40.0,
+          categoryId: 'catFood',
+          occurredAt: DateTime(2026, 8, 3),
+        ),
+        _expense(
+          id: 'a2',
+          amount: 60.0,
+          categoryId: 'catFood',
+          occurredAt: DateTime(2026, 8, 20),
+        ),
+        // September: one purchase of 30 -> mean 30.
+        _expense(
+          id: 's1',
+          amount: 30.0,
+          categoryId: 'catFood',
+          occurredAt: DateTime(2026, 9, 10),
+        ),
+      ];
+
+      final summary = buildMonthlySummary(
+        allExpenses: expenses,
+        categories: categories,
+        year: 2026,
+        month: 8,
+        displayCurrencyCode: 'MDL',
+      );
+
+      expect(summary.previousMonthAveragePurchase, closeTo(50.0, 0.001));
+      expect(summary.averagePurchase, closeTo(30.0, 0.001));
     });
 
     test('per-category share and count', () {

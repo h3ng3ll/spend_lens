@@ -14,8 +14,8 @@ import 'store_stats_row.dart';
 /// (design_spendlens.md's Stores artboard, `hasStoreSel` branch): header,
 /// 3-column stats row, "Products bought here" (real cross-store comparison
 /// lines once M7/M8 scanning has written observations; honest empty state
-/// until then), and the delete-store section when no expense references
-/// this store.
+/// until then), and the delete-store section — always shown now, since a
+/// referenced store can be deleted along with its records.
 class StoreDetailBody extends StatelessWidget {
   final StoreDetailSnapshot snapshot;
   final VoidCallback onClose;
@@ -65,7 +65,7 @@ class StoreDetailBody extends StatelessWidget {
                   stores: snapshot.stores,
                   displayCurrencyCode: displayCurrencyCode,
                 ),
-                StoreDeleteSection(storeId: store.id, expenses: storeExpenses),
+                StoreDeleteSection(storeId: store.id),
               ],
             ),
           ),

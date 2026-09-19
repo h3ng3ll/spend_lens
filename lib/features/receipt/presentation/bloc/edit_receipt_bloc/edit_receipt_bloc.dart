@@ -79,7 +79,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
     // no persisted receipt to read — the in-progress scan lives on the
     // draft store.
     if (event.receiptId == kPendingDraftReceiptId) {
-      _loadFromPendingDraft(emit);
+      await _loadFromPendingDraft(emit);
       return;
     }
 
@@ -115,6 +115,9 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
         status: EEditReceiptStatus.ready,
         receiptId: receipt.id,
         storeId: receipt.storeId,
+        // The id alone left the Store row rendering its placeholder on a
+        // saved receipt that definitely had one.
+        storeName: await _storeNameFor(receipt.storeId),
         purchasedAt: receipt.purchasedAt,
         printedTotal: receipt.printedTotal,
         items: items,
@@ -133,7 +136,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
   /// `receiptId` is left NULL in the emitted state — that null is what
   /// [_onSave] branches on to write corrections back to the draft instead
   /// of to Hive, so an unsaved receipt stays unsaved.
-  void _loadFromPendingDraft(Emitter<EditReceiptState> emit) {
+  Future<void> _loadFromPendingDraft(Emitter<EditReceiptState> emit) async {
     final draft = _draftStore.current;
     if (draft == null) {
       emit(
@@ -161,6 +164,11 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
     emit(
       state.copyWith(
         status: EEditReceiptStatus.ready,
+        // Seeded so re-entering the editor shows the store already chosen,
+        // instead of the "not selected" placeholder over a real pick.
+        storeId: parsed.storeId,
+        storeName: await _storeNameFor(parsed.storeId),
+        isStoreUserPicked: parsed.isStoreUserPicked,
         purchasedAt: parsed.purchasedAt,
         printedTotal: parsed.total,
         items: items,
@@ -192,7 +200,17 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
 
     _draftStore.updateParsedReceipt(
       ParsedReceipt(
+        // `storeName` deliberately keeps the ORIGINAL OCR text (spec §11 —
+        // the printed name stays attached for price history). The user's
+        // choice rides on `storeId`, which had nowhere to live before:
+        // this method rewrote the draft with only the printed name, so
+        // picking a store in "Correct receipt" and tapping Done silently
+        // discarded it, and the receipt saved with no store at all.
         storeName: existing.parsedReceipt.storeName,
+        storeId: state.storeId ?? existing.parsedReceipt.storeId,
+        isStoreUserPicked:
+            state.isStoreUserPicked ||
+            existing.parsedReceipt.isStoreUserPicked,
         purchasedAt: state.purchasedAt ?? existing.parsedReceipt.purchasedAt,
         total: state.printedTotal,
         discount: existing.parsedReceipt.discount,
@@ -218,6 +236,14 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
     emit(state.copyWith(status: EEditReceiptStatus.saved));
   }
 
+  /// The display name for [storeId], or `''` when there is no store (or it
+  /// has since been deleted). `''` is what the UI renders as "not selected".
+  Future<String> _storeNameFor(String? storeId) async {
+    if (storeId == null) return '';
+    final store = await _storeRepository.getById(storeId);
+    return store?.name ?? '';
+  }
+
   /// Resolves the picked store id against the repository — used to be a
   /// UI-side `getById` read in `EditReceiptPage._onPickStore`.
   Future<void> _onPickStore(
@@ -226,7 +252,14 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
   ) async {
     final store = await _storeRepository.getById(event.storeId);
     if (store == null) return;
-    emit(state.copyWith(storeId: store.id, storeName: store.name));
+    emit(
+      state.copyWith(
+        storeId: store.id,
+        storeName: store.name,
+        // An explicit pick — this is what authorises alias learning later.
+        isStoreUserPicked: true,
+      ),
+    );
   }
 
   void _onSetStore(_SetStore event, Emitter<EditReceiptState> emit) {

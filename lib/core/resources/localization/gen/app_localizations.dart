@@ -231,8 +231,20 @@ abstract class AppLocalizations {
   /// No description provided for @deleteStoreNote.
   ///
   /// In en, this message translates to:
-  /// **'Only possible while no receipts are linked.'**
+  /// **'Also deletes every expense and receipt linked to this store.'**
   String get deleteStoreNote;
+
+  /// Confirm-dialog body when deleting a store that has linked expenses/receipts. Real ICU plural, never string concatenation (recorded bug count-plus-noun-concatenated-without-icu-plural).
+  ///
+  /// In en, this message translates to:
+  /// **'{n,plural, =1{This store has 1 linked record. Deleting the store deletes that record too. This cannot be undone.} other{This store has {n} linked records. Deleting the store deletes those records too. This cannot be undone.}}'**
+  String deleteStoreBody(num n);
+
+  /// No description provided for @deleteStoreBodyEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'This store has no linked records. This cannot be undone.'**
+  String get deleteStoreBodyEmpty;
 
   /// Auto-ported from i18n.js key "storeDeleted".
   ///
@@ -600,17 +612,41 @@ abstract class AppLocalizations {
   /// **'PDF'**
   String get pdf;
 
-  /// No description provided for @pdfExportUnavailable.
-  ///
-  /// In en, this message translates to:
-  /// **'PDF export arrives in a later update.'**
-  String get pdfExportUnavailable;
-
   /// Auto-ported from i18n.js key "pdfToast".
   ///
   /// In en, this message translates to:
   /// **'{m} report · PDF ready to share'**
   String pdfToast(String m);
+
+  /// No description provided for @pdfExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not create the PDF report. Please try again.'**
+  String get pdfExportFailed;
+
+  /// No description provided for @analyticsEmptyMonthTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in this month'**
+  String get analyticsEmptyMonthTitle;
+
+  /// No description provided for @analyticsEmptyMonthBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick another period to see your spending.'**
+  String get analyticsEmptyMonthBody;
+
+  /// Selected-category drill-down card heading on Analytics: category name, its total for the period, and the currency code.
+  ///
+  /// In en, this message translates to:
+  /// **'{c} · {a} {cur}'**
+  String analyticsCategoryTotal(String c, String a, String cur);
+
+  /// Timestamp line printed in the exported PDF report.
+  ///
+  /// In en, this message translates to:
+  /// **'Generated {d}'**
+  String reportGeneratedAt(String d);
 
   /// Replaces the auto-ported i18n.js "purchase1"/"purchaseN" pair — that split-by-count-bucket shape is not a real ICU plural (it has no dedicated code call site and was never localized to non-English plural rules; recorded bug count-plus-noun-concatenated-without-icu-plural). This single key is the correct replacement shape for any future count+noun purchases string.
   ///

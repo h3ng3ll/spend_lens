@@ -104,6 +104,7 @@ dependencies:
   flutter_gen: ^5.12.0
   purchases_flutter: ^10.12.0
   purchases_ui_flutter: ^10.12.0
+  auto_size_text: ^3.0.0
 
 dev_dependencies:
   flutter_test:
@@ -132,6 +133,12 @@ flutter:
   assets:
     - assets/icons/
     - assets/legal/
+    # Noto Sans (OFL) — embedded into the exported PDF only; Flutter itself
+    # never renders these. The `pdf` package cannot use the platform font the
+    # app's TextStyles fall back to, and its built-in Helvetica has no
+    # Cyrillic/Romanian glyphs, so ru/uk/ro reports would export blank text.
+    # Declared as assets, NOT under `fonts:` — nothing resolves them by family.
+    - assets/fonts/
     - assets/launcher/
     - assets/splash/
     - path: .env

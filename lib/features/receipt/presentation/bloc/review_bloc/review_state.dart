@@ -17,7 +17,20 @@ enum EReviewStatus { initial, loading, ready, saved, correcting, failed }
 sealed class ReviewState with _$ReviewState {
   const factory ReviewState({
     @Default(EReviewStatus.initial) EReviewStatus status,
+
+    /// The store name as PRINTED on the receipt — raw OCR text, displayed on
+    /// the store card and kept for price history (spec §11).
     String? storeName,
+
+    /// The resolved store this receipt belongs to, or null when nothing
+    /// matched. Written into `Receipt.storeId` AND `Expense.storeId` on
+    /// save; before this field existed both were always null, so a scanned
+    /// receipt never appeared under any store.
+    String? storeId,
+
+    /// Whether [storeId] was chosen by the user rather than auto-matched.
+    /// Gates alias learning — see `LearnStoreAliasUseCase`.
+    @Default(false) bool isStoreUserPicked,
     DateTime? purchasedAt,
     double? printedTotal,
     @Default(<ReviewDraftItem>[]) List<ReviewDraftItem> items,

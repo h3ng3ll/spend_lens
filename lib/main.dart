@@ -24,6 +24,7 @@ import 'features/analytics/di/analytics_injection.dart';
 import 'features/auth/di/auth_injection.dart';
 import 'features/auth/presentation/bloc/auth_bloc/auth_bloc.dart';
 import 'features/backup/di/backup_injection.dart';
+import 'features/report/di/report_injection.dart';
 import 'features/subscription/di/subscription_injection.dart';
 import 'features/category/di/category_injection.dart';
 import 'features/category/domain/repositories/i_category_local_repository.dart';
@@ -41,6 +42,7 @@ import 'features/settings/domain/use_cases/watch_settings_use_case.dart';
 import 'features/settings/presentation/bloc/settings_bloc/settings_bloc.dart';
 import 'features/store/di/store_injection.dart';
 import 'features/store/domain/repositories/i_store_local_repository.dart';
+import 'features/store/domain/use_cases/delete_store_use_case.dart';
 import 'features/store/presentation/bloc/stores_bloc/stores_bloc.dart';
 import 'firebase_options.dart';
 
@@ -122,6 +124,7 @@ void main() async {
   initAnalyticsFeature();
   initScannerFeature();
   initBackupFeature();
+  initReportFeature();
   initSubscriptionFeature();
 
   // First-launch category seed (design_spendlens.md §7). THE GUARD IS
@@ -174,6 +177,7 @@ void main() async {
 
   final storesBloc = StoresBloc(
     storeLocalRepository: getIt<IStoreLocalRepository>(),
+    deleteStore: getIt<DeleteStoreUseCase>(),
   )..add(const StoresEvent.watch());
   getIt.registerLazySingleton<StoresBloc>(() => storesBloc);
 

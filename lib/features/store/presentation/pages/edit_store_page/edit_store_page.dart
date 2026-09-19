@@ -1,64 +1,47 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../../../../../../core/di/injection.dart';
-import '../../../../../../../core/resources/colors/app_color_scheme.dart';
-import '../../../../../../../core/resources/localization/gen/app_localizations.dart';
-import '../../../../../../../core/services/permission_requester.dart';
-import '../../../../../../../core/services/store_logo_image_store/store_logo_image_store.dart';
-import '../../../../../../../core/services/ui_message_service.dart';
-import '../../../../../../auth/presentation/bloc/auth_bloc/auth_bloc.dart';
-import '../../../../../domain/repositories/i_store_local_repository.dart';
-import '../../../../../domain/use_cases/remove_store_logo_use_case.dart';
-import '../../../../../domain/use_cases/save_store_logo_use_case.dart';
-import '../../../../bloc/edit_store_bloc/edit_store_bloc.dart';
+import '../../../../../core/di/injection.dart';
+import '../../../../../core/resources/colors/app_color_scheme.dart';
+import '../../../../../core/resources/localization/gen/app_localizations.dart';
+import '../../../../../core/services/permission_requester.dart';
+import '../../../../../core/services/store_logo_image_store/store_logo_image_store.dart';
+import '../../../../../core/services/ui_message_service.dart';
+import '../../../../../core/utils/extensions/go_router_x.dart';
+import '../../../../auth/presentation/bloc/auth_bloc/auth_bloc.dart';
+import '../../../domain/repositories/i_store_local_repository.dart';
+import '../../../domain/use_cases/remove_store_logo_use_case.dart';
+import '../../../domain/use_cases/save_store_logo_use_case.dart';
+import '../../bloc/edit_store_bloc/edit_store_bloc.dart';
 import 'widgets/e_store_logo_source.dart';
-import 'widgets/edit_store_body.dart';
+import 'widgets/edit_store_page_body.dart';
 import 'widgets/store_logo_source_sheet.dart';
 
-/// Edits a store's NAME and LOGO — opened from the edit icon in
-/// `StoreDetailHeader`.
+/// `EditStorePageRoute` (`/store/:storeId/edit`) — edits a store's NAME and
+/// LOGO, reached from the edit icon in `StoreDetailHeader`.
 ///
-/// A bottom sheet rather than a pushed route: it edits two fields of a record
-/// the screen behind it already shows, and keeping that screen visible means
-/// the change lands in place instead of after a screen transition. It is
-/// deliberately NOT a second "store form" — type and receipt aliases stay with
-/// `NewStorePage`, which owns creation.
+/// A top-level push above the shell, mirroring `EditProfilePage`, which is the
+/// same job for the other editable record in this app. It is deliberately NOT a
+/// second "store form": type and receipt aliases stay with `NewStorePage`,
+/// which owns creation.
 ///
 /// [EditStoreBloc] is SCREEN-scoped (BLoC rule A3.8): built here as a field,
-/// closed in `dispose`. Every edit is staged in that bloc and committed once
-/// on Save.
+/// closed in `dispose`. Every edit is staged in that bloc and committed once on
+/// Save.
 ///
 /// The controller is seeded from the bloc's first `editing` state via a
 /// `BlocListener` rather than in `initState`, because the store is read
 /// asynchronously and is not available when the widget mounts.
-class EditStoreSheet extends StatefulWidget {
+class EditStorePage extends StatefulWidget {
   final String storeId;
 
-  const EditStoreSheet({super.key, required this.storeId});
-
-  /// Opens the sheet. Resolves to true when a save committed, so the caller
-  /// can react — the detail screen's own stream already repaints on its own,
-  /// so the result is a signal, not the data.
-  static Future<bool?> show(BuildContext context, {required String storeId}) {
-    return showModalBottomSheet<bool>(
-      context: context,
-      // Root navigator, above the 5-tab shell — matching `AvatarSourceSheet`.
-      useRootNavigator: true,
-      isScrollControlled: true,
-      backgroundColor: AppColorScheme.of(context).sheet,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(24.0)),
-      ),
-      builder: (sheetContext) => EditStoreSheet(storeId: storeId),
-    );
-  }
+  const EditStorePage({super.key, required this.storeId});
 
   @override
-  State<EditStoreSheet> createState() => _EditStoreSheetState();
+  State<EditStorePage> createState() => _EditStorePageState();
 }
 
-class _EditStoreSheetState extends State<EditStoreSheet> {
+class _EditStorePageState extends State<EditStorePage> {
   final EditStoreBloc _editStoreBloc = EditStoreBloc(
     storeLocalRepository: getIt<IStoreLocalRepository>(),
     saveStoreLogo: getIt<SaveStoreLogoUseCase>(),
@@ -84,15 +67,12 @@ class _EditStoreSheetState extends State<EditStoreSheet> {
   }
 
   /// The field is a shared `NewStoreTextField`, which exposes no `onChanged` —
-  /// so the controller is the change source, exactly as `NewStorePage` does
-  /// it. The bloc still owns the value; this only forwards it.
+  /// so the controller is the change source, exactly as `NewStorePage` does it.
+  /// The bloc still owns the value; this only forwards it.
   void _onNameControllerChanged() =>
       _editStoreBloc.add(EditStoreEvent.nameChanged(_nameController.text));
 
-  void _onNameChanged(String value) =>
-      _editStoreBloc.add(EditStoreEvent.nameChanged(value));
-
-  void _onClose() => Navigator.of(context).pop();
+  void _onClose() => context.goBack();
 
   /// The uid is read ONCE, at save time, from the live auth state — this bloc
   /// owns store editing and must not subscribe to another feature's state.
@@ -119,9 +99,9 @@ class _EditStoreSheetState extends State<EditStoreSheet> {
     }
 
     // Flagged across BOTH the OS picker and the staging copy. Neither is
-    // instant on a multi-megabyte photo, and without it the logo sits
-    // unchanged with no feedback the whole time — indistinguishable from a tap
-    // that did nothing.
+    // instant on a multi-megabyte photo, and without it the logo sits unchanged
+    // with no feedback the whole time — indistinguishable from a tap that did
+    // nothing.
     _editStoreBloc.add(const EditStoreEvent.logoPickStarted());
 
     try {
@@ -158,7 +138,7 @@ class _EditStoreSheetState extends State<EditStoreSheet> {
   /// Save persists and EXITS.
   void _onSaved(BuildContext context, EditStoreState state) {
     UiMessageService.showSuccess(AppLocalizations.of(context).tStoreSaved);
-    Navigator.of(context).pop(true);
+    context.goBack();
   }
 
   bool _listenWhenFailed(EditStoreState p, EditStoreState c) =>
@@ -171,6 +151,8 @@ class _EditStoreSheetState extends State<EditStoreSheet> {
 
   @override
   Widget build(BuildContext context) {
+    final scheme = AppColorScheme.of(context);
+
     return BlocProvider<EditStoreBloc>.value(
       value: _editStoreBloc,
       child: MultiBlocListener(
@@ -191,21 +173,23 @@ class _EditStoreSheetState extends State<EditStoreSheet> {
         child: BlocBuilder<EditStoreBloc, EditStoreState>(
           builder: (context, state) => PopScope(
             // Blocked only WHILE a save runs. An upload is in flight, and
-            // dismissing mid-flight disposes the bloc that owns it: the save
-            // would neither finish nor report, leaving the user believing an
-            // edit landed that did not.
+            // leaving mid-flight disposes the bloc that owns it: the save would
+            // neither finish nor report, leaving the user believing an edit
+            // landed that did not.
             //
-            // `canPop` follows the live flag and is never a constant — the
-            // sheet stays dismissible at every other moment.
+            // `canPop` follows the live flag and is never a constant — this
+            // screen stays dismissible at every other moment.
             canPop: !state.isSaving,
-            child: SafeArea(
-              child: EditStoreBody(
-                state: state,
-                nameController: _nameController,
-                onNameChanged: _onNameChanged,
-                onLogoTap: _onLogoTap,
-                onSave: _onSave,
-                onClose: _onClose,
+            child: Scaffold(
+              backgroundColor: scheme.bg,
+              body: SafeArea(
+                child: EditStorePageBody(
+                  state: state,
+                  nameController: _nameController,
+                  onLogoTap: _onLogoTap,
+                  onSave: _onSave,
+                  onClose: _onClose,
+                ),
               ),
             ),
           ),

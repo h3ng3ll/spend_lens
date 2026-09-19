@@ -67,7 +67,18 @@
   },
   "noStore": "No store",
   "deleteStore": "Delete store",
-  "deleteStoreNote": "Only possible while no receipts are linked.",
+  "deleteStoreNote": "Also deletes every expense and receipt linked to this store.",
+  "deleteStoreBody": "{n,plural, =1{This store has 1 linked record. Deleting the store deletes that record too. This cannot be undone.} other{This store has {n} linked records. Deleting the store deletes those records too. This cannot be undone.}}",
+  "@deleteStoreBody": {
+    "description": "Confirm-dialog body when deleting a store that has linked expenses/receipts. Real ICU plural, never string concatenation (recorded bug count-plus-noun-concatenated-without-icu-plural).",
+    "placeholders": {
+      "n": {
+        "type": "num",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "deleteStoreBodyEmpty": "This store has no linked records. This cannot be undone.",
   "storeDeleted": "{n} deleted",
   "@storeDeleted": {
     "description": "Auto-ported from i18n.js key \"storeDeleted\".",
@@ -173,12 +184,38 @@
     }
   },
   "pdf": "PDF",
-  "pdfExportUnavailable": "PDF export arrives in a later update.",
   "pdfToast": "{m} report · PDF ready to share",
   "@pdfToast": {
     "description": "Auto-ported from i18n.js key \"pdfToast\".",
     "placeholders": {
       "m": {
+        "type": "String"
+      }
+    }
+  },
+  "pdfExportFailed": "Could not create the PDF report. Please try again.",
+  "analyticsEmptyMonthTitle": "Nothing in this month",
+  "analyticsEmptyMonthBody": "Pick another period to see your spending.",
+  "analyticsCategoryTotal": "{c} · {a} {cur}",
+  "@analyticsCategoryTotal": {
+    "description": "Selected-category drill-down card heading on Analytics: category name, its total for the period, and the currency code.",
+    "placeholders": {
+      "c": {
+        "type": "String"
+      },
+      "a": {
+        "type": "String"
+      },
+      "cur": {
+        "type": "String"
+      }
+    }
+  },
+  "reportGeneratedAt": "Generated {d}",
+  "@reportGeneratedAt": {
+    "description": "Timestamp line printed in the exported PDF report.",
+    "placeholders": {
+      "d": {
         "type": "String"
       }
     }

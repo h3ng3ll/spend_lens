@@ -121,7 +121,31 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get deleteStoreNote =>
-      'Доступно, доки до магазину не прив’язані чеки.';
+      'Також видалить усі витрати та чеки цього магазину.';
+
+  @override
+  String deleteStoreBody(num n) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          'До магазину прив’язано $nString записів. Разом із магазином їх буде видалено. Цю дію не можна скасувати.',
+      few:
+          'До магазину прив’язано $nString записи. Разом із магазином їх буде видалено. Цю дію не можна скасувати.',
+      one:
+          'До магазину прив’язано 1 запис. Разом із магазином його буде видалено. Цю дію не можна скасувати.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteStoreBodyEmpty =>
+      'До магазину не прив’язані записи. Цю дію не можна скасувати.';
 
   @override
   String storeDeleted(int n) {
@@ -325,12 +349,29 @@ class AppLocalizationsUk extends AppLocalizations {
   String get pdf => 'PDF';
 
   @override
-  String get pdfExportUnavailable =>
-      'Експорт у PDF з’явиться в одному з наступних оновлень.';
-
-  @override
   String pdfToast(String m) {
     return 'Звіт $m · PDF готовий';
+  }
+
+  @override
+  String get pdfExportFailed =>
+      'Не вдалося створити PDF-звіт. Спробуйте ще раз.';
+
+  @override
+  String get analyticsEmptyMonthTitle => 'Цього місяця порожньо';
+
+  @override
+  String get analyticsEmptyMonthBody =>
+      'Виберіть інший період, щоб побачити витрати.';
+
+  @override
+  String analyticsCategoryTotal(String c, String a, String cur) {
+    return '$c · $a $cur';
+  }
+
+  @override
+  String reportGeneratedAt(String d) {
+    return 'Створено $d';
   }
 
   @override

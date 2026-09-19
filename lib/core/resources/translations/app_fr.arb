@@ -20,7 +20,18 @@
   "catDeleted": "{n} supprimée",
   "noStore": "Aucun magasin",
   "deleteStore": "Supprimer le magasin",
-  "deleteStoreNote": "Possible uniquement sans tickets liés.",
+  "deleteStoreNote": "Supprime aussi toutes les dépenses et tickets de ce magasin.",
+  "deleteStoreBody": "{n,plural, =1{Ce magasin a 1 enregistrement lié. Supprimer le magasin supprime aussi cet enregistrement. Cette action est irréversible.} other{Ce magasin a {n} enregistrements liés. Supprimer le magasin supprime aussi ces enregistrements. Cette action est irréversible.}}",
+  "@deleteStoreBody": {
+    "description": "Confirm-dialog body when deleting a store that has linked expenses/receipts. Real ICU plural, never string concatenation (recorded bug count-plus-noun-concatenated-without-icu-plural).",
+    "placeholders": {
+      "n": {
+        "type": "num",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "deleteStoreBodyEmpty": "Ce magasin n'a aucun enregistrement lié. Cette action est irréversible.",
   "storeDeleted": "{n} supprimé",
   "tabHome": "Accueil",
   "tabAnalytics": "Analyse",
@@ -82,8 +93,12 @@
   "period": "Période",
   "periodRange": "Enregistrements de {a} à {b}",
   "pdf": "PDF",
-  "pdfExportUnavailable": "L’export PDF arrivera dans une prochaine mise à jour.",
   "pdfToast": "Rapport {m} · PDF prêt à partager",
+  "pdfExportFailed": "Impossible de créer le rapport PDF. Réessaie.",
+  "analyticsEmptyMonthTitle": "Rien ce mois-ci",
+  "analyticsEmptyMonthBody": "Choisis une autre période pour voir tes dépenses.",
+  "analyticsCategoryTotal": "{c} · {a} {cur}",
+  "reportGeneratedAt": "Généré {d}",
   "purchaseCount": "{n,plural, one{{n} achat} other{{n} achats}}",
   "top": "top",
   "ins1": "L’alimentation représente {p}% de vos dépenses.",

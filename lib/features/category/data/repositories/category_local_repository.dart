@@ -88,9 +88,7 @@ class CategoryLocalRepository implements ICategoryLocalRepository {
   @override
   Future<List<Category>> getPending() async {
     final box = await _hiveDatabase.getBox<Category>(_boxName);
-    return box.values
-        .where((e) => e.syncStatus != ESyncStatus.synced)
-        .toList();
+    return box.values.where((e) => e.syncStatus != ESyncStatus.synced).toList();
   }
 
   /// Resolves the `syncStatus` a write should carry. `pendingCreate` when the
@@ -113,8 +111,7 @@ class CategoryLocalRepository implements ICategoryLocalRepository {
       // passes through this method, so stamping it here is the only
       // placement no call site can forget.
       updatedAt: DateTime.now(),
-      syncStatus:
-          isNew ? ESyncStatus.pendingCreate : ESyncStatus.pendingUpdate,
+      syncStatus: isNew ? ESyncStatus.pendingCreate : ESyncStatus.pendingUpdate,
     );
   }
 

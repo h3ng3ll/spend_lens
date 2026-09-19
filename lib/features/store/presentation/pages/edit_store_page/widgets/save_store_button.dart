@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../../../core/resources/colors/app_color_scheme.dart';
-import '../../../../../../../../core/resources/localization/gen/app_localizations.dart';
-import '../../../../../../../../core/resources/text/app_text_theme.dart';
-import '../../../../../../../../core/widgets/app_container.dart';
-import '../../../../../../../../core/widgets/gradient_cta_button.dart';
+import '../../../../../../core/resources/colors/app_color_scheme.dart';
+import '../../../../../../core/resources/localization/gen/app_localizations.dart';
+import '../../../../../../core/resources/text/app_text_theme.dart';
+import '../../../../../../core/widgets/app_container.dart';
+import '../../../../../../core/widgets/gradient_cta_button.dart';
 
 /// The Save control, which becomes a progress indicator while the save runs.
 ///

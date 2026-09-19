@@ -11,6 +11,7 @@ List<RouteBase> get $appRoutes => [
   $onboardingPageRoute,
   $appShellRoute,
   $newStorePageRoute,
+  $editStorePageRoute,
   $storeDetailPageRoute,
   $chooseStorePageRoute,
   $newCategoryPageRoute,
@@ -256,6 +257,38 @@ mixin $NewStorePageRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/store/new');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $editStorePageRoute => GoRouteData.$route(
+  path: '/store/:storeId/edit',
+  hasOverriddenOnExit: false,
+  parentNavigatorKey: EditStorePageRoute.$parentNavigatorKey,
+  factory: $EditStorePageRoute._fromState,
+);
+
+mixin $EditStorePageRoute on GoRouteData {
+  static EditStorePageRoute _fromState(GoRouterState state) =>
+      EditStorePageRoute(storeId: state.pathParameters['storeId']!);
+
+  EditStorePageRoute get _self => this as EditStorePageRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/store/${Uri.encodeComponent(_self.storeId)}/edit',
+  );
 
   @override
   void go(BuildContext context) => context.go(location);

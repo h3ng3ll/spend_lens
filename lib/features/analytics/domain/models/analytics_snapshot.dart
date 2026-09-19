@@ -1,5 +1,6 @@
 import '../../../category/domain/models/category/category.dart';
 import '../../../expense/domain/models/expense/expense.dart';
+import '../../../store/domain/models/store/store.dart';
 
 /// Named snapshot class combining the streams [AnalyticsBloc] reacts to
 /// (hive_rules.md §7/§10 — never a Dart record type for a combined-stream
@@ -16,5 +17,14 @@ class AnalyticsSnapshot {
   final List<Expense> expenses;
   final List<Category> categories;
 
-  const AnalyticsSnapshot({required this.expenses, required this.categories});
+  /// Stores resolve each expense's `storeId` to a display name in the
+  /// selected-category drill-down card. Without this third stream the card
+  /// could only ever show "No store" for every row.
+  final List<Store> stores;
+
+  const AnalyticsSnapshot({
+    required this.expenses,
+    required this.categories,
+    required this.stores,
+  });
 }

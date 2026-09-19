@@ -35,8 +35,9 @@ StorePriceComparison? compareStorePriceForProduct({
       )
       .toList();
 
-  final atStoreObservations =
-      productObservations.where((o) => o.storeId == atStoreId).toList();
+  final atStoreObservations = productObservations
+      .where((o) => o.storeId == atStoreId)
+      .toList();
   if (atStoreObservations.isEmpty) {
     return null;
   }
@@ -46,8 +47,8 @@ StorePriceComparison? compareStorePriceForProduct({
   final priceHere = atStoreObservations.first.comparableUnitPrice;
 
   // Latest price per OTHER store this product was bought at.
-  final otherStoreIds =
-      productObservations.map((o) => o.storeId!).toSet()..remove(atStoreId);
+  final otherStoreIds = productObservations.map((o) => o.storeId!).toSet()
+    ..remove(atStoreId);
 
   if (otherStoreIds.isEmpty) {
     return StorePriceComparison(
@@ -60,19 +61,20 @@ StorePriceComparison? compareStorePriceForProduct({
 
   final latestPriceByStore = <String, double>{};
   for (final storeId in otherStoreIds) {
-    final storeObservations = productObservations
-        .where((o) => o.storeId == storeId)
-        .toList()
-      ..sort((a, b) => b.observedAt.compareTo(a.observedAt));
+    final storeObservations =
+        productObservations.where((o) => o.storeId == storeId).toList()
+          ..sort((a, b) => b.observedAt.compareTo(a.observedAt));
     latestPriceByStore[storeId] = storeObservations.first.comparableUnitPrice;
   }
 
   final totalStoreCount = otherStoreIds.length + 1;
-  final cheapestOtherEntry = latestPriceByStore.entries
-      .reduce((a, b) => a.value <= b.value ? a : b);
+  final cheapestOtherEntry = latestPriceByStore.entries.reduce(
+    (a, b) => a.value <= b.value ? a : b,
+  );
 
-  final isCheapestHere =
-      latestPriceByStore.values.every((price) => priceHere <= price);
+  final isCheapestHere = latestPriceByStore.values.every(
+    (price) => priceHere <= price,
+  );
 
   if (isCheapestHere) {
     if (totalStoreCount >= 3) {
@@ -85,8 +87,7 @@ StorePriceComparison? compareStorePriceForProduct({
     }
     // Exactly one alternative store — name it via cheaperBy phrasing with
     // this store as the cheaper reference point.
-    final cheaperStoreName =
-        _storeName(stores, cheapestOtherEntry.key) ?? '';
+    final cheaperStoreName = _storeName(stores, cheapestOtherEntry.key) ?? '';
     final difference = cheapestOtherEntry.value - priceHere;
     return StorePriceComparison(
       productId: productId,

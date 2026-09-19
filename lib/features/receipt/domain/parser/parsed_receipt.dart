@@ -41,7 +41,26 @@ class ParsedLineCandidate {
 /// printed total", never as zero (spec §35 — never inferred from "the
 /// largest or last number").
 class ParsedReceipt {
+  /// The store name as PRINTED on the receipt — raw OCR text. Never
+  /// overwritten by a user's store pick, because price history keys off the
+  /// literal printed text (spec §11).
   final String? storeName;
+
+  /// The RESOLVED store this receipt belongs to, or null when nothing
+  /// matched. Distinct from [storeName]: that is what the paper said, this
+  /// is which `Store` row it maps to.
+  ///
+  /// Before this field existed, a store picked in "Correct receipt" was
+  /// dropped on the way back to Review — the draft carried only the printed
+  /// name, so the choice had nowhere to live and every scanned receipt
+  /// saved with no store at all.
+  final String? storeId;
+
+  /// Whether [storeId] was chosen by the USER rather than auto-matched.
+  /// Gates alias learning: an auto-match must never teach itself its own
+  /// alias, or one bad match becomes permanent.
+  final bool isStoreUserPicked;
+
   final DateTime? purchasedAt;
   final double? total;
   final double? discount;
@@ -49,6 +68,8 @@ class ParsedReceipt {
 
   const ParsedReceipt({
     this.storeName,
+    this.storeId,
+    this.isStoreUserPicked = false,
     this.purchasedAt,
     this.total,
     this.discount,

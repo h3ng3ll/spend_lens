@@ -23,9 +23,9 @@ class PriceHistoryPoint {
   });
 
   factory PriceHistoryPoint.empty(DateTime periodStart) => PriceHistoryPoint(
-        periodStart: periodStart,
-        unitPrice: 0.0,
-        storeId: null,
-        hasData: false,
-      );
+    periodStart: periodStart,
+    unitPrice: 0.0,
+    storeId: null,
+    hasData: false,
+  );
 }

@@ -1,35 +1,33 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../../../core/resources/localization/gen/app_localizations.dart';
-import '../../../../../../../../core/widgets/labeled_field.dart';
-import '../../../../../../../../core/widgets/padding/horizontal_padding.dart';
-import '../../../../../../../../core/widgets/sheet_close_header.dart';
-import '../../../../new_store_page/widgets/new_store_text_field.dart';
-import '../../../../../bloc/edit_store_bloc/edit_store_bloc.dart';
+import '../../../../../../core/resources/localization/gen/app_localizations.dart';
+import '../../../../../../core/widgets/labeled_field.dart';
+import '../../../../../../core/widgets/padding/horizontal_padding.dart';
+import '../../../../../../core/widgets/sheet_close_header.dart';
+import '../../../bloc/edit_store_bloc/edit_store_bloc.dart';
+import '../../new_store_page/widgets/new_store_text_field.dart';
 import 'editable_store_logo.dart';
 import 'save_store_button.dart';
 
 /// The Edit Store form: logo, name, Save.
 ///
 /// KEYBOARD-HIDES-FIELD GUARD (`db:keyboard-hides-text-field`): the whole form
-/// sits inside one [SingleChildScrollView] whose bottom padding tracks
-/// `viewInsets`, and the Save button is INSIDE that same scroll region rather
-/// than pinned below it — so both the field and the button stay reachable once
-/// the keyboard opens. A bottom sheet gets no `resizeToAvoidBottomInset`, so
-/// the inset must be applied here by hand.
-class EditStoreBody extends StatelessWidget {
+/// sits inside one [SingleChildScrollView] and the Save button is INSIDE that
+/// same scroll region rather than pinned below it, so both the field and the
+/// button stay reachable once the keyboard opens. The page's `Scaffold` keeps
+/// its default `resizeToAvoidBottomInset: true`, which shrinks the viewport —
+/// no manual `viewInsets` padding is needed here.
+class EditStorePageBody extends StatelessWidget {
   final EditStoreState state;
   final TextEditingController nameController;
-  final ValueChanged<String> onNameChanged;
   final VoidCallback onLogoTap;
   final VoidCallback onSave;
   final VoidCallback onClose;
 
-  const EditStoreBody({
+  const EditStorePageBody({
     super.key,
     required this.state,
     required this.nameController,
-    required this.onNameChanged,
     required this.onLogoTap,
     required this.onSave,
     required this.onClose,
@@ -40,10 +38,7 @@ class EditStoreBody extends StatelessWidget {
     final lo = AppLocalizations.of(context);
 
     return SingleChildScrollView(
-      padding: EdgeInsets.only(
-        top: 16.0,
-        bottom: 24.0 + MediaQuery.viewInsetsOf(context).bottom,
-      ),
+      padding: const EdgeInsets.symmetric(vertical: 24.0),
       child: HorizontalPadding(
         child: Column(
           mainAxisSize: MainAxisSize.min,

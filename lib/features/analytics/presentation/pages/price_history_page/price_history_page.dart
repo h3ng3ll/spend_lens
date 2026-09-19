@@ -37,8 +37,7 @@ class _PriceHistoryPageState extends State<PriceHistoryPage> {
   late final PriceHistoryBloc _priceHistoryBloc = PriceHistoryBloc(
     productId: widget.productId,
     productLocalRepository: getIt<IProductLocalRepository>(),
-    priceObservationLocalRepository:
-        getIt<IPriceObservationLocalRepository>(),
+    priceObservationLocalRepository: getIt<IPriceObservationLocalRepository>(),
     storeLocalRepository: getIt<IStoreLocalRepository>(),
   )..add(const PriceHistoryEvent.watch());
 

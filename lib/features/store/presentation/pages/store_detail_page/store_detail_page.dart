@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/resources/colors/app_color_scheme.dart';
+import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../../../core/routes/presentation/error_message_widget.dart';
 import '../../../../../core/routes/presentation/loading_data_widget.dart';
 import '../../../../../core/utils/extensions/go_router_x.dart';
@@ -11,7 +12,6 @@ import '../../../../expense/domain/repositories/i_expense_local_repository.dart'
 import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../bloc/store_detail_bloc/store_detail_bloc.dart';
 import '../../../domain/repositories/i_store_local_repository.dart';
-import 'widgets/edit_store_sheet/edit_store_sheet.dart';
 import 'widgets/store_detail_body.dart';
 import 'widgets/store_detail_header.dart';
 
@@ -54,13 +54,13 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
     context.goBack();
   }
 
-  /// Opens the edit sheet for this store's name and logo.
+  /// Opens the edit page for this store's name and logo.
   ///
   /// Nothing is read back from it: `StoreDetailBloc` is already subscribed to
   /// the store box, so a committed save repaints this screen through the same
   /// stream that any other write would.
-  Future<void> _onEdit() async {
-    await EditStoreSheet.show(context, storeId: widget.storeId);
+  void _onEdit() {
+    EditStorePageRoute(storeId: widget.storeId).push<void>(context);
   }
 
   bool _listenWhenNotFound(

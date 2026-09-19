@@ -16,8 +16,9 @@ import '../../../../../../core/resources/localization/gen/app_localizations.dart
 /// from `HistorySnapshot` at build time (BLoC rule A3.1). Mirrors Home's
 /// `HomeRecentEntry` shape/tile-color convention
 /// (`tileBackground: color.withValues(alpha: 0.13)`, `tileForeground: color`)
-/// and reuses its `recentExpenseMeta` for the meta line, so a record reads
-/// identically whether it is seen from Home's Recent card or from History.
+/// and reuses its `recentExpenseTitle`/`recentExpenseMeta` helpers, so a
+/// record reads identically whether it is seen from Home's Recent card or
+/// from History.
 class HistoryRowViewData {
   final String initial;
   final Color tileBackground;
@@ -47,7 +48,7 @@ class HistoryRowViewData {
     final categoryById = {for (final c in categories) c.id: c};
     final category = categoryById[expense.categoryId];
 
-    final name = category != null
+    final categoryName = category != null
         ? resolveCategoryName(lo, category)
         : lo.catOther;
     final color = category != null
@@ -56,12 +57,16 @@ class HistoryRowViewData {
 
     final numberFormat = NumberFormat.decimalPattern();
 
+    // Store as the headline, category on the meta line — see
+    // `recentExpenseTitle`. The tile colour stays category-derived.
+    final title = recentExpenseTitle(lo, expense, stores);
+
     return HistoryRowViewData(
-      initial: name.isNotEmpty ? name[0].toUpperCase() : '?',
+      initial: title.isNotEmpty ? title[0].toUpperCase() : '?',
       tileBackground: color.withValues(alpha: 0.13),
       tileForeground: color,
-      name: name,
-      meta: recentExpenseMeta(lo, expense, stores),
+      name: title,
+      meta: recentExpenseMeta(lo, expense, categoryName),
       amountText:
           '${numberFormat.format(expense.amount)} ${expense.currencyCode}',
     );

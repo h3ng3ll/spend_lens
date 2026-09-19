@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 
-import '../../../../../../../../core/resources/app_icons.dart';
-import '../../../../../../../../core/resources/colors/app_color_scheme.dart';
-import '../../../../../../../../core/widgets/app_container.dart';
-import '../../../../../../../../core/widgets/app_svg_icon.dart';
-import '../../../../../../../../core/widgets/build_store_logo.dart';
+import '../../../../../../core/resources/app_icons.dart';
+import '../../../../../../core/resources/colors/app_color_scheme.dart';
+import '../../../../../../core/widgets/app_container.dart';
+import '../../../../../../core/widgets/app_svg_icon.dart';
+import '../../../../../../core/widgets/build_store_logo.dart';
 
 /// The edit sheet's logo: the current image (or the initial-letter tile) with
 /// a small edit badge, tappable to open the source sheet.

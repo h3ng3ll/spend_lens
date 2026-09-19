@@ -117,7 +117,30 @@ class AppLocalizationsRo extends AppLocalizations {
   String get deleteStore => 'Șterge magazinul';
 
   @override
-  String get deleteStoreNote => 'Posibil doar cât timp nu are bonuri legate.';
+  String get deleteStoreNote =>
+      'Șterge și toate cheltuielile și bonurile acestui magazin.';
+
+  @override
+  String deleteStoreBody(num n) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other:
+          'Acest magazin are $nString înregistrări legate. Ștergerea magazinului șterge și acele înregistrări. Această acțiune nu poate fi anulată.',
+      one:
+          'Acest magazin are 1 înregistrare legată. Ștergerea magazinului șterge și acea înregistrare. Această acțiune nu poate fi anulată.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get deleteStoreBodyEmpty =>
+      'Acest magazin nu are înregistrări legate. Această acțiune nu poate fi anulată.';
 
   @override
   String storeDeleted(int n) {
@@ -321,12 +344,29 @@ class AppLocalizationsRo extends AppLocalizations {
   String get pdf => 'PDF';
 
   @override
-  String get pdfExportUnavailable =>
-      'Exportul PDF va fi disponibil într-o actualizare viitoare.';
-
-  @override
   String pdfToast(String m) {
     return 'Raport $m · PDF gata de trimis';
+  }
+
+  @override
+  String get pdfExportFailed =>
+      'Raportul PDF nu a putut fi creat. Încearcă din nou.';
+
+  @override
+  String get analyticsEmptyMonthTitle => 'Nimic în această lună';
+
+  @override
+  String get analyticsEmptyMonthBody =>
+      'Alege altă perioadă pentru a-ți vedea cheltuielile.';
+
+  @override
+  String analyticsCategoryTotal(String c, String a, String cur) {
+    return '$c · $a $cur';
+  }
+
+  @override
+  String reportGeneratedAt(String d) {
+    return 'Generat $d';
   }
 
   @override

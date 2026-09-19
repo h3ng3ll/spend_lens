@@ -126,21 +126,46 @@ String _relativeDayLabel(AppLocalizations lo, DateTime date) {
       '${date.month.toString().padLeft(2, '0')}.${date.year}';
 }
 
-/// The Recent card's meta line for one [expense]: the resolved store name
-/// for a receipt-derived expense, or the "Cash" label for a cash expense,
-/// followed by a relative day label (design_spendlens.md — Home artboard's
-/// `r.meta`).
-String recentExpenseMeta(
+/// The Recent row's TITLE for one [expense]: the resolved store name for a
+/// receipt-derived expense, or the "Cash" label for a cash one.
+///
+/// The store is the title rather than the meta line because it is what
+/// actually distinguishes one row from another. The category used to hold this
+/// slot, and since most expenses fall back to the built-in "Other"
+/// (`kUncategorizedCategoryId`), the list read as three identical "Other" rows
+/// whose real subject — the shop — was demoted to grey subtext.
+String recentExpenseTitle(
   AppLocalizations lo,
   Expense expense,
   List<Store> stores,
 ) {
   final storeById = {for (final s in stores) s.id: s};
-  final source = expense.storeId != null
+  return expense.storeId != null
       ? (storeById[expense.storeId]?.name ?? lo.cashType)
       : lo.cashType;
+}
 
-  return '$source · ${_relativeDayLabel(lo, expense.occurredAt)}';
+/// The Recent card's meta line for one [expense]: the category name, then a
+/// relative day label, then the clock time in `HH:mm`
+/// (design_spendlens.md — Home artboard's `r.meta`).
+///
+/// The category moves DOWN here from the title (see [recentExpenseTitle]); it
+/// still identifies the row, just no longer at the expense of the store.
+String recentExpenseMeta(
+  AppLocalizations lo,
+  Expense expense,
+  String categoryName,
+) {
+  final occurredAt = expense.occurredAt;
+  // 24-hour, zero-padded, and built by hand rather than through `DateFormat`:
+  // the day label beside it is already locale-resolved through `lo`, and a
+  // locale-dependent clock here would render "5:00 PM" next to "Today" in one
+  // locale and "17:00" in another for the same row.
+  final time =
+      '${occurredAt.hour.toString().padLeft(2, '0')}:'
+      '${occurredAt.minute.toString().padLeft(2, '0')}';
+
+  return '$categoryName · ${_relativeDayLabel(lo, occurredAt)} · $time';
 }
 
 /// One resolved row's presentation data for Home's "Recent" card — resolved
@@ -186,13 +211,19 @@ List<HomeRecentEntry> buildRecentEntries(
         ? resolveCategoryColor(category)
         : resolveCategoryColorForOther();
 
+    final title = recentExpenseTitle(lo, expense, stores);
+
     return HomeRecentEntry(
       expense: expense,
-      initial: name.isNotEmpty ? name[0].toUpperCase() : '?',
+      // Keyed off the TITLE now, so the tile letter matches the row's heading
+      // rather than showing a category initial beside a store name.
+      initial: title.isNotEmpty ? title[0].toUpperCase() : '?',
+      // The tile COLOUR still comes from the category — it is the app's
+      // category colour coding, and the store carries no colour of its own.
       tileBackground: color.withValues(alpha: 0.13),
       tileForeground: color,
-      title: name,
-      meta: recentExpenseMeta(lo, expense, stores),
+      title: title,
+      meta: recentExpenseMeta(lo, expense, name),
       amountText: '${numberFormat.format(expense.amount.round())} $currencyCode',
     );
   }).toList();

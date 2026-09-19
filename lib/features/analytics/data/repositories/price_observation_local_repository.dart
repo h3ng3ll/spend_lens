@@ -28,13 +28,22 @@ class PriceObservationLocalRepository
   }
 
   @override
-  Future<void> save(PriceObservation observation, {bool markPending = true}) async {
+  Future<void> save(
+    PriceObservation observation, {
+    bool markPending = true,
+  }) async {
     final box = await _hiveDatabase.getBox<PriceObservation>(_boxName);
-    await box.put(observation.id, await _stamped(box, observation, markPending));
+    await box.put(
+      observation.id,
+      await _stamped(box, observation, markPending),
+    );
   }
 
   @override
-  Future<void> saveAll(List<PriceObservation> items, {bool markPending = true}) async {
+  Future<void> saveAll(
+    List<PriceObservation> items, {
+    bool markPending = true,
+  }) async {
     final box = await _hiveDatabase.getBox<PriceObservation>(_boxName);
     final entries = <String, PriceObservation>{};
     for (final item in items) {
@@ -85,9 +94,7 @@ class PriceObservationLocalRepository
   @override
   Future<List<PriceObservation>> getPending() async {
     final box = await _hiveDatabase.getBox<PriceObservation>(_boxName);
-    return box.values
-        .where((e) => e.syncStatus != ESyncStatus.synced)
-        .toList();
+    return box.values.where((e) => e.syncStatus != ESyncStatus.synced).toList();
   }
 
   /// Resolves the `syncStatus` a write should carry. `pendingCreate` when the
@@ -110,8 +117,7 @@ class PriceObservationLocalRepository
       // passes through this method, so stamping it here is the only
       // placement no call site can forget.
       updatedAt: DateTime.now(),
-      syncStatus:
-          isNew ? ESyncStatus.pendingCreate : ESyncStatus.pendingUpdate,
+      syncStatus: isNew ? ESyncStatus.pendingCreate : ESyncStatus.pendingUpdate,
     );
   }
 

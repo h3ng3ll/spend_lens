@@ -20,7 +20,18 @@
   "catDeleted": "{n} удалена",
   "noStore": "Без магазина",
   "deleteStore": "Удалить магазин",
-  "deleteStoreNote": "Доступно, пока к магазину не привязаны чеки.",
+  "deleteStoreNote": "Также удалит все расходы и чеки этого магазина.",
+  "deleteStoreBody": "{n,plural, =1{К магазину привязана 1 запись. Вместе с магазином она будет удалена. Это действие нельзя отменить.} few{К магазину привязано {n} записи. Вместе с магазином они будут удалены. Это действие нельзя отменить.} other{К магазину привязано {n} записей. Вместе с магазином они будут удалены. Это действие нельзя отменить.}}",
+  "@deleteStoreBody": {
+    "description": "Confirm-dialog body when deleting a store that has linked expenses/receipts. Real ICU plural, never string concatenation (recorded bug count-plus-noun-concatenated-without-icu-plural).",
+    "placeholders": {
+      "n": {
+        "type": "num",
+        "format": "decimalPattern"
+      }
+    }
+  },
+  "deleteStoreBodyEmpty": "К магазину не привязаны записи. Это действие нельзя отменить.",
   "storeDeleted": "{n} удалён",
   "tabHome": "Главная",
   "tabAnalytics": "Аналитика",
@@ -82,8 +93,12 @@
   "period": "Период",
   "periodRange": "Записи с {a} по {b}",
   "pdf": "PDF",
-  "pdfExportUnavailable": "Экспорт в PDF появится в одном из следующих обновлений.",
   "pdfToast": "Отчёт {m} · PDF готов",
+  "pdfExportFailed": "Не удалось создать PDF-отчёт. Попробуйте ещё раз.",
+  "analyticsEmptyMonthTitle": "В этом месяце пусто",
+  "analyticsEmptyMonthBody": "Выберите другой период, чтобы увидеть расходы.",
+  "analyticsCategoryTotal": "{c} · {a} {cur}",
+  "reportGeneratedAt": "Создано {d}",
   "purchaseCount": "{n,plural, one{{n} покупка} few{{n} покупки} many{{n} покупок} other{{n} покупки}}",
   "top": "топ",
   "ins1": "Продукты — {p}% ваших расходов.",
