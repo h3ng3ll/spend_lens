@@ -2,10 +2,12 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../../core/widgets/app_empty_state.dart';
+import '../../../../../../core/widgets/create_new_row.dart';
 import '../../../../../../core/widgets/section_label.dart';
 import '../../../../../../core/resources/app_icons.dart';
 import '../../../../../analytics/domain/models/price_observation/price_observation.dart';
 import '../../../../../analytics/domain/price_history/store_price_comparator.dart';
+import '../../../../../product/domain/linking/linked_product_group.dart';
 import '../../../../../product/domain/models/product/product.dart';
 import '../../../../domain/models/store/store.dart';
 import 'store_product_row.dart';
@@ -25,7 +27,12 @@ class ProductsHereCard extends StatelessWidget {
   final List<Product> products;
   final List<PriceObservation> priceObservations;
   final List<Store> stores;
-  final String displayCurrencyCode;
+
+  /// Opens a product's page.
+  final ValueChanged<String> onOpenProduct;
+
+  /// Records a product at this store without the camera.
+  final VoidCallback onAddProduct;
 
   const ProductsHereCard({
     super.key,
@@ -33,22 +40,31 @@ class ProductsHereCard extends StatelessWidget {
     required this.products,
     required this.priceObservations,
     required this.stores,
-    required this.displayCurrencyCode,
+    required this.onOpenProduct,
+    required this.onAddProduct,
   });
 
   @override
   Widget build(BuildContext context) {
     final lo = AppLocalizations.of(context);
 
-    final productIdsHere = priceObservations
+    // OWNERSHIP, not observation location. Listing by where prices were
+    // SEEN put one store-less product under every shop it was ever bought
+    // at; `Product.storeId` is the single source of truth for membership,
+    // and the per-store split migration makes it true of legacy data too.
+    //
+    // An observation recorded at a different store still counts toward the
+    // cross-store comparison below — where a price was seen and which store
+    // owns the product are genuinely different facts, and only the second
+    // decides what this list contains.
+    final productsHere = products
         .where(
-          (observation) =>
-              observation.storeId == storeId && observation.deletedAt == null,
+          (product) =>
+              product.storeId == storeId && product.deletedAt == null,
         )
-        .map((observation) => observation.productId)
-        .toSet();
+        .toList();
 
-    if (productIdsHere.isEmpty) {
+    if (productsHere.isEmpty) {
       return Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -60,24 +76,39 @@ class ProductsHereCard extends StatelessWidget {
             title: lo.storeNoProductsYet,
             body: lo.storeNoProductsYetBody,
           ),
+          // Offered in the EMPTY branch too: a store with nothing recorded
+          // is exactly when the user most needs a way to record something,
+          // and hiding the only create path behind a non-empty list would
+          // strand the store permanently.
+          CreateNewRow(
+            title: lo.addProduct,
+            subtitle: lo.addProductSub,
+            onTap: onAddProduct,
+          ),
         ],
       );
     }
 
     final rows = <Widget>[];
-    for (final productId in productIdsHere) {
-      final product = _findProduct(productId);
-      if (product == null) continue;
-
+    for (final product in productsHere) {
+      // Grouped over the product's link set rather than a bare id: products
+      // are per-store, so the same goods at two shops are two rows, and only
+      // the links make them comparable. The split migration writes those
+      // links automatically for products it separates.
       final comparison = compareStorePriceForProduct(
-        productId: productId,
+        productId: product.id,
         atStoreId: storeId,
         allObservations: priceObservations,
         stores: stores,
+        comparableProductIds: resolveLinkedGroup(product.id, products),
       );
 
       rows.add(
-        StoreProductRow(product: product, comparison: comparison),
+        StoreProductRow(
+          product: product,
+          comparison: comparison,
+          onTap: () => onOpenProduct(product.id),
+        ),
       );
     }
 
@@ -88,14 +119,12 @@ class ProductsHereCard extends StatelessWidget {
       children: [
         SectionLabel(text: lo.productsHere),
         ...rows,
+        CreateNewRow(
+          title: lo.addProduct,
+          subtitle: lo.addProductSub,
+          onTap: onAddProduct,
+        ),
       ],
     );
-  }
-
-  Product? _findProduct(String productId) {
-    for (final product in products) {
-      if (product.id == productId) return product;
-    }
-    return null;
   }
 }

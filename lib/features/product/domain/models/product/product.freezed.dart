@@ -19,7 +19,28 @@ mixin _$Product {
 /// cleanup, abbreviation-expanded) — never shown to the user.
  String get normalizedName;/// User-facing name.
  String get displayName;/// Alternate raw-OCR spellings that have been matched to this product.
- List<String> get aliases; String? get defaultCategoryId; EUnit get defaultUnit; DateTime get updatedAt; DateTime? get deletedAt; ESyncStatus get syncStatus;
+ List<String> get aliases; String? get defaultCategoryId; EUnit get defaultUnit;/// The store this product belongs to, or null for a GENERAL-PURPOSE
+/// product — one created from a scan before any store was resolved.
+///
+/// Per-store products are a deliberate product decision: the same goods
+/// bought at two stores are two [Product] rows, so each store owns its
+/// own price line. The consequence is that cross-store comparison can no
+/// longer group by `productId` alone — see [linkedProductIds].
+///
+/// Legacy rows decode with null here, which reads correctly: a product
+/// created before stores were tracked genuinely belongs to no store.
+ String? get storeId;/// Products at OTHER stores the user has declared to be the same goods.
+///
+/// SYMMETRIC — both sides carry each other's id — and resolved into a
+/// transitive group at read time by `resolveLinkedGroup`, so A-B plus
+/// B-C makes A and C comparable without any group-id bookkeeping to
+/// rebalance on unlink.
+///
+/// This is what keeps the store-detail "cheaper by" comparison alive
+/// under per-store products: the comparator groups observations over the
+/// linked SET rather than a single `productId`. Empty = compares against
+/// nothing, which renders as "Only bought here".
+ List<String> get linkedProductIds; DateTime get updatedAt; DateTime? get deletedAt; ESyncStatus get syncStatus;
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -32,16 +53,16 @@ $ProductCopyWith<Product> get copyWith => _$ProductCopyWithImpl<Product>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.id, id) || other.id == id)&&(identical(other.normalizedName, normalizedName) || other.normalizedName == normalizedName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&const DeepCollectionEquality().equals(other.aliases, aliases)&&(identical(other.defaultCategoryId, defaultCategoryId) || other.defaultCategoryId == defaultCategoryId)&&(identical(other.defaultUnit, defaultUnit) || other.defaultUnit == defaultUnit)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.id, id) || other.id == id)&&(identical(other.normalizedName, normalizedName) || other.normalizedName == normalizedName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&const DeepCollectionEquality().equals(other.aliases, aliases)&&(identical(other.defaultCategoryId, defaultCategoryId) || other.defaultCategoryId == defaultCategoryId)&&(identical(other.defaultUnit, defaultUnit) || other.defaultUnit == defaultUnit)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other.linkedProductIds, linkedProductIds)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,normalizedName,displayName,const DeepCollectionEquality().hash(aliases),defaultCategoryId,defaultUnit,updatedAt,deletedAt,syncStatus);
+int get hashCode => Object.hash(runtimeType,id,normalizedName,displayName,const DeepCollectionEquality().hash(aliases),defaultCategoryId,defaultUnit,storeId,const DeepCollectionEquality().hash(linkedProductIds),updatedAt,deletedAt,syncStatus);
 
 @override
 String toString() {
-  return 'Product(id: $id, normalizedName: $normalizedName, displayName: $displayName, aliases: $aliases, defaultCategoryId: $defaultCategoryId, defaultUnit: $defaultUnit, updatedAt: $updatedAt, deletedAt: $deletedAt, syncStatus: $syncStatus)';
+  return 'Product(id: $id, normalizedName: $normalizedName, displayName: $displayName, aliases: $aliases, defaultCategoryId: $defaultCategoryId, defaultUnit: $defaultUnit, storeId: $storeId, linkedProductIds: $linkedProductIds, updatedAt: $updatedAt, deletedAt: $deletedAt, syncStatus: $syncStatus)';
 }
 
 
@@ -52,7 +73,7 @@ abstract mixin class $ProductCopyWith<$Res>  {
   factory $ProductCopyWith(Product value, $Res Function(Product) _then) = _$ProductCopyWithImpl;
 @useResult
 $Res call({
- String id, String normalizedName, String displayName, List<String> aliases, String? defaultCategoryId, EUnit defaultUnit, DateTime updatedAt, DateTime? deletedAt, ESyncStatus syncStatus
+ String id, String normalizedName, String displayName, List<String> aliases, String? defaultCategoryId, EUnit defaultUnit, String? storeId, List<String> linkedProductIds, DateTime updatedAt, DateTime? deletedAt, ESyncStatus syncStatus
 });
 
 
@@ -69,7 +90,7 @@ class _$ProductCopyWithImpl<$Res>
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? normalizedName = null,Object? displayName = null,Object? aliases = null,Object? defaultCategoryId = freezed,Object? defaultUnit = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? syncStatus = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? normalizedName = null,Object? displayName = null,Object? aliases = null,Object? defaultCategoryId = freezed,Object? defaultUnit = null,Object? storeId = freezed,Object? linkedProductIds = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? syncStatus = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,normalizedName: null == normalizedName ? _self.normalizedName : normalizedName // ignore: cast_nullable_to_non_nullable
@@ -77,7 +98,9 @@ as String,displayName: null == displayName ? _self.displayName : displayName // 
 as String,aliases: null == aliases ? _self.aliases : aliases // ignore: cast_nullable_to_non_nullable
 as List<String>,defaultCategoryId: freezed == defaultCategoryId ? _self.defaultCategoryId : defaultCategoryId // ignore: cast_nullable_to_non_nullable
 as String?,defaultUnit: null == defaultUnit ? _self.defaultUnit : defaultUnit // ignore: cast_nullable_to_non_nullable
-as EUnit,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as EUnit,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
+as String?,linkedProductIds: null == linkedProductIds ? _self.linkedProductIds : linkedProductIds // ignore: cast_nullable_to_non_nullable
+as List<String>,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
 as ESyncStatus,
@@ -162,10 +185,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String normalizedName,  String displayName,  List<String> aliases,  String? defaultCategoryId,  EUnit defaultUnit,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String normalizedName,  String displayName,  List<String> aliases,  String? defaultCategoryId,  EUnit defaultUnit,  String? storeId,  List<String> linkedProductIds,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_that.defaultCategoryId,_that.defaultUnit,_that.updatedAt,_that.deletedAt,_that.syncStatus);case _:
+return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_that.defaultCategoryId,_that.defaultUnit,_that.storeId,_that.linkedProductIds,_that.updatedAt,_that.deletedAt,_that.syncStatus);case _:
   return orElse();
 
 }
@@ -183,10 +206,10 @@ return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String normalizedName,  String displayName,  List<String> aliases,  String? defaultCategoryId,  EUnit defaultUnit,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String normalizedName,  String displayName,  List<String> aliases,  String? defaultCategoryId,  EUnit defaultUnit,  String? storeId,  List<String> linkedProductIds,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)  $default,) {final _that = this;
 switch (_that) {
 case _Product():
-return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_that.defaultCategoryId,_that.defaultUnit,_that.updatedAt,_that.deletedAt,_that.syncStatus);}
+return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_that.defaultCategoryId,_that.defaultUnit,_that.storeId,_that.linkedProductIds,_that.updatedAt,_that.deletedAt,_that.syncStatus);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -200,10 +223,10 @@ return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String normalizedName,  String displayName,  List<String> aliases,  String? defaultCategoryId,  EUnit defaultUnit,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String normalizedName,  String displayName,  List<String> aliases,  String? defaultCategoryId,  EUnit defaultUnit,  String? storeId,  List<String> linkedProductIds,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_that.defaultCategoryId,_that.defaultUnit,_that.updatedAt,_that.deletedAt,_that.syncStatus);case _:
+return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_that.defaultCategoryId,_that.defaultUnit,_that.storeId,_that.linkedProductIds,_that.updatedAt,_that.deletedAt,_that.syncStatus);case _:
   return null;
 
 }
@@ -215,7 +238,7 @@ return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_t
 @JsonSerializable()
 
 class _Product implements Product {
-  const _Product({required this.id, required this.normalizedName, required this.displayName, final  List<String> aliases = const <String>[], this.defaultCategoryId, this.defaultUnit = EUnit.piece, required this.updatedAt, this.deletedAt, this.syncStatus = ESyncStatus.synced}): _aliases = aliases;
+  const _Product({required this.id, required this.normalizedName, required this.displayName, final  List<String> aliases = const <String>[], this.defaultCategoryId, this.defaultUnit = EUnit.piece, this.storeId, final  List<String> linkedProductIds = const <String>[], required this.updatedAt, this.deletedAt, this.syncStatus = ESyncStatus.synced}): _aliases = aliases,_linkedProductIds = linkedProductIds;
   factory _Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
 
 @override final  String id;
@@ -235,6 +258,46 @@ class _Product implements Product {
 
 @override final  String? defaultCategoryId;
 @override@JsonKey() final  EUnit defaultUnit;
+/// The store this product belongs to, or null for a GENERAL-PURPOSE
+/// product — one created from a scan before any store was resolved.
+///
+/// Per-store products are a deliberate product decision: the same goods
+/// bought at two stores are two [Product] rows, so each store owns its
+/// own price line. The consequence is that cross-store comparison can no
+/// longer group by `productId` alone — see [linkedProductIds].
+///
+/// Legacy rows decode with null here, which reads correctly: a product
+/// created before stores were tracked genuinely belongs to no store.
+@override final  String? storeId;
+/// Products at OTHER stores the user has declared to be the same goods.
+///
+/// SYMMETRIC — both sides carry each other's id — and resolved into a
+/// transitive group at read time by `resolveLinkedGroup`, so A-B plus
+/// B-C makes A and C comparable without any group-id bookkeeping to
+/// rebalance on unlink.
+///
+/// This is what keeps the store-detail "cheaper by" comparison alive
+/// under per-store products: the comparator groups observations over the
+/// linked SET rather than a single `productId`. Empty = compares against
+/// nothing, which renders as "Only bought here".
+ final  List<String> _linkedProductIds;
+/// Products at OTHER stores the user has declared to be the same goods.
+///
+/// SYMMETRIC — both sides carry each other's id — and resolved into a
+/// transitive group at read time by `resolveLinkedGroup`, so A-B plus
+/// B-C makes A and C comparable without any group-id bookkeeping to
+/// rebalance on unlink.
+///
+/// This is what keeps the store-detail "cheaper by" comparison alive
+/// under per-store products: the comparator groups observations over the
+/// linked SET rather than a single `productId`. Empty = compares against
+/// nothing, which renders as "Only bought here".
+@override@JsonKey() List<String> get linkedProductIds {
+  if (_linkedProductIds is EqualUnmodifiableListView) return _linkedProductIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_linkedProductIds);
+}
+
 @override final  DateTime updatedAt;
 @override final  DateTime? deletedAt;
 @override@JsonKey() final  ESyncStatus syncStatus;
@@ -252,16 +315,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.id, id) || other.id == id)&&(identical(other.normalizedName, normalizedName) || other.normalizedName == normalizedName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&const DeepCollectionEquality().equals(other._aliases, _aliases)&&(identical(other.defaultCategoryId, defaultCategoryId) || other.defaultCategoryId == defaultCategoryId)&&(identical(other.defaultUnit, defaultUnit) || other.defaultUnit == defaultUnit)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.id, id) || other.id == id)&&(identical(other.normalizedName, normalizedName) || other.normalizedName == normalizedName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&const DeepCollectionEquality().equals(other._aliases, _aliases)&&(identical(other.defaultCategoryId, defaultCategoryId) || other.defaultCategoryId == defaultCategoryId)&&(identical(other.defaultUnit, defaultUnit) || other.defaultUnit == defaultUnit)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other._linkedProductIds, _linkedProductIds)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,normalizedName,displayName,const DeepCollectionEquality().hash(_aliases),defaultCategoryId,defaultUnit,updatedAt,deletedAt,syncStatus);
+int get hashCode => Object.hash(runtimeType,id,normalizedName,displayName,const DeepCollectionEquality().hash(_aliases),defaultCategoryId,defaultUnit,storeId,const DeepCollectionEquality().hash(_linkedProductIds),updatedAt,deletedAt,syncStatus);
 
 @override
 String toString() {
-  return 'Product(id: $id, normalizedName: $normalizedName, displayName: $displayName, aliases: $aliases, defaultCategoryId: $defaultCategoryId, defaultUnit: $defaultUnit, updatedAt: $updatedAt, deletedAt: $deletedAt, syncStatus: $syncStatus)';
+  return 'Product(id: $id, normalizedName: $normalizedName, displayName: $displayName, aliases: $aliases, defaultCategoryId: $defaultCategoryId, defaultUnit: $defaultUnit, storeId: $storeId, linkedProductIds: $linkedProductIds, updatedAt: $updatedAt, deletedAt: $deletedAt, syncStatus: $syncStatus)';
 }
 
 
@@ -272,7 +335,7 @@ abstract mixin class _$ProductCopyWith<$Res> implements $ProductCopyWith<$Res> {
   factory _$ProductCopyWith(_Product value, $Res Function(_Product) _then) = __$ProductCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String normalizedName, String displayName, List<String> aliases, String? defaultCategoryId, EUnit defaultUnit, DateTime updatedAt, DateTime? deletedAt, ESyncStatus syncStatus
+ String id, String normalizedName, String displayName, List<String> aliases, String? defaultCategoryId, EUnit defaultUnit, String? storeId, List<String> linkedProductIds, DateTime updatedAt, DateTime? deletedAt, ESyncStatus syncStatus
 });
 
 
@@ -289,7 +352,7 @@ class __$ProductCopyWithImpl<$Res>
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? normalizedName = null,Object? displayName = null,Object? aliases = null,Object? defaultCategoryId = freezed,Object? defaultUnit = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? syncStatus = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? normalizedName = null,Object? displayName = null,Object? aliases = null,Object? defaultCategoryId = freezed,Object? defaultUnit = null,Object? storeId = freezed,Object? linkedProductIds = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? syncStatus = null,}) {
   return _then(_Product(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,normalizedName: null == normalizedName ? _self.normalizedName : normalizedName // ignore: cast_nullable_to_non_nullable
@@ -297,7 +360,9 @@ as String,displayName: null == displayName ? _self.displayName : displayName // 
 as String,aliases: null == aliases ? _self._aliases : aliases // ignore: cast_nullable_to_non_nullable
 as List<String>,defaultCategoryId: freezed == defaultCategoryId ? _self.defaultCategoryId : defaultCategoryId // ignore: cast_nullable_to_non_nullable
 as String?,defaultUnit: null == defaultUnit ? _self.defaultUnit : defaultUnit // ignore: cast_nullable_to_non_nullable
-as EUnit,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as EUnit,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
+as String?,linkedProductIds: null == linkedProductIds ? _self._linkedProductIds : linkedProductIds // ignore: cast_nullable_to_non_nullable
+as List<String>,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
 as ESyncStatus,

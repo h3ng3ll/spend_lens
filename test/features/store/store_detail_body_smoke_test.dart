@@ -58,6 +58,8 @@ void main() {
               snapshot: snapshot,
               onClose: () {},
               onEdit: () {},
+              onOpenProduct: (_) {},
+              onAddProduct: () {},
             ),
           ),
         ),

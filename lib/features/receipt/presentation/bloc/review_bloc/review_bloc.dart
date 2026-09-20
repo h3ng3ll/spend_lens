@@ -78,7 +78,10 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
           (candidate) => ReviewDraftItem(
             id: '${_now().microsecondsSinceEpoch}_${candidate.lineIndex}',
             rawName: candidate.rawName,
-            name: candidate.rawName,
+            // A corrected name on the candidate is a rename the user made
+            // in "Correct receipt"; falling back to `rawName` unconditionally
+            // is what used to throw that correction away on the way back.
+            name: candidate.name ?? candidate.rawName,
             quantity: candidate.quantity,
             unit: candidate.unit,
             unitPrice: candidate.unitPrice,
@@ -191,6 +194,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
               // `name` is user-editable, and it is carried separately so
               // the Edit screen shows the edited text.
               rawName: state.items[i].rawName,
+              name: state.items[i].name,
               quantity: state.items[i].quantity,
               unit: state.items[i].unit,
               unitPrice: state.items[i].unitPrice,

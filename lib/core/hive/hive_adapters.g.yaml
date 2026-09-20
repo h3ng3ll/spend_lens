@@ -5,7 +5,7 @@ nextTypeId: 8
 types:
   AppSettings:
     typeId: 0
-    nextIndex: 8
+    nextIndex: 9
     fields:
       localeCode:
         index: 0
@@ -23,6 +23,8 @@ types:
         index: 6
       legacyPullCompleted:
         index: 7
+      productsSplitCompleted:
+        index: 8
   Receipt:
     typeId: 1
     nextIndex: 14
@@ -91,7 +93,7 @@ types:
         index: 14
   Product:
     typeId: 3
-    nextIndex: 9
+    nextIndex: 11
     fields:
       id:
         index: 0
@@ -111,6 +113,10 @@ types:
         index: 7
       syncStatus:
         index: 8
+      storeId:
+        index: 9
+      linkedProductIds:
+        index: 10
   Store:
     typeId: 4
     nextIndex: 9

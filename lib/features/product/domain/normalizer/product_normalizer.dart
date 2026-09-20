@@ -19,7 +19,15 @@ typedef ProductIdGenerator = String Function();
 /// CONSERVATIVE by design (spec §42): a near-miss that does not clear the
 /// fuzzy matcher's high similarity threshold CREATES a new product rather
 /// than merging into an existing one, because false merges are worse than
-/// duplicates. This class NEVER touches `ReceiptItem.rawName` — it only
+/// duplicates.
+///
+/// STORE-SCOPED. Matching considers only products belonging to the store the
+/// receipt resolved to, plus general-purpose ones (`storeId == null`), and a
+/// product it creates is stamped with that store. Products are per-store by
+/// product decision: the same goods at two stores are two rows, each owning
+/// its own price line. Matching globally would defeat that immediately — the
+/// second store's first scan would bind to the first store's product and the
+/// two price lines would merge back into one. This class NEVER touches `ReceiptItem.rawName` — it only
 /// ever produces/matches a [Product]; the caller is responsible for setting
 /// `ReceiptItem.normalizedName`/`productId` from the result, never
 /// `rawName` (spec §11, the hardest invariant).
@@ -38,14 +46,19 @@ class ProductNormalizer {
     this._now = DateTime.now,
   });
 
-  /// Normalizes [rawName] against [existingProducts], creating a new
+  /// Normalizes [rawName] against the products of [storeId], creating a new
   /// [Product] via [generateId] when neither an exact nor a sufficiently
   /// close fuzzy match exists.
+  ///
+  /// [storeId] is the store the receipt resolved to, or null when none was.
+  /// It both NARROWS the candidates (see [_candidatesFor]) and stamps the
+  /// created product, which is what keeps each store's price line its own.
   ProductMatchResult normalize({
     required String rawName,
     required List<Product> existingProducts,
     required ProductIdGenerator generateId,
     EUnit defaultUnit = EUnit.piece,
+    String? storeId,
   }) {
     // Stage 1 — cleanup.
     final cleaned = _cleaner.clean(rawName);
@@ -53,8 +66,11 @@ class ProductNormalizer {
     // Stage 2 — abbreviation expansion.
     final expanded = _abbreviationExpander.expand(cleaned);
 
+    // Stage 2b — narrow to the products this store may match against.
+    final candidates = _candidatesFor(existingProducts, storeId);
+
     // Stage 3 — exact match (against normalizedName AND every alias).
-    for (final product in existingProducts) {
+    for (final product in candidates) {
       if (product.normalizedName == expanded || product.aliases.contains(expanded)) {
         return ProductMatchResult(
           product: product,
@@ -64,10 +80,10 @@ class ProductNormalizer {
     }
 
     // Stage 4 — fuzzy match, conservative threshold (spec §42).
-    final existingNames = existingProducts.map((p) => p.normalizedName).toList();
+    final existingNames = candidates.map((p) => p.normalizedName).toList();
     final closest = _fuzzyMatcher.findClosestMatch(expanded, existingNames);
     if (closest != null) {
-      final matched = existingProducts.firstWhere(
+      final matched = candidates.firstWhere(
         (p) => p.normalizedName == closest,
       );
       return ProductMatchResult(
@@ -83,6 +99,7 @@ class ProductNormalizer {
       normalizedName: expanded,
       displayName: rawName.trim(),
       defaultUnit: defaultUnit,
+      storeId: storeId,
       updatedAt: _now(),
       syncStatus: ESyncStatus.pendingCreate,
     );
@@ -90,5 +107,24 @@ class ProductNormalizer {
       product: created,
       outcome: ENormalizerOutcome.created,
     );
+  }
+
+  /// The products [storeId] is allowed to match against.
+  ///
+  /// With a store: that store's own products PLUS general-purpose ones,
+  /// which belong to no store and so are adoptable anywhere — this is how a
+  /// product created before any store was known keeps matching once one is.
+  ///
+  /// Without a store: general-purpose products ONLY. A store-less scan must
+  /// not bind to a store's product, or a receipt whose store failed to
+  /// resolve would silently attach its prices to whichever store happened to
+  /// own a similarly-named row.
+  List<Product> _candidatesFor(List<Product> products, String? storeId) {
+    if (storeId == null) {
+      return products.where((p) => p.storeId == null).toList();
+    }
+    return products
+        .where((p) => p.storeId == storeId || p.storeId == null)
+        .toList();
   }
 }

@@ -33,6 +33,19 @@ sealed class EditReceiptEvent with _$EditReceiptEvent {
   const factory EditReceiptEvent.updateItemName(String itemId, String name) =
       _UpdateItemName;
 
+  /// Pins a line to a product the user picked, overriding the normalizer's
+  /// automatic match.
+  ///
+  /// Auto-matching is conservative but not infallible — it resolves by name
+  /// similarity, so a mis-OCR'd line can land on the wrong product or create
+  /// a duplicate. This is the user's correction, and `_onSave` honours it by
+  /// SKIPPING the normalizer for that line; re-deriving the match at save
+  /// would silently undo the choice they just made.
+  const factory EditReceiptEvent.pickItemProduct(
+    String itemId,
+    String productId,
+  ) = _PickItemProduct;
+
   /// Cycles one item's unit of measure (piece -> kg -> L -> piece).
   ///
   /// The parser's unit is a best guess from OCR text that routinely reads

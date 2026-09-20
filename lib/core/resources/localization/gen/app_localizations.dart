@@ -2663,6 +2663,252 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Processing photo…'**
   String get processingPhoto;
+
+  /// No description provided for @productTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Product'**
+  String get productTitle;
+
+  /// No description provided for @generalPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'General purpose'**
+  String get generalPurpose;
+
+  /// No description provided for @productNoStore.
+  ///
+  /// In en, this message translates to:
+  /// **'Not tied to a store yet'**
+  String get productNoStore;
+
+  /// No description provided for @productPrices.
+  ///
+  /// In en, this message translates to:
+  /// **'Prices'**
+  String get productPrices;
+
+  /// No description provided for @productNoPricesTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No prices yet'**
+  String get productNoPricesTitle;
+
+  /// No description provided for @productNoPricesBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a price to start tracking how it changes.'**
+  String get productNoPricesBody;
+
+  /// No description provided for @fromReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'From receipt'**
+  String get fromReceipt;
+
+  /// No description provided for @editOnReceipt.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit on receipt'**
+  String get editOnReceipt;
+
+  /// No description provided for @addPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Add price'**
+  String get addPrice;
+
+  /// No description provided for @addPriceSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Record what it costs today'**
+  String get addPriceSub;
+
+  /// No description provided for @editPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit price'**
+  String get editPrice;
+
+  /// No description provided for @deletePrice.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete price'**
+  String get deletePrice;
+
+  /// No description provided for @deletePriceConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove this price point? The chart will be recalculated.'**
+  String get deletePriceConfirm;
+
+  /// No description provided for @priceAmountLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Price'**
+  String get priceAmountLabel;
+
+  /// No description provided for @priceDateLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Date'**
+  String get priceDateLabel;
+
+  /// No description provided for @priceStoreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get priceStoreLabel;
+
+  /// No description provided for @addProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Add product'**
+  String get addProduct;
+
+  /// No description provided for @addProductSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Name it and record its first price'**
+  String get addProductSub;
+
+  /// No description provided for @newProductTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'New product'**
+  String get newProductTitle;
+
+  /// No description provided for @editProductTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit product'**
+  String get editProductTitle;
+
+  /// No description provided for @productNameLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get productNameLabel;
+
+  /// No description provided for @productNameHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Milk 2.5% 1L'**
+  String get productNameHint;
+
+  /// No description provided for @productCategoryLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get productCategoryLabel;
+
+  /// No description provided for @productStoreLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Store'**
+  String get productStoreLabel;
+
+  /// No description provided for @makeGeneralPurpose.
+  ///
+  /// In en, this message translates to:
+  /// **'Make general purpose'**
+  String get makeGeneralPurpose;
+
+  /// No description provided for @deleteProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Delete product'**
+  String get deleteProduct;
+
+  /// Confirm body for deleting a product, counting the price points that go with it.
+  ///
+  /// In en, this message translates to:
+  /// **'{n,plural, =0{Delete this product?} =1{Delete this product and its 1 price point?} other{Delete this product and its {n} price points?}}'**
+  String deleteProductConfirm(num n);
+
+  /// No description provided for @chooseProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose product'**
+  String get chooseProduct;
+
+  /// No description provided for @searchProductPh.
+  ///
+  /// In en, this message translates to:
+  /// **'Search or type a new product'**
+  String get searchProductPh;
+
+  /// No description provided for @createNewProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new product'**
+  String get createNewProduct;
+
+  /// No description provided for @createNewProductSub.
+  ///
+  /// In en, this message translates to:
+  /// **'Name, category and unit'**
+  String get createNewProductSub;
+
+  /// No description provided for @noMatchingProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching product yet'**
+  String get noMatchingProduct;
+
+  /// No description provided for @newProductHint.
+  ///
+  /// In en, this message translates to:
+  /// **'New product · future receipts will link to it'**
+  String get newProductHint;
+
+  /// No description provided for @pickProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick product'**
+  String get pickProduct;
+
+  /// No description provided for @productUnitLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Unit'**
+  String get productUnitLabel;
+
+  /// No description provided for @tabCompare.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare'**
+  String get tabCompare;
+
+  /// No description provided for @compareTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Compare stores'**
+  String get compareTitle;
+
+  /// No description provided for @compareNeedsTwoStoresTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Add a second store'**
+  String get compareNeedsTwoStoresTitle;
+
+  /// No description provided for @compareNeedsTwoStoresBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Comparing needs at least two stores.'**
+  String get compareNeedsTwoStoresBody;
+
+  /// No description provided for @compareNoProductsHere.
+  ///
+  /// In en, this message translates to:
+  /// **'No products at this store yet.'**
+  String get compareNoProductsHere;
+
+  /// No description provided for @compareNoPrice.
+  ///
+  /// In en, this message translates to:
+  /// **'No price yet'**
+  String get compareNoPrice;
 }
 
 class _AppLocalizationsDelegate

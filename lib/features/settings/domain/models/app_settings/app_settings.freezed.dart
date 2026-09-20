@@ -54,7 +54,21 @@ mixin _$AppSettings {
 /// A one-shot unfiltered fetch repairs that. Flagged rather than
 /// repeated because it reads every collection whole — acceptable once
 /// per install, wasteful every cycle.
- bool get legacyPullCompleted;
+ bool get legacyPullCompleted;/// Whether the one-shot per-store product split has run on this device.
+///
+/// Products gained an owning `storeId`, but every product created before
+/// that stayed null — "general purpose" — and nothing in the UI could
+/// assign one. Such a product is listed under EVERY store it was ever
+/// bought at and shows every store's prices on one page, which is not
+/// what a per-store product model means.
+///
+/// `SplitLegacyProductsUseCase` repairs that once: a legacy product whose
+/// prices span N stores becomes N products, one per store. Flagged rather
+/// than repeated because it reads and rewrites whole collections —
+/// acceptable once per install, wasteful every launch. The use case is
+/// idempotent regardless (it skips products that already own a store), so
+/// this flag is an optimisation, not the correctness guarantee.
+ bool get productsSplitCompleted;
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -67,16 +81,16 @@ $AppSettingsCopyWith<AppSettings> get copyWith => _$AppSettingsCopyWithImpl<AppS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared)&&(identical(other.lastSyncedAt, lastSyncedAt) || other.lastSyncedAt == lastSyncedAt)&&(identical(other.legacyPullCompleted, legacyPullCompleted) || other.legacyPullCompleted == legacyPullCompleted));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared)&&(identical(other.lastSyncedAt, lastSyncedAt) || other.lastSyncedAt == lastSyncedAt)&&(identical(other.legacyPullCompleted, legacyPullCompleted) || other.legacyPullCompleted == legacyPullCompleted)&&(identical(other.productsSplitCompleted, productsSplitCompleted) || other.productsSplitCompleted == productsSplitCompleted));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared,lastSyncedAt,legacyPullCompleted);
+int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared,lastSyncedAt,legacyPullCompleted,productsSplitCompleted);
 
 @override
 String toString() {
-  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared, lastSyncedAt: $lastSyncedAt, legacyPullCompleted: $legacyPullCompleted)';
+  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared, lastSyncedAt: $lastSyncedAt, legacyPullCompleted: $legacyPullCompleted, productsSplitCompleted: $productsSplitCompleted)';
 }
 
 
@@ -87,7 +101,7 @@ abstract mixin class $AppSettingsCopyWith<$Res>  {
   factory $AppSettingsCopyWith(AppSettings value, $Res Function(AppSettings) _then) = _$AppSettingsCopyWithImpl;
 @useResult
 $Res call({
- String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared, String? lastSyncedAt, bool legacyPullCompleted
+ String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared, String? lastSyncedAt, bool legacyPullCompleted, bool productsSplitCompleted
 });
 
 
@@ -104,7 +118,7 @@ class _$AppSettingsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,Object? lastSyncedAt = freezed,Object? legacyPullCompleted = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,Object? lastSyncedAt = freezed,Object? legacyPullCompleted = null,Object? productsSplitCompleted = null,}) {
   return _then(_self.copyWith(
 localeCode: freezed == localeCode ? _self.localeCode : localeCode // ignore: cast_nullable_to_non_nullable
 as String?,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
@@ -114,6 +128,7 @@ as bool,flashMode: null == flashMode ? _self.flashMode : flashMode // ignore: ca
 as EFlashMode,dataCleared: null == dataCleared ? _self.dataCleared : dataCleared // ignore: cast_nullable_to_non_nullable
 as bool,lastSyncedAt: freezed == lastSyncedAt ? _self.lastSyncedAt : lastSyncedAt // ignore: cast_nullable_to_non_nullable
 as String?,legacyPullCompleted: null == legacyPullCompleted ? _self.legacyPullCompleted : legacyPullCompleted // ignore: cast_nullable_to_non_nullable
+as bool,productsSplitCompleted: null == productsSplitCompleted ? _self.productsSplitCompleted : productsSplitCompleted // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }
@@ -196,10 +211,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted,  bool productsSplitCompleted)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppSettings() when $default != null:
-return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted);case _:
+return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted,_that.productsSplitCompleted);case _:
   return orElse();
 
 }
@@ -217,10 +232,10 @@ return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboar
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted,  bool productsSplitCompleted)  $default,) {final _that = this;
 switch (_that) {
 case _AppSettings():
-return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted);}
+return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted,_that.productsSplitCompleted);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -234,10 +249,10 @@ return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboar
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted,  bool productsSplitCompleted)?  $default,) {final _that = this;
 switch (_that) {
 case _AppSettings() when $default != null:
-return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted);case _:
+return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted,_that.productsSplitCompleted);case _:
   return null;
 
 }
@@ -249,7 +264,7 @@ return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboar
 @JsonSerializable()
 
 class _AppSettings implements AppSettings {
-  const _AppSettings({this.localeCode, this.currencyCode = 'MDL', this.themeMode = EAppThemeMode.system, this.onboardingCompleted = false, this.flashMode = EFlashMode.auto, this.dataCleared = false, this.lastSyncedAt, this.legacyPullCompleted = false});
+  const _AppSettings({this.localeCode, this.currencyCode = 'MDL', this.themeMode = EAppThemeMode.system, this.onboardingCompleted = false, this.flashMode = EFlashMode.auto, this.dataCleared = false, this.lastSyncedAt, this.legacyPullCompleted = false, this.productsSplitCompleted = false});
   factory _AppSettings.fromJson(Map<String, dynamic> json) => _$AppSettingsFromJson(json);
 
 /// `null` = follow the device locale. Never defaulted to a concrete
@@ -299,6 +314,21 @@ class _AppSettings implements AppSettings {
 /// repeated because it reads every collection whole — acceptable once
 /// per install, wasteful every cycle.
 @override@JsonKey() final  bool legacyPullCompleted;
+/// Whether the one-shot per-store product split has run on this device.
+///
+/// Products gained an owning `storeId`, but every product created before
+/// that stayed null — "general purpose" — and nothing in the UI could
+/// assign one. Such a product is listed under EVERY store it was ever
+/// bought at and shows every store's prices on one page, which is not
+/// what a per-store product model means.
+///
+/// `SplitLegacyProductsUseCase` repairs that once: a legacy product whose
+/// prices span N stores becomes N products, one per store. Flagged rather
+/// than repeated because it reads and rewrites whole collections —
+/// acceptable once per install, wasteful every launch. The use case is
+/// idempotent regardless (it skips products that already own a store), so
+/// this flag is an optimisation, not the correctness guarantee.
+@override@JsonKey() final  bool productsSplitCompleted;
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -313,16 +343,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared)&&(identical(other.lastSyncedAt, lastSyncedAt) || other.lastSyncedAt == lastSyncedAt)&&(identical(other.legacyPullCompleted, legacyPullCompleted) || other.legacyPullCompleted == legacyPullCompleted));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared)&&(identical(other.lastSyncedAt, lastSyncedAt) || other.lastSyncedAt == lastSyncedAt)&&(identical(other.legacyPullCompleted, legacyPullCompleted) || other.legacyPullCompleted == legacyPullCompleted)&&(identical(other.productsSplitCompleted, productsSplitCompleted) || other.productsSplitCompleted == productsSplitCompleted));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared,lastSyncedAt,legacyPullCompleted);
+int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared,lastSyncedAt,legacyPullCompleted,productsSplitCompleted);
 
 @override
 String toString() {
-  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared, lastSyncedAt: $lastSyncedAt, legacyPullCompleted: $legacyPullCompleted)';
+  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared, lastSyncedAt: $lastSyncedAt, legacyPullCompleted: $legacyPullCompleted, productsSplitCompleted: $productsSplitCompleted)';
 }
 
 
@@ -333,7 +363,7 @@ abstract mixin class _$AppSettingsCopyWith<$Res> implements $AppSettingsCopyWith
   factory _$AppSettingsCopyWith(_AppSettings value, $Res Function(_AppSettings) _then) = __$AppSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared, String? lastSyncedAt, bool legacyPullCompleted
+ String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared, String? lastSyncedAt, bool legacyPullCompleted, bool productsSplitCompleted
 });
 
 
@@ -350,7 +380,7 @@ class __$AppSettingsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,Object? lastSyncedAt = freezed,Object? legacyPullCompleted = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,Object? lastSyncedAt = freezed,Object? legacyPullCompleted = null,Object? productsSplitCompleted = null,}) {
   return _then(_AppSettings(
 localeCode: freezed == localeCode ? _self.localeCode : localeCode // ignore: cast_nullable_to_non_nullable
 as String?,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
@@ -360,6 +390,7 @@ as bool,flashMode: null == flashMode ? _self.flashMode : flashMode // ignore: ca
 as EFlashMode,dataCleared: null == dataCleared ? _self.dataCleared : dataCleared // ignore: cast_nullable_to_non_nullable
 as bool,lastSyncedAt: freezed == lastSyncedAt ? _self.lastSyncedAt : lastSyncedAt // ignore: cast_nullable_to_non_nullable
 as String?,legacyPullCompleted: null == legacyPullCompleted ? _self.legacyPullCompleted : legacyPullCompleted // ignore: cast_nullable_to_non_nullable
+as bool,productsSplitCompleted: null == productsSplitCompleted ? _self.productsSplitCompleted : productsSplitCompleted // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
 }

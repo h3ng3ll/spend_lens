@@ -19,6 +19,7 @@ _AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => _AppSettings(
   dataCleared: json['dataCleared'] as bool? ?? false,
   lastSyncedAt: json['lastSyncedAt'] as String?,
   legacyPullCompleted: json['legacyPullCompleted'] as bool? ?? false,
+  productsSplitCompleted: json['productsSplitCompleted'] as bool? ?? false,
 );
 
 Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
@@ -31,6 +32,7 @@ Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
       'dataCleared': instance.dataCleared,
       'lastSyncedAt': instance.lastSyncedAt,
       'legacyPullCompleted': instance.legacyPullCompleted,
+      'productsSplitCompleted': instance.productsSplitCompleted,
     };
 
 const _$EAppThemeModeEnumMap = {

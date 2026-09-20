@@ -93,6 +93,9 @@ class $AssetsIconsGen {
   /// File path: assets/icons/tab_analytics.svg
   String get tabAnalytics => 'assets/icons/tab_analytics.svg';
 
+  /// File path: assets/icons/tab_compare.svg
+  String get tabCompare => 'assets/icons/tab_compare.svg';
+
   /// File path: assets/icons/tab_history.svg
   String get tabHistory => 'assets/icons/tab_history.svg';
 
@@ -137,6 +140,7 @@ class $AssetsIconsGen {
     share,
     store,
     tabAnalytics,
+    tabCompare,
     tabHistory,
     tabHome,
     tabSettings,

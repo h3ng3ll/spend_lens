@@ -27,13 +27,14 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       dataCleared: fields[5] == null ? false : fields[5] as bool,
       lastSyncedAt: fields[6] as String?,
       legacyPullCompleted: fields[7] == null ? false : fields[7] as bool,
+      productsSplitCompleted: fields[8] == null ? false : fields[8] as bool,
     );
   }
 
   @override
   void write(BinaryWriter writer, AppSettings obj) {
     writer
-      ..writeByte(8)
+      ..writeByte(9)
       ..writeByte(0)
       ..write(obj.localeCode)
       ..writeByte(1)
@@ -49,7 +50,9 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(6)
       ..write(obj.lastSyncedAt)
       ..writeByte(7)
-      ..write(obj.legacyPullCompleted);
+      ..write(obj.legacyPullCompleted)
+      ..writeByte(8)
+      ..write(obj.productsSplitCompleted);
   }
 
   @override
@@ -233,6 +236,10 @@ class ProductAdapter extends TypeAdapter<Product> {
       aliases: fields[3] == null ? [] : (fields[3] as List).cast<String>(),
       defaultCategoryId: fields[4] as String?,
       defaultUnit: fields[5] == null ? EUnit.piece : fields[5] as EUnit,
+      storeId: fields[9] as String?,
+      linkedProductIds: fields[10] == null
+          ? []
+          : (fields[10] as List).cast<String>(),
       updatedAt: fields[6] as DateTime,
       deletedAt: fields[7] as DateTime?,
       syncStatus: fields[8] == null
@@ -244,7 +251,7 @@ class ProductAdapter extends TypeAdapter<Product> {
   @override
   void write(BinaryWriter writer, Product obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(11)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -262,7 +269,11 @@ class ProductAdapter extends TypeAdapter<Product> {
       ..writeByte(7)
       ..write(obj.deletedAt)
       ..writeByte(8)
-      ..write(obj.syncStatus);
+      ..write(obj.syncStatus)
+      ..writeByte(9)
+      ..write(obj.storeId)
+      ..writeByte(10)
+      ..write(obj.linkedProductIds);
   }
 
   @override
@@ -477,7 +488,7 @@ class PriceObservationAdapter extends TypeAdapter<PriceObservation> {
       id: fields[0] as String,
       productId: fields[1] as String,
       storeId: fields[2] as String?,
-      receiptId: fields[3] as String,
+      receiptId: fields[3] as String?,
       observedAt: fields[4] as DateTime,
       comparableUnitPrice: (fields[5] as num).toDouble(),
       unit: fields[6] == null ? EUnit.piece : fields[6] as EUnit,

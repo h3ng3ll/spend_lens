@@ -23,6 +23,11 @@ import '../../../features/settings/presentation/pages/about_page/about_page.dart
 import '../../../features/settings/presentation/pages/privacy_page/privacy_page.dart';
 import '../../../features/settings/presentation/pages/terms_page/terms_page.dart';
 import '../../../features/settings/presentation/pages/settings_page/settings_page.dart';
+import '../../../features/compare/presentation/pages/compare_page/compare_page.dart';
+import '../../../features/product/presentation/pages/choose_product_page/choose_product_page.dart';
+import '../../../features/product/presentation/pages/edit_product_page/edit_product_page.dart';
+import '../../../features/product/presentation/pages/new_product_page/new_product_page.dart';
+import '../../../features/product/presentation/pages/product_detail_page/product_detail_page.dart';
 import '../../../features/store/presentation/pages/choose_store_page/choose_store_page.dart';
 import '../../../features/store/presentation/pages/edit_store_page/edit_store_page.dart';
 import '../../../features/store/presentation/pages/new_store_page/new_store_page.dart';
@@ -153,7 +158,7 @@ class OnboardingPageRoute extends GoRouteData with $OnboardingPageRoute {
   }
 }
 
-// ─────────────────────────── 5-branch shell ───────────────────────────
+// ─────────────────────────── 6-branch shell ───────────────────────────
 
 @TypedStatefulShellRoute<AppShellRoute>(
   branches: [
@@ -170,6 +175,11 @@ class OnboardingPageRoute extends GoRouteData with $OnboardingPageRoute {
     TypedStatefulShellBranch(
       routes: [
         TypedGoRoute<StorePageRoute>(path: '/stores'),
+      ],
+    ),
+    TypedStatefulShellBranch(
+      routes: [
+        TypedGoRoute<ComparePageRoute>(path: '/compare'),
       ],
     ),
     TypedStatefulShellBranch(
@@ -221,6 +231,15 @@ class StorePageRoute extends GoRouteData with $StorePageRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage<void>(child: const StorePage());
+  }
+}
+
+class ComparePageRoute extends GoRouteData with $ComparePageRoute {
+  const ComparePageRoute();
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return NoTransitionPage<void>(child: const ComparePage());
   }
 }
 
@@ -456,6 +475,88 @@ class CashExpensePageRoute extends GoRouteData with $CashExpensePageRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return appPage(const CashExpensePage());
+  }
+}
+
+// ── Product family ──────────────────────────────────────────────────────
+//
+// There is no literal `/product/...` sibling today, but the family is laid
+// out so one can be added SAFELY: any literal must be declared ABOVE the
+// bare `:productId` route below, or go_router will capture the literal
+// segment as a product id and shadow it entirely (chronic bug
+// `db:gorouter-parameterised-route-registered-before-literal-shadows-it`) —
+// exactly as the Store family above documents.
+@TypedGoRoute<ChooseProductPageRoute>(path: '/choose-product')
+class ChooseProductPageRoute extends GoRouteData with $ChooseProductPageRoute {
+  /// Scope the candidates to one store (plus general-purpose products).
+  final String? storeId;
+
+  const ChooseProductPageRoute({this.storeId});
+
+  static final GlobalKey<NavigatorState> $parentNavigatorKey =
+      rootNavigatorKey;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return appPage(ChooseProductPage(storeId: storeId));
+  }
+}
+
+// LITERAL `/product/new` is registered BEFORE the param `/product/:productId`
+// below. go_router matches in registration order, so the bare `:productId`
+// declared first would capture `new` as a product id and shadow this route
+// entirely (chronic bug
+// `db:gorouter-parameterised-route-registered-before-literal-shadows-it`).
+@TypedGoRoute<NewProductPageRoute>(path: '/product/new')
+class NewProductPageRoute extends GoRouteData with $NewProductPageRoute {
+  /// The store the product is created for; null makes it general purpose.
+  final String? storeId;
+
+  const NewProductPageRoute({this.storeId});
+
+  static final GlobalKey<NavigatorState> $parentNavigatorKey =
+      rootNavigatorKey;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return appPage(NewProductPage(storeId: storeId));
+  }
+}
+
+// `/product/:productId/edit` is registered BEFORE the bare `:productId`.
+// go_router matches in registration order, so the bare param declared first
+// would capture `edit` as a product id and shadow this route entirely
+// (chronic bug
+// `db:gorouter-parameterised-route-registered-before-literal-shadows-it`) —
+// exactly as the Store family documents for `/store/:storeId/edit`.
+@TypedGoRoute<EditProductPageRoute>(path: '/product/:productId/edit')
+class EditProductPageRoute extends GoRouteData with $EditProductPageRoute {
+  final String productId;
+
+  const EditProductPageRoute({required this.productId});
+
+  static final GlobalKey<NavigatorState> $parentNavigatorKey =
+      rootNavigatorKey;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return appPage(EditProductPage(productId: productId));
+  }
+}
+
+@TypedGoRoute<ProductDetailPageRoute>(path: '/product/:productId')
+class ProductDetailPageRoute extends GoRouteData
+    with $ProductDetailPageRoute {
+  final String productId;
+
+  const ProductDetailPageRoute({required this.productId});
+
+  static final GlobalKey<NavigatorState> $parentNavigatorKey =
+      rootNavigatorKey;
+
+  @override
+  Page<void> buildPage(BuildContext context, GoRouterState state) {
+    return appPage(ProductDetailPage(productId: productId));
   }
 }
 

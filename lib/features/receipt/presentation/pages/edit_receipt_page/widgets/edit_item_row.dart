@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../../../core/resources/app_icons.dart';
 import '../../../../../../core/resources/colors/app_color_scheme.dart';
+import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../../core/resources/text/app_text_theme.dart';
 import '../../../../../../core/widgets/app_container.dart';
 import '../../../../../../core/widgets/app_svg_icon.dart';
@@ -29,6 +30,12 @@ class EditItemRow extends StatelessWidget {
   final VoidCallback onCycleUnit;
   final ValueChanged<String> onPriceChanged;
 
+  /// Opens the product picker so the user can override the automatic match.
+  final VoidCallback onPickProduct;
+
+  /// Whether this line is already pinned to a product the user chose.
+  final bool hasPickedProduct;
+
   const EditItemRow({
     super.key,
     required this.nameController,
@@ -42,12 +49,15 @@ class EditItemRow extends StatelessWidget {
     required this.onQuantityChanged,
     required this.onCycleUnit,
     required this.onPriceChanged,
+    required this.onPickProduct,
+    required this.hasPickedProduct,
   });
 
   @override
   Widget build(BuildContext context) {
     final scheme = AppColorScheme.of(context);
     final textTheme = AppTextTheme.of(context);
+    final lo = AppLocalizations.of(context);
 
     return AppContainer(
       border: Border(bottom: BorderSide(color: scheme.field, width: 0.5)),
@@ -192,6 +202,31 @@ class EditItemRow extends StatelessWidget {
               rawLine!,
               style: textTheme.footnote13.copyWith(color: scheme.ter),
             ),
+          // The override affordance. Automatic matching resolves by name
+          // similarity and can land on the wrong product or mint a
+          // duplicate, and until now there was no way to say so.
+          GestureDetector(
+            onTap: onPickProduct,
+            behavior: HitTestBehavior.opaque,
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              spacing: 6.0,
+              children: [
+                AppSvgIcon(
+                  asset: AppIcons.search,
+                  color: scheme.accent,
+                  size: 14.0,
+                ),
+                Text(
+                  hasPickedProduct ? lo.editProductTitle : lo.chooseProduct,
+                  style: textTheme.footnote13.copyWith(
+                    color: scheme.accent,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
         ],
       ),
     );

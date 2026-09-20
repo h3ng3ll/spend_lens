@@ -5,6 +5,8 @@ import '../../../../../core/utils/combine_latest_streams.dart';
 import '../../../../category/domain/repositories/i_category_local_repository.dart';
 import '../../../../expense/domain/models/expense/expense.dart';
 import '../../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../../../product/domain/models/product/product.dart';
+import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../../receipt/domain/models/receipt/receipt.dart';
 import '../../../../receipt/domain/models/receipt_item/receipt_item.dart';
 import '../../../../receipt/domain/repositories/i_receipt_item_local_repository.dart';
@@ -53,6 +55,7 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
   final IStoreLocalRepository _storeLocalRepository;
   final IReceiptLocalRepository _receiptLocalRepository;
   final IReceiptItemLocalRepository _receiptItemLocalRepository;
+  final IProductLocalRepository _productLocalRepository;
 
   RecordDetailBloc({
     required String recordId,
@@ -61,6 +64,7 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
     required this._storeLocalRepository,
     required this._receiptLocalRepository,
     required this._receiptItemLocalRepository,
+    required this._productLocalRepository,
   }) : super(RecordDetailState(recordId: recordId)) {
     on<_Watch>(_onWatch);
     on<_DeleteRecord>(_onDeleteRecord);
@@ -70,13 +74,14 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
     emit(state.copyWith(status: ERecordDetailStatus.loading));
 
     await emit.forEach<RecordDetailSnapshot>(
-      combineLatest5(
+      combineLatest6(
         _expenseLocalRepository.watchAll(),
         _categoryLocalRepository.watchAll(),
         _storeLocalRepository.watchAll(),
         _receiptLocalRepository.watchAll(),
         _receiptItemLocalRepository.watchAll(),
-        (expenses, categories, stores, receipts, receiptItems) {
+        _productLocalRepository.watchAll(),
+        (expenses, categories, stores, receipts, receiptItems, products) {
           final recordId = state.recordId;
           final receipt = _findReceipt(receipts, recordId);
 
@@ -86,6 +91,7 @@ class RecordDetailBloc extends Bloc<RecordDetailEvent, RecordDetailState> {
             stores: stores,
             receipt: receipt,
             items: _itemsOf(receipt, receiptItems),
+            products: products,
           );
         },
       ),

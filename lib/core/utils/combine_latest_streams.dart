@@ -70,3 +70,22 @@ Stream<T> combineLatest5<A, B, C, D, E, T>(
   T Function(A, B, C, D, E) combiner,
 ) =>
     Rx.combineLatest5(streamA, streamB, streamC, streamD, streamE, combiner);
+
+/// Six-stream combiner. Same contract as the smaller arities above.
+Stream<T> combineLatest6<A, B, C, D, E, F, T>(
+  Stream<A> streamA,
+  Stream<B> streamB,
+  Stream<C> streamC,
+  Stream<D> streamD,
+  Stream<E> streamE,
+  Stream<F> streamF,
+  T Function(A, B, C, D, E, F) combiner,
+) => Rx.combineLatest6(
+  streamA,
+  streamB,
+  streamC,
+  streamD,
+  streamE,
+  streamF,
+  combiner,
+);

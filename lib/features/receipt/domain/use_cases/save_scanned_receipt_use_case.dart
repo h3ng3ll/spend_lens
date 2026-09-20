@@ -212,6 +212,7 @@ class SaveScannedReceiptUseCase {
         existingProducts: mutableProducts,
         generateId: () => '${now.microsecondsSinceEpoch}_product_$i',
         defaultUnit: draftItem.unit,
+        storeId: input.storeId,
       );
 
       if (matchResult.isNewProduct) {

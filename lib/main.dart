@@ -11,12 +11,12 @@ import 'features/sync/di/sync_injection.dart';
 import 'features/sync/presentation/bloc/sync_bloc/sync_bloc.dart';
 import 'core/services/connectivity_service.dart';
 import 'core/services/firebase/firebase_firestore_service.dart';
+import 'core/services/logger_service.dart';
 import 'core/hive/hive_initializer.dart';
 import 'core/resources/app_locale.dart';
 import 'core/resources/app_theme.dart';
 import 'core/resources/localization/gen/app_localizations.dart';
 import 'core/routes/init_router/init_router.dart';
-import 'core/services/subscription/apphud_subscription_repository.dart';
 import 'core/services/subscription/i_subscription_repository.dart';
 import 'core/services/ui_message_service.dart';
 import 'core/utils/env/env.dart';
@@ -43,6 +43,11 @@ import 'features/settings/presentation/bloc/settings_bloc/settings_bloc.dart';
 import 'features/store/di/store_injection.dart';
 import 'features/store/domain/repositories/i_store_local_repository.dart';
 import 'features/store/domain/use_cases/delete_store_use_case.dart';
+import 'features/analytics/domain/repositories/i_price_observation_local_repository.dart';
+import 'features/product/domain/repositories/i_product_local_repository.dart';
+import 'features/product/domain/use_cases/split_legacy_products_use_case.dart';
+import 'features/settings/domain/repositories/i_settings_local_repository.dart';
+import 'features/product/presentation/bloc/products_bloc/products_bloc.dart';
 import 'features/store/presentation/bloc/stores_bloc/stores_bloc.dart';
 import 'firebase_options.dart';
 
@@ -139,6 +144,33 @@ void main() async {
     dataCleared: initialSettings.dataCleared,
   );
 
+  // One-shot per-store product split. Products gained an owning store, but
+  // every product created before that stayed store-less and was therefore
+  // listed under every store it was ever bought at, mixing several stores'
+  // prices into one page and one inflation curve.
+  //
+  // Guarded by a flag purely to avoid re-reading whole collections on every
+  // launch — the use case is idempotent on its own, so a lost flag costs a
+  // wasted pass, never a double split. A failure here must not block launch:
+  // the app is fully usable on unsplit data, just with the old mixing.
+  if (!initialSettings.productsSplitCompleted) {
+    try {
+      await getIt<SplitLegacyProductsUseCase>().call();
+      await getIt<ISettingsLocalRepository>().save(
+        (await getIt<ISettingsLocalRepository>().get()).copyWith(
+          productsSplitCompleted: true,
+        ),
+      );
+    } catch (error, stackTrace) {
+      getIt<LoggerService>().error(
+        'Per-store product split failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'Migration',
+      );
+    }
+  }
+
   // M9: the app-lifetime auth bloc (design_spendlens.md §5/§9). Firebase
   // init failure is caught INSIDE initAuthFeature() — this never throws.
   final isFirebaseReady = await initAuthFeature();
@@ -181,6 +213,13 @@ void main() async {
   )..add(const StoresEvent.watch());
   getIt.registerLazySingleton<StoresBloc>(() => storesBloc);
 
+  final productsBloc = ProductsBloc(
+    productLocalRepository: getIt<IProductLocalRepository>(),
+    priceObservationLocalRepository:
+        getIt<IPriceObservationLocalRepository>(),
+  )..add(const ProductsEvent.watch());
+  getIt.registerLazySingleton<ProductsBloc>(() => productsBloc);
+
   final authBloc = getIt<AuthBloc>()
     ..add(const AuthEvent.watch())
     ..add(const AuthEvent.watchProfile())
@@ -201,6 +240,7 @@ void main() async {
       settingsBloc: settingsBloc,
       categoriesBloc: categoriesBloc,
       storesBloc: storesBloc,
+      productsBloc: productsBloc,
       authBloc: authBloc,
       syncBloc: syncBloc,
       router: router,
@@ -212,6 +252,7 @@ class SpendLensApp extends StatefulWidget {
   final SettingsBloc settingsBloc;
   final CategoriesBloc categoriesBloc;
   final StoresBloc storesBloc;
+  final ProductsBloc productsBloc;
   final AuthBloc authBloc;
   final SyncBloc syncBloc;
   final GoRouter router;
@@ -221,6 +262,7 @@ class SpendLensApp extends StatefulWidget {
     required this.settingsBloc,
     required this.categoriesBloc,
     required this.storesBloc,
+    required this.productsBloc,
     required this.authBloc,
     required this.syncBloc,
     required this.router,
@@ -306,6 +348,9 @@ class _SpendLensAppState extends State<SpendLensApp>
         ),
         BlocProvider<StoresBloc>.value(
           value: widget.storesBloc,
+        ),
+        BlocProvider<ProductsBloc>.value(
+          value: widget.productsBloc,
         ),
         BlocProvider<SyncBloc>.value(
           value: widget.syncBloc,

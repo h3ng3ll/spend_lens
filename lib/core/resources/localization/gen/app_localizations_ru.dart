@@ -1658,4 +1658,144 @@ class AppLocalizationsRu extends AppLocalizations {
 
   @override
   String get processingPhoto => 'Обработка фото…';
+
+  @override
+  String get productTitle => 'Товар';
+
+  @override
+  String get generalPurpose => 'Общий товар';
+
+  @override
+  String get productNoStore => 'Пока не привязан к магазину';
+
+  @override
+  String get productPrices => 'Цены';
+
+  @override
+  String get productNoPricesTitle => 'Пока нет цен';
+
+  @override
+  String get productNoPricesBody =>
+      'Добавьте цену, чтобы отслеживать её изменения.';
+
+  @override
+  String get fromReceipt => 'Из чека';
+
+  @override
+  String get editOnReceipt => 'Изменить в чеке';
+
+  @override
+  String get addPrice => 'Добавить цену';
+
+  @override
+  String get addPriceSub => 'Запишите сегодняшнюю цену';
+
+  @override
+  String get editPrice => 'Изменить цену';
+
+  @override
+  String get deletePrice => 'Удалить цену';
+
+  @override
+  String get deletePriceConfirm => 'Удалить эту цену? График будет пересчитан.';
+
+  @override
+  String get priceAmountLabel => 'Цена';
+
+  @override
+  String get priceDateLabel => 'Дата';
+
+  @override
+  String get priceStoreLabel => 'Магазин';
+
+  @override
+  String get addProduct => 'Добавить товар';
+
+  @override
+  String get addProductSub => 'Назовите его и запишите первую цену';
+
+  @override
+  String get newProductTitle => 'Новый товар';
+
+  @override
+  String get editProductTitle => 'Изменить товар';
+
+  @override
+  String get productNameLabel => 'Название';
+
+  @override
+  String get productNameHint => 'напр. Молоко 2,5% 1 л';
+
+  @override
+  String get productCategoryLabel => 'Категория';
+
+  @override
+  String get productStoreLabel => 'Магазин';
+
+  @override
+  String get makeGeneralPurpose => 'Сделать общим';
+
+  @override
+  String get deleteProduct => 'Удалить товар';
+
+  @override
+  String deleteProductConfirm(num n) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Удалить этот товар и его $nString цен?',
+      few: 'Удалить этот товар и его $nString цены?',
+      one: 'Удалить этот товар и его 1 цену?',
+      zero: 'Удалить этот товар?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chooseProduct => 'Выберите товар';
+
+  @override
+  String get searchProductPh => 'Найдите или введите новый товар';
+
+  @override
+  String get createNewProduct => 'Создать новый товар';
+
+  @override
+  String get createNewProductSub => 'Название, категория и единица';
+
+  @override
+  String get noMatchingProduct => 'Подходящих товаров пока нет';
+
+  @override
+  String get newProductHint => 'Новый товар · будущие чеки свяжутся с ним';
+
+  @override
+  String get pickProduct => 'Выбрать товар';
+
+  @override
+  String get productUnitLabel => 'Единица';
+
+  @override
+  String get tabCompare => 'Сравнить';
+
+  @override
+  String get compareTitle => 'Сравнение магазинов';
+
+  @override
+  String get compareNeedsTwoStoresTitle => 'Добавьте второй магазин';
+
+  @override
+  String get compareNeedsTwoStoresBody =>
+      'Для сравнения нужно минимум два магазина.';
+
+  @override
+  String get compareNoProductsHere => 'В этом магазине пока нет товаров.';
+
+  @override
+  String get compareNoPrice => 'Пока нет цены';
 }

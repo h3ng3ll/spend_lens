@@ -3,7 +3,9 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../../../../../core/models/e_sync_status.dart';
 import '../../../../product/domain/models/product/e_unit.dart';
+import '../../../../product/domain/models/product/product.dart';
 import '../../../../product/domain/normalizer/product_normalizer.dart';
+import '../../../../product/presentation/utils/receipt_item_display_name.dart';
 import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../../store/domain/repositories/i_store_local_repository.dart';
 import '../../../domain/models/receipt/receipt.dart';
@@ -68,6 +70,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
     on<_SetPurchasedAt>(_onSetPurchasedAt);
     on<_SetPrintedTotal>(_onSetPrintedTotal);
     on<_UpdateItemName>(_onUpdateItemName);
+    on<_PickItemProduct>(_onPickItemProduct);
     on<_UpdateItemQuantity>(_onUpdateItemQuantity);
     on<_CycleItemUnit>(_onCycleItemUnit);
     on<_UpdateItemPrice>(_onUpdateItemPrice);
@@ -102,14 +105,39 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
     for (final itemId in receipt.itemIds) {
       final item = await _receiptItemRepository.getById(itemId);
       if (item == null || item.deletedAt != null) continue;
+
+      // A line BOUND to a product shows THAT PRODUCT'S current name, read
+      // live — there is one name, on one entity, and the line does not keep
+      // a second copy of it.
+      //
+      // `ReceiptItem.normalizedName` is a snapshot taken at save time, so a
+      // product renamed afterwards left every line it appears on still
+      // showing the old text: rename "SET 2 LAVEIE HF 59.98 A" to
+      // "SET 2 LAVEIE" and the receipt kept the OCR noise forever, with no
+      // way to tell the two apart. The stored field remains as the fallback
+      // for an unbound line, which has no product to read from.
+      //
+      // `rawName` is untouched either way and still renders underneath as
+      // what the receipt actually printed (spec §11).
+      final productId = item.productId;
+      final product = productId == null
+          ? null
+          : await _productRepository.getById(productId);
+
       items.add(
         EditDraftItem(
           id: item.id,
           rawName: item.rawName,
-          name: item.normalizedName,
+          name: receiptItemDisplayName(
+            item,
+            product == null ? const [] : [product],
+          ),
           quantity: item.quantity,
           unit: item.unit,
           lineTotal: item.lineTotal,
+          // Seeded so re-entering the editor keeps the product the line is
+          // already resolved to, instead of re-deriving it on every save.
+          productId: productId,
         ),
       );
     }
@@ -159,7 +187,10 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
         EditDraftItem(
           id: '${candidate.lineIndex}',
           rawName: candidate.rawName,
-          name: candidate.rawName,
+          // A name already corrected (here or on Review) wins over the OCR
+          // text — re-seeding from `rawName` unconditionally is what made a
+          // rename vanish the moment the editor was re-entered.
+          name: candidate.name ?? candidate.rawName,
           quantity: candidate.quantity,
           unit: candidate.unit,
           lineTotal: candidate.lineTotal,
@@ -228,6 +259,11 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
               rawName: state.items[i].rawName.isEmpty
                   ? state.items[i].name
                   : state.items[i].rawName,
+              // The edited name travels on its OWN field. Without it the
+              // draft carried `rawName` alone, Review re-read that as the
+              // name, and every rename made here was silently reverted the
+              // moment `Apply corrections` returned.
+              name: state.items[i].name,
               quantity: state.items[i].quantity,
               unit: state.items[i].unit,
               lineTotal: state.items[i].lineTotal,
@@ -309,6 +345,35 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
       return item.copyWith(name: event.name);
     }).toList();
     emit(state.copyWith(items: updated));
+  }
+
+  /// Pins one line to a product the user chose from the picker.
+  ///
+  /// Sets the line's NAME as well as its product id: the user picked this
+  /// product because it is what the line is, so the editor should say so —
+  /// that is the "substitute by name" behaviour the picker exists for.
+  /// `rawName` is untouched (spec §11).
+  Future<void> _onPickItemProduct(
+    _PickItemProduct event,
+    Emitter<EditReceiptState> emit,
+  ) async {
+    final product = await _productRepository.getById(event.productId);
+    if (product == null) return;
+
+    emit(
+      state.copyWith(
+        items: [
+          for (final item in state.items)
+            if (item.id == event.itemId)
+              item.copyWith(
+                name: product.displayName,
+                productId: product.id,
+              )
+            else
+              item,
+        ],
+      ),
+    );
   }
 
   void _onUpdateItemQuantity(
@@ -410,15 +475,29 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
         final draftItem = state.items[i];
         final isManuallyAdded = draftItem.rawName.isEmpty;
 
-        final matchResult = _productNormalizer.normalize(
-          rawName: draftItem.name,
-          existingProducts: mutableProducts,
-          generateId: () => '${now.microsecondsSinceEpoch}_product_$i',
-          defaultUnit: draftItem.unit,
-        );
-        if (matchResult.isNewProduct) {
-          mutableProducts.add(matchResult.product);
-          await _productRepository.save(matchResult.product);
+        // A line the user PINNED to a product via the picker bypasses the
+        // normalizer entirely. Re-deriving the match here would overwrite
+        // the correction they just made with the very guess they rejected —
+        // which is the whole reason the override exists.
+        final pinnedProductId = draftItem.productId;
+        Product? resolvedProduct;
+        if (pinnedProductId != null) {
+          resolvedProduct = await _productRepository.getById(pinnedProductId);
+        }
+
+        if (resolvedProduct == null) {
+          final matchResult = _productNormalizer.normalize(
+            rawName: draftItem.name,
+            existingProducts: mutableProducts,
+            generateId: () => '${now.microsecondsSinceEpoch}_product_$i',
+            defaultUnit: draftItem.unit,
+            storeId: state.storeId,
+          );
+          if (matchResult.isNewProduct) {
+            mutableProducts.add(matchResult.product);
+            await _productRepository.save(matchResult.product);
+          }
+          resolvedProduct = matchResult.product;
         }
 
         final item = ReceiptItem(
@@ -428,8 +507,8 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
           // its ORIGINAL rawName untouched (spec §11) — never the edited
           // `name`.
           rawName: isManuallyAdded ? draftItem.name : draftItem.rawName,
-          normalizedName: matchResult.product.displayName,
-          productId: matchResult.product.id,
+          normalizedName: resolvedProduct.displayName,
+          productId: resolvedProduct.id,
           quantity: draftItem.quantity,
           unit: draftItem.unit,
           lineTotal: draftItem.lineTotal,

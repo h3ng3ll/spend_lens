@@ -1,3 +1,5 @@
+import '../../../../../product/domain/models/product/product.dart';
+import '../../../../../product/presentation/utils/receipt_item_display_name.dart';
 import 'package:flutter/material.dart';
 
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
@@ -20,7 +22,15 @@ import 'record_detail_item_row.dart';
 class RecordDetailItemsCard extends StatelessWidget {
   final List<ReceiptItem> items;
 
-  const RecordDetailItemsCard({super.key, required this.items});
+  /// The products the items resolve to, so each line shows its product's
+  /// CURRENT name instead of the copy stamped on it at save time.
+  final List<Product> products;
+
+  const RecordDetailItemsCard({
+    super.key,
+    required this.items,
+    required this.products,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -37,9 +47,7 @@ class RecordDetailItemsCard extends StatelessWidget {
           SectionLabel(text: lo.items(items.length)),
           for (int i = 0; i < items.length; i++)
             RecordDetailItemRow(
-              name: items[i].normalizedName.isNotEmpty
-                  ? items[i].normalizedName
-                  : items[i].rawName,
+              name: receiptItemDisplayName(items[i], products),
               quantity: items[i].quantity,
               unit: items[i].unit,
               unitPrice: items[i].unitPrice,

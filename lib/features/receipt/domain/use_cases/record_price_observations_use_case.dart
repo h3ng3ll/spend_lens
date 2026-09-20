@@ -74,10 +74,20 @@ class RecordPriceObservationsUseCase {
   /// that PUBLISHES, and these rows are being replaced by fresh ones in the
   /// same operation. Propagating "deleted" for a row the very next write
   /// recreates is churn the other devices would have to reconcile.
+  ///
+  /// MANUAL PRICES ARE SKIPPED EXPLICITLY. A price the user typed on the
+  /// product page has a null `receiptId` and is owned by nothing here — this
+  /// method replaces one RECEIPT's derivation, not every price for the
+  /// products it happens to mention. The null check is written out rather
+  /// than left to `null != receiptId` falling through by luck, because the
+  /// failure it prevents is silent and destroys user-entered data: correct a
+  /// receipt once and every hand-entered price would vanish with no error.
   Future<void> _retireExisting(String receiptId) async {
     final existing = await _priceObservationRepository.getAllIncludingDeleted();
     for (final observation in existing) {
-      if (observation.receiptId != receiptId) continue;
+      final existingReceiptId = observation.receiptId;
+      if (existingReceiptId == null) continue;
+      if (existingReceiptId != receiptId) continue;
       await _priceObservationRepository.deleteLocalOnly(observation.id);
     }
   }

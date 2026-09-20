@@ -127,6 +127,28 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
     _bloc.add(EditReceiptEvent.setCategory(pickedId));
   }
 
+  /// Opens the product picker for one line and pins the chosen product.
+  ///
+  /// The name controller is updated BY HAND afterwards. The pool in
+  /// [_controller] returns an already-created controller untouched (that is
+  /// what keeps the field from losing focus on every keystroke —
+  /// `db:textfield-loses-focus-on-keystroke`), so a name changed in bloc
+  /// state does NOT flow back into a live controller. Without this write the
+  /// row would keep showing the old text while state held the new product,
+  /// and the user would see their pick apparently do nothing.
+  Future<void> _onPickItemProduct(BuildContext context, String itemId) async {
+    final pickedId = await ChooseProductPageRoute(
+      storeId: _bloc.state.storeId,
+    ).push<String>(context);
+    if (pickedId == null || !context.mounted) return;
+
+    _bloc.add(EditReceiptEvent.pickItemProduct(itemId, pickedId));
+
+    final product = await getIt<IProductLocalRepository>().getById(pickedId);
+    if (product == null) return;
+    _nameControllers[itemId]?.text = product.displayName;
+  }
+
   /// Cycles the item unit. NO payload beyond the id — the bloc reads the
   /// current unit and advances it (BLoC toggle-event rule).
   void _onCycleItemUnit(String itemId) =>
@@ -209,6 +231,7 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
           onPickCategory: () => _onPickCategory(context),
           onRemoveItem: _onRemoveItem,
           onCycleItemUnit: _onCycleItemUnit,
+          onPickItemProduct: (itemId) => _onPickItemProduct(context, itemId),
           onAddItem: _onAddItem,
           onItemNameChanged: (id, value) =>
               _bloc.add(EditReceiptEvent.updateItemName(id, value)),

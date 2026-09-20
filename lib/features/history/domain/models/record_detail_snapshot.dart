@@ -1,3 +1,4 @@
+import '../../../product/domain/models/product/product.dart';
 import '../../../category/domain/models/category/category.dart';
 import '../../../expense/domain/models/expense/expense.dart';
 import '../../../receipt/domain/models/receipt/receipt.dart';
@@ -31,11 +32,16 @@ class RecordDetailSnapshot {
   /// for a cash expense, and also for a receipt saved with no items.
   final List<ReceiptItem> items;
 
+  /// The products the items resolve to, so a line can show its product's
+  /// CURRENT name rather than the copy stamped on it at save time.
+  final List<Product> products;
+
   const RecordDetailSnapshot({
     required this.expense,
     required this.categories,
     required this.stores,
     this.receipt,
     this.items = const <ReceiptItem>[],
-  });
+      required this.products,
+});
 }

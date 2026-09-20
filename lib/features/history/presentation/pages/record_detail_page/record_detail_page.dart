@@ -14,6 +14,7 @@ import '../../../../../core/utils/extensions/go_router_x.dart';
 import '../../../../../core/widgets/app_background.dart';
 import '../../../../category/domain/repositories/i_category_local_repository.dart';
 import '../../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../../receipt/domain/repositories/i_receipt_item_local_repository.dart';
 import '../../../../receipt/domain/repositories/i_receipt_local_repository.dart';
 import '../../../../store/domain/repositories/i_store_local_repository.dart';
@@ -63,6 +64,7 @@ class _RecordDetailPageState extends State<RecordDetailPage> {
     storeLocalRepository: getIt<IStoreLocalRepository>(),
     receiptLocalRepository: getIt<IReceiptLocalRepository>(),
     receiptItemLocalRepository: getIt<IReceiptItemLocalRepository>(),
+    productLocalRepository: getIt<IProductLocalRepository>(),
   )..add(const RecordDetailEvent.watch());
 
   @override

@@ -6,6 +6,7 @@ import '../../../../../../core/resources/text/app_text_theme.dart';
 import '../../../../../../core/widgets/app_section_card.dart';
 import '../../../../../../core/widgets/padding/horizontal_padding.dart';
 import '../../../../domain/models/price_history/price_history_summary.dart';
+import '../month_short_label.dart';
 import 'price_history_change_label.dart';
 import 'price_history_chart.dart';
 
@@ -30,7 +31,7 @@ class PriceHistoryBody extends StatelessWidget {
 
     final percentChange = summary.percentChangeFirstToLast;
     final monthLabels = summary.points
-        .map((point) => _monthShortLabel(lo, point.periodStart.month))
+        .map((point) => monthShortLabel(lo, point.periodStart.month))
         .toList();
 
     return SingleChildScrollView(
@@ -67,24 +68,5 @@ class PriceHistoryBody extends StatelessWidget {
         ),
       ),
     );
-  }
-
-  /// Resolves a 1-based calendar month to its localized short label
-  /// (`monthsShort0`..`monthsShort11`, 0-based ARB key numbering).
-  String _monthShortLabel(AppLocalizations lo, int month) {
-    return switch (month) {
-      1 => lo.monthsShort0,
-      2 => lo.monthsShort1,
-      3 => lo.monthsShort2,
-      4 => lo.monthsShort3,
-      5 => lo.monthsShort4,
-      6 => lo.monthsShort5,
-      7 => lo.monthsShort6,
-      8 => lo.monthsShort7,
-      9 => lo.monthsShort8,
-      10 => lo.monthsShort9,
-      11 => lo.monthsShort10,
-      _ => lo.monthsShort11,
-    };
   }
 }

@@ -63,6 +63,17 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
     EditStorePageRoute(storeId: widget.storeId).push<void>(context);
   }
 
+  /// Opens a product's page. Nothing is read back — `StoreDetailBloc`
+  /// already watches products and observations, so an edit made there
+  /// repaints this screen through the same stream.
+  void _onOpenProduct(String productId) {
+    ProductDetailPageRoute(productId: productId).push<void>(context);
+  }
+
+  void _onAddProduct() {
+    NewProductPageRoute(storeId: widget.storeId).push<String>(context);
+  }
+
   bool _listenWhenNotFound(
     StoreDetailState previous,
     StoreDetailState current,
@@ -102,6 +113,8 @@ class _StoreDetailPageState extends State<StoreDetailPage> {
                   snapshot: state.snapshot!,
                   onClose: _onClose,
                   onEdit: _onEdit,
+                  onOpenProduct: _onOpenProduct,
+                  onAddProduct: _onAddProduct,
                 );
               }
               // Covers isInitial, isLoading and isNotFound (the listener

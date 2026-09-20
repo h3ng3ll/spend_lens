@@ -77,6 +77,22 @@ sealed class AppSettings with _$AppSettings {
     /// repeated because it reads every collection whole — acceptable once
     /// per install, wasteful every cycle.
     @Default(false) bool legacyPullCompleted,
+
+    /// Whether the one-shot per-store product split has run on this device.
+    ///
+    /// Products gained an owning `storeId`, but every product created before
+    /// that stayed null — "general purpose" — and nothing in the UI could
+    /// assign one. Such a product is listed under EVERY store it was ever
+    /// bought at and shows every store's prices on one page, which is not
+    /// what a per-store product model means.
+    ///
+    /// `SplitLegacyProductsUseCase` repairs that once: a legacy product whose
+    /// prices span N stores becomes N products, one per store. Flagged rather
+    /// than repeated because it reads and rewrites whole collections —
+    /// acceptable once per install, wasteful every launch. The use case is
+    /// idempotent regardless (it skips products that already own a store), so
+    /// this flag is an optimisation, not the correctness guarantee.
+    @Default(false) bool productsSplitCompleted,
   }) = _AppSettings;
 
   factory AppSettings.fromJson(Map<String, dynamic> json) =>

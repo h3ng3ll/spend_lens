@@ -9,6 +9,13 @@
 /// the code it was stored with, and prices are never converted. Filtering
 /// on a stored code made comparison rows disappear whenever the user's
 /// setting differed from it — the same defect that zeroed Analytics.
+///
+/// COMPARISON RUNS OVER A SET OF PRODUCT IDS, not one. Products are
+/// per-store, so the same goods at two stores are two rows with two ids;
+/// grouping on a single id would make every row report "Only bought here"
+/// and silently retire this whole feature. The set is the user's manual link
+/// group, resolved by `resolveLinkedGroup` — an unlinked product simply
+/// passes a set of one and behaves exactly as before.
 library;
 
 import '../../../store/domain/models/store/store.dart';
@@ -16,7 +23,14 @@ import '../models/price_observation/price_observation.dart';
 import '../models/store_price_comparison/store_price_comparison.dart';
 
 /// Builds the [StorePriceComparison] for [productId] as bought at
-/// [atStoreId], across all [allObservations] for that product.
+/// [atStoreId], across every observation belonging to
+/// [comparableProductIds].
+///
+/// [comparableProductIds] is [productId] plus the products the user has
+/// linked it to at other stores. It must CONTAIN [productId]; pass
+/// `{productId}` for an unlinked product. The result still reports
+/// [productId], because that is the row being rendered — the set only widens
+/// what it is measured against.
 ///
 /// Returns null when there is no observation for this product at
 /// [atStoreId] — nothing to show a comparison row for.
@@ -25,11 +39,14 @@ StorePriceComparison? compareStorePriceForProduct({
   required String atStoreId,
   required List<PriceObservation> allObservations,
   required List<Store> stores,
+  Set<String>? comparableProductIds,
 }) {
+  final comparableIds = comparableProductIds ?? {productId};
+
   final productObservations = allObservations
       .where(
         (observation) =>
-            observation.productId == productId &&
+            comparableIds.contains(observation.productId) &&
             observation.deletedAt == null &&
             observation.storeId != null,
       )
@@ -42,7 +59,10 @@ StorePriceComparison? compareStorePriceForProduct({
     return null;
   }
 
-  // Latest observed price at this store.
+  // Latest observed price at this store. With a link group, more than one
+  // product in the set can have observations here (a linked general-purpose
+  // row, say) — taking the most recent across all of them is the right
+  // reading: it is the latest price of this thing, at this store.
   atStoreObservations.sort((a, b) => b.observedAt.compareTo(a.observedAt));
   final priceHere = atStoreObservations.first.comparableUnitPrice;
 

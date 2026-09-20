@@ -15,7 +15,15 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$PriceObservation {
 
- String get id; String get productId; String? get storeId; String get receiptId; DateTime get observedAt;/// Unit price normalized to a comparable basis (e.g. `/kg`, `/L`, `/pc`)
+ String get id; String get productId; String? get storeId;/// The receipt this price came from, or NULL when the user entered it by
+/// hand on the product page.
+///
+/// Null is the ONLY marker distinguishing a manual price from a derived
+/// one, and it is load-bearing: `RecordPriceObservationsUseCase` retires
+/// a receipt's observations by matching this field, so a manual row must
+/// never carry a receipt id — a sentinel string would be swept away the
+/// moment a receipt happened to use it.
+ String? get receiptId; DateTime get observedAt;/// Unit price normalized to a comparable basis (e.g. `/kg`, `/L`, `/pc`)
 /// — this is what price-history comparison charts and sorts on.
  double get comparableUnitPrice; EUnit get unit; String get currencyCode; DateTime get updatedAt; DateTime? get deletedAt; ESyncStatus get syncStatus;
 /// Create a copy of PriceObservation
@@ -50,7 +58,7 @@ abstract mixin class $PriceObservationCopyWith<$Res>  {
   factory $PriceObservationCopyWith(PriceObservation value, $Res Function(PriceObservation) _then) = _$PriceObservationCopyWithImpl;
 @useResult
 $Res call({
- String id, String productId, String? storeId, String receiptId, DateTime observedAt, double comparableUnitPrice, EUnit unit, String currencyCode, DateTime updatedAt, DateTime? deletedAt, ESyncStatus syncStatus
+ String id, String productId, String? storeId, String? receiptId, DateTime observedAt, double comparableUnitPrice, EUnit unit, String currencyCode, DateTime updatedAt, DateTime? deletedAt, ESyncStatus syncStatus
 });
 
 
@@ -67,13 +75,13 @@ class _$PriceObservationCopyWithImpl<$Res>
 
 /// Create a copy of PriceObservation
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? productId = null,Object? storeId = freezed,Object? receiptId = null,Object? observedAt = null,Object? comparableUnitPrice = null,Object? unit = null,Object? currencyCode = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? syncStatus = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? productId = null,Object? storeId = freezed,Object? receiptId = freezed,Object? observedAt = null,Object? comparableUnitPrice = null,Object? unit = null,Object? currencyCode = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? syncStatus = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as String,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
-as String?,receiptId: null == receiptId ? _self.receiptId : receiptId // ignore: cast_nullable_to_non_nullable
-as String,observedAt: null == observedAt ? _self.observedAt : observedAt // ignore: cast_nullable_to_non_nullable
+as String?,receiptId: freezed == receiptId ? _self.receiptId : receiptId // ignore: cast_nullable_to_non_nullable
+as String?,observedAt: null == observedAt ? _self.observedAt : observedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,comparableUnitPrice: null == comparableUnitPrice ? _self.comparableUnitPrice : comparableUnitPrice // ignore: cast_nullable_to_non_nullable
 as double,unit: null == unit ? _self.unit : unit // ignore: cast_nullable_to_non_nullable
 as EUnit,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
@@ -162,7 +170,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String productId,  String? storeId,  String receiptId,  DateTime observedAt,  double comparableUnitPrice,  EUnit unit,  String currencyCode,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String productId,  String? storeId,  String? receiptId,  DateTime observedAt,  double comparableUnitPrice,  EUnit unit,  String currencyCode,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PriceObservation() when $default != null:
 return $default(_that.id,_that.productId,_that.storeId,_that.receiptId,_that.observedAt,_that.comparableUnitPrice,_that.unit,_that.currencyCode,_that.updatedAt,_that.deletedAt,_that.syncStatus);case _:
@@ -183,7 +191,7 @@ return $default(_that.id,_that.productId,_that.storeId,_that.receiptId,_that.obs
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String productId,  String? storeId,  String receiptId,  DateTime observedAt,  double comparableUnitPrice,  EUnit unit,  String currencyCode,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String productId,  String? storeId,  String? receiptId,  DateTime observedAt,  double comparableUnitPrice,  EUnit unit,  String currencyCode,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)  $default,) {final _that = this;
 switch (_that) {
 case _PriceObservation():
 return $default(_that.id,_that.productId,_that.storeId,_that.receiptId,_that.observedAt,_that.comparableUnitPrice,_that.unit,_that.currencyCode,_that.updatedAt,_that.deletedAt,_that.syncStatus);}
@@ -200,7 +208,7 @@ return $default(_that.id,_that.productId,_that.storeId,_that.receiptId,_that.obs
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String productId,  String? storeId,  String receiptId,  DateTime observedAt,  double comparableUnitPrice,  EUnit unit,  String currencyCode,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String productId,  String? storeId,  String? receiptId,  DateTime observedAt,  double comparableUnitPrice,  EUnit unit,  String currencyCode,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _PriceObservation() when $default != null:
 return $default(_that.id,_that.productId,_that.storeId,_that.receiptId,_that.observedAt,_that.comparableUnitPrice,_that.unit,_that.currencyCode,_that.updatedAt,_that.deletedAt,_that.syncStatus);case _:
@@ -215,13 +223,21 @@ return $default(_that.id,_that.productId,_that.storeId,_that.receiptId,_that.obs
 @JsonSerializable()
 
 class _PriceObservation implements PriceObservation {
-  const _PriceObservation({required this.id, required this.productId, this.storeId, required this.receiptId, required this.observedAt, required this.comparableUnitPrice, this.unit = EUnit.piece, required this.currencyCode, required this.updatedAt, this.deletedAt, this.syncStatus = ESyncStatus.synced});
+  const _PriceObservation({required this.id, required this.productId, this.storeId, this.receiptId, required this.observedAt, required this.comparableUnitPrice, this.unit = EUnit.piece, required this.currencyCode, required this.updatedAt, this.deletedAt, this.syncStatus = ESyncStatus.synced});
   factory _PriceObservation.fromJson(Map<String, dynamic> json) => _$PriceObservationFromJson(json);
 
 @override final  String id;
 @override final  String productId;
 @override final  String? storeId;
-@override final  String receiptId;
+/// The receipt this price came from, or NULL when the user entered it by
+/// hand on the product page.
+///
+/// Null is the ONLY marker distinguishing a manual price from a derived
+/// one, and it is load-bearing: `RecordPriceObservationsUseCase` retires
+/// a receipt's observations by matching this field, so a manual row must
+/// never carry a receipt id — a sentinel string would be swept away the
+/// moment a receipt happened to use it.
+@override final  String? receiptId;
 @override final  DateTime observedAt;
 /// Unit price normalized to a comparable basis (e.g. `/kg`, `/L`, `/pc`)
 /// — this is what price-history comparison charts and sorts on.
@@ -265,7 +281,7 @@ abstract mixin class _$PriceObservationCopyWith<$Res> implements $PriceObservati
   factory _$PriceObservationCopyWith(_PriceObservation value, $Res Function(_PriceObservation) _then) = __$PriceObservationCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String productId, String? storeId, String receiptId, DateTime observedAt, double comparableUnitPrice, EUnit unit, String currencyCode, DateTime updatedAt, DateTime? deletedAt, ESyncStatus syncStatus
+ String id, String productId, String? storeId, String? receiptId, DateTime observedAt, double comparableUnitPrice, EUnit unit, String currencyCode, DateTime updatedAt, DateTime? deletedAt, ESyncStatus syncStatus
 });
 
 
@@ -282,13 +298,13 @@ class __$PriceObservationCopyWithImpl<$Res>
 
 /// Create a copy of PriceObservation
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? productId = null,Object? storeId = freezed,Object? receiptId = null,Object? observedAt = null,Object? comparableUnitPrice = null,Object? unit = null,Object? currencyCode = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? syncStatus = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? productId = null,Object? storeId = freezed,Object? receiptId = freezed,Object? observedAt = null,Object? comparableUnitPrice = null,Object? unit = null,Object? currencyCode = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? syncStatus = null,}) {
   return _then(_PriceObservation(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,productId: null == productId ? _self.productId : productId // ignore: cast_nullable_to_non_nullable
 as String,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
-as String?,receiptId: null == receiptId ? _self.receiptId : receiptId // ignore: cast_nullable_to_non_nullable
-as String,observedAt: null == observedAt ? _self.observedAt : observedAt // ignore: cast_nullable_to_non_nullable
+as String?,receiptId: freezed == receiptId ? _self.receiptId : receiptId // ignore: cast_nullable_to_non_nullable
+as String?,observedAt: null == observedAt ? _self.observedAt : observedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,comparableUnitPrice: null == comparableUnitPrice ? _self.comparableUnitPrice : comparableUnitPrice // ignore: cast_nullable_to_non_nullable
 as double,unit: null == unit ? _self.unit : unit // ignore: cast_nullable_to_non_nullable
 as EUnit,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable

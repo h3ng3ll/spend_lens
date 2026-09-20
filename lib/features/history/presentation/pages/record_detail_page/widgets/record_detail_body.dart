@@ -68,6 +68,7 @@ class RecordDetailBody extends StatelessWidget {
     final receipt = snapshot.receipt;
     final note = viewData.note;
     final items = snapshot.items;
+    final products = snapshot.products;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.only(bottom: 24.0),
@@ -91,7 +92,8 @@ class RecordDetailBody extends StatelessWidget {
               syncLabel: viewData.syncLabel,
               syncDotColor: viewData.syncDotColor,
             ),
-            if (items.isNotEmpty) RecordDetailItemsCard(items: items),
+            if (items.isNotEmpty)
+              RecordDetailItemsCard(items: items, products: products),
             if (note != null && note.trim().isNotEmpty)
               RecordDetailNoteCard(note: note),
             if (receipt != null)

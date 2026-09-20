@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../../core/widgets/padding/horizontal_padding.dart';
-import '../../../../../settings/presentation/bloc/settings_bloc/settings_bloc.dart';
 import '../../../../domain/models/store_detail_snapshot/store_detail_snapshot.dart';
 import '../../../utils/store_aggregates.dart';
 import 'products_here_card.dart';
@@ -23,23 +21,25 @@ class StoreDetailBody extends StatelessWidget {
   /// Opens the edit-store sheet for this store's name and logo.
   final VoidCallback onEdit;
 
+  /// Opens one product's page.
+  final ValueChanged<String> onOpenProduct;
+
+  /// Records a product at this store without the camera.
+  final VoidCallback onAddProduct;
+
   const StoreDetailBody({
     super.key,
     required this.snapshot,
     required this.onClose,
     required this.onEdit,
+    required this.onOpenProduct,
+    required this.onAddProduct,
   });
 
   @override
   Widget build(BuildContext context) {
     final store = snapshot.store!;
     final storeExpenses = expensesForStore(snapshot.expenses, store.id);
-    final displayCurrencyCode = context
-        .watch<SettingsBloc>()
-        .state
-        .settings
-        .currencyCode;
-
     return SingleChildScrollView(
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -67,7 +67,8 @@ class StoreDetailBody extends StatelessWidget {
                   products: snapshot.products,
                   priceObservations: snapshot.priceObservations,
                   stores: snapshot.stores,
-                  displayCurrencyCode: displayCurrencyCode,
+                  onOpenProduct: onOpenProduct,
+                  onAddProduct: onAddProduct,
                 ),
                 StoreDeleteSection(storeId: store.id),
               ],

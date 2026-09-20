@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../../../../../core/resources/app_icons.dart';
 import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../../core/resources/text/app_text_theme.dart';
+import '../../../../../../core/widgets/app_svg_icon.dart';
 import '../../../../../analytics/domain/models/store_price_comparison/store_price_comparison.dart';
 import '../../../../../product/domain/models/product/product.dart';
 
@@ -20,10 +22,16 @@ class StoreProductRow extends StatelessWidget {
   final Product product;
   final StorePriceComparison? comparison;
 
+  /// Opens this product's page. The row used to be inert, which left the
+  /// whole product surface — and the finished price-history screen behind
+  /// it — unreachable from anywhere in the app.
+  final VoidCallback onTap;
+
   const StoreProductRow({
     super.key,
     required this.product,
     required this.comparison,
+    required this.onTap,
   });
 
   @override
@@ -39,26 +47,47 @@ class StoreProductRow extends StatelessWidget {
       null => scheme.ter,
     };
 
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        spacing: 4.0,
-        children: [
-          Text(
-            product.displayName,
-            style: textTheme.headline17.copyWith(color: scheme.ink),
-          ),
-          if (comparisonText != null)
-            Text(
-              comparisonText,
-              style: textTheme.footnote13.copyWith(
-                color: comparisonColor,
-                fontWeight: FontWeight.w500,
+    // CHRONIC BUG GUARD
+    // (`sig:developer-derived-fixed-dp-cell-height-ignores-textScaleFactor`):
+    // no fixed `height:` — the row sizes to its own content, so a larger
+    // textScaleFactor grows it instead of clipping the comparison line.
+    return GestureDetector(
+      onTap: onTap,
+      behavior: HitTestBehavior.opaque,
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0),
+        child: Row(
+          crossAxisAlignment: CrossAxisAlignment.center,
+          spacing: 12.0,
+          children: [
+            Expanded(
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
+                spacing: 4.0,
+                children: [
+                  Text(
+                    product.displayName,
+                    style: textTheme.headline17.copyWith(color: scheme.ink),
+                  ),
+                  if (comparisonText != null)
+                    Text(
+                      comparisonText,
+                      style: textTheme.footnote13.copyWith(
+                        color: comparisonColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                ],
               ),
             ),
-        ],
+            AppSvgIcon(
+              asset: AppIcons.chevronRight,
+              color: scheme.ter,
+              size: 16.0,
+            ),
+          ],
+        ),
       ),
     );
   }

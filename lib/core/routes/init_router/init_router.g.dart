@@ -23,6 +23,10 @@ List<RouteBase> get $appRoutes => [
   $scannerPageRoute,
   $reviewPageRoute,
   $cashExpensePageRoute,
+  $chooseProductPageRoute,
+  $newProductPageRoute,
+  $editProductPageRoute,
+  $productDetailPageRoute,
   $priceHistoryPageRoute,
   $profilePageRoute,
   $editProfilePageRoute,
@@ -118,6 +122,15 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
     StatefulShellBranchData.$branch(
       routes: [
         GoRouteData.$route(
+          path: '/compare',
+          hasOverriddenOnExit: false,
+          factory: $ComparePageRoute._fromState,
+        ),
+      ],
+    ),
+    StatefulShellBranchData.$branch(
+      routes: [
+        GoRouteData.$route(
           path: '/history',
           hasOverriddenOnExit: false,
           factory: $HistoryPageRoute._fromState,
@@ -187,6 +200,27 @@ mixin $StorePageRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/stores');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+mixin $ComparePageRoute on GoRouteData {
+  static ComparePageRoute _fromState(GoRouterState state) =>
+      const ComparePageRoute();
+
+  @override
+  String get location => GoRouteData.$location('/compare');
 
   @override
   void go(BuildContext context) => context.go(location);
@@ -615,6 +649,135 @@ mixin $CashExpensePageRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/cash-expense');
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $chooseProductPageRoute => GoRouteData.$route(
+  path: '/choose-product',
+  hasOverriddenOnExit: false,
+  parentNavigatorKey: ChooseProductPageRoute.$parentNavigatorKey,
+  factory: $ChooseProductPageRoute._fromState,
+);
+
+mixin $ChooseProductPageRoute on GoRouteData {
+  static ChooseProductPageRoute _fromState(GoRouterState state) =>
+      ChooseProductPageRoute(storeId: state.uri.queryParameters['store-id']);
+
+  ChooseProductPageRoute get _self => this as ChooseProductPageRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/choose-product',
+    queryParams: {if (_self.storeId != null) 'store-id': _self.storeId},
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $newProductPageRoute => GoRouteData.$route(
+  path: '/product/new',
+  hasOverriddenOnExit: false,
+  parentNavigatorKey: NewProductPageRoute.$parentNavigatorKey,
+  factory: $NewProductPageRoute._fromState,
+);
+
+mixin $NewProductPageRoute on GoRouteData {
+  static NewProductPageRoute _fromState(GoRouterState state) =>
+      NewProductPageRoute(storeId: state.uri.queryParameters['store-id']);
+
+  NewProductPageRoute get _self => this as NewProductPageRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/product/new',
+    queryParams: {if (_self.storeId != null) 'store-id': _self.storeId},
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $editProductPageRoute => GoRouteData.$route(
+  path: '/product/:productId/edit',
+  hasOverriddenOnExit: false,
+  parentNavigatorKey: EditProductPageRoute.$parentNavigatorKey,
+  factory: $EditProductPageRoute._fromState,
+);
+
+mixin $EditProductPageRoute on GoRouteData {
+  static EditProductPageRoute _fromState(GoRouterState state) =>
+      EditProductPageRoute(productId: state.pathParameters['productId']!);
+
+  EditProductPageRoute get _self => this as EditProductPageRoute;
+
+  @override
+  String get location => GoRouteData.$location(
+    '/product/${Uri.encodeComponent(_self.productId)}/edit',
+  );
+
+  @override
+  void go(BuildContext context) => context.go(location);
+
+  @override
+  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
+
+  @override
+  void pushReplacement(BuildContext context) =>
+      context.pushReplacement(location);
+
+  @override
+  void replace(BuildContext context) => context.replace(location);
+}
+
+RouteBase get $productDetailPageRoute => GoRouteData.$route(
+  path: '/product/:productId',
+  hasOverriddenOnExit: false,
+  parentNavigatorKey: ProductDetailPageRoute.$parentNavigatorKey,
+  factory: $ProductDetailPageRoute._fromState,
+);
+
+mixin $ProductDetailPageRoute on GoRouteData {
+  static ProductDetailPageRoute _fromState(GoRouterState state) =>
+      ProductDetailPageRoute(productId: state.pathParameters['productId']!);
+
+  ProductDetailPageRoute get _self => this as ProductDetailPageRoute;
+
+  @override
+  String get location =>
+      GoRouteData.$location('/product/${Uri.encodeComponent(_self.productId)}');
 
   @override
   void go(BuildContext context) => context.go(location);

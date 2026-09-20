@@ -7,8 +7,11 @@ import '../../resources/localization/gen/app_localizations.dart';
 import '../../widgets/app_container.dart';
 import 'widgets/shell_tab_item.dart';
 
-/// The 5-branch shell (design_spendlens.md §5): Home, Analytics, Stores,
-/// History, Settings.
+/// The 6-branch shell: Home, Analytics, Stores, Compare, History, Settings.
+///
+/// The order here MUST match the branch order in the router's
+/// `TypedStatefulShellRoute` — `goBranch` addresses branches by index, so a
+/// mismatch silently sends a tab to the wrong screen.
 ///
 /// **Tab-bar visibility is structural, not a flag.** The pill is built ONLY
 /// here, inside the shell's `builder` — a screen pushed with
@@ -55,6 +58,7 @@ class RootPage extends StatelessWidget {
       (AppIcons.tabHome, lo.tabHome),
       (AppIcons.tabAnalytics, lo.tabAnalytics),
       (AppIcons.tabStores, lo.tabStores),
+      (AppIcons.tabCompare, lo.tabCompare),
       (AppIcons.tabHistory, lo.tabHistory),
       (AppIcons.tabSettings, lo.tabSettings),
     ];

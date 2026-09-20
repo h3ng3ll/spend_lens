@@ -16,6 +16,12 @@ _Product _$ProductFromJson(Map<String, dynamic> json) => _Product(
   defaultCategoryId: json['defaultCategoryId'] as String?,
   defaultUnit:
       $enumDecodeNullable(_$EUnitEnumMap, json['defaultUnit']) ?? EUnit.piece,
+  storeId: json['storeId'] as String?,
+  linkedProductIds:
+      (json['linkedProductIds'] as List<dynamic>?)
+          ?.map((e) => e as String)
+          .toList() ??
+      const <String>[],
   updatedAt: DateTime.parse(json['updatedAt'] as String),
   deletedAt: json['deletedAt'] == null
       ? null
@@ -32,6 +38,8 @@ Map<String, dynamic> _$ProductToJson(_Product instance) => <String, dynamic>{
   'aliases': instance.aliases,
   'defaultCategoryId': instance.defaultCategoryId,
   'defaultUnit': _$EUnitEnumMap[instance.defaultUnit]!,
+  'storeId': instance.storeId,
+  'linkedProductIds': instance.linkedProductIds,
   'updatedAt': instance.updatedAt.toIso8601String(),
   'deletedAt': instance.deletedAt?.toIso8601String(),
   'syncStatus': _$ESyncStatusEnumMap[instance.syncStatus]!,

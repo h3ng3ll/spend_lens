@@ -1635,4 +1635,145 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get processingPhoto => 'Foto wird verarbeitet…';
+
+  @override
+  String get productTitle => 'Produkt';
+
+  @override
+  String get generalPurpose => 'Allgemein';
+
+  @override
+  String get productNoStore => 'Noch keinem Geschäft zugeordnet';
+
+  @override
+  String get productPrices => 'Preise';
+
+  @override
+  String get productNoPricesTitle => 'Noch keine Preise';
+
+  @override
+  String get productNoPricesBody =>
+      'Füge einen Preis hinzu, um seine Entwicklung zu verfolgen.';
+
+  @override
+  String get fromReceipt => 'Vom Beleg';
+
+  @override
+  String get editOnReceipt => 'Auf dem Beleg bearbeiten';
+
+  @override
+  String get addPrice => 'Preis hinzufügen';
+
+  @override
+  String get addPriceSub => 'Halte den heutigen Preis fest';
+
+  @override
+  String get editPrice => 'Preis bearbeiten';
+
+  @override
+  String get deletePrice => 'Preis löschen';
+
+  @override
+  String get deletePriceConfirm =>
+      'Diesen Preispunkt entfernen? Das Diagramm wird neu berechnet.';
+
+  @override
+  String get priceAmountLabel => 'Preis';
+
+  @override
+  String get priceDateLabel => 'Datum';
+
+  @override
+  String get priceStoreLabel => 'Geschäft';
+
+  @override
+  String get addProduct => 'Produkt hinzufügen';
+
+  @override
+  String get addProductSub => 'Benenne es und halte den ersten Preis fest';
+
+  @override
+  String get newProductTitle => 'Neues Produkt';
+
+  @override
+  String get editProductTitle => 'Produkt bearbeiten';
+
+  @override
+  String get productNameLabel => 'Name';
+
+  @override
+  String get productNameHint => 'z. B. Milch 2,5% 1L';
+
+  @override
+  String get productCategoryLabel => 'Kategorie';
+
+  @override
+  String get productStoreLabel => 'Geschäft';
+
+  @override
+  String get makeGeneralPurpose => 'Als allgemein festlegen';
+
+  @override
+  String get deleteProduct => 'Produkt löschen';
+
+  @override
+  String deleteProductConfirm(num n) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Dieses Produkt und seine $nString Preise löschen?',
+      one: 'Dieses Produkt und seinen 1 Preis löschen?',
+      zero: 'Dieses Produkt löschen?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chooseProduct => 'Produkt wählen';
+
+  @override
+  String get searchProductPh => 'Suchen oder neues Produkt eingeben';
+
+  @override
+  String get createNewProduct => 'Neues Produkt erstellen';
+
+  @override
+  String get createNewProductSub => 'Name, Kategorie und Einheit';
+
+  @override
+  String get noMatchingProduct => 'Noch kein passendes Produkt';
+
+  @override
+  String get newProductHint =>
+      'Neues Produkt · künftige Belege verknüpfen sich damit';
+
+  @override
+  String get pickProduct => 'Produkt auswählen';
+
+  @override
+  String get productUnitLabel => 'Einheit';
+
+  @override
+  String get tabCompare => 'Vergleich';
+
+  @override
+  String get compareTitle => 'Geschäfte vergleichen';
+
+  @override
+  String get compareNeedsTwoStoresTitle => 'Zweites Geschäft hinzufügen';
+
+  @override
+  String get compareNeedsTwoStoresBody =>
+      'Zum Vergleichen sind mindestens zwei Geschäfte nötig.';
+
+  @override
+  String get compareNoProductsHere => 'Noch keine Produkte in diesem Geschäft.';
+
+  @override
+  String get compareNoPrice => 'Noch kein Preis';
 }

@@ -36,6 +36,9 @@ class EditReceiptScaffold extends StatelessWidget {
   final void Function(String itemId, String value) onItemNameChanged;
   final void Function(String itemId, String value) onItemQuantityChanged;
   final void Function(String itemId) onCycleItemUnit;
+
+  /// Opens the product picker for one line.
+  final void Function(String itemId) onPickItemProduct;
   final void Function(String itemId, String value) onItemPriceChanged;
   final ValueChanged<String> onPrintedTotalChanged;
 
@@ -54,6 +57,7 @@ class EditReceiptScaffold extends StatelessWidget {
     required this.onItemNameChanged,
     required this.onItemQuantityChanged,
     required this.onCycleItemUnit,
+    required this.onPickItemProduct,
     required this.onItemPriceChanged,
     required this.onPrintedTotalChanged,
   });
@@ -297,6 +301,9 @@ class EditReceiptScaffold extends StatelessWidget {
                               onQuantityChanged: (value) =>
                                   onItemQuantityChanged(item.id, value),
                               onCycleUnit: () => onCycleItemUnit(item.id),
+                              onPickProduct: () =>
+                                  onPickItemProduct(item.id),
+                              hasPickedProduct: item.productId != null,
                               onPriceChanged: (value) =>
                                   onItemPriceChanged(item.id, value),
                             ),

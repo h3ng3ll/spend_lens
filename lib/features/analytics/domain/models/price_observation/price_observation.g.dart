@@ -11,7 +11,7 @@ _PriceObservation _$PriceObservationFromJson(Map<String, dynamic> json) =>
       id: json['id'] as String,
       productId: json['productId'] as String,
       storeId: json['storeId'] as String?,
-      receiptId: json['receiptId'] as String,
+      receiptId: json['receiptId'] as String?,
       observedAt: DateTime.parse(json['observedAt'] as String),
       comparableUnitPrice: (json['comparableUnitPrice'] as num).toDouble(),
       unit: $enumDecodeNullable(_$EUnitEnumMap, json['unit']) ?? EUnit.piece,

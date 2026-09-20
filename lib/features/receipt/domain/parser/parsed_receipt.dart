@@ -10,6 +10,22 @@ class ParsedLineCandidate {
   /// The literal OCR text this candidate was built from — becomes
   /// `ReceiptItem.rawName` and must never be altered afterwards (spec §11).
   final String rawName;
+
+  /// The user-CORRECTED display name for this line, or null when the user
+  /// has not renamed it (so [rawName] is still what should be shown).
+  ///
+  /// This exists because the Review <-> Edit round trip is carried entirely
+  /// on the draft's [ParsedReceipt], and a candidate that holds only
+  /// [rawName] has nowhere to keep a rename. Renaming a line, tapping
+  /// `Apply corrections` and landing back on Review used to show the
+  /// ORIGINAL OCR text again — the edit was written to the draft as
+  /// `rawName` only, then re-read as the name, so every correction was
+  /// silently reverted on the way back.
+  ///
+  /// [rawName] stays byte-for-byte what the receipt printed (spec §11); this
+  /// is the separate field the user's text lives in.
+  final String? name;
+
   final double quantity;
   final EUnit unit;
   final double? unitPrice;
@@ -25,6 +41,7 @@ class ParsedLineCandidate {
 
   const ParsedLineCandidate({
     required this.rawName,
+    this.name,
     required this.quantity,
     required this.unit,
     this.unitPrice,

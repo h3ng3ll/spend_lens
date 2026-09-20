@@ -126,6 +126,7 @@ class UpdateSavedReceiptUseCase {
         existingProducts: mutableProducts,
         generateId: () => '${now.microsecondsSinceEpoch}_product_$i',
         defaultUnit: draftItem.unit,
+        storeId: corrections.storeId,
       );
       if (matchResult.isNewProduct) {
         mutableProducts.add(matchResult.product);

@@ -18,6 +18,7 @@ abstract class AppIcons {
   static const tabStores = '${_path}tab_stores$_ext';
   static const tabHistory = '${_path}tab_history$_ext';
   static const tabSettings = '${_path}tab_settings$_ext';
+  static const tabCompare = '${_path}tab_compare$_ext';
   static const plus = '${_path}plus$_ext';
 
   // M5: manual-entry screens (design_spendlens.md §10).

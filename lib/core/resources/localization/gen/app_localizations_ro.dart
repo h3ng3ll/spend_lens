@@ -1648,4 +1648,145 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get processingPhoto => 'Se procesează fotografia…';
+
+  @override
+  String get productTitle => 'Produs';
+
+  @override
+  String get generalPurpose => 'De uz general';
+
+  @override
+  String get productNoStore => 'Încă nelegat de un magazin';
+
+  @override
+  String get productPrices => 'Prețuri';
+
+  @override
+  String get productNoPricesTitle => 'Niciun preț încă';
+
+  @override
+  String get productNoPricesBody =>
+      'Adaugă un preț ca să urmărești cum se schimbă.';
+
+  @override
+  String get fromReceipt => 'De pe bon';
+
+  @override
+  String get editOnReceipt => 'Editează pe bon';
+
+  @override
+  String get addPrice => 'Adaugă preț';
+
+  @override
+  String get addPriceSub => 'Notează cât costă azi';
+
+  @override
+  String get editPrice => 'Editează prețul';
+
+  @override
+  String get deletePrice => 'Șterge prețul';
+
+  @override
+  String get deletePriceConfirm =>
+      'Elimini acest punct de preț? Graficul va fi recalculat.';
+
+  @override
+  String get priceAmountLabel => 'Preț';
+
+  @override
+  String get priceDateLabel => 'Data';
+
+  @override
+  String get priceStoreLabel => 'Magazin';
+
+  @override
+  String get addProduct => 'Adaugă produs';
+
+  @override
+  String get addProductSub => 'Denumește-l și notează primul preț';
+
+  @override
+  String get newProductTitle => 'Produs nou';
+
+  @override
+  String get editProductTitle => 'Editează produsul';
+
+  @override
+  String get productNameLabel => 'Nume';
+
+  @override
+  String get productNameHint => 'ex. Lapte 2.5% 1L';
+
+  @override
+  String get productCategoryLabel => 'Categorie';
+
+  @override
+  String get productStoreLabel => 'Magazin';
+
+  @override
+  String get makeGeneralPurpose => 'Fă-l de uz general';
+
+  @override
+  String get deleteProduct => 'Șterge produsul';
+
+  @override
+  String deleteProductConfirm(num n) {
+    final intl.NumberFormat nNumberFormat = intl.NumberFormat.decimalPattern(
+      localeName,
+    );
+    final String nString = nNumberFormat.format(n);
+
+    String _temp0 = intl.Intl.pluralLogic(
+      n,
+      locale: localeName,
+      other: 'Ștergi acest produs și cele $nString prețuri ale sale?',
+      one: 'Ștergi acest produs și cel 1 preț al său?',
+      zero: 'Ștergi acest produs?',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get chooseProduct => 'Alege produsul';
+
+  @override
+  String get searchProductPh => 'Caută sau scrie un produs nou';
+
+  @override
+  String get createNewProduct => 'Creează produs nou';
+
+  @override
+  String get createNewProductSub => 'Nume, categorie și unitate';
+
+  @override
+  String get noMatchingProduct => 'Niciun produs potrivit încă';
+
+  @override
+  String get newProductHint =>
+      'Produs nou · bonurile viitoare se vor lega de el';
+
+  @override
+  String get pickProduct => 'Alege produsul';
+
+  @override
+  String get productUnitLabel => 'Unitate';
+
+  @override
+  String get tabCompare => 'Compară';
+
+  @override
+  String get compareTitle => 'Compară magazine';
+
+  @override
+  String get compareNeedsTwoStoresTitle => 'Adaugă al doilea magazin';
+
+  @override
+  String get compareNeedsTwoStoresBody =>
+      'Compararea are nevoie de cel puțin două magazine.';
+
+  @override
+  String get compareNoProductsHere => 'Niciun produs la acest magazin încă.';
+
+  @override
+  String get compareNoPrice => 'Niciun preț încă';
 }
