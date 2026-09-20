@@ -2,12 +2,13 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:spend_lens/features/analytics/domain/models/price_observation/price_observation.dart';
 import 'package:spend_lens/features/analytics/domain/repositories/i_price_observation_local_repository.dart';
-import 'package:spend_lens/features/expense/domain/models/expense/e_expense_source.dart';
 import 'package:spend_lens/features/expense/domain/models/expense/expense.dart';
 import 'package:spend_lens/features/expense/domain/repositories/i_expense_local_repository.dart';
+import 'package:spend_lens/features/product/domain/models/product/e_unit.dart';
 import 'package:spend_lens/features/product/domain/models/product/product.dart';
 import 'package:spend_lens/features/product/domain/repositories/i_product_local_repository.dart';
 import 'package:spend_lens/features/product/domain/use_cases/rename_product_use_case.dart';
+import 'package:spend_lens/features/product/presentation/utils/receipt_item_display_name.dart';
 import 'package:spend_lens/features/receipt/domain/models/receipt/receipt.dart';
 import 'package:spend_lens/features/receipt/domain/models/receipt_item/receipt_item.dart';
 import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_item_local_repository.dart';
@@ -19,17 +20,25 @@ import 'package:spend_lens/features/scanner/domain/pending_receipt_draft_store.d
 import 'package:spend_lens/features/store/domain/models/store/store.dart';
 import 'package:spend_lens/features/store/domain/repositories/i_store_local_repository.dart';
 
-/// Saving on the Edit Receipt screen must mirror the receipt into the
-/// `expenses` box.
+/// Renaming a line on a SAVED receipt must change what the detail screen
+/// shows.
 ///
-/// Home, History and Analytics all watch `expenses` and NONE reads
-/// `receipts`. `ReviewBloc` (the OCR-SUCCESS path) was the only caller of
-/// `CreateExpenseFromReceiptUseCase`, so the manual-entry path — scan fails
-/// → "Enter Manually" → `EditReceiptPage` → Save — persisted a `Receipt`
-/// with items and products but never an `Expense`. The record saved
-/// successfully and the app still showed "No expenses yet", with a restart
-/// making no difference because nothing was missing from the boxes actually
-/// being watched.
+/// A saved line is displayed by its PRODUCT's name
+/// ([receiptItemDisplayName]), so a rename that stops at the `ReceiptItem`
+/// is invisible. `_onSave` resolved the product and then dropped the edit in
+/// BOTH branches:
+///
+/// - a PINNED line (every line loaded from a saved receipt has a
+///   `productId`) was fetched by id and used as-is, with its old
+///   `displayName`;
+/// - an UNPINNED line went through the normalizer, which exact/fuzzy-matched
+///   the edited text straight back to the product it already belonged to and
+///   returned it unchanged.
+///
+/// `ReceiptItem.normalizedName` was then set FROM that stale `displayName`,
+/// so the correction was overwritten by the value it was meant to replace.
+/// The symptom: edit a title, tap `Apply corrections`, and the receipt still
+/// lists the original OCR text — with no error, and unchanged on retry.
 void main() {
   late _FakeReceiptRepository receipts;
   late _FakeReceiptItemRepository items;
@@ -38,34 +47,68 @@ void main() {
   late _FakeExpenseRepository expenses;
   late _FakePriceObservationRepository priceObservations;
 
-  final now = DateTime(2026, 9, 9, 14, 30);
+  final now = DateTime(2026, 9, 20, 13, 34);
+
+  const rawName = 'SACOSA ECOTAX8,151e1 17 98 A';
+  const correctedName = 'Shopping bag';
 
   EditReceiptBloc buildBloc() => EditReceiptBloc(
-        receiptRepository: receipts,
-        draftStore: PendingReceiptDraftStore(),
-        receiptItemRepository: items,
-        productRepository: products,
-        storeRepository: stores,
-        createExpenseFromReceipt: CreateExpenseFromReceiptUseCase(expenses),
-        recordPriceObservations: RecordPriceObservationsUseCase(
-          priceObservationRepository: priceObservations,
-        ),
-        renameProduct: RenameProductUseCase(
-          productRepository: products,
-          now: () => now,
-        ),
-        now: () => now,
-      );
+    receiptRepository: receipts,
+    draftStore: PendingReceiptDraftStore(),
+    receiptItemRepository: items,
+    productRepository: products,
+    storeRepository: stores,
+    createExpenseFromReceipt: CreateExpenseFromReceiptUseCase(expenses),
+    recordPriceObservations: RecordPriceObservationsUseCase(
+      priceObservationRepository: priceObservations,
+    ),
+    renameProduct: RenameProductUseCase(
+      productRepository: products,
+      now: () => now,
+    ),
+    now: () => now,
+  );
 
-  /// The blank receipt `ScannerBody._onEnterManually` writes so the editor
-  /// has a record to load: no items, zero total, no store, no category.
-  Receipt blankReceipt() => Receipt(
+  /// A saved receipt with one line already bound to a product — exactly what
+  /// the editor loads when reached from the receipt detail screen.
+  Future<void> seedSavedReceipt({required String? productId}) async {
+    if (productId != null) {
+      await products.save(
+        Product(
+          id: productId,
+          normalizedName: 'sacosa ecotax',
+          displayName: rawName,
+          defaultUnit: EUnit.piece,
+          updatedAt: now,
+        ),
+      );
+    }
+    await items.save(
+      ReceiptItem(
+        id: 'item-1',
+        rawName: rawName,
+        normalizedName: rawName,
+        productId: productId,
+        quantity: 1.81,
+        unit: EUnit.piece,
+        lineTotal: 17.98,
+        confidence: 0.9,
+        lineIndex: 0,
+        updatedAt: now,
+      ),
+    );
+    await receipts.save(
+      Receipt(
         id: 'receipt-1',
         purchasedAt: now,
-        itemsTotal: 0.0,
+        itemsTotal: 17.98,
+        printedTotal: 17.98,
         currencyCode: 'MDL',
+        itemIds: const ['item-1'],
         updatedAt: now,
-      );
+      ),
+    );
+  }
 
   setUp(() {
     receipts = _FakeReceiptRepository();
@@ -76,64 +119,108 @@ void main() {
     priceObservations = _FakePriceObservationRepository();
   });
 
-  test('manual entry then save creates the mirrored expense', () async {
-    await receipts.save(blankReceipt());
+  test('renaming a product-bound line renames the product it displays by',
+      () async {
+    await seedSavedReceipt(productId: 'product-1');
 
     final bloc = buildBloc()..add(const EditReceiptEvent.load('receipt-1'));
     await Future<void>.delayed(Duration.zero);
 
-    bloc.add(const EditReceiptEvent.addItem());
+    expect(bloc.state.items.single.name, rawName);
+
+    bloc.add(EditReceiptEvent.updateItemName('item-1', correctedName));
+    await Future<void>.delayed(Duration.zero);
+    bloc.add(const EditReceiptEvent.save());
     await Future<void>.delayed(Duration.zero);
 
-    final itemId = bloc.state.items.single.id;
-    bloc
-      ..add(EditReceiptEvent.updateItemName(itemId, 'Milk 1L'))
-      ..add(EditReceiptEvent.updateItemPrice(itemId, 22.90));
+    final savedItem = (await items.getById('item-1'))!;
+    final allProducts = await products.getAll();
+
+    expect(
+      receiptItemDisplayName(savedItem, allProducts),
+      correctedName,
+      reason: 'The detail screen shows the PRODUCT name, so the rename must '
+          'reach the product or nothing changes on screen.',
+    );
+    expect(
+      savedItem.rawName,
+      rawName,
+      reason: 'rawName must stay byte-for-byte what the receipt printed '
+          '(spec §11).',
+    );
+    expect(
+      allProducts,
+      hasLength(1),
+      reason: 'A rename must MOVE the existing product, not fork a duplicate.',
+    );
+
+    await bloc.close();
+  });
+
+  test('renaming an unbound line does not revert via a normalizer re-match',
+      () async {
+    // No productId: the save path goes through the normalizer, which
+    // exact-matches the line back onto the seeded product.
+    await products.save(
+      Product(
+        id: 'product-1',
+        normalizedName: 'sacosa ecotax',
+        displayName: rawName,
+        defaultUnit: EUnit.piece,
+        updatedAt: now,
+      ),
+    );
+    await seedSavedReceipt(productId: null);
+
+    final bloc = buildBloc()..add(const EditReceiptEvent.load('receipt-1'));
+    await Future<void>.delayed(Duration.zero);
+
+    bloc.add(EditReceiptEvent.updateItemName('item-1', correctedName));
+    await Future<void>.delayed(Duration.zero);
+    bloc.add(const EditReceiptEvent.save());
+    await Future<void>.delayed(Duration.zero);
+
+    final savedItem = (await items.getById('item-1'))!;
+    expect(
+      receiptItemDisplayName(savedItem, await products.getAll()),
+      correctedName,
+    );
+    expect(savedItem.rawName, rawName);
+
+    await bloc.close();
+  });
+
+  test('re-entering the editor shows the corrected name', () async {
+    await seedSavedReceipt(productId: 'product-1');
+
+    final first = buildBloc()..add(const EditReceiptEvent.load('receipt-1'));
+    await Future<void>.delayed(Duration.zero);
+    first.add(EditReceiptEvent.updateItemName('item-1', correctedName));
+    await Future<void>.delayed(Duration.zero);
+    first.add(const EditReceiptEvent.save());
+    await Future<void>.delayed(Duration.zero);
+    await first.close();
+
+    final second = buildBloc()..add(const EditReceiptEvent.load('receipt-1'));
+    await Future<void>.delayed(Duration.zero);
+
+    expect(second.state.items.single.name, correctedName);
+    expect(second.state.items.single.rawName, rawName);
+
+    await second.close();
+  });
+
+  test('saving without renaming leaves the product name untouched', () async {
+    await seedSavedReceipt(productId: 'product-1');
+
+    final bloc = buildBloc()..add(const EditReceiptEvent.load('receipt-1'));
     await Future<void>.delayed(Duration.zero);
 
     bloc.add(const EditReceiptEvent.save());
     await Future<void>.delayed(Duration.zero);
 
-    final saved = await expenses.getAll();
-    expect(
-      saved,
-      hasLength(1),
-      reason: 'Save wrote a Receipt but no Expense — Home/History/Analytics '
-          'watch the expenses box, so the record stays invisible.',
-    );
-    expect(saved.single.id, 'receipt-1');
-    expect(saved.single.amount, 22.90);
-    expect(saved.single.source, EExpenseSource.receipt);
-    expect(saved.single.currencyCode, 'MDL');
-
-    await bloc.close();
-  });
-
-  test('the mirrored expense shares the receipt id, so re-saving updates '
-      'rather than duplicating', () async {
-    await receipts.save(blankReceipt());
-
-    final bloc = buildBloc()..add(const EditReceiptEvent.load('receipt-1'));
-    await Future<void>.delayed(Duration.zero);
-
-    bloc.add(const EditReceiptEvent.addItem());
-    await Future<void>.delayed(Duration.zero);
-    final itemId = bloc.state.items.single.id;
-    bloc
-      ..add(EditReceiptEvent.updateItemName(itemId, 'Milk 1L'))
-      ..add(EditReceiptEvent.updateItemPrice(itemId, 22.90))
-      ..add(const EditReceiptEvent.save());
-    await Future<void>.delayed(Duration.zero);
-
-    // Edit the amount and save again — the stale-expense half of the bug.
-    bloc
-      ..add(EditReceiptEvent.updateItemPrice(itemId, 30.00))
-      ..add(const EditReceiptEvent.save());
-    await Future<void>.delayed(Duration.zero);
-
-    final saved = await expenses.getAll();
-    expect(saved, hasLength(1), reason: 'id identity must overwrite');
-    expect(saved.single.amount, 30.00);
+    expect((await products.getById('product-1'))!.displayName, rawName);
+    expect(await products.getAll(), hasLength(1));
 
     await bloc.close();
   });
@@ -156,8 +243,7 @@ class _FakeReceiptRepository implements IReceiptLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
-  Future<void> deleteLocalOnly(String id) async =>
-      _store.remove(id);
+  Future<void> deleteLocalOnly(String id) async => _store.remove(id);
 
   @override
   Future<List<Receipt>> getAllIncludingDeleted() async =>
@@ -194,12 +280,10 @@ class _FakeReceiptItemRepository implements IReceiptItemLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
-  Future<void> deleteLocalOnly(String id) async =>
-      _store.remove(id);
+  Future<void> deleteLocalOnly(String id) async => _store.remove(id);
 
   @override
-  Stream<List<ReceiptItem>> watchAll() =>
-      Stream.value(_store.values.toList());
+  Stream<List<ReceiptItem>> watchAll() => Stream.value(_store.values.toList());
 
   @override
   Stream<List<ReceiptItem>> watchByReceiptId(List<String> itemIds) =>
@@ -242,8 +326,7 @@ class _FakeProductRepository implements IProductLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
-  Future<void> deleteLocalOnly(String id) async =>
-      _store.remove(id);
+  Future<void> deleteLocalOnly(String id) async => _store.remove(id);
 
   @override
   Future<List<Product>> getAllIncludingDeleted() async =>
@@ -280,8 +363,7 @@ class _FakeStoreRepository implements IStoreLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
-  Future<void> deleteLocalOnly(String id) async =>
-      _store.remove(id);
+  Future<void> deleteLocalOnly(String id) async => _store.remove(id);
 
   @override
   Future<List<Store>> getAllIncludingDeleted() async => _store.values.toList();
@@ -317,8 +399,7 @@ class _FakeExpenseRepository implements IExpenseLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
-  Future<void> deleteLocalOnly(String id) async =>
-      _store.remove(id);
+  Future<void> deleteLocalOnly(String id) async => _store.remove(id);
 
   @override
   Future<List<Expense>> getAllIncludingDeleted() async =>

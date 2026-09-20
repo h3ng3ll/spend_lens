@@ -5,6 +5,7 @@ import '../../../../../core/models/e_sync_status.dart';
 import '../../../../product/domain/models/product/e_unit.dart';
 import '../../../../product/domain/models/product/product.dart';
 import '../../../../product/domain/normalizer/product_normalizer.dart';
+import '../../../../product/domain/use_cases/rename_product_use_case.dart';
 import '../../../../product/presentation/utils/receipt_item_display_name.dart';
 import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../../store/domain/repositories/i_store_local_repository.dart';
@@ -45,6 +46,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
   final IProductLocalRepository _productRepository;
   final IStoreLocalRepository _storeRepository;
   final ProductNormalizer _productNormalizer;
+  final RenameProductUseCase _renameProduct;
   final PendingReceiptDraftStore _draftStore;
   final CreateExpenseFromReceiptUseCase _createExpenseFromReceipt;
   final RecordPriceObservationsUseCase _recordPriceObservations;
@@ -59,6 +61,7 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
     required this._storeRepository,
     required this._createExpenseFromReceipt,
     required this._recordPriceObservations,
+    required this._renameProduct,
     this._productNormalizer = const ProductNormalizer(),
     this._reconciler = const ReceiptReconciler(),
     this._now = DateTime.now,
@@ -498,6 +501,26 @@ class EditReceiptBloc extends Bloc<EditReceiptEvent, EditReceiptState> {
             await _productRepository.save(matchResult.product);
           }
           resolvedProduct = matchResult.product;
+        }
+
+        // A rename typed on the line is only real once it reaches the
+        // PRODUCT, because that is what the line is displayed by
+        // (`receiptItemDisplayName`). The rule itself — skip a no-op, keep
+        // the old spelling as an alias, never touch `normalizedName` — lives
+        // in the use case, so this path and the initial scan-save path share
+        // one implementation instead of two drifting copies.
+        resolvedProduct = await _renameProduct(
+          product: resolvedProduct,
+          displayName: draftItem.name,
+        );
+        // Keep the in-flight candidate list in step, so a LATER line in this
+        // same save matching the same product sees the new name rather than
+        // re-matching against the pre-rename copy.
+        final renamedIndex = mutableProducts.indexWhere(
+          (product) => product.id == resolvedProduct!.id,
+        );
+        if (renamedIndex != -1) {
+          mutableProducts[renamedIndex] = resolvedProduct;
         }
 
         final item = ReceiptItem(

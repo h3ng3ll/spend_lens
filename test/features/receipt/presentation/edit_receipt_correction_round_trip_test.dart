@@ -1,15 +1,17 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:spend_lens/core/routes/init_router/init_router.dart';
 import 'package:spend_lens/features/analytics/domain/models/price_observation/price_observation.dart';
 import 'package:spend_lens/features/analytics/domain/repositories/i_price_observation_local_repository.dart';
-import 'package:spend_lens/features/expense/domain/models/expense/e_expense_source.dart';
 import 'package:spend_lens/features/expense/domain/models/expense/expense.dart';
 import 'package:spend_lens/features/expense/domain/repositories/i_expense_local_repository.dart';
+import 'package:spend_lens/features/product/domain/models/product/e_unit.dart';
 import 'package:spend_lens/features/product/domain/models/product/product.dart';
 import 'package:spend_lens/features/product/domain/repositories/i_product_local_repository.dart';
 import 'package:spend_lens/features/product/domain/use_cases/rename_product_use_case.dart';
 import 'package:spend_lens/features/receipt/domain/models/receipt/receipt.dart';
 import 'package:spend_lens/features/receipt/domain/models/receipt_item/receipt_item.dart';
+import 'package:spend_lens/features/receipt/domain/parser/parsed_receipt.dart';
 import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_item_local_repository.dart';
 import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_local_repository.dart';
 import 'package:spend_lens/features/receipt/domain/use_cases/create_expense_from_receipt_use_case.dart';
@@ -19,18 +21,18 @@ import 'package:spend_lens/features/scanner/domain/pending_receipt_draft_store.d
 import 'package:spend_lens/features/store/domain/models/store/store.dart';
 import 'package:spend_lens/features/store/domain/repositories/i_store_local_repository.dart';
 
-/// Saving on the Edit Receipt screen must mirror the receipt into the
-/// `expenses` box.
+/// An item renamed on the UNSAVED scan must SURVIVE `Apply corrections`.
 ///
-/// Home, History and Analytics all watch `expenses` and NONE reads
-/// `receipts`. `ReviewBloc` (the OCR-SUCCESS path) was the only caller of
-/// `CreateExpenseFromReceiptUseCase`, so the manual-entry path — scan fails
-/// → "Enter Manually" → `EditReceiptPage` → Save — persisted a `Receipt`
-/// with items and products but never an `Expense`. The record saved
-/// successfully and the app still showed "No expenses yet", with a restart
-/// making no difference because nothing was missing from the boxes actually
-/// being watched.
+/// The Review <-> Edit loop is pure navigation, so the only thing carrying
+/// state between the two screens is the draft's [ParsedReceipt]. Its line
+/// candidates held ONLY `rawName` — which spec §11 forbids altering — so a
+/// rename had nowhere to live: `_applyCorrectionsToDraft` wrote the OCR text
+/// back out, and re-loading read that same text in as the name. The symptom
+/// was that editing an item title, tapping `Apply corrections` and returning
+/// showed the ORIGINAL OCR string again, with no error and no crash — the
+/// edit looked accepted and was discarded a frame later.
 void main() {
+  late PendingReceiptDraftStore draftStore;
   late _FakeReceiptRepository receipts;
   late _FakeReceiptItemRepository items;
   late _FakeProductRepository products;
@@ -38,102 +40,126 @@ void main() {
   late _FakeExpenseRepository expenses;
   late _FakePriceObservationRepository priceObservations;
 
-  final now = DateTime(2026, 9, 9, 14, 30);
+  final now = DateTime(2026, 9, 20, 13, 26);
+
+  const rawName = 'SACOSA ECOTAX8,151e1 17 98 A';
+  const correctedName = 'Shopping bag';
 
   EditReceiptBloc buildBloc() => EditReceiptBloc(
-        receiptRepository: receipts,
-        draftStore: PendingReceiptDraftStore(),
-        receiptItemRepository: items,
-        productRepository: products,
-        storeRepository: stores,
-        createExpenseFromReceipt: CreateExpenseFromReceiptUseCase(expenses),
-        recordPriceObservations: RecordPriceObservationsUseCase(
-          priceObservationRepository: priceObservations,
-        ),
-        renameProduct: RenameProductUseCase(
-          productRepository: products,
-          now: () => now,
-        ),
-        now: () => now,
-      );
-
-  /// The blank receipt `ScannerBody._onEnterManually` writes so the editor
-  /// has a record to load: no items, zero total, no store, no category.
-  Receipt blankReceipt() => Receipt(
-        id: 'receipt-1',
-        purchasedAt: now,
-        itemsTotal: 0.0,
-        currencyCode: 'MDL',
-        updatedAt: now,
-      );
+    receiptRepository: receipts,
+    draftStore: draftStore,
+    receiptItemRepository: items,
+    productRepository: products,
+    storeRepository: stores,
+    createExpenseFromReceipt: CreateExpenseFromReceiptUseCase(expenses),
+    recordPriceObservations: RecordPriceObservationsUseCase(
+      priceObservationRepository: priceObservations,
+    ),
+    renameProduct: RenameProductUseCase(
+      productRepository: products,
+      now: () => now,
+    ),
+    now: () => now,
+  );
 
   setUp(() {
+    draftStore = PendingReceiptDraftStore();
     receipts = _FakeReceiptRepository();
     items = _FakeReceiptItemRepository();
     products = _FakeProductRepository();
     stores = _FakeStoreRepository();
     expenses = _FakeExpenseRepository();
     priceObservations = _FakePriceObservationRepository();
+
+    draftStore.set(
+      PendingReceiptDraft(
+        parsedReceipt: const ParsedReceipt(
+          storeName: 'Kaufland',
+          total: 17.98,
+          items: [
+            ParsedLineCandidate(
+              rawName: rawName,
+              quantity: 1.0,
+              unit: EUnit.piece,
+              lineTotal: 17.98,
+              confidence: 0.9,
+              lineIndex: 0,
+            ),
+          ],
+        ),
+      ),
+    );
   });
 
-  test('manual entry then save creates the mirrored expense', () async {
-    await receipts.save(blankReceipt());
-
-    final bloc = buildBloc()..add(const EditReceiptEvent.load('receipt-1'));
-    await Future<void>.delayed(Duration.zero);
-
-    bloc.add(const EditReceiptEvent.addItem());
+  test('a rename survives Apply corrections on the draft', () async {
+    final bloc = buildBloc()
+      ..add(const EditReceiptEvent.load(kPendingDraftReceiptId));
     await Future<void>.delayed(Duration.zero);
 
     final itemId = bloc.state.items.single.id;
-    bloc
-      ..add(EditReceiptEvent.updateItemName(itemId, 'Milk 1L'))
-      ..add(EditReceiptEvent.updateItemPrice(itemId, 22.90));
+    bloc.add(EditReceiptEvent.updateItemName(itemId, correctedName));
     await Future<void>.delayed(Duration.zero);
 
     bloc.add(const EditReceiptEvent.save());
     await Future<void>.delayed(Duration.zero);
 
-    final saved = await expenses.getAll();
+    final candidate = draftStore.current!.parsedReceipt.items.single;
     expect(
-      saved,
-      hasLength(1),
-      reason: 'Save wrote a Receipt but no Expense — Home/History/Analytics '
-          'watch the expenses box, so the record stays invisible.',
+      candidate.name,
+      correctedName,
+      reason: 'Apply corrections dropped the edited name, so Review re-read '
+          'rawName as the name and the rename was silently reverted.',
     );
-    expect(saved.single.id, 'receipt-1');
-    expect(saved.single.amount, 22.90);
-    expect(saved.single.source, EExpenseSource.receipt);
-    expect(saved.single.currencyCode, 'MDL');
+    expect(
+      candidate.rawName,
+      rawName,
+      reason: 'rawName must stay byte-for-byte what the receipt printed '
+          '(spec §11).',
+    );
 
     await bloc.close();
   });
 
-  test('the mirrored expense shares the receipt id, so re-saving updates '
-      'rather than duplicating', () async {
-    await receipts.save(blankReceipt());
-
-    final bloc = buildBloc()..add(const EditReceiptEvent.load('receipt-1'));
+  test('re-entering the editor shows the corrected name, not the OCR text',
+      () async {
+    final first = buildBloc()
+      ..add(const EditReceiptEvent.load(kPendingDraftReceiptId));
     await Future<void>.delayed(Duration.zero);
 
-    bloc.add(const EditReceiptEvent.addItem());
+    first.add(
+      EditReceiptEvent.updateItemName(
+        first.state.items.single.id,
+        correctedName,
+      ),
+    );
     await Future<void>.delayed(Duration.zero);
-    final itemId = bloc.state.items.single.id;
-    bloc
-      ..add(EditReceiptEvent.updateItemName(itemId, 'Milk 1L'))
-      ..add(EditReceiptEvent.updateItemPrice(itemId, 22.90))
-      ..add(const EditReceiptEvent.save());
+    first.add(const EditReceiptEvent.save());
+    await Future<void>.delayed(Duration.zero);
+    await first.close();
+
+    // The second trip is where the user "tries again and it hasn't changed":
+    // the editor re-seeds from the draft it just wrote.
+    final second = buildBloc()
+      ..add(const EditReceiptEvent.load(kPendingDraftReceiptId));
     await Future<void>.delayed(Duration.zero);
 
-    // Edit the amount and save again — the stale-expense half of the bug.
-    bloc
-      ..add(EditReceiptEvent.updateItemPrice(itemId, 30.00))
-      ..add(const EditReceiptEvent.save());
+    final reloaded = second.state.items.single;
+    expect(reloaded.name, correctedName);
+    expect(reloaded.rawName, rawName);
+
+    await second.close();
+  });
+
+  test('an untouched line still shows the OCR text as its name', () async {
+    final bloc = buildBloc()
+      ..add(const EditReceiptEvent.load(kPendingDraftReceiptId));
     await Future<void>.delayed(Duration.zero);
 
-    final saved = await expenses.getAll();
-    expect(saved, hasLength(1), reason: 'id identity must overwrite');
-    expect(saved.single.amount, 30.00);
+    expect(
+      bloc.state.items.single.name,
+      rawName,
+      reason: 'With no correction yet, rawName is still what should show.',
+    );
 
     await bloc.close();
   });
@@ -156,8 +182,7 @@ class _FakeReceiptRepository implements IReceiptLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
-  Future<void> deleteLocalOnly(String id) async =>
-      _store.remove(id);
+  Future<void> deleteLocalOnly(String id) async => _store.remove(id);
 
   @override
   Future<List<Receipt>> getAllIncludingDeleted() async =>
@@ -194,12 +219,10 @@ class _FakeReceiptItemRepository implements IReceiptItemLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
-  Future<void> deleteLocalOnly(String id) async =>
-      _store.remove(id);
+  Future<void> deleteLocalOnly(String id) async => _store.remove(id);
 
   @override
-  Stream<List<ReceiptItem>> watchAll() =>
-      Stream.value(_store.values.toList());
+  Stream<List<ReceiptItem>> watchAll() => Stream.value(_store.values.toList());
 
   @override
   Stream<List<ReceiptItem>> watchByReceiptId(List<String> itemIds) =>
@@ -242,8 +265,7 @@ class _FakeProductRepository implements IProductLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
-  Future<void> deleteLocalOnly(String id) async =>
-      _store.remove(id);
+  Future<void> deleteLocalOnly(String id) async => _store.remove(id);
 
   @override
   Future<List<Product>> getAllIncludingDeleted() async =>
@@ -280,8 +302,7 @@ class _FakeStoreRepository implements IStoreLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
-  Future<void> deleteLocalOnly(String id) async =>
-      _store.remove(id);
+  Future<void> deleteLocalOnly(String id) async => _store.remove(id);
 
   @override
   Future<List<Store>> getAllIncludingDeleted() async => _store.values.toList();
@@ -317,8 +338,7 @@ class _FakeExpenseRepository implements IExpenseLocalRepository {
   Future<void> delete(String id) async => _store.remove(id);
 
   @override
-  Future<void> deleteLocalOnly(String id) async =>
-      _store.remove(id);
+  Future<void> deleteLocalOnly(String id) async => _store.remove(id);
 
   @override
   Future<List<Expense>> getAllIncludingDeleted() async =>

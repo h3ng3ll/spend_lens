@@ -7,6 +7,7 @@ import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../../scanner/domain/pending_receipt_draft_store.dart';
 import '../../../../../core/services/ui_message_service.dart';
+import '../../../../product/domain/use_cases/rename_product_use_case.dart';
 import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../../store/domain/repositories/i_store_local_repository.dart';
 import '../../../domain/repositories/i_receipt_item_local_repository.dart';
@@ -44,6 +45,7 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
     storeRepository: getIt<IStoreLocalRepository>(),
     createExpenseFromReceipt: getIt<CreateExpenseFromReceiptUseCase>(),
     recordPriceObservations: getIt<RecordPriceObservationsUseCase>(),
+    renameProduct: getIt<RenameProductUseCase>(),
   )..add(EditReceiptEvent.load(widget.receiptId));
 
   final Map<String, TextEditingController> _nameControllers = {};

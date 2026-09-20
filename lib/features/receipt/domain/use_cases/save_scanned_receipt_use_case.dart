@@ -4,6 +4,7 @@ import '../../../product/domain/models/product/e_unit.dart';
 import '../../../product/domain/models/product/product.dart';
 import '../../../product/domain/normalizer/product_match_result.dart';
 import '../../../product/domain/normalizer/product_normalizer.dart';
+import '../../../product/domain/use_cases/rename_product_use_case.dart';
 import '../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../scanner/domain/pending_receipt_draft_store.dart';
 import '../../../store/domain/repositories/i_store_local_repository.dart';
@@ -106,6 +107,7 @@ class SaveScannedReceiptUseCase {
   final LearnStoreAliasUseCase _learnStoreAlias;
   final PendingReceiptDraftStore _draftStore;
   final ProductNormalizer _productNormalizer;
+  final RenameProductUseCase _renameProduct;
   final ReceiptImageStore _imageStore;
   final DateTime Function() _now;
 
@@ -118,6 +120,7 @@ class SaveScannedReceiptUseCase {
     required RecordPriceObservationsUseCase recordPriceObservations,
     required LearnStoreAliasUseCase learnStoreAlias,
     required PendingReceiptDraftStore draftStore,
+    required RenameProductUseCase renameProduct,
     ProductNormalizer productNormalizer = const ProductNormalizer(),
     ReceiptImageStore imageStore = const ReceiptImageStore(),
     DateTime Function() now = DateTime.now,
@@ -130,6 +133,7 @@ class SaveScannedReceiptUseCase {
          recordPriceObservations,
          learnStoreAlias,
          draftStore,
+         renameProduct,
          productNormalizer,
          imageStore,
          now,
@@ -144,6 +148,7 @@ class SaveScannedReceiptUseCase {
     this._recordPriceObservations,
     this._learnStoreAlias,
     this._draftStore,
+    this._renameProduct,
     this._productNormalizer,
     this._imageStore,
     this._now,
@@ -215,9 +220,28 @@ class SaveScannedReceiptUseCase {
         storeId: input.storeId,
       );
 
+      var product = matchResult.product;
       if (matchResult.isNewProduct) {
-        mutableProducts.add(matchResult.product);
-        await _productRepository.save(matchResult.product);
+        mutableProducts.add(product);
+        await _productRepository.save(product);
+      } else {
+        // A renamed line that MATCHED an existing product must carry its new
+        // name onto that product, because a saved line is displayed by its
+        // product's name (`receiptItemDisplayName`) — otherwise the
+        // normalizer hands back the pre-rename product, `normalizedName`
+        // below is set from that stale `displayName`, and the correction the
+        // user typed is silently replaced by the text it was replacing.
+        //
+        // The rule lives in `RenameProductUseCase`, shared with
+        // `EditReceiptBloc._onSave`.
+        product = await _renameProduct(
+          product: product,
+          displayName: draftItem.name,
+        );
+        final renamedIndex = mutableProducts.indexWhere(
+          (candidate) => candidate.id == product.id,
+        );
+        if (renamedIndex != -1) mutableProducts[renamedIndex] = product;
       }
 
       // `rawName` is set ONCE, at creation, from the item's ORIGINAL rawName
@@ -228,8 +252,8 @@ class SaveScannedReceiptUseCase {
         ReceiptItem(
           id: draftItem.id,
           rawName: draftItem.rawName,
-          normalizedName: matchResult.product.displayName,
-          productId: matchResult.product.id,
+          normalizedName: product.displayName,
+          productId: product.id,
           quantity: draftItem.quantity,
           unit: draftItem.unit,
           unitPrice: draftItem.unitPrice,

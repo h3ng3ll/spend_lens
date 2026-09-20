@@ -10,6 +10,7 @@ import '../../../core/services/receipt_image_store/receipt_image_store.dart';
 import '../../../core/services/receipt_size_calculator.dart';
 import '../data/repositories/receipt_repository.dart';
 import '../domain/repositories/i_receipt_repository.dart';
+import '../../product/domain/use_cases/rename_product_use_case.dart';
 import '../../product/domain/repositories/i_product_local_repository.dart';
 import '../../scanner/domain/pending_receipt_draft_store.dart';
 import '../../store/domain/repositories/i_store_local_repository.dart';
@@ -71,6 +72,7 @@ void initReceiptFeature() {
       recordPriceObservations: getIt<RecordPriceObservationsUseCase>(),
       learnStoreAlias: getIt<LearnStoreAliasUseCase>(),
       draftStore: getIt<PendingReceiptDraftStore>(),
+      renameProduct: getIt<RenameProductUseCase>(),
       imageStore: getIt<ReceiptImageStore>(),
     ),
   );

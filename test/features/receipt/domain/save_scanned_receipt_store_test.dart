@@ -5,6 +5,7 @@ import 'package:spend_lens/features/analytics/domain/repositories/i_price_observ
 import 'package:spend_lens/features/expense/domain/models/expense/expense.dart';
 import 'package:spend_lens/features/expense/domain/repositories/i_expense_local_repository.dart';
 import 'package:spend_lens/features/product/domain/models/product/e_unit.dart';
+import 'package:spend_lens/features/product/domain/use_cases/rename_product_use_case.dart';
 import 'package:spend_lens/features/product/domain/models/product/product.dart';
 import 'package:spend_lens/features/product/domain/repositories/i_product_local_repository.dart';
 import 'package:spend_lens/features/receipt/domain/models/receipt/receipt.dart';
@@ -87,6 +88,7 @@ void main() {
       ),
       learnStoreAlias: LearnStoreAliasUseCase(repository: stores),
       draftStore: PendingReceiptDraftStore(),
+      renameProduct: RenameProductUseCase(productRepository: products),
     );
   });
 
