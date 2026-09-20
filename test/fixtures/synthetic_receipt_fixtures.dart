@@ -47,6 +47,93 @@ class SyntheticReceiptFixtures {
     );
   }
 
+  /// A receipt whose VAT RATE row prints as its own grouped line, with the
+  /// `TVA` label lost — and ABOVE the total keyword.
+  ///
+  /// This is the shape that became a Product named `1.008 %` priced at
+  /// 19.95. Every existing guard misses it: `footerKeywords` needs the
+  /// `TVA` token (the grouper put the label on its own row, and here OCR
+  /// dropped it entirely), `reachedTotal` has not been set because the
+  /// total keyword prints BELOW, and `isNameOnlyLine` requires letters so
+  /// it cannot park a letterless line either. The candidate builder then
+  /// strips the trailing `19.95`, but the `%` blocks its trailing-digit
+  /// strip, leaving a non-empty `1.008 %` that satisfied its only guard.
+  ///
+  /// The damage was arithmetic, not cosmetic. VAT is already INSIDE the
+  /// printed total, so the phantom 19.95 pushes `itemsTotal` (154.75) above
+  /// the printed 151.10, `ReceiptParser._plausibleTotal` then judges the
+  /// CORRECT printed total impossible and returns null, and the expense is
+  /// recorded from the inflated item sum — with the reconciler's mismatch
+  /// warning suppressed, because a null printed total reconciles as
+  /// "nothing to compare against".
+  ///
+  /// The rate is placed ABOVE the total line deliberately: below it the
+  /// `reachedTotal` flag would already skip it and the fixture would pass
+  /// without the guard under test.
+  static List<OcrTextBlock> vatRateLineAboveTotalReceipt() => [
+    _block('KAUFLAND MOLDOVA', left: 60.0, top: 40.0),
+    _block('07.09.2026 14:32', left: 60.0, top: 140.0),
+    _block('LAPTE ZUZU 1L 22.90', left: 60.0, top: 260.0),
+    _block('FRANZELA GRIU 7.90', left: 60.0, top: 310.0),
+    _block('ROSII 1.2 kg x 120.30', left: 60.0, top: 360.0),
+    // The bare VAT rate, on its own row, its label gone.
+    _block('1.008 % 19.95', left: 500.0, top: 420.0),
+    _block('TOTAL DE PLATA 151.10', left: 60.0, top: 500.0),
+  ];
+
+  /// A receipt where an AMOUNT plus its VAT CLASS CODE lands on its own
+  /// grouped row — `99.88 A`.
+  ///
+  /// The single trailing letter is the tax class the receipt prints, not a
+  /// product word, but it was enough to clear a "has any letter" test: the
+  /// row became a Product named `99.88 A` priced at 99.88, i.e. a product
+  /// named after its own price. Hence the two-letter minimum.
+  static List<OcrTextBlock> amountWithVatClassCodeReceipt() => [
+    _block('KAUFLAND MOLDOVA', left: 60.0, top: 40.0),
+    _block('07.09.2026 14:32', left: 60.0, top: 140.0),
+    _block('LAPTE ZUZU 1L 22.90', left: 60.0, top: 260.0),
+    // An amount and a tax class letter, stranded on their own row.
+    _block('99.88 A', left: 500.0, top: 320.0),
+    _block('TOTAL DE PLATA 22.90', left: 60.0, top: 500.0),
+  ];
+
+  /// A price-CONTINUATION line with no name line above it — the first
+  /// priced row on the receipt is the continuation half of a wrapped item
+  /// whose name never survived OCR.
+  ///
+  /// `ReceiptCandidateBuilder` deliberately allows an empty `rawName` on the
+  /// expression path, trusting the parser to pair it with the held name
+  /// fragments. With nothing pending there is nothing to pair, and the
+  /// parser emitted the empty-named candidate anyway — producing a
+  /// BLANK-named product. That is worse than it looks twice over: an empty
+  /// name also normalizes to an empty matching key (so later blank lines
+  /// collapse onto the same row), and an empty `rawName` is the app's
+  /// sentinel for "manually added by the user", making a parser-emitted row
+  /// indistinguishable from a typed one.
+  static List<OcrTextBlock> unpairedContinuationLineReceipt() => [
+    _block('KAUFLAND MOLDOVA', left: 60.0, top: 40.0),
+    _block('07.09.2026 14:32', left: 60.0, top: 140.0),
+    // A continuation line with NO name row above it.
+    _block('1 _ x 25.50= 25.50 A', left: 80.0, top: 260.0),
+    _block('LAPTE ZUZU 1L 22.90', left: 60.0, top: 320.0),
+    _block('TOTAL DE PLATA 48.40', left: 60.0, top: 500.0),
+  ];
+
+  /// A product whose NAME legitimately contains a percentage, wrapped across
+  /// two physical lines.
+  ///
+  /// The false-positive guard for [vatRateLineAboveTotalReceipt]'s fix: a
+  /// 45%-fat cheese is a real product, and an earlier over-broad guard on a
+  /// `%`-bearing line dropped this line — which then stranded its price
+  /// line as a bogus item of its own. It must survive as ONE item at 47.50.
+  static List<OcrTextBlock> percentageInProductNameReceipt() => [
+    _block('KAUFLAND MOLDOVA', left: 60.0, top: 40.0),
+    _block('07.09.2026 14:32', left: 60.0, top: 140.0),
+    _block('Branza Maasdam 45% 130g BREST', left: 60.0, top: 260.0),
+    _block('1 _ x 47.50= 47.50 A', left: 80.0, top: 310.0),
+    _block('TOTAL DE PLATA 47.50', left: 60.0, top: 500.0),
+  ];
+
   /// A clean, well-lit single-column receipt — the baseline case every
   /// other fixture is a noisy variant of.
   static List<OcrTextBlock> cleanSingleColumnReceipt() => [

@@ -209,6 +209,57 @@ class ReceiptStructureResolver {
     return !_quantityMultiplier.hasMatch(trimmed);
   }
 
+  /// Any Unicode LETTER. `\p{L}` rather than `[A-Za-z]` so Romanian
+  /// diacritics count as letters — `Brânză`/`Pâine` are product names, not
+  /// noise.
+  static final _letter = RegExp(r'\p{L}', unicode: true);
+
+  /// How many letters a name needs before it can be a product.
+  ///
+  /// TWO, not one, because a receipt prints its VAT CLASS CODE as a single
+  /// trailing letter: `99.88 A` and `139.88 A` are an amount plus that
+  /// code, and a one-letter threshold kept them as products named after
+  /// their own price. No real product name survives on one letter — the
+  /// shortest in this corpus (`2L A`, `Ou`, `APA`) all clear two.
+  static const _minNameLetters = 2;
+
+  /// Whether [name] — an already-extracted candidate NAME, never a raw line
+  /// — identifies no product at all: empty, or carrying no letters
+  /// whatsoever (`1.008 %`, `20 %`, `1 008`, `...`, `- - -`).
+  ///
+  /// THE BUG THIS CLOSES. A receipt's VAT block prints a bare rate row, and
+  /// when the line grouper splits the `TVA` label away from the figure (or
+  /// OCR mangles the label) nothing vetoes it: `footerKeywords` needs the
+  /// keyword, `reachedTotal` needs the total line to have matched first, and
+  /// [isNameOnlyLine] requires letters so it cannot even park it. The
+  /// candidate builder then strips the trailing amount but `%` blocks the
+  /// trailing-digit strip, leaving a non-empty `1.008 %` that passed its
+  /// only guard — and became a Product with a price observation.
+  ///
+  /// It also cost real money. A VAT line is already INSIDE the printed
+  /// total, so counting it as an item pushes `itemsTotal` above the printed
+  /// total, `ReceiptParser._plausibleTotal` then judges the correctly-read
+  /// total implausible and returns null, and the expense is recorded from
+  /// the inflated item sum instead — with the mismatch warning suppressed,
+  /// because a null printed total reconciles as "nothing to compare".
+  ///
+  /// A trailing VAT class code does not rescue a line either: `99.88 A` is
+  /// an amount and a tax letter, and reading it as a name produced a
+  /// product called after its own price. Hence [_minNameLetters].
+  ///
+  /// KEYED ON A SHORTAGE OF LETTERS, never on the presence of `%`:
+  /// `Branza Maasdam 45% 130g BREST` is a real 45%-fat cheese, and an
+  /// earlier over-broad guard on a `%`-bearing line already broke that once
+  /// (see [_matchesWord]'s note on `REST`). A name keeps its line whenever
+  /// it contains anything word-like.
+  ///
+  /// A short fragment that IS part of a real name — `45% 130g`, `2L A` —
+  /// never reaches this predicate: [isNameOnlyLine] parks it as a pending
+  /// name fragment first, and the parser tests the JOINED name, by which
+  /// point the letters from the fragment above are present.
+  bool hasNoProductName(String name) =>
+      _letter.allMatches(name).length < _minNameLetters;
+
   /// An explicit quantity multiplier — `1.2 kg @ 104`, `2 x 15`, `500 g x
   /// 40`. Its presence means the line prices ITSELF.
   static final _quantityMultiplier = RegExp(

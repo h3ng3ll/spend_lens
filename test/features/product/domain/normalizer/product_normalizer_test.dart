@@ -115,4 +115,68 @@ void main() {
     expect(result.product.defaultUnit, EUnit.kilogram);
     expect(result.product.syncStatus, ESyncStatus.pendingCreate);
   });
+
+  group('a name that normalizes to nothing never adopts a product', () {
+    // `ProductNameCleaner` strips everything that is not a letter, digit or
+    // whitespace, so a punctuation-only name reduces to ''. An empty
+    // `normalizedName` used as a matching key exact-matches every OTHER
+    // empty one, which made the first nameless product a permanent magnet:
+    // unrelated lines from every store piled onto one row that no later
+    // exact or fuzzy comparison could separate again.
+    test('an empty key does not exact-match an existing empty product', () {
+      final existing = [product('')];
+      final result = normalizer.normalize(
+        rawName: '%',
+        existingProducts: existing,
+        generateId: () => 'new-id',
+      );
+
+      expect(
+        result.outcome,
+        ENormalizerOutcome.created,
+        reason: 'An empty key must not adopt an existing nameless product.',
+      );
+      expect(result.product.id, isNot('p-'));
+    });
+
+    test('two different empty-normalizing names do NOT collide', () {
+      final first = normalizer.normalize(
+        rawName: '...',
+        existingProducts: const [],
+        generateId: () => 'first-id',
+      );
+      final second = normalizer.normalize(
+        rawName: '- - -',
+        existingProducts: [first.product],
+        generateId: () => 'second-id',
+      );
+
+      expect(second.outcome, ENormalizerOutcome.created);
+      expect(second.product.id, isNot(first.product.id));
+    });
+
+    test('an empty key does not fuzzy-match either', () {
+      final existing = [product('lapte zuzu 1l')];
+      final result = normalizer.normalize(
+        rawName: '%%%',
+        existingProducts: existing,
+        generateId: () => 'new-id',
+      );
+
+      expect(result.outcome, ENormalizerOutcome.created);
+      expect(result.product.id, 'new-id');
+    });
+
+    test('a real name still matches normally', () {
+      // The guard must not disturb the ordinary path.
+      final existing = [product('lapte zuzu 1l')];
+      final result = normalizer.normalize(
+        rawName: 'LAPTE ZUZU 1L',
+        existingProducts: existing,
+        generateId: () => 'new-id',
+      );
+
+      expect(result.outcome, ENormalizerOutcome.exactMatch);
+    });
+  });
 }

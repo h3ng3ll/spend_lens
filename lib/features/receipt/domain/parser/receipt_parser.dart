@@ -155,20 +155,32 @@ class ReceiptParser {
               .where((part) => part.isNotEmpty)
               .toList();
 
-          items.add(
-            nameParts.isEmpty
-                ? built
-                : ParsedLineCandidate(
-                    rawName: nameParts.join(' '),
-                    quantity: built.quantity,
-                    unit: built.unit,
-                    unitPrice: built.unitPrice,
-                    lineTotal: built.lineTotal,
-                    confidence: built.confidence,
-                    lineIndex: itemLineIndex,
-                  ),
-          );
-          itemLineIndex++;
+          // An empty `nameParts` means nothing was pending above AND this
+          // line carries no prefix of its own — so the builder's
+          // deliberately-empty name was never paired with anything and
+          // names no product. Emitting `built` unpaired here is what
+          // created blank-named products, which are worse than they look:
+          // an empty name also normalizes to an empty matching key, so
+          // every later blank line EXACT-MATCHES the same blank product
+          // and piles unrelated prices onto one row.
+          //
+          // `itemLineIndex` is deliberately NOT incremented on this path —
+          // it counts EMITTED items, so skipping leaves no gap in
+          // `lineIndex` and shifts nothing (same as the footer skips).
+          if (nameParts.isNotEmpty) {
+            items.add(
+              ParsedLineCandidate(
+                rawName: nameParts.join(' '),
+                quantity: built.quantity,
+                unit: built.unit,
+                unitPrice: built.unitPrice,
+                lineTotal: built.lineTotal,
+                confidence: built.confidence,
+                lineIndex: itemLineIndex,
+              ),
+            );
+            itemLineIndex++;
+          }
         }
         pendingNameParts.clear();
         continue;
@@ -244,20 +256,35 @@ class ReceiptParser {
                 .where((part) => part.isNotEmpty)
                 .toList();
 
-            items.add(
-              pendingNameParts.isEmpty
-                  ? candidate
-                  : ParsedLineCandidate(
-                      rawName: nameParts.join(' '),
-                      quantity: candidate.quantity,
-                      unit: candidate.unit,
-                      unitPrice: candidate.unitPrice,
-                      lineTotal: candidate.lineTotal,
-                      confidence: candidate.confidence,
-                      lineIndex: itemLineIndex,
-                    ),
-            );
-            itemLineIndex++;
+            // A name with no letters at all names no product — a bare VAT
+            // rate row (`1.008 %`), a stray `20 %`, a punctuation run. Its
+            // amount is footer/tax detail that the printed total already
+            // includes, so counting it would inflate `itemsTotal` and, via
+            // `_plausibleTotal`, discard the real total (see
+            // `hasNoProductName`).
+            //
+            // Tested on the JOINED name, so a wrapped item whose fragments
+            // carry the letters survives on the strength of those
+            // fragments. `itemLineIndex` is not incremented when the line
+            // is dropped, so `lineIndex` stays contiguous.
+            final joinedName = nameParts.join(' ');
+            if (!_structureResolver.hasNoProductName(joinedName)) {
+              items.add(
+                ParsedLineCandidate(
+                  rawName: joinedName,
+                  quantity: candidate.quantity,
+                  unit: candidate.unit,
+                  unitPrice: candidate.unitPrice,
+                  lineTotal: candidate.lineTotal,
+                  confidence: candidate.confidence,
+                  lineIndex: itemLineIndex,
+                ),
+              );
+              itemLineIndex++;
+            }
+            // Cleared either way: these fragments belong to the line just
+            // resolved, and carrying them forward would prepend them to the
+            // NEXT product.
             pendingNameParts.clear();
           } else {
             // No price on this line. On a wrapping receipt that is the

@@ -69,27 +69,43 @@ class ProductNormalizer {
     // Stage 2b — narrow to the products this store may match against.
     final candidates = _candidatesFor(existingProducts, storeId);
 
-    // Stage 3 — exact match (against normalizedName AND every alias).
-    for (final product in candidates) {
-      if (product.normalizedName == expanded || product.aliases.contains(expanded)) {
+    // A name that normalizes to NOTHING must never be used as a matching
+    // key. `ProductNameCleaner` reduces anything without letters or digits
+    // to an empty string, and an empty `normalizedName` would exact-match
+    // every other empty one below — so the FIRST nameless product becomes a
+    // permanent magnet, silently collecting unrelated lines from every
+    // store onto one row that no later comparison can separate again.
+    //
+    // Skipping the match stages keeps such a name from ADOPTING an existing
+    // product. The parser is what stops these names arising in the first
+    // place (`ReceiptStructureResolver.hasNoProductName`); this is the
+    // backstop for the other callers of this method.
+    if (expanded.isNotEmpty) {
+      // Stage 3 — exact match (against normalizedName AND every alias).
+      for (final product in candidates) {
+        if (product.normalizedName == expanded ||
+            product.aliases.contains(expanded)) {
+          return ProductMatchResult(
+            product: product,
+            outcome: ENormalizerOutcome.exactMatch,
+          );
+        }
+      }
+
+      // Stage 4 — fuzzy match, conservative threshold (spec §42). Inside
+      // the same non-empty guard: an empty key must not fuzzy-match either,
+      // or it would adopt whichever product happened to score closest.
+      final existingNames = candidates.map((p) => p.normalizedName).toList();
+      final closest = _fuzzyMatcher.findClosestMatch(expanded, existingNames);
+      if (closest != null) {
+        final matched = candidates.firstWhere(
+          (p) => p.normalizedName == closest,
+        );
         return ProductMatchResult(
-          product: product,
-          outcome: ENormalizerOutcome.exactMatch,
+          product: matched,
+          outcome: ENormalizerOutcome.fuzzyMatch,
         );
       }
-    }
-
-    // Stage 4 — fuzzy match, conservative threshold (spec §42).
-    final existingNames = candidates.map((p) => p.normalizedName).toList();
-    final closest = _fuzzyMatcher.findClosestMatch(expanded, existingNames);
-    if (closest != null) {
-      final matched = candidates.firstWhere(
-        (p) => p.normalizedName == closest,
-      );
-      return ProductMatchResult(
-        product: matched,
-        outcome: ENormalizerOutcome.fuzzyMatch,
-      );
     }
 
     // Stage 5 — create new. A near-miss that did not clear the fuzzy
