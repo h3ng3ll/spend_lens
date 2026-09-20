@@ -75,31 +75,93 @@ void main() {
     });
 
     test('every folder the client lists has a list rule', () {
-      // Derived from the code rather than hardcoded: a new `.list()` call on
-      // another folder must fail this test rather than fail silently on device.
+      // Derived from the code rather than hardcoded: a new listed folder must
+      // fail this test rather than fail silently on device.
+      //
+      // The earlier version of this test only recognised the shape
+      // `_xxxFolder(uid).list(`, so when `usedBytes` grew to enumerate the
+      // `stores/`, `products/` and `profile/` prefixes through a collected
+      // list, it saw nothing to check. Every folder the service references is
+      // now checked, which does not depend on how the call is spelled.
       final service = read(
         'lib/core/services/firebase/firebase_storage_service.dart',
       );
 
-      // Folder helpers whose result has `.list(` called on it.
-      final listsReceipts = RegExp(r'_receiptsFolder\(uid\)\.list\(')
-          .hasMatch(service);
-
-      if (listsReceipts) {
-        expect(rules, contains('/users/{uid}/receipts/{prefix=**}'));
-      }
-
-      // No other folder helper should be listed without a matching rule. If
-      // one appears, this reason explains what to add.
-      final otherFolderLists = RegExp(r'_(?!receiptsFolder)\w*Folder\(uid\)\.list\(')
-          .allMatches(service)
-          .map((m) => m.group(0))
-          .toList();
       expect(
-        otherFolderLists,
-        isEmpty,
-        reason: 'a newly listed folder needs its own {prefix=**} list rule',
+        rules,
+        contains('/users/{uid}/receipts/{prefix=**}'),
+        reason: 'uploadedReceiptIds lists this prefix',
       );
+
+      // `usedBytes` enumerates every BILLED folder, so each needs a grant.
+      final billedStart = service.indexOf('List<Reference> _billedFolders(');
+      expect(
+        billedStart,
+        isNot(-1),
+        reason: 'usedBytes sums the folders this list names',
+      );
+      final billed = service.substring(
+        billedStart,
+        service.indexOf('];', billedStart),
+      );
+
+      final folders = <String>{
+        if (billed.contains('_receiptsFolder')) 'receipts',
+        ...RegExp(r"users/\$uid/(\w+)")
+            .allMatches(billed)
+            .map((match) => match.group(1)!),
+      };
+
+      expect(folders, isNotEmpty, reason: 'the source parse must not fail');
+
+      for (final folder in folders) {
+        expect(
+          rules,
+          contains('/users/{uid}/$folder/{prefix=**}'),
+          reason: 'usedBytes lists $folder/ — without a {prefix=**} list rule '
+              'it fails with [firebase_storage/unauthorized], which takes the '
+              'whole sync cycle down, not just the usage figure',
+        );
+      }
+    });
+
+    test('every folder the client WRITES has an object rule', () {
+      // THE REGRESSION: product photo upload shipped with no `products/`
+      // block at all, so every upload failed with 403 / -13021 — the third
+      // time this omission broke a feature here (receipts, avatar, logos).
+      // Storage has no wildcard fallthrough.
+      final service = read(
+        'lib/core/services/firebase/firebase_storage_service.dart',
+      );
+
+      final written = RegExp(r"child\('users/\$uid/(\w+)")
+          .allMatches(service)
+          .map((match) => match.group(1)!)
+          .toSet();
+
+      expect(written, isNotEmpty, reason: 'the source parse must not fail');
+
+      for (final folder in written) {
+        // An OBJECT rule granting write — not merely any block mentioning the
+        // folder. The `{prefix=**}` list blocks match that path too, and they
+        // grant `list` only, so checking for the path alone would report a
+        // folder as covered while every upload to it is still denied.
+        // The trailing segment is either a `{wildcard}` (receipts, stores,
+        // products) or a literal filename — `profile/avatar.jpg` is pinned
+        // because there is exactly one avatar per user.
+        final objectRule = RegExp(
+          'match /users/\\{uid\\}/$folder/(?:\\{[^}]+\\}|[\\w.]+) \\{'
+          '(?:(?!\n    \\}).)*?allow write',
+          dotAll: true,
+        );
+
+        expect(
+          objectRule.hasMatch(rules),
+          isTrue,
+          reason: 'the client writes $folder/ but no match block grants write '
+              'there — every upload is denied with 403 / -13021',
+        );
+      }
     });
 
     test('the avatar can be deleted', () {

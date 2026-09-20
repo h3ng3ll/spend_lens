@@ -61,6 +61,27 @@ service firebase.storage {
       allow list: if isOwner(uid);
     }
 
+    // `usedBytes` enumerates every BILLED folder, not just `receipts/`, so
+    // each one needs its own list grant. It previously summed `receipts/`
+    // alone and reported 0 MB to a user whose bucket held store logos — the
+    // quota Firebase enforces covers the whole bucket, so a figure that
+    // omits real objects is inaccurate, not merely narrower.
+    //
+    // Without these three blocks `usedBytes` fails with
+    // `[firebase_storage/unauthorized]`, which takes the whole sync cycle
+    // down rather than just the number.
+    match /users/{uid}/stores/{prefix=**} {
+      allow list: if isOwner(uid);
+    }
+
+    match /users/{uid}/products/{prefix=**} {
+      allow list: if isOwner(uid);
+    }
+
+    match /users/{uid}/profile/{prefix=**} {
+      allow list: if isOwner(uid);
+    }
+
     // `<receiptId>.jpg` — the shape `_receiptRef` writes. Anything else is
     // not a photo this app can associate with a record, so it would be an
     // orphan consuming quota that no code path would ever clean up.
@@ -87,10 +108,10 @@ service firebase.storage {
     //
     // A SEPARATE block rather than a widened receipts rule, and a separate
     // folder rather than a file inside `receipts/`, because
-    // `FirebaseStorageService.usedBytes` sums the `receipts/` folder to drive
-    // the Profile storage bar — which the UI describes to the user as receipt
-    // photos. An avatar filed there would silently inflate a figure the user
-    // is told means something else.
+    // `FirebaseStorageService.uploadedReceiptIds` lists `receipts/` to decide
+    // which photos still need uploading — an avatar filed there would be read
+    // as a receipt id. Its bytes ARE counted by `usedBytes`, which sums every
+    // billed folder.
     //
     // The filename is pinned to exactly `avatar.jpg`: there is one avatar per
     // user, `uploadAvatar` always overwrites that single object, and allowing
@@ -118,9 +139,8 @@ service firebase.storage {
     // Its own block for the same two reasons the avatar has one: Storage
     // denies any path no `match` covers, so without this the logo upload
     // fails with `403` / `-13021` exactly as the avatar once did; and the
-    // folder is kept out of `receipts/` because `usedBytes` sums that prefix
-    // to drive the Profile storage bar, which the UI describes to the user as
-    // receipt photos.
+    // folder is kept out of `receipts/` so `uploadedReceiptIds` cannot read a
+    // logo as a receipt id. Its bytes ARE counted by `usedBytes`.
     //
     // The id is matched loosely, for the reason given on the receipts block:
     // store ids are microsecond stamps today, but ids elsewhere in this app
@@ -142,6 +162,30 @@ service firebase.storage {
 
       // Required by the staged "Remove logo" action, which deletes the remote
       // object on Save.
+      allow delete: if isOwner(uid);
+    }
+
+    // Product photos — `users/{uid}/products/{productId}.jpg`, written by
+    // `FirebaseStorageService.uploadProductImage`.
+    //
+    // This block was MISSING while the upload path shipped, so every product
+    // photo upload failed with `403` / `-13021` — the third time this exact
+    // omission has broken a feature here (receipts, then the avatar, then
+    // store logos). Storage has no wildcard fallthrough: a folder without a
+    // `match` is denied, however permissive its siblings are.
+    match /users/{uid}/products/{fileName} {
+      allow read: if isOwner(uid);
+
+      // 2 MB — the store logo's ceiling, for the same reason: the client
+      // compresses to 100 KB, but that path returns the ORIGINAL bytes when
+      // the compressor cannot reach the target on an unusual source image.
+      allow write: if isOwner(uid)
+                   && isJpeg()
+                   && request.resource.size <= 2 * 1024 * 1024
+                   && fileName.matches('[A-Za-z0-9_-]+\\.jpg');
+
+      // Required by the staged "Remove photo" action, which deletes the
+      // remote object on Save.
       allow delete: if isOwner(uid);
     }
   }

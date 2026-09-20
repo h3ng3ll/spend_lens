@@ -6,7 +6,9 @@ import '../../../../analytics/domain/repositories/i_price_observation_local_repo
 import '../../../domain/models/product/e_unit.dart';
 import '../../../domain/models/product/product.dart';
 import '../../../domain/normalizer/product_name_cleaner.dart';
+import '../../../../../core/services/product_image_store/product_image_store.dart';
 import '../../../domain/repositories/i_product_local_repository.dart';
+import '../../../domain/use_cases/save_product_image_use_case.dart';
 
 part 'products_event.dart';
 
@@ -30,17 +32,23 @@ part 'products_bloc.freezed.dart';
 class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   final IProductLocalRepository _productLocalRepository;
   final IPriceObservationLocalRepository _priceObservationLocalRepository;
+  final ProductImageStore _imageStore;
+  final SaveProductImageUseCase _saveProductImage;
   final ProductNameCleaner _nameCleaner;
   final DateTime Function() _now;
 
   ProductsBloc({
     required IProductLocalRepository productLocalRepository,
     required IPriceObservationLocalRepository priceObservationLocalRepository,
+    required ProductImageStore imageStore,
+    required SaveProductImageUseCase saveProductImage,
     ProductNameCleaner nameCleaner = const ProductNameCleaner(),
     DateTime Function() now = DateTime.now,
   }) : this._(
           productLocalRepository,
           priceObservationLocalRepository,
+          imageStore,
+          saveProductImage,
           nameCleaner,
           now,
         );
@@ -48,6 +56,8 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
   ProductsBloc._(
     this._productLocalRepository,
     this._priceObservationLocalRepository,
+    this._imageStore,
+    this._saveProductImage,
     this._nameCleaner,
     this._now,
   ) : super(const ProductsState()) {
@@ -96,12 +106,30 @@ class ProductsBloc extends Bloc<ProductsEvent, ProductsState> {
     if (trimmed.isEmpty) return;
 
     try {
-      final product = _buildProduct(
+      var product = _buildProduct(
         displayName: trimmed,
         storeId: event.storeId,
         categoryId: event.categoryId,
         unit: event.unit,
       );
+
+      // The photo is committed HERE rather than in the form, because the
+      // per-product slot is keyed on an id that does not exist until this
+      // method builds it. The staging slot is then released so the picked
+      // photo cannot reappear over the next product created.
+      final staged = event.stagedImageFilename;
+      if (staged != null) {
+        final bytes = await _imageStore.readBytes(staged);
+        if (bytes != null) {
+          product = await _saveProductImage(
+            product: product,
+            bytes: bytes,
+            uid: event.uid,
+          );
+        }
+        await _imageStore.discardStaged();
+      }
+
       await _productLocalRepository.save(product);
 
       // The first price is optional: a product with none is legal and

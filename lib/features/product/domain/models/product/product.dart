@@ -51,6 +51,26 @@ sealed class Product with _$Product {
     /// linked SET rather than a single `productId`. Empty = compares against
     /// nothing, which renders as "Only bought here".
     @Default(<String>[]) List<String> linkedProductIds,
+
+    /// FILENAME of the product's photo on disk (`product_<id>.jpg`),
+    /// resolved against the CURRENT Documents directory by
+    /// [ProductImageStore] — never a full path, which dangles across iOS
+    /// reinstalls, and never the bytes, which must not reach Hive or a bloc
+    /// state (see `AvatarImageStore` for the two defects that rule
+    /// prevents).
+    ///
+    /// Null = no photo, which is what makes the remove affordance
+    /// conditional.
+    String? imageFilename,
+
+    /// Firebase Storage download URL for `users/{uid}/products/{id}.jpg`.
+    ///
+    /// Carried on the record so the photo travels with the product through
+    /// the ordinary record sync: a device that pulls this row learns a photo
+    /// exists, and the photo pass fetches the bytes. Empty = not uploaded
+    /// yet (offline, or the account is full), which is a normal state and
+    /// not an error.
+    @Default('') String imageUrl,
     required DateTime updatedAt,
     DateTime? deletedAt,
     @Default(ESyncStatus.synced) ESyncStatus syncStatus,

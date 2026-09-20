@@ -35,14 +35,24 @@ import '../repositories/i_user_profile_remote_repository.dart';
 ///   their records and can retry; the reverse order would lose them with the
 ///   cloud copy already gone.
 ///
-/// ## Re-authentication is expected, not exceptional
+/// ## Re-authentication is expected, and it happens FIRST
 ///
 /// `User.delete()` rejects a credential older than a few minutes with
 /// `requires-recent-login`, while the SESSION itself stays valid indefinitely.
-/// So for any user who did not sign in moments ago — the common case — the
-/// first attempt fails by design. This retries once through
-/// [IAuthRepository.reauthenticate] rather than surfacing an error the user
-/// cannot act on.
+/// So for any user who did not sign in moments ago — the common case — a
+/// delete attempted on the existing credential fails by design.
+///
+/// The credential is therefore refreshed BEFORE anything is destroyed. It used
+/// to be refreshed only as a RETRY, after `_deleteRemoteData` had already run,
+/// which made a cancelled re-auth sheet catastrophic: every Firestore
+/// collection, every receipt photo, the avatar and the user document were
+/// already gone, the account survived, and the next sync simply re-uploaded
+/// the local copy — so the user saw their cloud storage refill instead of the
+/// account disappearing. A destructive flow must not depend on a credential it
+/// has not yet confirmed it can get.
+///
+/// Refreshing first also costs nothing when it is unnecessary: a user who DID
+/// just sign in re-authenticates silently on the same provider.
 class DeleteAccountUseCase {
   final IAuthRepository _authRepository;
   final ISyncRemoteRepository _syncRemoteRepository;
@@ -98,6 +108,11 @@ class DeleteAccountUseCase {
     final uid = _authRepository.currentUser?.uid;
 
     try {
+      // BEFORE anything is destroyed. A cancelled sheet must leave the account
+      // and its data exactly as they were — see the class doc.
+      final authorised = await _ensureRecentLogin();
+      if (authorised.isLeft()) return authorised;
+
       if (uid != null) {
         await _deleteRemoteData(uid);
       }
@@ -150,6 +165,17 @@ class DeleteAccountUseCase {
     await _profileRemoteRepository.deleteAvatar(uid);
     await _profileRemoteRepository.deleteUserDocument(uid);
   }
+
+  /// Refreshes the credential up front so the destructive work below runs
+  /// only once deletion is actually authorised.
+  ///
+  /// A failure here — most often the user dismissing the provider sheet — is
+  /// returned as-is and nothing has been touched. [_deleteUserWithRetry] still
+  /// keeps its own retry: the credential can age out between this call and the
+  /// delete on a slow connection, and that late retry is harmless because by
+  /// then the user has already proved they can re-authenticate.
+  Future<Either<Failure, Unit>> _ensureRecentLogin() =>
+      _authRepository.reauthenticate();
 
   /// Deletes the Firebase user, re-authenticating once if the credential is
   /// too old — which it almost always is. See the class doc.

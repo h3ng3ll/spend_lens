@@ -5,7 +5,7 @@ import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../../core/resources/text/app_text_theme.dart';
 import '../../../../../../core/widgets/app_svg_icon.dart';
-import '../../../../../../core/widgets/initial_tile.dart';
+import '../../../../../../core/widgets/build_product_image.dart';
 import '../../../../domain/models/product/product.dart';
 
 /// One pickable product: its name, and the store it belongs to.
@@ -14,6 +14,10 @@ import '../../../../domain/models/product/product.dart';
 /// can legitimately carry the SAME name and differ only by shop. Without it
 /// the list would look like it contained duplicates.
 class ProductPickRow extends StatelessWidget {
+  /// Matches the 36dp box `InitialTile` drew here before the photo
+  /// existed, so the row's geometry is unchanged.
+  static const double _imageSize = 36.0;
+
   final Product product;
   final String? storeName;
   final bool isSelected;
@@ -42,10 +46,10 @@ class ProductPickRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           spacing: 12.0,
           children: [
-            InitialTile(
-              initial: _initialOf(product.displayName),
-              background: scheme.accentTint,
-              foreground: scheme.accent,
+            BuildProductImage(
+              filename: product.imageFilename ?? '',
+              productName: product.displayName,
+              size: _imageSize,
             ),
             Expanded(
               child: Column(
@@ -76,9 +80,4 @@ class ProductPickRow extends StatelessWidget {
     );
   }
 
-  String _initialOf(String name) {
-    final trimmed = name.trim();
-    if (trimmed.isEmpty) return '?';
-    return trimmed.substring(0, 1).toUpperCase();
-  }
 }

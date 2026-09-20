@@ -26,5 +26,12 @@ sealed class ProductsEvent with _$ProductsEvent {
     required double? firstPrice,
     required DateTime observedAt,
     required String currencyCode,
+
+    /// A photo STAGED by the new-product form, committed once the product
+    /// has an id. Null when no photo was picked.
+    String? stagedImageFilename,
+
+    /// Empty when signed out — the photo is then kept locally only.
+    @Default('') String uid,
   }) = _Create;
 }

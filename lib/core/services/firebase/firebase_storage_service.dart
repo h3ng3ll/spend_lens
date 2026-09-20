@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'package:firebase_storage/firebase_storage.dart';
 
-/// Receipt-photo storage, scoped per user.
+/// Image storage, scoped per user.
 ///
 /// Paths mirror the Firestore layout (`/users/{uid}/receipts/...`) and the
 /// matching `storage.rules`, so one uid check governs both stores.
@@ -30,10 +30,10 @@ class FirebaseStorageService {
 
   /// The avatar object, in its own `profile/` folder.
   ///
-  /// Kept OUT of `receipts/` on purpose: [usedBytes] sums that folder to drive
-  /// the Profile storage bar, which the UI describes to the user as receipt
-  /// photos. An avatar filed there would silently inflate a figure the user is
-  /// told means something else.
+  /// Kept OUT of `receipts/` so the two can be told apart — [uploadedReceiptIds]
+  /// lists that folder to decide which receipt photos still need uploading, and
+  /// an avatar filed there would read as a receipt id. It is still BILLED, and
+  /// [usedBytes] counts it.
   Reference _avatarRef(String uid) =>
       _firebaseStorage.ref().child('users/$uid/profile/avatar.jpg');
 
@@ -42,12 +42,19 @@ class FirebaseStorageService {
 
   /// A store's logo object, in its own `stores/` folder.
   ///
-  /// Kept OUT of `receipts/` for the same reason as the avatar: [usedBytes]
-  /// sums that folder to drive the Profile storage bar, which the UI
-  /// describes to the user as receipt photos. A logo filed there would
-  /// silently inflate a figure the user is told means something else.
+  /// Kept OUT of `receipts/` for the same reason as the avatar: it would
+  /// otherwise read as a receipt id in [uploadedReceiptIds]. It is still
+  /// BILLED, and [usedBytes] counts it.
   Reference _storeLogoRef(String uid, String storeId) =>
       _firebaseStorage.ref().child('users/$uid/stores/$storeId.jpg');
+
+  /// A product's photo object, in its own `products/` folder.
+  ///
+  /// Kept OUT of `receipts/` for the same reason as the store logo and the
+  /// avatar: it would otherwise read as a receipt id in [uploadedReceiptIds].
+  /// It is still BILLED, and [usedBytes] counts it.
+  Reference _productImageRef(String uid, String productId) =>
+      _firebaseStorage.ref().child('users/$uid/products/$productId.jpg');
 
   /// Uploads [bytes] as this receipt's photo, replacing any existing object.
   /// Returns the stored byte count so the caller can update usage without a
@@ -157,6 +164,57 @@ class FirebaseStorageService {
     }
   }
 
+  /// Uploads [bytes] as this product's photo, replacing any existing object,
+  /// and returns its download URL for the product record.
+  ///
+  /// The URL is what makes the photo travel: it rides the ordinary record
+  /// sync on `Product.imageUrl`, so another device learns a photo exists
+  /// from the document alone and fetches the bytes in the photo pass.
+  Future<String> uploadProductImage({
+    required String uid,
+    required String productId,
+    required Uint8List bytes,
+  }) async {
+    final ref = _productImageRef(uid, productId);
+    await ref.putData(bytes, SettableMetadata(contentType: 'image/jpeg'));
+    return ref.getDownloadURL();
+  }
+
+  /// Downloads this product's photo, or null when the object is absent.
+  ///
+  /// Bounded by [_kMaxPhotoBytes] for the same reason as
+  /// [downloadReceiptPhoto] — `getData` buffers the whole object in memory,
+  /// and a product photo is compressed far below this ceiling.
+  ///
+  /// Returns null rather than throwing when the object is missing: a product
+  /// whose photo never uploaded (offline, or a full account) is a normal
+  /// state, not an error.
+  Future<Uint8List?> downloadProductImage({
+    required String uid,
+    required String productId,
+  }) async {
+    try {
+      return await _productImageRef(uid, productId).getData(_kMaxPhotoBytes);
+    } on FirebaseException catch (error) {
+      if (error.code == 'object-not-found') return null;
+      rethrow;
+    }
+  }
+
+  /// Removes a product's photo object. Already-gone is success, not failure
+  /// — the same contract as [deleteStoreLogo].
+  Future<void> deleteProductImage({
+    required String uid,
+    required String productId,
+  }) async {
+    try {
+      await _productImageRef(uid, productId).delete();
+    } on FirebaseException catch (error) {
+      if (error.code == 'object-not-found') return;
+      rethrow;
+    }
+  }
+
   /// The receipt ids that already have a photo object in the bucket.
   ///
   /// Lets the upload stage be STATELESS: rather than tracking an
@@ -208,15 +266,52 @@ class FirebaseStorageService {
     }
   }
 
-  /// Total bytes this user occupies, summed from real object metadata.
+  /// Total bytes this user occupies, summed from real object metadata
+  /// across EVERY folder this class writes to.
+  ///
+  /// It used to sum `receipts/` alone, on the reasoning that the Profile
+  /// copy calls the figure receipt photos. That was wrong in the direction
+  /// that matters: the quota Firebase actually enforces is the whole
+  /// bucket, so a store logo or a product photo consumed it while the bar
+  /// reported 0 MB. A user with only logos uploaded saw an empty bar, and a
+  /// user near the ceiling could be refused an upload the bar said there was
+  /// room for. A measurement that omits real bytes is not a narrower
+  /// measurement — it is an inaccurate one.
+  ///
+  /// The copy was corrected to match (`storageEstimateNote`), rather than
+  /// the number being trimmed to match the copy.
   ///
   /// Paginated: `listAll()` would fetch every object in one unbounded call.
   Future<int> usedBytes(String uid) async {
     var total = 0;
+    for (final folder in _billedFolders(uid)) {
+      total += await _folderBytes(folder);
+    }
+    return total;
+  }
+
+  /// Every folder whose objects count against the user's bucket quota.
+  ///
+  /// `profile/` holds the avatar, which is one small object but is still
+  /// billed; leaving it out would reintroduce the same class of error this
+  /// method exists to fix.
+  List<Reference> _billedFolders(String uid) => [
+    _receiptsFolder(uid),
+    _firebaseStorage.ref().child('users/$uid/stores'),
+    _firebaseStorage.ref().child('users/$uid/products'),
+    _firebaseStorage.ref().child('users/$uid/profile'),
+  ];
+
+  /// Sums one folder's object sizes, a page at a time.
+  ///
+  /// A folder that does not exist yet lists as empty rather than throwing,
+  /// which is the normal state for a user who has never added a logo.
+  Future<int> _folderBytes(Reference folder) async {
+    var total = 0;
     String? pageToken;
 
     do {
-      final page = await _receiptsFolder(uid).list(
+      final page = await folder.list(
         ListOptions(maxResults: 100, pageToken: pageToken),
       );
       for (final item in page.items) {

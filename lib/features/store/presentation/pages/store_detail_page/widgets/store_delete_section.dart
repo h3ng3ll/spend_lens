@@ -9,6 +9,7 @@ import '../../../../../../core/services/ui_message_service.dart';
 import '../../../../../../core/widgets/app_container.dart';
 import '../../../../../../core/widgets/confirm_dialog.dart';
 import '../../../../domain/use_cases/delete_store_use_case.dart';
+import '../../../../../auth/presentation/bloc/auth_bloc/auth_bloc.dart';
 import '../../../bloc/stores_bloc/stores_bloc.dart';
 
 /// The destructive delete-store control (design_spendlens.md's Stores
@@ -48,6 +49,9 @@ class StoreDeleteSection extends StatelessWidget {
   Future<void> _onDelete(BuildContext context) async {
     final lo = AppLocalizations.of(context);
     final bloc = context.read<StoresBloc>();
+    // Read here, before the awaits: the delete removes the store's logo from
+    // the bucket, which needs the signed-in uid.
+    final uid = context.read<AuthBloc>().state.uid;
 
     // Counted before the dialog is built so the copy can name the real
     // number. `impact` is read-only — nothing is removed by asking.
@@ -64,7 +68,7 @@ class StoreDeleteSection extends StatelessWidget {
           : lo.deleteStoreBodyEmpty,
       confirmLabel: lo.deleteStore,
       cancelLabel: lo.cancel,
-      onConfirm: () => bloc.add(StoresEvent.delete(storeId)),
+      onConfirm: () => bloc.add(StoresEvent.delete(storeId, uid: uid)),
     );
   }
 

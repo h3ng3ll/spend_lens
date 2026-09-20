@@ -21,6 +21,8 @@ import '../domain/repositories/i_sync_remote_repository.dart';
 import '../domain/use_cases/pull_remote_changes_use_case.dart';
 import '../domain/use_cases/push_pending_changes_use_case.dart';
 import '../domain/use_cases/download_receipt_photos_use_case.dart';
+import '../../../core/services/product_image_store/product_image_store.dart';
+import '../domain/use_cases/download_product_images_use_case.dart';
 import '../domain/use_cases/download_store_logos_use_case.dart';
 import '../domain/use_cases/upload_receipt_photos_use_case.dart';
 import '../domain/use_cases/run_full_sync_use_case.dart';
@@ -83,6 +85,13 @@ void initSyncFeature({required bool isFirebaseReady}) {
     ),
   );
   getIt.registerLazySingleton(
+    () => DownloadProductImagesUseCase(
+      productLocalRepository: getIt<IProductLocalRepository>(),
+      imageStore: getIt<ProductImageStore>(),
+      storageService: getIt<FirebaseStorageService>(),
+    ),
+  );
+  getIt.registerLazySingleton(
     () => RunFullSyncUseCase(
       remoteRepository: getIt<ISyncRemoteRepository>(),
       pushPendingChanges: getIt<PushPendingChangesUseCase>(),
@@ -90,6 +99,7 @@ void initSyncFeature({required bool isFirebaseReady}) {
       uploadReceiptPhotos: getIt<UploadReceiptPhotosUseCase>(),
       downloadReceiptPhotos: getIt<DownloadReceiptPhotosUseCase>(),
       downloadStoreLogos: getIt<DownloadStoreLogosUseCase>(),
+      downloadProductImages: getIt<DownloadProductImagesUseCase>(),
       adapters: getIt<SyncEntityAdapters>(),
       settingsLocalRepository: getIt<ISettingsLocalRepository>(),
       loggerService: getIt<LoggerService>(),

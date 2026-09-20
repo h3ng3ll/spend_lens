@@ -8,7 +8,10 @@ import '../../../../store/domain/repositories/i_store_local_repository.dart';
 import '../../../domain/models/product/e_unit.dart';
 import '../../../domain/models/product/product.dart';
 import '../../../domain/models/product_detail_snapshot/product_detail_snapshot.dart';
+import '../../../../../core/services/product_image_store/product_image_store.dart';
 import '../../../domain/repositories/i_product_local_repository.dart';
+import '../../../domain/use_cases/remove_product_image_use_case.dart';
+import '../../../domain/use_cases/save_product_image_use_case.dart';
 
 part 'product_detail_event.dart';
 
@@ -38,6 +41,9 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
   final IProductLocalRepository _productLocalRepository;
   final IPriceObservationLocalRepository _priceObservationLocalRepository;
   final IStoreLocalRepository _storeLocalRepository;
+  final ProductImageStore _imageStore;
+  final SaveProductImageUseCase _saveProductImage;
+  final RemoveProductImageUseCase _removeProductImage;
   final DateTime Function() _now;
 
   ProductDetailBloc({
@@ -45,6 +51,9 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     required this._productLocalRepository,
     required this._priceObservationLocalRepository,
     required this._storeLocalRepository,
+    required this._imageStore,
+    required this._saveProductImage,
+    required this._removeProductImage,
     this._now = DateTime.now,
   }) : super(const ProductDetailState()) {
     on<_Watch>(_onWatch);
@@ -55,6 +64,8 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     on<_SetCategory>(_onSetCategory);
     on<_SetUnit>(_onSetUnit);
     on<_SetStore>(_onSetStore);
+    on<_SetImage>(_onSetImage);
+    on<_RemoveImage>(_onRemoveImage);
     on<_DeleteProduct>(_onDeleteProduct);
   }
 
@@ -189,6 +200,51 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     });
   }
 
+  /// Commits the photo the edit page STAGED, then discards the staging slot.
+  ///
+  /// The staged file is one shared slot, so it is read into memory here and
+  /// handed to the use case, which compresses it, writes the per-product slot
+  /// and uploads. Leaving the staging file behind would show this photo over
+  /// the NEXT product opened.
+  Future<void> _onSetImage(
+    _SetImage event,
+    Emitter<ProductDetailState> emit,
+  ) async {
+    await _write(emit, () async {
+      final product = state.snapshot?.product;
+      if (product == null) return;
+
+      final bytes = await _imageStore.readBytes(event.stagedFilename);
+      // A staged file that vanished (a cleared cache, a failed copy) leaves
+      // the product exactly as it was rather than clearing its photo.
+      if (bytes == null) return;
+
+      final updated = await _saveProductImage(
+        product: product,
+        bytes: bytes,
+        uid: event.uid,
+      );
+      await _productLocalRepository.save(updated.copyWith(updatedAt: _now()));
+      await _imageStore.discardStaged();
+    });
+  }
+
+  Future<void> _onRemoveImage(
+    _RemoveImage event,
+    Emitter<ProductDetailState> emit,
+  ) async {
+    await _write(emit, () async {
+      final product = state.snapshot?.product;
+      if (product == null || product.imageFilename == null) return;
+
+      final updated = await _removeProductImage(
+        product: product,
+        uid: event.uid,
+      );
+      await _productLocalRepository.save(updated.copyWith(updatedAt: _now()));
+    });
+  }
+
   Future<void> _onSetUnit(
     _SetUnit event,
     Emitter<ProductDetailState> emit,
@@ -238,6 +294,15 @@ class ProductDetailBloc extends Bloc<ProductDetailEvent, ProductDetailState> {
     if (product == null) return;
 
     try {
+      // The PHOTO first, and its failure is swallowed. Nothing in the sync
+      // cycle removes a Storage object on a record delete, so without this
+      // the image outlives every record naming it — billed to the user's
+      // quota with no code path left that could ever find it. A photo that
+      // cannot be deleted must not abort the delete the user asked for.
+      try {
+        await _removeProductImage(product: product, uid: event.uid);
+      } catch (_) {}
+
       // Unwind the links FIRST. A partner left holding this id would render
       // a phantom row naming a product that no longer exists.
       for (final partnerId in product.linkedProductIds) {

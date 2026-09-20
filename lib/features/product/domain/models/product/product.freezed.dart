@@ -40,7 +40,23 @@ mixin _$Product {
 /// under per-store products: the comparator groups observations over the
 /// linked SET rather than a single `productId`. Empty = compares against
 /// nothing, which renders as "Only bought here".
- List<String> get linkedProductIds; DateTime get updatedAt; DateTime? get deletedAt; ESyncStatus get syncStatus;
+ List<String> get linkedProductIds;/// FILENAME of the product's photo on disk (`product_<id>.jpg`),
+/// resolved against the CURRENT Documents directory by
+/// [ProductImageStore] — never a full path, which dangles across iOS
+/// reinstalls, and never the bytes, which must not reach Hive or a bloc
+/// state (see `AvatarImageStore` for the two defects that rule
+/// prevents).
+///
+/// Null = no photo, which is what makes the remove affordance
+/// conditional.
+ String? get imageFilename;/// Firebase Storage download URL for `users/{uid}/products/{id}.jpg`.
+///
+/// Carried on the record so the photo travels with the product through
+/// the ordinary record sync: a device that pulls this row learns a photo
+/// exists, and the photo pass fetches the bytes. Empty = not uploaded
+/// yet (offline, or the account is full), which is a normal state and
+/// not an error.
+ String get imageUrl; DateTime get updatedAt; DateTime? get deletedAt; ESyncStatus get syncStatus;
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -53,16 +69,16 @@ $ProductCopyWith<Product> get copyWith => _$ProductCopyWithImpl<Product>(this as
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.id, id) || other.id == id)&&(identical(other.normalizedName, normalizedName) || other.normalizedName == normalizedName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&const DeepCollectionEquality().equals(other.aliases, aliases)&&(identical(other.defaultCategoryId, defaultCategoryId) || other.defaultCategoryId == defaultCategoryId)&&(identical(other.defaultUnit, defaultUnit) || other.defaultUnit == defaultUnit)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other.linkedProductIds, linkedProductIds)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Product&&(identical(other.id, id) || other.id == id)&&(identical(other.normalizedName, normalizedName) || other.normalizedName == normalizedName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&const DeepCollectionEquality().equals(other.aliases, aliases)&&(identical(other.defaultCategoryId, defaultCategoryId) || other.defaultCategoryId == defaultCategoryId)&&(identical(other.defaultUnit, defaultUnit) || other.defaultUnit == defaultUnit)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other.linkedProductIds, linkedProductIds)&&(identical(other.imageFilename, imageFilename) || other.imageFilename == imageFilename)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,normalizedName,displayName,const DeepCollectionEquality().hash(aliases),defaultCategoryId,defaultUnit,storeId,const DeepCollectionEquality().hash(linkedProductIds),updatedAt,deletedAt,syncStatus);
+int get hashCode => Object.hash(runtimeType,id,normalizedName,displayName,const DeepCollectionEquality().hash(aliases),defaultCategoryId,defaultUnit,storeId,const DeepCollectionEquality().hash(linkedProductIds),imageFilename,imageUrl,updatedAt,deletedAt,syncStatus);
 
 @override
 String toString() {
-  return 'Product(id: $id, normalizedName: $normalizedName, displayName: $displayName, aliases: $aliases, defaultCategoryId: $defaultCategoryId, defaultUnit: $defaultUnit, storeId: $storeId, linkedProductIds: $linkedProductIds, updatedAt: $updatedAt, deletedAt: $deletedAt, syncStatus: $syncStatus)';
+  return 'Product(id: $id, normalizedName: $normalizedName, displayName: $displayName, aliases: $aliases, defaultCategoryId: $defaultCategoryId, defaultUnit: $defaultUnit, storeId: $storeId, linkedProductIds: $linkedProductIds, imageFilename: $imageFilename, imageUrl: $imageUrl, updatedAt: $updatedAt, deletedAt: $deletedAt, syncStatus: $syncStatus)';
 }
 
 
@@ -73,7 +89,7 @@ abstract mixin class $ProductCopyWith<$Res>  {
   factory $ProductCopyWith(Product value, $Res Function(Product) _then) = _$ProductCopyWithImpl;
 @useResult
 $Res call({
- String id, String normalizedName, String displayName, List<String> aliases, String? defaultCategoryId, EUnit defaultUnit, String? storeId, List<String> linkedProductIds, DateTime updatedAt, DateTime? deletedAt, ESyncStatus syncStatus
+ String id, String normalizedName, String displayName, List<String> aliases, String? defaultCategoryId, EUnit defaultUnit, String? storeId, List<String> linkedProductIds, String? imageFilename, String imageUrl, DateTime updatedAt, DateTime? deletedAt, ESyncStatus syncStatus
 });
 
 
@@ -90,7 +106,7 @@ class _$ProductCopyWithImpl<$Res>
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? normalizedName = null,Object? displayName = null,Object? aliases = null,Object? defaultCategoryId = freezed,Object? defaultUnit = null,Object? storeId = freezed,Object? linkedProductIds = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? syncStatus = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? normalizedName = null,Object? displayName = null,Object? aliases = null,Object? defaultCategoryId = freezed,Object? defaultUnit = null,Object? storeId = freezed,Object? linkedProductIds = null,Object? imageFilename = freezed,Object? imageUrl = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? syncStatus = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,normalizedName: null == normalizedName ? _self.normalizedName : normalizedName // ignore: cast_nullable_to_non_nullable
@@ -100,7 +116,9 @@ as List<String>,defaultCategoryId: freezed == defaultCategoryId ? _self.defaultC
 as String?,defaultUnit: null == defaultUnit ? _self.defaultUnit : defaultUnit // ignore: cast_nullable_to_non_nullable
 as EUnit,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String?,linkedProductIds: null == linkedProductIds ? _self.linkedProductIds : linkedProductIds // ignore: cast_nullable_to_non_nullable
-as List<String>,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as List<String>,imageFilename: freezed == imageFilename ? _self.imageFilename : imageFilename // ignore: cast_nullable_to_non_nullable
+as String?,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
 as ESyncStatus,
@@ -185,10 +203,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String normalizedName,  String displayName,  List<String> aliases,  String? defaultCategoryId,  EUnit defaultUnit,  String? storeId,  List<String> linkedProductIds,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String normalizedName,  String displayName,  List<String> aliases,  String? defaultCategoryId,  EUnit defaultUnit,  String? storeId,  List<String> linkedProductIds,  String? imageFilename,  String imageUrl,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_that.defaultCategoryId,_that.defaultUnit,_that.storeId,_that.linkedProductIds,_that.updatedAt,_that.deletedAt,_that.syncStatus);case _:
+return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_that.defaultCategoryId,_that.defaultUnit,_that.storeId,_that.linkedProductIds,_that.imageFilename,_that.imageUrl,_that.updatedAt,_that.deletedAt,_that.syncStatus);case _:
   return orElse();
 
 }
@@ -206,10 +224,10 @@ return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String normalizedName,  String displayName,  List<String> aliases,  String? defaultCategoryId,  EUnit defaultUnit,  String? storeId,  List<String> linkedProductIds,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String normalizedName,  String displayName,  List<String> aliases,  String? defaultCategoryId,  EUnit defaultUnit,  String? storeId,  List<String> linkedProductIds,  String? imageFilename,  String imageUrl,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)  $default,) {final _that = this;
 switch (_that) {
 case _Product():
-return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_that.defaultCategoryId,_that.defaultUnit,_that.storeId,_that.linkedProductIds,_that.updatedAt,_that.deletedAt,_that.syncStatus);}
+return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_that.defaultCategoryId,_that.defaultUnit,_that.storeId,_that.linkedProductIds,_that.imageFilename,_that.imageUrl,_that.updatedAt,_that.deletedAt,_that.syncStatus);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -223,10 +241,10 @@ return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String normalizedName,  String displayName,  List<String> aliases,  String? defaultCategoryId,  EUnit defaultUnit,  String? storeId,  List<String> linkedProductIds,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String normalizedName,  String displayName,  List<String> aliases,  String? defaultCategoryId,  EUnit defaultUnit,  String? storeId,  List<String> linkedProductIds,  String? imageFilename,  String imageUrl,  DateTime updatedAt,  DateTime? deletedAt,  ESyncStatus syncStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _Product() when $default != null:
-return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_that.defaultCategoryId,_that.defaultUnit,_that.storeId,_that.linkedProductIds,_that.updatedAt,_that.deletedAt,_that.syncStatus);case _:
+return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_that.defaultCategoryId,_that.defaultUnit,_that.storeId,_that.linkedProductIds,_that.imageFilename,_that.imageUrl,_that.updatedAt,_that.deletedAt,_that.syncStatus);case _:
   return null;
 
 }
@@ -238,7 +256,7 @@ return $default(_that.id,_that.normalizedName,_that.displayName,_that.aliases,_t
 @JsonSerializable()
 
 class _Product implements Product {
-  const _Product({required this.id, required this.normalizedName, required this.displayName, final  List<String> aliases = const <String>[], this.defaultCategoryId, this.defaultUnit = EUnit.piece, this.storeId, final  List<String> linkedProductIds = const <String>[], required this.updatedAt, this.deletedAt, this.syncStatus = ESyncStatus.synced}): _aliases = aliases,_linkedProductIds = linkedProductIds;
+  const _Product({required this.id, required this.normalizedName, required this.displayName, final  List<String> aliases = const <String>[], this.defaultCategoryId, this.defaultUnit = EUnit.piece, this.storeId, final  List<String> linkedProductIds = const <String>[], this.imageFilename, this.imageUrl = '', required this.updatedAt, this.deletedAt, this.syncStatus = ESyncStatus.synced}): _aliases = aliases,_linkedProductIds = linkedProductIds;
   factory _Product.fromJson(Map<String, dynamic> json) => _$ProductFromJson(json);
 
 @override final  String id;
@@ -298,6 +316,24 @@ class _Product implements Product {
   return EqualUnmodifiableListView(_linkedProductIds);
 }
 
+/// FILENAME of the product's photo on disk (`product_<id>.jpg`),
+/// resolved against the CURRENT Documents directory by
+/// [ProductImageStore] — never a full path, which dangles across iOS
+/// reinstalls, and never the bytes, which must not reach Hive or a bloc
+/// state (see `AvatarImageStore` for the two defects that rule
+/// prevents).
+///
+/// Null = no photo, which is what makes the remove affordance
+/// conditional.
+@override final  String? imageFilename;
+/// Firebase Storage download URL for `users/{uid}/products/{id}.jpg`.
+///
+/// Carried on the record so the photo travels with the product through
+/// the ordinary record sync: a device that pulls this row learns a photo
+/// exists, and the photo pass fetches the bytes. Empty = not uploaded
+/// yet (offline, or the account is full), which is a normal state and
+/// not an error.
+@override@JsonKey() final  String imageUrl;
 @override final  DateTime updatedAt;
 @override final  DateTime? deletedAt;
 @override@JsonKey() final  ESyncStatus syncStatus;
@@ -315,16 +351,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.id, id) || other.id == id)&&(identical(other.normalizedName, normalizedName) || other.normalizedName == normalizedName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&const DeepCollectionEquality().equals(other._aliases, _aliases)&&(identical(other.defaultCategoryId, defaultCategoryId) || other.defaultCategoryId == defaultCategoryId)&&(identical(other.defaultUnit, defaultUnit) || other.defaultUnit == defaultUnit)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other._linkedProductIds, _linkedProductIds)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Product&&(identical(other.id, id) || other.id == id)&&(identical(other.normalizedName, normalizedName) || other.normalizedName == normalizedName)&&(identical(other.displayName, displayName) || other.displayName == displayName)&&const DeepCollectionEquality().equals(other._aliases, _aliases)&&(identical(other.defaultCategoryId, defaultCategoryId) || other.defaultCategoryId == defaultCategoryId)&&(identical(other.defaultUnit, defaultUnit) || other.defaultUnit == defaultUnit)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&const DeepCollectionEquality().equals(other._linkedProductIds, _linkedProductIds)&&(identical(other.imageFilename, imageFilename) || other.imageFilename == imageFilename)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,id,normalizedName,displayName,const DeepCollectionEquality().hash(_aliases),defaultCategoryId,defaultUnit,storeId,const DeepCollectionEquality().hash(_linkedProductIds),updatedAt,deletedAt,syncStatus);
+int get hashCode => Object.hash(runtimeType,id,normalizedName,displayName,const DeepCollectionEquality().hash(_aliases),defaultCategoryId,defaultUnit,storeId,const DeepCollectionEquality().hash(_linkedProductIds),imageFilename,imageUrl,updatedAt,deletedAt,syncStatus);
 
 @override
 String toString() {
-  return 'Product(id: $id, normalizedName: $normalizedName, displayName: $displayName, aliases: $aliases, defaultCategoryId: $defaultCategoryId, defaultUnit: $defaultUnit, storeId: $storeId, linkedProductIds: $linkedProductIds, updatedAt: $updatedAt, deletedAt: $deletedAt, syncStatus: $syncStatus)';
+  return 'Product(id: $id, normalizedName: $normalizedName, displayName: $displayName, aliases: $aliases, defaultCategoryId: $defaultCategoryId, defaultUnit: $defaultUnit, storeId: $storeId, linkedProductIds: $linkedProductIds, imageFilename: $imageFilename, imageUrl: $imageUrl, updatedAt: $updatedAt, deletedAt: $deletedAt, syncStatus: $syncStatus)';
 }
 
 
@@ -335,7 +371,7 @@ abstract mixin class _$ProductCopyWith<$Res> implements $ProductCopyWith<$Res> {
   factory _$ProductCopyWith(_Product value, $Res Function(_Product) _then) = __$ProductCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String normalizedName, String displayName, List<String> aliases, String? defaultCategoryId, EUnit defaultUnit, String? storeId, List<String> linkedProductIds, DateTime updatedAt, DateTime? deletedAt, ESyncStatus syncStatus
+ String id, String normalizedName, String displayName, List<String> aliases, String? defaultCategoryId, EUnit defaultUnit, String? storeId, List<String> linkedProductIds, String? imageFilename, String imageUrl, DateTime updatedAt, DateTime? deletedAt, ESyncStatus syncStatus
 });
 
 
@@ -352,7 +388,7 @@ class __$ProductCopyWithImpl<$Res>
 
 /// Create a copy of Product
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? normalizedName = null,Object? displayName = null,Object? aliases = null,Object? defaultCategoryId = freezed,Object? defaultUnit = null,Object? storeId = freezed,Object? linkedProductIds = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? syncStatus = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? normalizedName = null,Object? displayName = null,Object? aliases = null,Object? defaultCategoryId = freezed,Object? defaultUnit = null,Object? storeId = freezed,Object? linkedProductIds = null,Object? imageFilename = freezed,Object? imageUrl = null,Object? updatedAt = null,Object? deletedAt = freezed,Object? syncStatus = null,}) {
   return _then(_Product(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,normalizedName: null == normalizedName ? _self.normalizedName : normalizedName // ignore: cast_nullable_to_non_nullable
@@ -362,7 +398,9 @@ as List<String>,defaultCategoryId: freezed == defaultCategoryId ? _self.defaultC
 as String?,defaultUnit: null == defaultUnit ? _self.defaultUnit : defaultUnit // ignore: cast_nullable_to_non_nullable
 as EUnit,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
 as String?,linkedProductIds: null == linkedProductIds ? _self._linkedProductIds : linkedProductIds // ignore: cast_nullable_to_non_nullable
-as List<String>,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
+as List<String>,imageFilename: freezed == imageFilename ? _self.imageFilename : imageFilename // ignore: cast_nullable_to_non_nullable
+as String?,imageUrl: null == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
+as String,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,syncStatus: null == syncStatus ? _self.syncStatus : syncStatus // ignore: cast_nullable_to_non_nullable
 as ESyncStatus,

@@ -122,12 +122,12 @@ return create(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String name,  String? storeId)?  quickCreate,TResult Function( String name,  String? storeId,  String? categoryId,  EUnit unit,  double? firstPrice,  DateTime observedAt,  String currencyCode)?  create,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String name,  String? storeId)?  quickCreate,TResult Function( String name,  String? storeId,  String? categoryId,  EUnit unit,  double? firstPrice,  DateTime observedAt,  String currencyCode,  String? stagedImageFilename,  String uid)?  create,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _QuickCreate() when quickCreate != null:
 return quickCreate(_that.name,_that.storeId);case _Create() when create != null:
-return create(_that.name,_that.storeId,_that.categoryId,_that.unit,_that.firstPrice,_that.observedAt,_that.currencyCode);case _:
+return create(_that.name,_that.storeId,_that.categoryId,_that.unit,_that.firstPrice,_that.observedAt,_that.currencyCode,_that.stagedImageFilename,_that.uid);case _:
   return orElse();
 
 }
@@ -145,12 +145,12 @@ return create(_that.name,_that.storeId,_that.categoryId,_that.unit,_that.firstPr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String name,  String? storeId)  quickCreate,required TResult Function( String name,  String? storeId,  String? categoryId,  EUnit unit,  double? firstPrice,  DateTime observedAt,  String currencyCode)  create,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String name,  String? storeId)  quickCreate,required TResult Function( String name,  String? storeId,  String? categoryId,  EUnit unit,  double? firstPrice,  DateTime observedAt,  String currencyCode,  String? stagedImageFilename,  String uid)  create,}) {final _that = this;
 switch (_that) {
 case _Watch():
 return watch();case _QuickCreate():
 return quickCreate(_that.name,_that.storeId);case _Create():
-return create(_that.name,_that.storeId,_that.categoryId,_that.unit,_that.firstPrice,_that.observedAt,_that.currencyCode);}
+return create(_that.name,_that.storeId,_that.categoryId,_that.unit,_that.firstPrice,_that.observedAt,_that.currencyCode,_that.stagedImageFilename,_that.uid);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -164,12 +164,12 @@ return create(_that.name,_that.storeId,_that.categoryId,_that.unit,_that.firstPr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String name,  String? storeId)?  quickCreate,TResult? Function( String name,  String? storeId,  String? categoryId,  EUnit unit,  double? firstPrice,  DateTime observedAt,  String currencyCode)?  create,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String name,  String? storeId)?  quickCreate,TResult? Function( String name,  String? storeId,  String? categoryId,  EUnit unit,  double? firstPrice,  DateTime observedAt,  String currencyCode,  String? stagedImageFilename,  String uid)?  create,}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _QuickCreate() when quickCreate != null:
 return quickCreate(_that.name,_that.storeId);case _Create() when create != null:
-return create(_that.name,_that.storeId,_that.categoryId,_that.unit,_that.firstPrice,_that.observedAt,_that.currencyCode);case _:
+return create(_that.name,_that.storeId,_that.categoryId,_that.unit,_that.firstPrice,_that.observedAt,_that.currencyCode,_that.stagedImageFilename,_that.uid);case _:
   return null;
 
 }
@@ -281,7 +281,7 @@ as String?,
 
 
 class _Create implements ProductsEvent {
-  const _Create({required this.name, required this.storeId, required this.categoryId, required this.unit, required this.firstPrice, required this.observedAt, required this.currencyCode});
+  const _Create({required this.name, required this.storeId, required this.categoryId, required this.unit, required this.firstPrice, required this.observedAt, required this.currencyCode, this.stagedImageFilename, this.uid = ''});
   
 
  final  String name;
@@ -291,6 +291,11 @@ class _Create implements ProductsEvent {
  final  double? firstPrice;
  final  DateTime observedAt;
  final  String currencyCode;
+/// A photo STAGED by the new-product form, committed once the product
+/// has an id. Null when no photo was picked.
+ final  String? stagedImageFilename;
+/// Empty when signed out — the photo is then kept locally only.
+@JsonKey() final  String uid;
 
 /// Create a copy of ProductsEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -302,16 +307,16 @@ _$CreateCopyWith<_Create> get copyWith => __$CreateCopyWithImpl<_Create>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Create&&(identical(other.name, name) || other.name == name)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.firstPrice, firstPrice) || other.firstPrice == firstPrice)&&(identical(other.observedAt, observedAt) || other.observedAt == observedAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Create&&(identical(other.name, name) || other.name == name)&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.categoryId, categoryId) || other.categoryId == categoryId)&&(identical(other.unit, unit) || other.unit == unit)&&(identical(other.firstPrice, firstPrice) || other.firstPrice == firstPrice)&&(identical(other.observedAt, observedAt) || other.observedAt == observedAt)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.stagedImageFilename, stagedImageFilename) || other.stagedImageFilename == stagedImageFilename)&&(identical(other.uid, uid) || other.uid == uid));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,name,storeId,categoryId,unit,firstPrice,observedAt,currencyCode);
+int get hashCode => Object.hash(runtimeType,name,storeId,categoryId,unit,firstPrice,observedAt,currencyCode,stagedImageFilename,uid);
 
 @override
 String toString() {
-  return 'ProductsEvent.create(name: $name, storeId: $storeId, categoryId: $categoryId, unit: $unit, firstPrice: $firstPrice, observedAt: $observedAt, currencyCode: $currencyCode)';
+  return 'ProductsEvent.create(name: $name, storeId: $storeId, categoryId: $categoryId, unit: $unit, firstPrice: $firstPrice, observedAt: $observedAt, currencyCode: $currencyCode, stagedImageFilename: $stagedImageFilename, uid: $uid)';
 }
 
 
@@ -322,7 +327,7 @@ abstract mixin class _$CreateCopyWith<$Res> implements $ProductsEventCopyWith<$R
   factory _$CreateCopyWith(_Create value, $Res Function(_Create) _then) = __$CreateCopyWithImpl;
 @useResult
 $Res call({
- String name, String? storeId, String? categoryId, EUnit unit, double? firstPrice, DateTime observedAt, String currencyCode
+ String name, String? storeId, String? categoryId, EUnit unit, double? firstPrice, DateTime observedAt, String currencyCode, String? stagedImageFilename, String uid
 });
 
 
@@ -339,7 +344,7 @@ class __$CreateCopyWithImpl<$Res>
 
 /// Create a copy of ProductsEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? name = null,Object? storeId = freezed,Object? categoryId = freezed,Object? unit = null,Object? firstPrice = freezed,Object? observedAt = null,Object? currencyCode = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? name = null,Object? storeId = freezed,Object? categoryId = freezed,Object? unit = null,Object? firstPrice = freezed,Object? observedAt = null,Object? currencyCode = null,Object? stagedImageFilename = freezed,Object? uid = null,}) {
   return _then(_Create(
 name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as String,storeId: freezed == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
@@ -348,6 +353,8 @@ as String?,unit: null == unit ? _self.unit : unit // ignore: cast_nullable_to_no
 as EUnit,firstPrice: freezed == firstPrice ? _self.firstPrice : firstPrice // ignore: cast_nullable_to_non_nullable
 as double?,observedAt: null == observedAt ? _self.observedAt : observedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
+as String,stagedImageFilename: freezed == stagedImageFilename ? _self.stagedImageFilename : stagedImageFilename // ignore: cast_nullable_to_non_nullable
+as String?,uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

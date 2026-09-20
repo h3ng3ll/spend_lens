@@ -55,7 +55,7 @@ extension ProductDetailEventPatterns on ProductDetailEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Watch value)?  watch,TResult Function( _AddPrice value)?  addPrice,TResult Function( _UpdatePrice value)?  updatePrice,TResult Function( _DeletePrice value)?  deletePrice,TResult Function( _Rename value)?  rename,TResult Function( _SetCategory value)?  setCategory,TResult Function( _SetUnit value)?  setUnit,TResult Function( _SetStore value)?  setStore,TResult Function( _DeleteProduct value)?  deleteProduct,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Watch value)?  watch,TResult Function( _AddPrice value)?  addPrice,TResult Function( _UpdatePrice value)?  updatePrice,TResult Function( _DeletePrice value)?  deletePrice,TResult Function( _Rename value)?  rename,TResult Function( _SetCategory value)?  setCategory,TResult Function( _SetUnit value)?  setUnit,TResult Function( _SetStore value)?  setStore,TResult Function( _SetImage value)?  setImage,TResult Function( _RemoveImage value)?  removeImage,TResult Function( _DeleteProduct value)?  deleteProduct,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
@@ -66,7 +66,9 @@ return deletePrice(_that);case _Rename() when rename != null:
 return rename(_that);case _SetCategory() when setCategory != null:
 return setCategory(_that);case _SetUnit() when setUnit != null:
 return setUnit(_that);case _SetStore() when setStore != null:
-return setStore(_that);case _DeleteProduct() when deleteProduct != null:
+return setStore(_that);case _SetImage() when setImage != null:
+return setImage(_that);case _RemoveImage() when removeImage != null:
+return removeImage(_that);case _DeleteProduct() when deleteProduct != null:
 return deleteProduct(_that);case _:
   return orElse();
 
@@ -85,7 +87,7 @@ return deleteProduct(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Watch value)  watch,required TResult Function( _AddPrice value)  addPrice,required TResult Function( _UpdatePrice value)  updatePrice,required TResult Function( _DeletePrice value)  deletePrice,required TResult Function( _Rename value)  rename,required TResult Function( _SetCategory value)  setCategory,required TResult Function( _SetUnit value)  setUnit,required TResult Function( _SetStore value)  setStore,required TResult Function( _DeleteProduct value)  deleteProduct,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Watch value)  watch,required TResult Function( _AddPrice value)  addPrice,required TResult Function( _UpdatePrice value)  updatePrice,required TResult Function( _DeletePrice value)  deletePrice,required TResult Function( _Rename value)  rename,required TResult Function( _SetCategory value)  setCategory,required TResult Function( _SetUnit value)  setUnit,required TResult Function( _SetStore value)  setStore,required TResult Function( _SetImage value)  setImage,required TResult Function( _RemoveImage value)  removeImage,required TResult Function( _DeleteProduct value)  deleteProduct,}){
 final _that = this;
 switch (_that) {
 case _Watch():
@@ -96,7 +98,9 @@ return deletePrice(_that);case _Rename():
 return rename(_that);case _SetCategory():
 return setCategory(_that);case _SetUnit():
 return setUnit(_that);case _SetStore():
-return setStore(_that);case _DeleteProduct():
+return setStore(_that);case _SetImage():
+return setImage(_that);case _RemoveImage():
+return removeImage(_that);case _DeleteProduct():
 return deleteProduct(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -111,7 +115,7 @@ return deleteProduct(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Watch value)?  watch,TResult? Function( _AddPrice value)?  addPrice,TResult? Function( _UpdatePrice value)?  updatePrice,TResult? Function( _DeletePrice value)?  deletePrice,TResult? Function( _Rename value)?  rename,TResult? Function( _SetCategory value)?  setCategory,TResult? Function( _SetUnit value)?  setUnit,TResult? Function( _SetStore value)?  setStore,TResult? Function( _DeleteProduct value)?  deleteProduct,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Watch value)?  watch,TResult? Function( _AddPrice value)?  addPrice,TResult? Function( _UpdatePrice value)?  updatePrice,TResult? Function( _DeletePrice value)?  deletePrice,TResult? Function( _Rename value)?  rename,TResult? Function( _SetCategory value)?  setCategory,TResult? Function( _SetUnit value)?  setUnit,TResult? Function( _SetStore value)?  setStore,TResult? Function( _SetImage value)?  setImage,TResult? Function( _RemoveImage value)?  removeImage,TResult? Function( _DeleteProduct value)?  deleteProduct,}){
 final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
@@ -122,7 +126,9 @@ return deletePrice(_that);case _Rename() when rename != null:
 return rename(_that);case _SetCategory() when setCategory != null:
 return setCategory(_that);case _SetUnit() when setUnit != null:
 return setUnit(_that);case _SetStore() when setStore != null:
-return setStore(_that);case _DeleteProduct() when deleteProduct != null:
+return setStore(_that);case _SetImage() when setImage != null:
+return setImage(_that);case _RemoveImage() when removeImage != null:
+return removeImage(_that);case _DeleteProduct() when deleteProduct != null:
 return deleteProduct(_that);case _:
   return null;
 
@@ -140,7 +146,7 @@ return deleteProduct(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( double unitPrice,  DateTime observedAt,  String? storeId,  String currencyCode)?  addPrice,TResult Function( String observationId,  double unitPrice,  DateTime observedAt,  String? storeId)?  updatePrice,TResult Function( String observationId)?  deletePrice,TResult Function( String displayName)?  rename,TResult Function( String categoryId)?  setCategory,TResult Function( EUnit unit)?  setUnit,TResult Function( String? storeId)?  setStore,TResult Function()?  deleteProduct,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( double unitPrice,  DateTime observedAt,  String? storeId,  String currencyCode)?  addPrice,TResult Function( String observationId,  double unitPrice,  DateTime observedAt,  String? storeId)?  updatePrice,TResult Function( String observationId)?  deletePrice,TResult Function( String displayName)?  rename,TResult Function( String categoryId)?  setCategory,TResult Function( EUnit unit)?  setUnit,TResult Function( String? storeId)?  setStore,TResult Function( String stagedFilename,  String uid)?  setImage,TResult Function( String uid)?  removeImage,TResult Function( String uid)?  deleteProduct,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _AddPrice() when addPrice != null:
@@ -150,8 +156,10 @@ return deletePrice(_that.observationId);case _Rename() when rename != null:
 return rename(_that.displayName);case _SetCategory() when setCategory != null:
 return setCategory(_that.categoryId);case _SetUnit() when setUnit != null:
 return setUnit(_that.unit);case _SetStore() when setStore != null:
-return setStore(_that.storeId);case _DeleteProduct() when deleteProduct != null:
-return deleteProduct();case _:
+return setStore(_that.storeId);case _SetImage() when setImage != null:
+return setImage(_that.stagedFilename,_that.uid);case _RemoveImage() when removeImage != null:
+return removeImage(_that.uid);case _DeleteProduct() when deleteProduct != null:
+return deleteProduct(_that.uid);case _:
   return orElse();
 
 }
@@ -169,7 +177,7 @@ return deleteProduct();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( double unitPrice,  DateTime observedAt,  String? storeId,  String currencyCode)  addPrice,required TResult Function( String observationId,  double unitPrice,  DateTime observedAt,  String? storeId)  updatePrice,required TResult Function( String observationId)  deletePrice,required TResult Function( String displayName)  rename,required TResult Function( String categoryId)  setCategory,required TResult Function( EUnit unit)  setUnit,required TResult Function( String? storeId)  setStore,required TResult Function()  deleteProduct,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( double unitPrice,  DateTime observedAt,  String? storeId,  String currencyCode)  addPrice,required TResult Function( String observationId,  double unitPrice,  DateTime observedAt,  String? storeId)  updatePrice,required TResult Function( String observationId)  deletePrice,required TResult Function( String displayName)  rename,required TResult Function( String categoryId)  setCategory,required TResult Function( EUnit unit)  setUnit,required TResult Function( String? storeId)  setStore,required TResult Function( String stagedFilename,  String uid)  setImage,required TResult Function( String uid)  removeImage,required TResult Function( String uid)  deleteProduct,}) {final _that = this;
 switch (_that) {
 case _Watch():
 return watch();case _AddPrice():
@@ -179,8 +187,10 @@ return deletePrice(_that.observationId);case _Rename():
 return rename(_that.displayName);case _SetCategory():
 return setCategory(_that.categoryId);case _SetUnit():
 return setUnit(_that.unit);case _SetStore():
-return setStore(_that.storeId);case _DeleteProduct():
-return deleteProduct();}
+return setStore(_that.storeId);case _SetImage():
+return setImage(_that.stagedFilename,_that.uid);case _RemoveImage():
+return removeImage(_that.uid);case _DeleteProduct():
+return deleteProduct(_that.uid);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -194,7 +204,7 @@ return deleteProduct();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( double unitPrice,  DateTime observedAt,  String? storeId,  String currencyCode)?  addPrice,TResult? Function( String observationId,  double unitPrice,  DateTime observedAt,  String? storeId)?  updatePrice,TResult? Function( String observationId)?  deletePrice,TResult? Function( String displayName)?  rename,TResult? Function( String categoryId)?  setCategory,TResult? Function( EUnit unit)?  setUnit,TResult? Function( String? storeId)?  setStore,TResult? Function()?  deleteProduct,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( double unitPrice,  DateTime observedAt,  String? storeId,  String currencyCode)?  addPrice,TResult? Function( String observationId,  double unitPrice,  DateTime observedAt,  String? storeId)?  updatePrice,TResult? Function( String observationId)?  deletePrice,TResult? Function( String displayName)?  rename,TResult? Function( String categoryId)?  setCategory,TResult? Function( EUnit unit)?  setUnit,TResult? Function( String? storeId)?  setStore,TResult? Function( String stagedFilename,  String uid)?  setImage,TResult? Function( String uid)?  removeImage,TResult? Function( String uid)?  deleteProduct,}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _AddPrice() when addPrice != null:
@@ -204,8 +214,10 @@ return deletePrice(_that.observationId);case _Rename() when rename != null:
 return rename(_that.displayName);case _SetCategory() when setCategory != null:
 return setCategory(_that.categoryId);case _SetUnit() when setUnit != null:
 return setUnit(_that.unit);case _SetStore() when setStore != null:
-return setStore(_that.storeId);case _DeleteProduct() when deleteProduct != null:
-return deleteProduct();case _:
+return setStore(_that.storeId);case _SetImage() when setImage != null:
+return setImage(_that.stagedFilename,_that.uid);case _RemoveImage() when removeImage != null:
+return removeImage(_that.uid);case _DeleteProduct() when deleteProduct != null:
+return deleteProduct(_that.uid);case _:
   return null;
 
 }
@@ -722,34 +734,202 @@ as String?,
 /// @nodoc
 
 
-class _DeleteProduct implements ProductDetailEvent {
-  const _DeleteProduct();
+class _SetImage implements ProductDetailEvent {
+  const _SetImage({required this.stagedFilename, required this.uid});
   
 
+ final  String stagedFilename;
+ final  String uid;
 
-
+/// Create a copy of ProductDetailEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SetImageCopyWith<_SetImage> get copyWith => __$SetImageCopyWithImpl<_SetImage>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeleteProduct);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SetImage&&(identical(other.stagedFilename, stagedFilename) || other.stagedFilename == stagedFilename)&&(identical(other.uid, uid) || other.uid == uid));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,stagedFilename,uid);
 
 @override
 String toString() {
-  return 'ProductDetailEvent.deleteProduct()';
+  return 'ProductDetailEvent.setImage(stagedFilename: $stagedFilename, uid: $uid)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$SetImageCopyWith<$Res> implements $ProductDetailEventCopyWith<$Res> {
+  factory _$SetImageCopyWith(_SetImage value, $Res Function(_SetImage) _then) = __$SetImageCopyWithImpl;
+@useResult
+$Res call({
+ String stagedFilename, String uid
+});
 
 
+
+
+}
+/// @nodoc
+class __$SetImageCopyWithImpl<$Res>
+    implements _$SetImageCopyWith<$Res> {
+  __$SetImageCopyWithImpl(this._self, this._then);
+
+  final _SetImage _self;
+  final $Res Function(_SetImage) _then;
+
+/// Create a copy of ProductDetailEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? stagedFilename = null,Object? uid = null,}) {
+  return _then(_SetImage(
+stagedFilename: null == stagedFilename ? _self.stagedFilename : stagedFilename // ignore: cast_nullable_to_non_nullable
+as String,uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _RemoveImage implements ProductDetailEvent {
+  const _RemoveImage({required this.uid});
+  
+
+ final  String uid;
+
+/// Create a copy of ProductDetailEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$RemoveImageCopyWith<_RemoveImage> get copyWith => __$RemoveImageCopyWithImpl<_RemoveImage>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _RemoveImage&&(identical(other.uid, uid) || other.uid == uid));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,uid);
+
+@override
+String toString() {
+  return 'ProductDetailEvent.removeImage(uid: $uid)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$RemoveImageCopyWith<$Res> implements $ProductDetailEventCopyWith<$Res> {
+  factory _$RemoveImageCopyWith(_RemoveImage value, $Res Function(_RemoveImage) _then) = __$RemoveImageCopyWithImpl;
+@useResult
+$Res call({
+ String uid
+});
+
+
+
+
+}
+/// @nodoc
+class __$RemoveImageCopyWithImpl<$Res>
+    implements _$RemoveImageCopyWith<$Res> {
+  __$RemoveImageCopyWithImpl(this._self, this._then);
+
+  final _RemoveImage _self;
+  final $Res Function(_RemoveImage) _then;
+
+/// Create a copy of ProductDetailEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? uid = null,}) {
+  return _then(_RemoveImage(
+uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _DeleteProduct implements ProductDetailEvent {
+  const _DeleteProduct({required this.uid});
+  
+
+ final  String uid;
+
+/// Create a copy of ProductDetailEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DeleteProductCopyWith<_DeleteProduct> get copyWith => __$DeleteProductCopyWithImpl<_DeleteProduct>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeleteProduct&&(identical(other.uid, uid) || other.uid == uid));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,uid);
+
+@override
+String toString() {
+  return 'ProductDetailEvent.deleteProduct(uid: $uid)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$DeleteProductCopyWith<$Res> implements $ProductDetailEventCopyWith<$Res> {
+  factory _$DeleteProductCopyWith(_DeleteProduct value, $Res Function(_DeleteProduct) _then) = __$DeleteProductCopyWithImpl;
+@useResult
+$Res call({
+ String uid
+});
+
+
+
+
+}
+/// @nodoc
+class __$DeleteProductCopyWithImpl<$Res>
+    implements _$DeleteProductCopyWith<$Res> {
+  __$DeleteProductCopyWithImpl(this._self, this._then);
+
+  final _DeleteProduct _self;
+  final $Res Function(_DeleteProduct) _then;
+
+/// Create a copy of ProductDetailEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? uid = null,}) {
+  return _then(_DeleteProduct(
+uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
 
 /// @nodoc
 mixin _$ProductDetailState {

@@ -115,7 +115,7 @@ class StoresBloc extends Bloc<StoresEvent, StoresState> {
   /// runs -- see `StoreDeleteSection`.
   Future<void> _onDelete(_Delete event, Emitter<StoresState> emit) async {
     try {
-      await _deleteStore(event.storeId);
+      await _deleteStore(event.storeId, uid: event.uid);
       emit(state.copyWith(lastWriteFailed: false));
     } catch (_) {
       emit(state.copyWith(lastWriteFailed: true));

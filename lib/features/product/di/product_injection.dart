@@ -5,7 +5,12 @@ import '../../receipt/domain/repositories/i_receipt_item_local_repository.dart';
 import '../../receipt/domain/repositories/i_receipt_local_repository.dart';
 import '../data/repositories/product_local_repository.dart';
 import '../domain/repositories/i_product_local_repository.dart';
+import '../../../core/services/firebase/firebase_storage_service.dart';
+import '../../../core/services/image_compression_service.dart';
+import '../../../core/services/product_image_store/product_image_store.dart';
+import '../domain/use_cases/remove_product_image_use_case.dart';
 import '../domain/use_cases/rename_product_use_case.dart';
+import '../domain/use_cases/save_product_image_use_case.dart';
 import '../domain/use_cases/split_legacy_products_use_case.dart';
 
 /// Registers the product slice's repository (design_spendlens.md §3).
@@ -15,6 +20,23 @@ import '../domain/use_cases/split_legacy_products_use_case.dart';
 void initProductFeature() {
   getIt.registerLazySingleton<IProductLocalRepository>(
     () => ProductLocalRepository(getIt<HiveDatabase>()),
+  );
+
+  // Photo bytes live on the FILESYSTEM, never in Hive and never in a bloc
+  // state — see `ProductImageStore` for the defects that rule prevents.
+  getIt.registerLazySingleton(() => const ProductImageStore());
+  getIt.registerLazySingleton(
+    () => SaveProductImageUseCase(
+      compressionService: getIt<ImageCompressionService>(),
+      imageStore: getIt<ProductImageStore>(),
+      storageService: getIt<FirebaseStorageService>(),
+    ),
+  );
+  getIt.registerLazySingleton(
+    () => RemoveProductImageUseCase(
+      imageStore: getIt<ProductImageStore>(),
+      storageService: getIt<FirebaseStorageService>(),
+    ),
   );
 
   // The single owner of "apply a user-typed name to a product" — shared by

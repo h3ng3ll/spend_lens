@@ -1,5 +1,9 @@
 import '../../../core/di/injection.dart';
 import '../../category/domain/repositories/i_category_local_repository.dart';
+import '../../analytics/domain/repositories/i_price_observation_local_repository.dart';
+import '../../product/domain/repositories/i_product_local_repository.dart';
+import '../../receipt/domain/repositories/i_receipt_item_local_repository.dart';
+import '../../receipt/domain/repositories/i_receipt_local_repository.dart';
 import '../../expense/domain/repositories/i_expense_local_repository.dart';
 import '../../store/domain/repositories/i_store_local_repository.dart';
 import '../data/repositories/settings_local_repository.dart';
@@ -44,6 +48,11 @@ Future<AppSettings> initSettingsFeature() async {
       expenseLocalRepository: getIt<IExpenseLocalRepository>(),
       storeLocalRepository: getIt<IStoreLocalRepository>(),
       categoryLocalRepository: getIt<ICategoryLocalRepository>(),
+      receiptLocalRepository: getIt<IReceiptLocalRepository>(),
+      receiptItemLocalRepository: getIt<IReceiptItemLocalRepository>(),
+      productLocalRepository: getIt<IProductLocalRepository>(),
+      priceObservationLocalRepository:
+          getIt<IPriceObservationLocalRepository>(),
       settingsLocalRepository: getIt<ISettingsLocalRepository>(),
     ),
   );

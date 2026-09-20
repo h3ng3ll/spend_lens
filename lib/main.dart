@@ -44,7 +44,9 @@ import 'features/store/di/store_injection.dart';
 import 'features/store/domain/repositories/i_store_local_repository.dart';
 import 'features/store/domain/use_cases/delete_store_use_case.dart';
 import 'features/analytics/domain/repositories/i_price_observation_local_repository.dart';
+import 'core/services/product_image_store/product_image_store.dart';
 import 'features/product/domain/repositories/i_product_local_repository.dart';
+import 'features/product/domain/use_cases/save_product_image_use_case.dart';
 import 'features/product/domain/use_cases/split_legacy_products_use_case.dart';
 import 'features/settings/domain/repositories/i_settings_local_repository.dart';
 import 'features/product/presentation/bloc/products_bloc/products_bloc.dart';
@@ -217,6 +219,8 @@ void main() async {
     productLocalRepository: getIt<IProductLocalRepository>(),
     priceObservationLocalRepository:
         getIt<IPriceObservationLocalRepository>(),
+    imageStore: getIt<ProductImageStore>(),
+    saveProductImage: getIt<SaveProductImageUseCase>(),
   )..add(const ProductsEvent.watch());
   getIt.registerLazySingleton<ProductsBloc>(() => productsBloc);
 

@@ -575,6 +575,12 @@ class AppLocalizationsRo extends AppLocalizations {
   String get removeStoreLogo => 'Elimină logoul';
 
   @override
+  String get changeProductImage => 'Schimbă fotografia';
+
+  @override
+  String get removeProductImage => 'Elimină fotografia';
+
+  @override
   String get savingStore => 'Se salvează…';
 
   @override
@@ -1422,7 +1428,7 @@ class AppLocalizationsRo extends AppLocalizations {
 
   @override
   String get storageEstimateNote =>
-      'Fotografiile bonurilor sunt măsurate din contul tău. Înregistrările adaugă o cantitate neglijabilă.';
+      'Fotografiile sunt măsurate din contul tău — bonuri, logo-uri de magazine și imagini de produse. Înregistrările adaugă o cantitate neglijabilă.';
 
   @override
   String get purchasesUnavailable =>

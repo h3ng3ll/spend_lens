@@ -571,6 +571,12 @@ class AppLocalizationsDe extends AppLocalizations {
   String get removeStoreLogo => 'Logo entfernen';
 
   @override
+  String get changeProductImage => 'Foto ändern';
+
+  @override
+  String get removeProductImage => 'Foto entfernen';
+
+  @override
   String get savingStore => 'Wird gespeichert…';
 
   @override
@@ -1411,7 +1417,7 @@ class AppLocalizationsDe extends AppLocalizations {
 
   @override
   String get storageEstimateNote =>
-      'Belegfotos werden aus deinem Konto gemessen. Datensätze belegen verschwindend wenig.';
+      'Fotos werden aus deinem Konto gemessen — Belege, Shop-Logos und Produktbilder. Datensätze belegen verschwindend wenig.';
 
   @override
   String get purchasesUnavailable => 'Käufe sind derzeit nicht verfügbar.';

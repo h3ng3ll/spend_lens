@@ -93,7 +93,7 @@ types:
         index: 14
   Product:
     typeId: 3
-    nextIndex: 11
+    nextIndex: 13
     fields:
       id:
         index: 0
@@ -117,6 +117,10 @@ types:
         index: 9
       linkedProductIds:
         index: 10
+      imageFilename:
+        index: 11
+      imageUrl:
+        index: 12
   Store:
     typeId: 4
     nextIndex: 9

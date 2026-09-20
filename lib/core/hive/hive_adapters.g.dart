@@ -240,6 +240,8 @@ class ProductAdapter extends TypeAdapter<Product> {
       linkedProductIds: fields[10] == null
           ? []
           : (fields[10] as List).cast<String>(),
+      imageFilename: fields[11] as String?,
+      imageUrl: fields[12] == null ? '' : fields[12] as String,
       updatedAt: fields[6] as DateTime,
       deletedAt: fields[7] as DateTime?,
       syncStatus: fields[8] == null
@@ -251,7 +253,7 @@ class ProductAdapter extends TypeAdapter<Product> {
   @override
   void write(BinaryWriter writer, Product obj) {
     writer
-      ..writeByte(11)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -273,7 +275,11 @@ class ProductAdapter extends TypeAdapter<Product> {
       ..writeByte(9)
       ..write(obj.storeId)
       ..writeByte(10)
-      ..write(obj.linkedProductIds);
+      ..write(obj.linkedProductIds)
+      ..writeByte(11)
+      ..write(obj.imageFilename)
+      ..writeByte(12)
+      ..write(obj.imageUrl);
   }
 
   @override

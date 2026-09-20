@@ -20,5 +20,8 @@ sealed class StoresEvent with _$StoresEvent {
 
   /// Deletes a store by id (`StoreDeleteSection`'s delete action). The
   /// confirm dialog has already run by the time this is dispatched.
-  const factory StoresEvent.delete(String storeId) = _Delete;
+  /// [uid] is read at dispatch time from the live auth state, like
+  /// `EditStoreEvent.save` — the bloc must not reach into `AuthBloc`.
+  const factory StoresEvent.delete(String storeId, {required String uid}) =
+      _Delete;
 }

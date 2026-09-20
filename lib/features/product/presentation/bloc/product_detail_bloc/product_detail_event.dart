@@ -51,5 +51,21 @@ sealed class ProductDetailEvent with _$ProductDetailEvent {
   /// price was actually seen, which is history and must not be rewritten.
   const factory ProductDetailEvent.setStore(String? storeId) = _SetStore;
 
-  const factory ProductDetailEvent.deleteProduct() = _DeleteProduct;
+  /// Commits a photo STAGED by the edit page (`product_staged.jpg`) onto
+  /// this product. The edit page writes nothing, so the commit happens here
+  /// where the bloc is the single writer.
+  const factory ProductDetailEvent.setImage({
+    required String stagedFilename,
+    required String uid,
+  }) = _SetImage;
+
+  /// Clears the product's photo — the file, the filename and the remote
+  /// object. Staged by the edit page, applied on save.
+  const factory ProductDetailEvent.removeImage({required String uid}) =
+      _RemoveImage;
+
+  /// [uid] is needed to remove the product's photo from the bucket — a
+  /// record tombstone cannot delete a Storage object.
+  const factory ProductDetailEvent.deleteProduct({required String uid}) =
+      _DeleteProduct;
 }

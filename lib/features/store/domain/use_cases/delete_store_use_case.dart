@@ -1,3 +1,5 @@
+import '../../../../core/services/firebase/firebase_storage_service.dart';
+import '../../../../core/services/store_logo_image_store/store_logo_image_store.dart';
 import '../../../analytics/domain/repositories/i_price_observation_local_repository.dart';
 import '../../../expense/domain/repositories/i_expense_local_repository.dart';
 import '../../../receipt/domain/repositories/i_receipt_item_local_repository.dart';
@@ -40,12 +42,30 @@ class StoreDeleteImpact {
 /// the user. Deleting the store first would leave expenses pointing at a
 /// store id that no longer resolves, which is the dangling reference the
 /// original guard was protecting against.
+///
+/// **The LOGO is removed too — the record tombstone cannot do it.** A soft
+/// delete propagates through Firestore, but a Storage object is not a
+/// Firestore document: nothing in the sync cycle ever touches the bucket on
+/// a delete. Without the cleanup here, deleting a store left its logo in
+/// `users/{uid}/stores/{id}.jpg` forever — consuming the user's quota, with
+/// no record left anywhere that names it, so no code path could ever find
+/// it again. The user's report was exactly that: cloud usage went up when a
+/// logo was added and never came back down.
+///
+/// The image step runs FIRST and its failure is swallowed. A logo that
+/// cannot be deleted (offline, a transient Storage error) must not abort the
+/// record cascade the user actually asked for — the alternative is a
+/// half-deleted store whose expenses are gone and whose row remains. The
+/// orphan is a quota cost, not a correctness one, and `deleteStoreLogo`
+/// already treats already-gone as success so a later retry is safe.
 class DeleteStoreUseCase {
   final IStoreLocalRepository _storeLocalRepository;
   final IExpenseLocalRepository _expenseLocalRepository;
   final IReceiptLocalRepository _receiptLocalRepository;
   final IReceiptItemLocalRepository _receiptItemLocalRepository;
   final IPriceObservationLocalRepository _priceObservationLocalRepository;
+  final StoreLogoImageStore _imageStore;
+  final FirebaseStorageService _storageService;
 
   const DeleteStoreUseCase({
     required IStoreLocalRepository storeLocalRepository,
@@ -53,12 +73,16 @@ class DeleteStoreUseCase {
     required IReceiptLocalRepository receiptLocalRepository,
     required IReceiptItemLocalRepository receiptItemLocalRepository,
     required IPriceObservationLocalRepository priceObservationLocalRepository,
+    required StoreLogoImageStore imageStore,
+    required FirebaseStorageService storageService,
   }) : this._(
          storeLocalRepository,
          expenseLocalRepository,
          receiptLocalRepository,
          receiptItemLocalRepository,
          priceObservationLocalRepository,
+         imageStore,
+         storageService,
        );
 
   const DeleteStoreUseCase._(
@@ -67,6 +91,8 @@ class DeleteStoreUseCase {
     this._receiptLocalRepository,
     this._receiptItemLocalRepository,
     this._priceObservationLocalRepository,
+    this._imageStore,
+    this._storageService,
   );
 
   /// Counts what [call] would remove, WITHOUT removing anything.
@@ -83,8 +109,14 @@ class DeleteStoreUseCase {
     );
   }
 
-  /// Tombstones every record referencing [storeId], then the store itself.
-  Future<void> call(String storeId) async {
+  /// Tombstones every record referencing [storeId], then the store itself,
+  /// after removing the store's logo from disk and from the bucket.
+  ///
+  /// [uid] is empty when the user is signed out — nothing was ever uploaded
+  /// under a uid, so only the local file is removed.
+  Future<void> call(String storeId, {required String uid}) async {
+    await _deleteLogo(storeId, uid);
+
     final receipts = await _receiptLocalRepository.getAll();
     final storeReceipts = receipts
         .where((receipt) => receipt.storeId == storeId)
@@ -125,5 +157,24 @@ class DeleteStoreUseCase {
 
     // The store last: see the ordering note in the class doc.
     await _storeLocalRepository.delete(storeId);
+  }
+
+  /// Removes the store's logo file and its remote object.
+  ///
+  /// Reads the store to learn the stored FILENAME rather than deriving it:
+  /// `logoFilename` is what the record actually points at, and a store saved
+  /// before the current naming scheme would not match a derived name.
+  Future<void> _deleteLogo(String storeId, String uid) async {
+    try {
+      final store = await _storeLocalRepository.getById(storeId);
+      await _imageStore.delete(store?.logoFilename);
+
+      if (uid.isNotEmpty) {
+        await _storageService.deleteStoreLogo(uid: uid, storeId: storeId);
+      }
+    } catch (_) {
+      // Swallowed on purpose — see the class doc. The record cascade is what
+      // the user asked for and must not be lost to an image failure.
+    }
   }
 }

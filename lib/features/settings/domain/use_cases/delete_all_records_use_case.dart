@@ -1,5 +1,9 @@
+import '../../../analytics/domain/repositories/i_price_observation_local_repository.dart';
 import '../../../category/domain/repositories/i_category_local_repository.dart';
 import '../../../expense/domain/repositories/i_expense_local_repository.dart';
+import '../../../product/domain/repositories/i_product_local_repository.dart';
+import '../../../receipt/domain/repositories/i_receipt_item_local_repository.dart';
+import '../../../receipt/domain/repositories/i_receipt_local_repository.dart';
 import '../models/e_delete_scope.dart';
 import '../../../store/domain/repositories/i_store_local_repository.dart';
 import '../repositories/i_settings_local_repository.dart';
@@ -25,26 +29,42 @@ import '../repositories/i_settings_local_repository.dart';
 /// flow — it stops removing data the design never asked this action to
 /// remove.
 ///
-/// Receipts/receipt items/price observations are intentionally not yet
-/// dependencies — M5 is manual-entry only (zero native code, no scanning),
-/// so those repositories carry no data for delete-all to clear. M8 (when
-/// receipts exist) must extend this use case's dependency list rather than
-/// re-implement delete-all elsewhere.
+/// ## It clears ALL SEVEN record collections
+///
+/// It used to clear three — expenses, stores and custom categories — because
+/// M5 was manual-entry only and the others genuinely held nothing. M8 brought
+/// scanning, and the dependency list was never extended: receipts, receipt
+/// items, products and price observations all survived "delete all data".
+/// The visible symptom was cloud storage still reporting megabytes of receipt
+/// photos after the user had emptied the app, because the `Receipt` rows
+/// naming those photos were never tombstoned.
 class DeleteAllRecordsUseCase {
   final IExpenseLocalRepository _expenseLocalRepository;
   final IStoreLocalRepository _storeLocalRepository;
   final ICategoryLocalRepository _categoryLocalRepository;
+  final IReceiptLocalRepository _receiptLocalRepository;
+  final IReceiptItemLocalRepository _receiptItemLocalRepository;
+  final IProductLocalRepository _productLocalRepository;
+  final IPriceObservationLocalRepository _priceObservationLocalRepository;
   final ISettingsLocalRepository _settingsLocalRepository;
 
   const DeleteAllRecordsUseCase({
     required IExpenseLocalRepository expenseLocalRepository,
     required IStoreLocalRepository storeLocalRepository,
     required ICategoryLocalRepository categoryLocalRepository,
+    required IReceiptLocalRepository receiptLocalRepository,
+    required IReceiptItemLocalRepository receiptItemLocalRepository,
+    required IProductLocalRepository productLocalRepository,
+    required IPriceObservationLocalRepository priceObservationLocalRepository,
     required ISettingsLocalRepository settingsLocalRepository,
   }) : this._(
          expenseLocalRepository,
          storeLocalRepository,
          categoryLocalRepository,
+         receiptLocalRepository,
+         receiptItemLocalRepository,
+         productLocalRepository,
+         priceObservationLocalRepository,
          settingsLocalRepository,
        );
 
@@ -52,6 +72,10 @@ class DeleteAllRecordsUseCase {
     this._expenseLocalRepository,
     this._storeLocalRepository,
     this._categoryLocalRepository,
+    this._receiptLocalRepository,
+    this._receiptItemLocalRepository,
+    this._productLocalRepository,
+    this._priceObservationLocalRepository,
     this._settingsLocalRepository,
   );
 
@@ -59,6 +83,14 @@ class DeleteAllRecordsUseCase {
   ///
   /// Deleting is a SOFT delete now, so this always produces tombstones — the
   /// difference between the scopes is what happens to them:
+  ///
+  /// **No caller passes a scope today.** `SettingsBloc` invokes this with no
+  /// argument, so every "Delete all data" runs as [EDeleteScope.local] — which
+  /// is what the confirm dialog promises ("Cloud backups are not affected"),
+  /// so the behaviour is correct, but [EDeleteScope.clearsRemote] is currently
+  /// dead. Wiring a scope CHOICE into that dialog is a UI decision that has
+  /// not been made; the parameter is kept because the remote path below is
+  /// already implemented and would otherwise have to be rebuilt.
   ///
   /// * [EDeleteScope.local] also sets `dataCleared`, which gates the pull so
   ///   the surviving cloud copy cannot flow back in.
@@ -90,6 +122,31 @@ class DeleteAllRecordsUseCase {
       // comment above) — only user-created ones are cleared.
       if (category.isBuiltIn) continue;
       await _categoryLocalRepository.delete(category.id);
+    }
+
+    // The scanning-era collections. Absent until M8 and never added to this
+    // list afterwards, which is what left receipt photos in cloud storage
+    // after the user had emptied the app.
+    final receipts = await _receiptLocalRepository.getAllIncludingDeleted();
+    for (final receipt in receipts) {
+      await _receiptLocalRepository.delete(receipt.id);
+    }
+
+    final receiptItems =
+        await _receiptItemLocalRepository.getAllIncludingDeleted();
+    for (final item in receiptItems) {
+      await _receiptItemLocalRepository.delete(item.id);
+    }
+
+    final products = await _productLocalRepository.getAllIncludingDeleted();
+    for (final product in products) {
+      await _productLocalRepository.delete(product.id);
+    }
+
+    final observations =
+        await _priceObservationLocalRepository.getAllIncludingDeleted();
+    for (final observation in observations) {
+      await _priceObservationLocalRepository.deleteLocalOnly(observation.id);
     }
 
     // `dataCleared` is what stops the seed AND (once sync lands) the pull

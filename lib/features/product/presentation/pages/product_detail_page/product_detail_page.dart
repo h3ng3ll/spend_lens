@@ -19,7 +19,11 @@ import '../../../../analytics/domain/repositories/i_price_observation_local_repo
 import '../../../../settings/presentation/bloc/settings_bloc/settings_bloc.dart';
 import '../../../../store/domain/repositories/i_store_local_repository.dart';
 import '../../../domain/models/product/product.dart';
+import '../../../../../core/services/product_image_store/product_image_store.dart';
+import '../../../../auth/presentation/bloc/auth_bloc/auth_bloc.dart';
 import '../../../domain/repositories/i_product_local_repository.dart';
+import '../../../domain/use_cases/remove_product_image_use_case.dart';
+import '../../../domain/use_cases/save_product_image_use_case.dart';
 import '../../bloc/product_detail_bloc/product_detail_bloc.dart';
 import '../edit_product_page/edit_product_result.dart';
 import '../../sheets/price_point_sheet/price_point_sheet.dart';
@@ -53,6 +57,9 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     priceObservationLocalRepository:
         getIt<IPriceObservationLocalRepository>(),
     storeLocalRepository: getIt<IStoreLocalRepository>(),
+    imageStore: getIt<ProductImageStore>(),
+    saveProductImage: getIt<SaveProductImageUseCase>(),
+    removeProductImage: getIt<RemoveProductImageUseCase>(),
   )..add(const ProductDetailEvent.watch());
 
   @override
@@ -154,10 +161,30 @@ class _ProductDetailPageState extends State<ProductDetailPage> {
     if (result.unit != product.defaultUnit) {
       _productDetailBloc.add(ProductDetailEvent.setUnit(result.unit));
     }
+
+    // The photo last: it is the only edit that touches the filesystem and the
+    // network, so a failure there does not strand the cheap field writes
+    // above. `uid` is read here rather than in the bloc, matching
+    // `EditStoreEvent.save(uid:)`.
+    final uid = context.read<AuthBloc>().state.uid;
+    final stagedImageFilename = result.stagedImageFilename;
+    if (stagedImageFilename != null) {
+      _productDetailBloc.add(
+        ProductDetailEvent.setImage(
+          stagedFilename: stagedImageFilename,
+          uid: uid,
+        ),
+      );
+    } else if (result.imageRemoved) {
+      _productDetailBloc.add(ProductDetailEvent.removeImage(uid: uid));
+    }
   }
 
-  void _onDelete() =>
-      _productDetailBloc.add(const ProductDetailEvent.deleteProduct());
+  void _onDelete() => _productDetailBloc.add(
+    ProductDetailEvent.deleteProduct(
+      uid: context.read<AuthBloc>().state.uid,
+    ),
+  );
 
   void _onOpenFullHistory() =>
       PriceHistoryPageRoute(productId: widget.productId).push<void>(context);

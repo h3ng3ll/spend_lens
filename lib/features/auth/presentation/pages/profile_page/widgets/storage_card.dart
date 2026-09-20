@@ -66,10 +66,19 @@ class StorageCard extends StatelessWidget {
             children: [
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                spacing: 12.0,
                 children: [
-                  Text(
-                    isSignedIn ? lo.cloudStorage : lo.storage,
-                    style: textTheme.subhead15.copyWith(color: scheme.ink),
+                  // The LABEL flexes and the amount does not: the amount is
+                  // the number the row exists to show, and wrapping or
+                  // ellipsizing it would be the wrong thing to lose. Neither
+                  // was bounded before, so a locale whose label is wider than
+                  // English overflowed the row — `Облачное хранилище` against
+                  // `5 MB из 100 MB` ran 31px past the edge.
+                  Flexible(
+                    child: Text(
+                      isSignedIn ? lo.cloudStorage : lo.storage,
+                      style: textTheme.subhead15.copyWith(color: scheme.ink),
+                    ),
                   ),
                   Text(
                     isSignedIn

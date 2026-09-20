@@ -572,6 +572,12 @@ class AppLocalizationsFr extends AppLocalizations {
   String get removeStoreLogo => 'Supprimer le logo';
 
   @override
+  String get changeProductImage => 'Changer la photo';
+
+  @override
+  String get removeProductImage => 'Supprimer la photo';
+
+  @override
   String get savingStore => 'Enregistrement…';
 
   @override
@@ -1413,7 +1419,7 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get storageEstimateNote =>
-      'Les photos de reçus sont mesurées depuis votre compte. Les enregistrements ajoutent une quantité négligeable.';
+      'Les photos sont mesurées depuis votre compte : reçus, logos de magasins et images de produits. Les enregistrements ajoutent une quantité négligeable.';
 
   @override
   String get purchasesUnavailable =>

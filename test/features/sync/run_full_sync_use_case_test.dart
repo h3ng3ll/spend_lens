@@ -6,6 +6,7 @@ import 'package:spend_lens/core/services/logger_service.dart';
 import 'package:spend_lens/features/expense/domain/models/expense/e_expense_source.dart';
 import 'package:spend_lens/core/services/firebase/firebase_storage_service.dart';
 import 'package:spend_lens/core/services/receipt_image_store/receipt_image_store.dart';
+import 'package:spend_lens/core/services/product_image_store/product_image_store.dart';
 import 'package:spend_lens/core/services/store_logo_image_store/store_logo_image_store.dart';
 import 'package:spend_lens/features/expense/domain/models/expense/expense.dart';
 import 'package:spend_lens/features/receipt/domain/models/receipt/receipt.dart';
@@ -13,6 +14,9 @@ import 'package:spend_lens/features/receipt/domain/repositories/i_receipt_local_
 import 'package:spend_lens/features/store/domain/models/store/store.dart';
 import 'package:spend_lens/features/store/domain/repositories/i_store_local_repository.dart';
 import 'package:spend_lens/features/sync/domain/use_cases/download_receipt_photos_use_case.dart';
+import 'package:spend_lens/features/product/domain/models/product/product.dart';
+import 'package:spend_lens/features/product/domain/repositories/i_product_local_repository.dart';
+import 'package:spend_lens/features/sync/domain/use_cases/download_product_images_use_case.dart';
 import 'package:spend_lens/features/sync/domain/use_cases/download_store_logos_use_case.dart';
 import 'package:spend_lens/features/sync/domain/use_cases/upload_receipt_photos_use_case.dart';
 import 'package:spend_lens/features/settings/domain/models/app_settings/app_settings.dart';
@@ -99,6 +103,11 @@ void main() {
     downloadStoreLogos: DownloadStoreLogosUseCase(
       storeLocalRepository: _EmptyStores(),
       imageStore: StoreLogoImageStore(),
+      storageService: _UnusedStorage(),
+    ),
+    downloadProductImages: DownloadProductImagesUseCase(
+      productLocalRepository: _EmptyProducts(),
+      imageStore: ProductImageStore(),
       storageService: _UnusedStorage(),
     ),
     adapters: _FakeAdapters([adapter()]),
@@ -211,6 +220,11 @@ void main() {
         downloadStoreLogos: DownloadStoreLogosUseCase(
           storeLocalRepository: _EmptyStores(),
           imageStore: StoreLogoImageStore(),
+          storageService: _UnusedStorage(),
+        ),
+        downloadProductImages: DownloadProductImagesUseCase(
+          productLocalRepository: _EmptyProducts(),
+          imageStore: ProductImageStore(),
           storageService: _UnusedStorage(),
         ),
         adapters: _FakeAdapters([
@@ -392,6 +406,14 @@ class _EmptyReceipts implements IReceiptLocalRepository {
 class _EmptyStores implements IStoreLocalRepository {
   @override
   Future<List<Store>> getAll() async => const [];
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _EmptyProducts implements IProductLocalRepository {
+  @override
+  Future<List<Product>> getAll() async => const [];
 
   @override
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

@@ -581,6 +581,12 @@ class AppLocalizationsUk extends AppLocalizations {
   String get removeStoreLogo => 'Видалити логотип';
 
   @override
+  String get changeProductImage => 'Змінити фото';
+
+  @override
+  String get removeProductImage => 'Видалити фото';
+
+  @override
   String get savingStore => 'Збереження…';
 
   @override
@@ -1433,7 +1439,7 @@ class AppLocalizationsUk extends AppLocalizations {
 
   @override
   String get storageEstimateNote =>
-      'Розмір фотографій чеків виміряно у вашому акаунті. Записи займають незначний обсяг.';
+      'Розмір фото виміряно у вашому акаунті — чеки, логотипи магазинів та фото товарів. Записи займають незначний обсяг.';
 
   @override
   String get purchasesUnavailable => 'Покупки зараз недоступні.';

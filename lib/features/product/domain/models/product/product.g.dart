@@ -22,6 +22,8 @@ _Product _$ProductFromJson(Map<String, dynamic> json) => _Product(
           ?.map((e) => e as String)
           .toList() ??
       const <String>[],
+  imageFilename: json['imageFilename'] as String?,
+  imageUrl: json['imageUrl'] as String? ?? '',
   updatedAt: DateTime.parse(json['updatedAt'] as String),
   deletedAt: json['deletedAt'] == null
       ? null
@@ -40,6 +42,8 @@ Map<String, dynamic> _$ProductToJson(_Product instance) => <String, dynamic>{
   'defaultUnit': _$EUnitEnumMap[instance.defaultUnit]!,
   'storeId': instance.storeId,
   'linkedProductIds': instance.linkedProductIds,
+  'imageFilename': instance.imageFilename,
+  'imageUrl': instance.imageUrl,
   'updatedAt': instance.updatedAt.toIso8601String(),
   'deletedAt': instance.deletedAt?.toIso8601String(),
   'syncStatus': _$ESyncStatusEnumMap[instance.syncStatus]!,

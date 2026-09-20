@@ -972,6 +972,18 @@ abstract class AppLocalizations {
   /// **'Remove logo'**
   String get removeStoreLogo;
 
+  /// No description provided for @changeProductImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Change photo'**
+  String get changeProductImage;
+
+  /// No description provided for @removeProductImage.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove photo'**
+  String get removeProductImage;
+
   /// No description provided for @savingStore.
   ///
   /// In en, this message translates to:
@@ -2259,7 +2271,7 @@ abstract class AppLocalizations {
   /// No description provided for @storageEstimateNote.
   ///
   /// In en, this message translates to:
-  /// **'Receipt photos are measured from your account. Records add a negligible amount.'**
+  /// **'Photos are measured from your account — receipts, store logos and product images. Records add a negligible amount.'**
   String get storageEstimateNote;
 
   /// No description provided for @purchasesUnavailable.

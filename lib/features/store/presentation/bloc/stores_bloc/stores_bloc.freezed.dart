@@ -125,13 +125,13 @@ return delete(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String name)?  quickCreate,TResult Function( String name,  String receiptAlias,  EStoreType type)?  create,TResult Function( String storeId)?  delete,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String name)?  quickCreate,TResult Function( String name,  String receiptAlias,  EStoreType type)?  create,TResult Function( String storeId,  String uid)?  delete,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _QuickCreate() when quickCreate != null:
 return quickCreate(_that.name);case _Create() when create != null:
 return create(_that.name,_that.receiptAlias,_that.type);case _Delete() when delete != null:
-return delete(_that.storeId);case _:
+return delete(_that.storeId,_that.uid);case _:
   return orElse();
 
 }
@@ -149,13 +149,13 @@ return delete(_that.storeId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String name)  quickCreate,required TResult Function( String name,  String receiptAlias,  EStoreType type)  create,required TResult Function( String storeId)  delete,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String name)  quickCreate,required TResult Function( String name,  String receiptAlias,  EStoreType type)  create,required TResult Function( String storeId,  String uid)  delete,}) {final _that = this;
 switch (_that) {
 case _Watch():
 return watch();case _QuickCreate():
 return quickCreate(_that.name);case _Create():
 return create(_that.name,_that.receiptAlias,_that.type);case _Delete():
-return delete(_that.storeId);}
+return delete(_that.storeId,_that.uid);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -169,13 +169,13 @@ return delete(_that.storeId);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String name)?  quickCreate,TResult? Function( String name,  String receiptAlias,  EStoreType type)?  create,TResult? Function( String storeId)?  delete,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String name)?  quickCreate,TResult? Function( String name,  String receiptAlias,  EStoreType type)?  create,TResult? Function( String storeId,  String uid)?  delete,}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _QuickCreate() when quickCreate != null:
 return quickCreate(_that.name);case _Create() when create != null:
 return create(_that.name,_that.receiptAlias,_that.type);case _Delete() when delete != null:
-return delete(_that.storeId);case _:
+return delete(_that.storeId,_that.uid);case _:
   return null;
 
 }
@@ -355,10 +355,11 @@ as EStoreType,
 
 
 class _Delete implements StoresEvent {
-  const _Delete(this.storeId);
+  const _Delete(this.storeId, {required this.uid});
   
 
  final  String storeId;
+ final  String uid;
 
 /// Create a copy of StoresEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -370,16 +371,16 @@ _$DeleteCopyWith<_Delete> get copyWith => __$DeleteCopyWithImpl<_Delete>(this, _
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Delete&&(identical(other.storeId, storeId) || other.storeId == storeId));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Delete&&(identical(other.storeId, storeId) || other.storeId == storeId)&&(identical(other.uid, uid) || other.uid == uid));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,storeId);
+int get hashCode => Object.hash(runtimeType,storeId,uid);
 
 @override
 String toString() {
-  return 'StoresEvent.delete(storeId: $storeId)';
+  return 'StoresEvent.delete(storeId: $storeId, uid: $uid)';
 }
 
 
@@ -390,7 +391,7 @@ abstract mixin class _$DeleteCopyWith<$Res> implements $StoresEventCopyWith<$Res
   factory _$DeleteCopyWith(_Delete value, $Res Function(_Delete) _then) = __$DeleteCopyWithImpl;
 @useResult
 $Res call({
- String storeId
+ String storeId, String uid
 });
 
 
@@ -407,9 +408,10 @@ class __$DeleteCopyWithImpl<$Res>
 
 /// Create a copy of StoresEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? storeId = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? storeId = null,Object? uid = null,}) {
   return _then(_Delete(
 null == storeId ? _self.storeId : storeId // ignore: cast_nullable_to_non_nullable
+as String,uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

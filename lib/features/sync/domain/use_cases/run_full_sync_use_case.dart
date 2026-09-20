@@ -9,6 +9,7 @@ import '../repositories/i_sync_remote_repository.dart';
 import 'pull_remote_changes_use_case.dart';
 import 'push_pending_changes_use_case.dart';
 import 'download_receipt_photos_use_case.dart';
+import 'download_product_images_use_case.dart';
 import 'download_store_logos_use_case.dart';
 import 'upload_receipt_photos_use_case.dart';
 
@@ -30,6 +31,10 @@ class SyncReport {
   /// over different collections and fail for different reasons.
   final int logosDownloaded;
 
+  /// Product photos restored FROM cloud storage this cycle. Counted
+  /// separately for the same reason as [logosDownloaded].
+  final int productImagesDownloaded;
+
   /// Remote documents removed because their deletion had been published.
   final int purged;
 
@@ -39,6 +44,7 @@ class SyncReport {
     this.photosUploaded = 0,
     this.photosDownloaded = 0,
     this.logosDownloaded = 0,
+    this.productImagesDownloaded = 0,
     this.purged = 0,
   });
 
@@ -48,6 +54,7 @@ class SyncReport {
       photosUploaded > 0 ||
       photosDownloaded > 0 ||
       logosDownloaded > 0 ||
+      productImagesDownloaded > 0 ||
       purged > 0;
 }
 
@@ -65,6 +72,7 @@ class RunFullSyncUseCase {
   final UploadReceiptPhotosUseCase _uploadReceiptPhotos;
   final DownloadReceiptPhotosUseCase _downloadReceiptPhotos;
   final DownloadStoreLogosUseCase _downloadStoreLogos;
+  final DownloadProductImagesUseCase _downloadProductImages;
   final SyncEntityAdapters _adapters;
   final ISettingsLocalRepository _settingsLocalRepository;
   final LoggerService _loggerService;
@@ -76,6 +84,7 @@ class RunFullSyncUseCase {
     required UploadReceiptPhotosUseCase uploadReceiptPhotos,
     required DownloadReceiptPhotosUseCase downloadReceiptPhotos,
     required DownloadStoreLogosUseCase downloadStoreLogos,
+    required DownloadProductImagesUseCase downloadProductImages,
     required SyncEntityAdapters adapters,
     required ISettingsLocalRepository settingsLocalRepository,
     required LoggerService loggerService,
@@ -86,6 +95,7 @@ class RunFullSyncUseCase {
          uploadReceiptPhotos,
          downloadReceiptPhotos,
          downloadStoreLogos,
+         downloadProductImages,
          adapters,
          settingsLocalRepository,
          loggerService,
@@ -98,6 +108,7 @@ class RunFullSyncUseCase {
     this._uploadReceiptPhotos,
     this._downloadReceiptPhotos,
     this._downloadStoreLogos,
+    this._downloadProductImages,
     this._adapters,
     this._settingsLocalRepository,
     this._loggerService,
@@ -270,6 +281,10 @@ class RunFullSyncUseCase {
       // locally before its logo has anything to attach to.
       final logosDownloaded = await _downloadStoreLogos(uid: uid);
 
+      // Same ordering rule again: the product row must exist locally before
+      // its photo has anything to attach to.
+      final productImagesDownloaded = await _downloadProductImages(uid: uid);
+
       // One line per cycle, deliberately kept. Every sync bug in this
       // feature presented as "the UI says up to date and nothing happened",
       // and without an outcome line that state is indistinguishable from a
@@ -277,7 +292,8 @@ class RunFullSyncUseCase {
       _loggerService.info(
         'RunFullSync: pushed=$pushed pulled=$pulled purged=$purged '
         'photosUp=$photosUploaded photosDown=$photosDownloaded '
-        'logosDown=$logosDownloaded',
+        'logosDown=$logosDownloaded '
+        'productImagesDown=$productImagesDownloaded',
         name: 'Sync',
       );
 
@@ -288,6 +304,7 @@ class RunFullSyncUseCase {
           photosUploaded: photosUploaded,
           photosDownloaded: photosDownloaded,
           logosDownloaded: logosDownloaded,
+          productImagesDownloaded: productImagesDownloaded,
           purged: purged,
         ),
       );

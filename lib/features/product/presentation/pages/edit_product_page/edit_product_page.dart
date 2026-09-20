@@ -9,6 +9,8 @@ import '../../../../../core/resources/text/app_text_theme.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../../../core/routes/presentation/loading_data_widget.dart';
 import '../../../../../core/widgets/app_container.dart';
+import '../../../../../core/services/product_image_store/product_image_store.dart';
+import '../../../../../core/services/permission_requester.dart';
 import '../../../../../core/widgets/app_svg_icon.dart';
 import '../../../../../core/widgets/custom_text_field.dart';
 import '../../../../../core/widgets/gradient_cta_button.dart';
@@ -23,6 +25,9 @@ import '../../../domain/models/product/product.dart';
 import '../../../domain/repositories/i_product_local_repository.dart';
 import '../new_product_page/widgets/product_unit_chip_row.dart';
 import 'edit_product_result.dart';
+import 'widgets/e_product_image_source.dart';
+import 'widgets/editable_product_image.dart';
+import 'widgets/product_image_source_sheet.dart';
 
 /// `EditProductPageRoute` — a top-level push above the shell for correcting a
 /// product's identity: its name, owning store, category and unit.
@@ -63,6 +68,25 @@ class _EditProductPageState extends State<EditProductPage> {
   String? _storeName;
   String? _categoryName;
 
+  /// The photo currently SHOWN — the committed filename until the user picks,
+  /// then the staged one. Never bytes (see `ProductImageStore`).
+  String _imageFilename = '';
+
+  /// Set once the user picks, so Save can tell a new photo from an untouched
+  /// one without comparing filenames (the staging slot has a fixed name).
+  String? _stagedImageFilename;
+
+  /// Staged removal — committed on Save, never on tap
+  /// (`edit_profile_screen_rules.md`).
+  bool _imageRemoved = false;
+
+  /// Covers BOTH the OS picker and the staging copy; neither is instant on a
+  /// multi-megabyte photo, and without it the tile sits unchanged with no
+  /// feedback — indistinguishable from a tap that did nothing.
+  bool _isPickingImage = false;
+
+  bool get _hasImage => _imageFilename.isNotEmpty;
+
   @override
   void initState() {
     super.initState();
@@ -74,6 +98,14 @@ class _EditProductPageState extends State<EditProductPage> {
   void dispose() {
     _nameController.removeListener(_onNameChanged);
     _nameController.dispose();
+    // A pick the user never saved must not survive into the next edit: the
+    // staging slot is one shared file, so leaving it would show this photo
+    // over the NEXT product opened. Fire-and-forget is the only option in
+    // `dispose`, and a failed cleanup is harmless — the slot is overwritten
+    // by the next pick regardless.
+    if (_stagedImageFilename != null) {
+      getIt<ProductImageStore>().discardStaged();
+    }
     super.dispose();
   }
 
@@ -94,6 +126,7 @@ class _EditProductPageState extends State<EditProductPage> {
       _storeId = product.storeId;
       _categoryId = product.defaultCategoryId;
       _unit = product.defaultUnit;
+      _imageFilename = product.imageFilename ?? '';
     });
 
     await _loadStoreName();
@@ -148,6 +181,58 @@ class _EditProductPageState extends State<EditProductPage> {
     await _loadCategoryName();
   }
 
+  /// Opens the source sheet and STAGES the outcome.
+  ///
+  /// The OS picker is a system dialog, not app logic, so launching it stays
+  /// in the UI layer — but only the resulting PATH is used, and the bytes are
+  /// never read here. Nothing is committed: this page writes nothing, so the
+  /// staged decision rides back on [EditProductResult].
+  Future<void> _onImageTap() async {
+    final source = await ProductImageSourceSheet.show(
+      context,
+      hasImage: _hasImage,
+    );
+    if (source == null || !mounted) return;
+
+    if (source == EProductImageSource.remove) {
+      setState(() {
+        _imageFilename = '';
+        _stagedImageFilename = null;
+        _imageRemoved = true;
+      });
+      return;
+    }
+
+    setState(() => _isPickingImage = true);
+
+    try {
+      final permissionRequester = getIt<PermissionRequester>();
+      final file = source == EProductImageSource.camera
+          ? await permissionRequester.onPickCamera(context)
+          : await permissionRequester.onPickGallery(context);
+      if (file == null) {
+        if (mounted) setState(() => _isPickingImage = false);
+        return;
+      }
+
+      final staged = await getIt<ProductImageStore>().stageFrom(file.path);
+      if (!mounted) return;
+      setState(() {
+        _isPickingImage = false;
+        if (staged != null) {
+          _imageFilename = staged;
+          _stagedImageFilename = staged;
+          _imageRemoved = false;
+        }
+      });
+    } catch (_) {
+      // A read that throws (a revoked permission, a file that vanished) must
+      // still clear the flag — a stuck spinner over an unchanged photo is
+      // worse than the failure itself, because it never resolves.
+      if (mounted) setState(() => _isPickingImage = false);
+    }
+  }
+
   void _onUnitSelected(EUnit unit) => setState(() => _unit = unit);
 
   void _onClose() => context.pop();
@@ -161,6 +246,8 @@ class _EditProductPageState extends State<EditProductPage> {
         storeId: _storeId,
         categoryId: _categoryId,
         unit: _unit,
+        stagedImageFilename: _stagedImageFilename,
+        imageRemoved: _imageRemoved,
       ),
     );
   }
@@ -188,6 +275,14 @@ class _EditProductPageState extends State<EditProductPage> {
                         SheetCloseHeader(
                           title: lo.editProductTitle,
                           onClose: _onClose,
+                        ),
+                        Center(
+                          child: EditableProductImage(
+                            filename: _imageFilename,
+                            productName: _nameController.text,
+                            onTap: _onImageTap,
+                            isUploading: _isPickingImage,
+                          ),
                         ),
                         LabeledField(
                           label: lo.productNameLabel,

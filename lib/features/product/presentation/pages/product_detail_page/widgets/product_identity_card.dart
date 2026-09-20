@@ -6,7 +6,7 @@ import '../../../../../../core/resources/text/app_text_theme.dart';
 import '../../../../../../core/resources/app_icons.dart';
 import '../../../../../../core/widgets/app_section_card.dart';
 import '../../../../../../core/widgets/app_svg_icon.dart';
-import '../../../../../../core/widgets/initial_tile.dart';
+import '../../../../../../core/widgets/build_product_image.dart';
 import '../../../../domain/models/product/product.dart';
 
 /// The product's identity: name, owning store (or the general-purpose
@@ -15,6 +15,10 @@ import '../../../../domain/models/product/product.dart';
 /// "General purpose" is `storeId == null` rendered — there is no separate
 /// flag, so the label and the data can never disagree.
 class ProductIdentityCard extends StatelessWidget {
+  /// Matches the 36dp box `InitialTile` drew here before the photo existed,
+  /// so the row's geometry is unchanged.
+  static const double _imageSize = 36.0;
+
   final Product product;
   final String? storeName;
 
@@ -52,10 +56,13 @@ class ProductIdentityCard extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           spacing: 12.0,
           children: [
-            InitialTile(
-              initial: _initialOf(product.displayName),
-              background: scheme.accentTint,
-              foreground: scheme.accent,
+            // The product's photo, falling back to its initial when there is
+            // none — `BuildProductImage` owns that choice, so this card never
+            // has to hold image bytes to show a mark.
+            BuildProductImage(
+              filename: product.imageFilename ?? '',
+              productName: product.displayName,
+              size: _imageSize,
             ),
             Expanded(
               child: Column(
@@ -87,9 +94,4 @@ class ProductIdentityCard extends StatelessWidget {
     );
   }
 
-  String _initialOf(String name) {
-    final trimmed = name.trim();
-    if (trimmed.isEmpty) return '?';
-    return trimmed.substring(0, 1).toUpperCase();
-  }
 }

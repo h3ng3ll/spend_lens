@@ -13,7 +13,14 @@ import '../../../../../core/widgets/labeled_field.dart';
 import '../../../../../core/widgets/padding/horizontal_padding.dart';
 import '../../../../../core/widgets/sheet_close_header.dart';
 import '../../../../settings/presentation/bloc/settings_bloc/settings_bloc.dart';
+import '../../../../../core/di/injection.dart';
+import '../../../../../core/services/permission_requester.dart';
+import '../../../../../core/services/product_image_store/product_image_store.dart';
+import '../../../../auth/presentation/bloc/auth_bloc/auth_bloc.dart';
 import '../../../domain/models/product/e_unit.dart';
+import '../edit_product_page/widgets/e_product_image_source.dart';
+import '../edit_product_page/widgets/editable_product_image.dart';
+import '../edit_product_page/widgets/product_image_source_sheet.dart';
 import '../../bloc/products_bloc/products_bloc.dart';
 import 'widgets/product_unit_chip_row.dart';
 
@@ -44,6 +51,15 @@ class _NewProductPageState extends State<NewProductPage> {
 
   EUnit _unit = EUnit.piece;
 
+  /// The STAGED photo's filename, or empty when none was picked. The
+  /// committed slot is keyed on a product id that does not exist yet, so the
+  /// commit happens in `ProductsBloc._onCreate` once the id is built.
+  String _stagedImageFilename = '';
+
+  /// Covers BOTH the OS picker and the staging copy — neither is instant on
+  /// a multi-megabyte photo.
+  bool _isPickingImage = false;
+
   @override
   void initState() {
     super.initState();
@@ -57,10 +73,54 @@ class _NewProductPageState extends State<NewProductPage> {
     _priceController.removeListener(_onFieldChanged);
     _nameController.dispose();
     _priceController.dispose();
+    // A pick the user never saved must not survive into the next form: the
+    // staging slot is one shared file.
+    if (_stagedImageFilename.isNotEmpty) {
+      getIt<ProductImageStore>().discardStaged();
+    }
     super.dispose();
   }
 
   void _onFieldChanged() => setState(() {});
+
+  /// Opens the source sheet and STAGES the outcome. Nothing is committed
+  /// here: the product has no id yet.
+  Future<void> _onImageTap() async {
+    final source = await ProductImageSourceSheet.show(
+      context,
+      hasImage: _stagedImageFilename.isNotEmpty,
+    );
+    if (source == null || !mounted) return;
+
+    if (source == EProductImageSource.remove) {
+      setState(() => _stagedImageFilename = '');
+      return;
+    }
+
+    setState(() => _isPickingImage = true);
+
+    try {
+      final permissionRequester = getIt<PermissionRequester>();
+      final file = source == EProductImageSource.camera
+          ? await permissionRequester.onPickCamera(context)
+          : await permissionRequester.onPickGallery(context);
+      if (file == null) {
+        if (mounted) setState(() => _isPickingImage = false);
+        return;
+      }
+
+      final staged = await getIt<ProductImageStore>().stageFrom(file.path);
+      if (!mounted) return;
+      setState(() {
+        _isPickingImage = false;
+        if (staged != null) _stagedImageFilename = staged;
+      });
+    } catch (_) {
+      // A stuck spinner over an unchanged tile is worse than the failure
+      // itself, because it never resolves.
+      if (mounted) setState(() => _isPickingImage = false);
+    }
+  }
 
   void _onClose(BuildContext context) => context.pop();
 
@@ -88,6 +148,9 @@ class _NewProductPageState extends State<NewProductPage> {
             observedAt: DateTime.now(),
             currencyCode:
                 context.read<SettingsBloc>().state.settings.currencyCode,
+            stagedImageFilename:
+                _stagedImageFilename.isEmpty ? null : _stagedImageFilename,
+            uid: context.read<AuthBloc>().state.uid,
           ),
         );
   }
@@ -144,6 +207,14 @@ class _NewProductPageState extends State<NewProductPage> {
                     SheetCloseHeader(
                       title: lo.newProductTitle,
                       onClose: () => _onClose(context),
+                    ),
+                    Center(
+                      child: EditableProductImage(
+                        filename: _stagedImageFilename,
+                        productName: _nameController.text,
+                        onTap: _onImageTap,
+                        isUploading: _isPickingImage,
+                      ),
                     ),
                     LabeledField(
                       label: lo.productNameLabel,

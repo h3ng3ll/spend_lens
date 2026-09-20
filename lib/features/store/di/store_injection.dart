@@ -68,6 +68,8 @@ void initStoreFeature() {
       receiptItemLocalRepository: getIt<IReceiptItemLocalRepository>(),
       priceObservationLocalRepository:
           getIt<IPriceObservationLocalRepository>(),
+      imageStore: getIt<StoreLogoImageStore>(),
+      storageService: getIt<FirebaseStorageService>(),
     ),
   );
 }
