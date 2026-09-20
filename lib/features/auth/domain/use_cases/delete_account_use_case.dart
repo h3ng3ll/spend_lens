@@ -105,13 +105,36 @@ class DeleteAccountUseCase {
   Future<Either<Failure, Unit>> call({
     required EAccountDeletionScope scope,
   }) async {
-    final uid = _authRepository.currentUser?.uid;
+    final uid = _authRepository.currentUid;
 
     try {
       // BEFORE anything is destroyed. A cancelled sheet must leave the account
       // and its data exactly as they were — see the class doc.
       final authorised = await _ensureRecentLogin();
       if (authorised.isLeft()) return authorised;
+
+      // The session must still be the SAME account. `uid` above was read
+      // before the refresh, and every step below is keyed to it: the remote
+      // wipe targets `/users/{uid}` while `deleteAccount()` deletes whoever is
+      // current. If those two ever disagreed, this would wipe one account's
+      // data and delete a different account entirely.
+      //
+      // `FirebaseAuthRepository.reauthenticate` already refuses a mismatch.
+      // This is the second, independent layer, because the cost of being
+      // wrong here is destroying an account the user never chose.
+      final current = _authRepository.currentUid;
+      if (uid != null && current != null && current != uid) {
+        _loggerService.error(
+          'Account deletion aborted: session changed during re-authentication',
+          name: 'Auth',
+        );
+        return const Left(
+          AccountDeletionFailure(
+            diagnostic: 'the signed-in account changed during '
+                're-authentication',
+          ),
+        );
+      }
 
       if (uid != null) {
         await _deleteRemoteData(uid);

@@ -409,48 +409,50 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
 
     final result = await _deleteAccountUseCase(scope: event.scope);
 
-    result.fold(
-      (failure) {
-        // A cancelled re-auth sheet is the user's own choice — return to the
-        // signed-in state silently rather than reporting a failure. Same
-        // treatment a cancelled sign-in gets.
+    await result.fold(
+      (failure) async {
+        // A cancelled re-auth sheet is the user's own choice, so it stays
+        // silent — but it does NOT stay signed in. See the sign-out below.
         final isCanceled = failure is AccountDeletionCanceledFailure;
 
-        // A FAILED deletion leaves the account intact, so the status must be
-        // derived from the session rather than hardcoded to `failed`.
+        // A deletion that did not complete must never leave the user
+        // AUTHORIZED. They confirmed a destructive, irreversible action;
+        // leaving the session alive contradicts what they just asked for,
+        // and when the flow aborts silently (a dismissed prompt) the only
+        // thing they can observe is that nothing happened at all.
         //
-        // THE BUG THIS FIXES: `failed` is neither `signedIn` nor `signedOut`,
-        // so `isNotSignedIn` was true for a user who was still very much
-        // signed in. Profile then rendered the signed-out sign-in card, whose
-        // buttons could not work — the session they would create already
-        // existed. Combined with the silent guard in
-        // `_resyncedAlreadySignedIn`, that produced a dead-ended screen with
-        // no way forward and no error explaining it.
+        // Signing out is the honest resting state: the account still exists,
+        // nothing was destroyed, and they are no longer logged into it.
         //
-        // The error still reaches the user as a toast below; it just no longer
-        // misreports the session as broken.
-        final stillSignedIn = _authRepository.currentUser != null;
+        // `signOut()` — never `disconnect()`. Revoking the Google grant here
+        // would break the very re-authentication a retry depends on; see
+        // `GoogleSignInService.signOut`.
+        if (_authRepository.currentUid != null) {
+          await _authRepository.signOut();
+        }
+
+        // `signedOut`, not `failed`: `failed` is neither signed-in nor
+        // signed-out, and Profile's `isNotSignedIn` then rendered a sign-in
+        // card whose buttons could not work. The session is genuinely gone
+        // now, so the state says exactly that.
         emit(
           state.copyWith(
-            status: isCanceled || stillSignedIn
-                ? EAuthStatus.signedIn
-                : EAuthStatus.failed,
+            status: EAuthStatus.signedOut,
             errorMessage: isCanceled ? '' : failure.message,
           ),
         );
 
         if (isCanceled) return;
 
-        // Previously the `failed` status was the only signal, and it was
-        // rendered as a screen state rather than an alert. With the status now
-        // reflecting the surviving session, the failure needs its own voice —
-        // otherwise a deletion could fail completely silently.
+        // The status alone is not the signal: `signedOut` is also what a
+        // normal sign-out looks like, so a real failure needs its own voice
+        // or the deletion would fail completely silently.
         final verbose = failure is AuthFailure ? failure.verboseMessage : null;
         UiMessageService.showError(
           kDebugMode && verbose != null ? verbose : failure.message,
         );
       },
-      (_) {
+      (_) async {
         // Re-arm seeding: the guard holds the deleted uid, and without this a
         // new sign-in on this device would skip building its profile.
         _seededUid = null;

@@ -79,6 +79,9 @@ class FirebaseAuthRepository implements IAuthRepository {
   User? get currentUser => _auth.currentUser;
 
   @override
+  String? get currentUid => _auth.currentUser?.uid;
+
+  @override
   Future<Either<Failure, UserCredential>> signInWithGoogle() async {
     if (!_googleSignInService.isConfigured) {
       // NOT a silent no-op: the service records WHY it never initialized
@@ -399,11 +402,33 @@ class FirebaseAuthRepository implements IAuthRepository {
     }
   }
 
-  /// Re-runs the CURRENT user's provider sign-in to refresh credential age.
+  /// Refreshes the CURRENT user's credential age — WITHOUT starting a new
+  /// session.
   ///
   /// Dispatches on `providerData` rather than asking the caller, so the flow
   /// cannot send an Apple account through the Google sheet. A user with neither
   /// provider (which this app never creates) is reported rather than guessed at.
+  ///
+  /// **This used to call `signInWithGoogle()` / `signInWithApple()`**, which
+  /// are SIGN-INS: `_auth.signInWithCredential(...)` /
+  /// `_auth.signInWithProvider(...)`. Two defects followed from that, and both
+  /// are fixed here.
+  ///
+  /// 1. **It showed an account chooser.** `authenticate()` on google_sign_in
+  ///    v7 is by definition the interactive path and takes no account hint, so
+  ///    deleting an account opened a picker listing every Google account on the
+  ///    device. Re-authentication is not a question of WHICH account — it is
+  ///    the account already signed in, proving it is still theirs.
+  ///
+  /// 2. **It could delete the WRONG account.** The returned credential's uid
+  ///    was discarded (`(_) => const Right(unit)`), so picking a different
+  ///    account from that chooser swapped the session. The caller had already
+  ///    captured the old uid, so it would try to wipe account A's data with
+  ///    account B's token, then call `currentUser.delete()` — deleting B, the
+  ///    innocent account, while A survived intact.
+  ///
+  /// [_reauthenticatedAs] therefore verifies the uid came back unchanged. That
+  /// check should now be unreachable; it is what keeps it unreachable.
   @override
   Future<Either<Failure, Unit>> reauthenticate() async {
     final user = _auth.currentUser;
@@ -413,25 +438,160 @@ class FirebaseAuthRepository implements IAuthRepository {
       (info) => info.providerId == 'google.com',
     );
 
-    // Re-uses the SAME sign-in paths as first authentication, so every fix
-    // already made there (the nonce pairing, the `AppleAuthProvider` branch,
-    // the Google `serverClientId`) applies here too rather than being
-    // reimplemented subtly differently.
-    final result = isGoogle
-        ? await signInWithGoogle()
-        : await signInWithApple();
+    try {
+      final credential = isGoogle
+          ? await _googleReauthCredential()
+          : await _appleReauthCredential();
 
-    return result.fold((failure) {
-      // A dismissed sheet is the user's choice, not a malfunction — mapped so
-      // the UI can stay silent about it.
-      final isCanceled =
-          failure is GoogleSignInCanceledFailure ||
-          failure is AppleSignInCanceledFailure;
+      return credential.fold(Left.new, (value) async {
+        // `user.reauthenticateWithCredential`, NOT `_auth.signInWithCredential`
+        // — it re-verifies THIS user in place and cannot switch the session.
+        final result = await user.reauthenticateWithCredential(value);
+        return _reauthenticatedAs(user.uid, result.user?.uid);
+      });
+    } on FirebaseAuthException catch (e, stackTrace) {
       return Left(
-        isCanceled
-            ? AccountDeletionCanceledFailure(diagnostic: failure.message)
-            : AccountDeletionFailure(diagnostic: failure.message),
+        _logged(
+          'Re-authentication',
+          AccountDeletionFailure(diagnostic: _describe(e)),
+          e,
+          stackTrace,
+        ),
       );
-    }, (_) => const Right(unit));
+    } catch (e, stackTrace) {
+      return Left(
+        _logged(
+          'Re-authentication',
+          AccountDeletionFailure(diagnostic: _describe(e)),
+          e,
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  /// Confirms the refreshed credential belongs to the SAME user.
+  ///
+  /// A mismatch is reported rather than tolerated: the caller's next step is
+  /// irreversible deletion, and a silent identity swap there destroys an
+  /// account the user never chose to delete.
+  Either<Failure, Unit> _reauthenticatedAs(String expected, String? actual) {
+    if (actual != null && actual != expected) {
+      return Left(
+        _logged(
+          'Re-authentication identity mismatch',
+          const AccountDeletionFailure(
+            diagnostic: 're-authentication returned a different account',
+          ),
+          StateError('expected uid $expected, got $actual'),
+          StackTrace.current,
+        ),
+      );
+    }
+    return const Right(unit);
+  }
+
+  /// A Google credential for the account ALREADY signed in.
+  ///
+  /// Tries the silent path first so no chooser appears. The interactive
+  /// fallback still exists — a cached grant can legitimately be gone — and the
+  /// uid check above is what makes that fallback safe.
+  Future<Either<Failure, AuthCredential>> _googleReauthCredential() async {
+    if (!_googleSignInService.isConfigured) {
+      final reason = _googleSignInService.unconfiguredReason;
+      _loggerService.error(
+        'Auth: Google re-authentication unavailable — $reason',
+        name: 'Auth',
+      );
+      return Left(GoogleSignInUnconfiguredFailure(diagnostic: reason));
+    }
+
+    try {
+      final account =
+          await _googleSignInService.attemptSilent() ??
+          await _googleSignInService.authenticate();
+
+      final idToken = account.authentication.idToken;
+      if (idToken == null) {
+        const reason = 'authenticate() returned no idToken';
+        _loggerService.error(
+          'Auth: Google re-authentication failed — $reason',
+          name: 'Auth',
+        );
+        return const Left(AccountDeletionFailure(diagnostic: reason));
+      }
+
+      return Right(GoogleAuthProvider.credential(idToken: idToken));
+    } on GoogleSignInException catch (e, stackTrace) {
+      // The same description heuristic as `signInWithGoogle`: only a genuine
+      // user cancellation carries no description, and only that stays silent.
+      final isCanceled =
+          e.code == GoogleSignInExceptionCode.canceled &&
+          (e.description == null || e.description!.isEmpty);
+      return Left(
+        _logged(
+          'Google re-authentication',
+          isCanceled
+              ? AccountDeletionCanceledFailure(diagnostic: _describe(e))
+              : AccountDeletionFailure(diagnostic: _describe(e)),
+          e,
+          stackTrace,
+        ),
+      );
+    }
+  }
+
+  /// An Apple credential for the account ALREADY signed in.
+  ///
+  /// iOS keeps the nonce pairing the sign-in path fixed: the SHA-256 hash goes
+  /// to Apple, the raw value to Firebase. Android has no native Apple API, so
+  /// it re-verifies through the provider flow on the user object — still
+  /// `reauthenticateWithProvider`, never `signInWithProvider`.
+  Future<Either<Failure, AuthCredential>> _appleReauthCredential() async {
+    try {
+      final rawNonce = _cryptoService.generateNonce();
+      final hashedNonce = _cryptoService.sha256ofString(rawNonce);
+
+      final appleCredential = await SignInWithApple.getAppleIDCredential(
+        scopes: [
+          AppleIDAuthorizationScopes.email,
+          AppleIDAuthorizationScopes.fullName,
+        ],
+        nonce: hashedNonce,
+      );
+
+      final identityToken = appleCredential.identityToken;
+      if (identityToken == null) {
+        const reason = 'Apple returned no identityToken';
+        _loggerService.error(
+          'Auth: Apple re-authentication failed — $reason',
+          name: 'Auth',
+        );
+        return const Left(AccountDeletionFailure(diagnostic: reason));
+      }
+
+      return Right(
+        AppleAuthProvider.credentialWithIDToken(
+          identityToken,
+          rawNonce,
+          AppleFullPersonName(
+            givenName: appleCredential.givenName,
+            familyName: appleCredential.familyName,
+          ),
+        ),
+      );
+    } on SignInWithAppleAuthorizationException catch (e, stackTrace) {
+      final isCanceled = e.code == AuthorizationErrorCode.canceled;
+      return Left(
+        _logged(
+          'Apple re-authentication',
+          isCanceled
+              ? AccountDeletionCanceledFailure(diagnostic: _describe(e))
+              : AccountDeletionFailure(diagnostic: _describe(e)),
+          e,
+          stackTrace,
+        ),
+      );
+    }
   }
 }

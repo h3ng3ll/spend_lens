@@ -30,6 +30,9 @@ class UnconfiguredAuthRepository implements IAuthRepository {
   User? get currentUser => null;
 
   @override
+  String? get currentUid => null;
+
+  @override
   Future<Either<Failure, UserCredential>> signInWithGoogle() async =>
       Left(AuthUnavailableFailure(diagnostic: reason));
 

@@ -121,6 +121,50 @@ class GoogleSignInService {
   /// Credential Manager could not match the app to an OAuth client — i.e. the
   /// signing certificate's SHA-1 is not registered in the Firebase project, so
   /// `google-services.json` carries no `client_type: 1` entry.
+  /// Re-verifies the ALREADY signed-in account without showing a chooser.
+  ///
+  /// Returns null when the platform cannot answer silently (no cached grant,
+  /// or the plugin declines), leaving the caller to decide whether an
+  /// interactive prompt is acceptable.
+  ///
+  /// This exists for RE-AUTHENTICATION. `authenticate()` on google_sign_in v7
+  /// is by definition the interactive path and takes no account hint — only
+  /// `scopeHint` — so on a device with several Google accounts it shows the
+  /// full chooser and invites picking a DIFFERENT one. During account
+  /// deletion that is not a harmless nuisance: the account being verified is
+  /// not in question, and a different pick would re-point the session at
+  /// another account mid-delete.
+  Future<GoogleSignInAccount?> attemptSilent() async {
+    _loggerService.info('GoogleSignInService.attemptSilent: starting…');
+    try {
+      final future = _googleSignIn.attemptLightweightAuthentication();
+      if (future == null) {
+        _loggerService.info(
+          'GoogleSignInService.attemptSilent: platform returned no future — '
+          'a silent result is not available on this platform.',
+        );
+        return null;
+      }
+
+      final account = await future;
+      _loggerService.info(
+        'GoogleSignInService.attemptSilent: '
+        '${account == null ? 'no cached account' : 'succeeded for '
+            '${account.email}'}',
+      );
+      return account;
+    } catch (e, stackTrace) {
+      // Never fatal: the caller falls back to the interactive path, so a
+      // silent-attempt failure must not end the flow.
+      _loggerService.warning(
+        'GoogleSignInService.attemptSilent failed: $e',
+        error: e,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
+
   Future<GoogleSignInAccount> authenticate() async {
     if (!_googleSignIn.supportsAuthenticate()) {
       // Would otherwise throw a bare UnsupportedError from deep in the plugin.

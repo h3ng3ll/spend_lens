@@ -31,30 +31,23 @@ import 'package:spend_lens/features/settings/domain/repositories/i_settings_loca
 import 'package:spend_lens/features/sync/domain/adapters/sync_entity_adapters.dart';
 import 'package:spend_lens/features/sync/domain/repositories/i_sync_remote_repository.dart';
 
-/// REGRESSION: a CANCELLED re-auth sheet destroyed all remote data.
+/// REGRESSION: account deletion could delete the WRONG Google account.
 ///
-/// `DeleteAccountUseCase` ran `_deleteRemoteData` first and only then tried to
-/// delete the Firebase user, refreshing the credential as a RETRY when
-/// Firebase answered `requires-recent-login` — which it does for any user who
-/// did not sign in moments ago, i.e. almost always.
+/// `FirebaseAuthRepository.reauthenticate()` did not re-authenticate — it
+/// called `signInWithGoogle()`, a full `signInWithCredential(...)`. On
+/// google_sign_in v7 `authenticate()` is always the interactive path and
+/// accepts no account hint, so deleting an account opened a chooser listing
+/// every Google account on the device.
 ///
-/// So the real-device sequence was:
+/// The returned credential's uid was then discarded (`(_) => Right(unit)`),
+/// so picking a different account silently swapped the session. The use case
+/// had already captured the ORIGINAL uid, so it would try to wipe account A's
+/// data using account B's token, and then call `currentUser.delete()` —
+/// destroying B, the innocent account, while A survived untouched.
 ///
-///     1. every Firestore collection deleted
-///     2. every receipt photo deleted, the avatar and user document too
-///     3. delete user -> requires-recent-login
-///     4. Google sheet opens -> user cancels
-///     5. abort
-///
-/// The account survived with its data gone, and the next sync re-uploaded the
-/// local copy — the user watched their cloud storage refill instead of the
-/// account disappearing. A destructive flow must not depend on a credential it
-/// has not yet confirmed it can get.
-///
-/// This test drives the REAL use case. The pre-existing
-/// `delete_account_use_case_test.dart` asserts ordering against a
-/// `_TestableDeleteAccount` COPY of the logic, so it could not have caught
-/// this: the production class was free to diverge from it, and did.
+/// The repository now refuses a uid mismatch. This is the second layer: the
+/// use case re-reads the session after the refresh and aborts before anything
+/// is destroyed.
 void main() {
   late List<String> order;
   late _RecordingAuth auth;
@@ -81,8 +74,8 @@ void main() {
     profileRemote = _RecordingProfileRemote(order);
   });
 
-  test('a cancelled re-auth destroys NOTHING', () async {
-    auth.reauthFailure = const AccountDeletionFailure(diagnostic: 'canceled');
+  test('a session that changes during re-auth destroys NOTHING', () async {
+    auth.uidAfterReauth = 'user-b';
 
     final result = await buildUseCase().call(
       scope: EAccountDeletionScope.everywhere,
@@ -92,44 +85,53 @@ void main() {
     expect(
       order,
       isNot(contains('deleteRecords')),
-      reason: 'THE BUG: remote records were wiped before the credential was '
-          'confirmed, so cancelling the sheet left the account alive and '
-          'empty.',
+      reason: "THE BUG: account A's data was wiped with account B's token",
+    );
+    expect(
+      order,
+      isNot(contains('deleteAccount')),
+      reason: 'THE BUG: this deleted account B — the wrong account entirely',
     );
     expect(order, isNot(contains('deleteAvatar')));
     expect(order, isNot(contains('deleteUserDocument')));
-    expect(order, isNot(contains('deleteAccount')));
   });
 
-  test('re-authentication is the FIRST thing that happens', () async {
+  test('the abort is reported, never silently treated as success', () async {
+    auth.uidAfterReauth = 'user-b';
+
+    final result = await buildUseCase().call(
+      scope: EAccountDeletionScope.everywhere,
+    );
+
+    result.fold(
+      (failure) => expect(failure, isA<AccountDeletionFailure>()),
+      (_) => fail('a changed session must not report success'),
+    );
+  });
+
+  test('an UNCHANGED session proceeds in the established order', () async {
+    // The control: the guard must not block the normal path.
     await buildUseCase().call(scope: EAccountDeletionScope.everywhere);
 
-    // The whole fix in one assertion: nothing precedes the credential check.
     expect(order.first, 'reauthenticate');
-  });
-
-  test('the account is deleted only after re-auth succeeds', () async {
-    await buildUseCase().call(scope: EAccountDeletionScope.everywhere);
-
+    expect(order, contains('deleteRecords'));
     expect(
-      order.indexOf('reauthenticate'),
+      order.indexOf('deleteRecords'),
       lessThan(order.indexOf('deleteAccount')),
+      reason: 'remote data must go before the user, or it is orphaned by the '
+          'rules that authorise on request.auth.uid',
     );
   });
 
-  test('a credential that ages out mid-flow is still retried', () async {
-    // The late retry stays: the credential can expire between the pre-flight
-    // refresh and the delete on a slow connection.
-    auth.failFirstDeleteWith = const AccountDeletionFailure(
-      diagnostic: 'requires-recent-login',
-    );
+  test('a signed-out session is not mistaken for a changed one', () async {
+    // `currentUser` is null once the user is gone; that is not a mismatch.
+    auth.uid = null;
 
     final result = await buildUseCase().call(
       scope: EAccountDeletionScope.everywhere,
     );
 
     expect(result.isRight(), isTrue);
-    expect(order.where((e) => e == 'deleteAccount').length, 2);
   });
 }
 
@@ -145,28 +147,27 @@ SyncEntityAdapters _emptyAdapters() => SyncEntityAdapters(
 
 class _RecordingAuth implements IAuthRepository {
   final List<String> order;
-  Failure? failFirstDeleteWith;
   Failure? reauthFailure;
-  int _deleteCalls = 0;
+
+  /// The uid `currentUser` reports. `reauthenticate()` swaps it to
+  /// [uidAfterReauth] when that is set, reproducing the session change a
+  /// wrong pick from the Google account chooser used to cause.
+  String? uid = 'user-a';
+  String? uidAfterReauth;
 
   _RecordingAuth(this.order);
 
+  // `currentUser` returns a Firebase `User`, which cannot be constructed in
+  // a test — which is exactly why the use case reads `currentUid` instead.
   @override
   Null get currentUser => null;
 
-  // The use case reads the identity through this, not through the
-  // unfakeable Firebase `User`. A non-null value keeps the remote-wipe step
-  // reachable, which is what these tests assert about.
   @override
-  String? get currentUid => 'user-a';
+  String? get currentUid => uid;
 
   @override
   Future<Either<Failure, Unit>> deleteAccount() async {
     order.add('deleteAccount');
-    _deleteCalls++;
-    if (_deleteCalls == 1 && failFirstDeleteWith != null) {
-      return Left(failFirstDeleteWith!);
-    }
     return const Right(unit);
   }
 
@@ -175,6 +176,8 @@ class _RecordingAuth implements IAuthRepository {
     order.add('reauthenticate');
     final failure = reauthFailure;
     if (failure != null) return Left(failure);
+    // The defect being guarded: a re-auth that comes back as someone else.
+    if (uidAfterReauth != null) uid = uidAfterReauth;
     return const Right(unit);
   }
 

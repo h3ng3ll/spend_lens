@@ -23,6 +23,16 @@ abstract interface class IAuthRepository {
 
   User? get currentUser;
 
+  /// The signed-in user's id, or null when signed out.
+  ///
+  /// Exists separately from [currentUser] so callers that only need the
+  /// IDENTITY are not coupled to Firebase's `User`, which cannot be
+  /// constructed in a test. `DeleteAccountUseCase` compares this before and
+  /// after re-authentication to refuse a session that changed mid-flow, and
+  /// that guard has to be verifiable — an untestable type is how the
+  /// wrong-account deletion stayed invisible.
+  String? get currentUid;
+
   Future<Either<Failure, UserCredential>> signInWithGoogle();
 
   Future<Either<Failure, AppleSignInResult>> signInWithApple();
