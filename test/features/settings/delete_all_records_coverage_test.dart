@@ -1,5 +1,8 @@
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:spend_lens/core/services/firebase/firebase_storage_service.dart';
+import 'package:spend_lens/core/services/logger_service.dart';
+
 import 'package:spend_lens/features/analytics/domain/models/price_observation/price_observation.dart';
 import 'package:spend_lens/features/analytics/domain/repositories/i_price_observation_local_repository.dart';
 import 'package:spend_lens/features/category/domain/models/category/category.dart';
@@ -39,6 +42,7 @@ void main() {
   late _FakeProducts products;
   late _FakeObservations observations;
   late _FakeSettings settings;
+  late _FakeStorage storage;
 
   final now = DateTime(2026, 9, 20);
 
@@ -51,6 +55,8 @@ void main() {
     productLocalRepository: products,
     priceObservationLocalRepository: observations,
     settingsLocalRepository: settings,
+    storageService: storage,
+    loggerService: _FakeLogger(),
   );
 
   setUp(() {
@@ -62,6 +68,7 @@ void main() {
     products = _FakeProducts();
     observations = _FakeObservations();
     settings = _FakeSettings();
+    storage = _FakeStorage();
 
     expenses.rows.add(
       Expense(
@@ -118,7 +125,7 @@ void main() {
   });
 
   test('clears every scanning-era collection, not just the M5 three', () async {
-    await buildUseCase().call();
+    await buildUseCase().call(uid: 'u1');
 
     expect(
       receipts.deleted,
@@ -128,11 +135,17 @@ void main() {
     );
     expect(receiptItems.deleted, ['ri1']);
     expect(products.deleted, ['p1']);
-    expect(observations.deleted, ['o1']);
+    expect(
+      observations.deleted,
+      ['o1'],
+      reason: 'Observations must be TOMBSTONED so the removal is pushed — a '
+          'hard delete left every priceObservations doc in Firestore.',
+    );
+    expect(observations.hardDeleted, isEmpty);
   });
 
   test('still clears the collections it always did', () async {
-    await buildUseCase().call();
+    await buildUseCase().call(uid: 'u1');
 
     expect(expenses.deleted, ['e1']);
     expect(stores.deleted, ['s1']);
@@ -156,7 +169,7 @@ void main() {
       ),
     ]);
 
-    await buildUseCase().call();
+    await buildUseCase().call(uid: 'u1');
 
     // The design's own restore path: deleting the built-ins contradicted the
     // footer that says they cannot be deleted.
@@ -164,8 +177,36 @@ void main() {
   });
 
   test('sets dataCleared so the seed cannot repopulate the app', () async {
-    await buildUseCase().call();
+    await buildUseCase().call(uid: 'u1');
 
+    expect(settings.saved?.dataCleared, isTrue);
+  });
+
+  test('sweeps the bucket so the storage bar drops to zero', () async {
+    await buildUseCase().call(uid: 'u1');
+
+    expect(
+      storage.sweptUids,
+      ['u1'],
+      reason: 'Tombstones remove Firestore docs only — receipt photos, logos '
+          'and product photos stayed in Storage (the "still 7 MB" bug).',
+    );
+  });
+
+  test('signed out: no bucket sweep, records still cleared', () async {
+    await buildUseCase().call(uid: '');
+
+    expect(storage.sweptUids, isEmpty);
+    expect(expenses.deleted, ['e1']);
+  });
+
+  test('a failed bucket sweep does not abort the local wipe', () async {
+    storage.fail = true;
+
+    await buildUseCase().call(uid: 'u1');
+
+    expect(expenses.deleted, ['e1']);
+    expect(observations.deleted, ['o1']);
     expect(settings.saved?.dataCleared, isTrue);
   });
 }
@@ -261,8 +302,13 @@ class _FakeObservations implements IPriceObservationLocalRepository {
   @override
   Future<List<PriceObservation>> getAllIncludingDeleted() async => rows;
 
+  final List<String> hardDeleted = [];
+
   @override
-  Future<void> deleteLocalOnly(String id) async => deleted.add(id);
+  Future<void> delete(String id) async => deleted.add(id);
+
+  @override
+  Future<void> deleteLocalOnly(String id) async => hardDeleted.add(id);
 
   @override
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
@@ -279,4 +325,23 @@ class _FakeSettings implements ISettingsLocalRepository {
 
   @override
   noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeStorage implements FirebaseStorageService {
+  final List<String> sweptUids = [];
+  bool fail = false;
+
+  @override
+  Future<void> deleteRecordFiles(String uid) async {
+    if (fail) throw Exception('offline');
+    sweptUids.add(uid);
+  }
+
+  @override
+  noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+class _FakeLogger implements LoggerService {
+  @override
+  noSuchMethod(Invocation invocation) {}
 }

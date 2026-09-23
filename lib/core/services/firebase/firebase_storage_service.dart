@@ -302,6 +302,44 @@ class FirebaseStorageService {
     _firebaseStorage.ref().child('users/$uid/profile'),
   ];
 
+  /// Deletes every RECORD file this user has in the bucket — receipt
+  /// photos, store logos and product photos. The avatar under `profile/` is
+  /// account identity, not a record, so it is left alone.
+  ///
+  /// Driven by what the BUCKET holds, not by local rows: a photo whose
+  /// record is already gone locally would otherwise be unreachable forever.
+  ///
+  /// Every page is listed BEFORE anything is deleted, so deleting cannot
+  /// shift the listing under a page token and skip objects.
+  Future<void> deleteRecordFiles(String uid) async {
+    final folders = [
+      _receiptsFolder(uid),
+      _firebaseStorage.ref().child('users/$uid/stores'),
+      _firebaseStorage.ref().child('users/$uid/products'),
+    ];
+
+    for (final folder in folders) {
+      final items = <Reference>[];
+      String? pageToken;
+      do {
+        final page = await folder.list(
+          ListOptions(maxResults: 100, pageToken: pageToken),
+        );
+        items.addAll(page.items);
+        pageToken = page.nextPageToken;
+      } while (pageToken != null);
+
+      for (final item in items) {
+        try {
+          await item.delete();
+        } on FirebaseException catch (error) {
+          if (error.code == 'object-not-found') continue;
+          rethrow;
+        }
+      }
+    }
+  }
+
   /// Sums one folder's object sizes, a page at a time.
   ///
   /// A folder that does not exist yet lists as empty rather than throwing,

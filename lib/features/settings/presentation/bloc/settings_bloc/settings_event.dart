@@ -49,6 +49,8 @@ sealed class SettingsEvent with _$SettingsEvent {
 
   /// The destructive delete-all action (delete_all_records_rules.md).
   /// Dispatched from the confirm dialog's `onConfirm` — a pure action, never
-  /// itself popping a route.
-  const factory SettingsEvent.deleteAll() = _DeleteAll;
+  /// itself popping a route. [uid] scopes the cloud-file sweep; empty when
+  /// signed out.
+  const factory SettingsEvent.deleteAll({@Default('') String uid}) =
+      _DeleteAll;
 }

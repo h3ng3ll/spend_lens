@@ -1,3 +1,5 @@
+import '../../../core/services/firebase/firebase_storage_service.dart';
+import '../../../core/services/logger_service.dart';
 import '../../../core/di/injection.dart';
 import '../../category/domain/repositories/i_category_local_repository.dart';
 import '../../analytics/domain/repositories/i_price_observation_local_repository.dart';
@@ -54,6 +56,8 @@ Future<AppSettings> initSettingsFeature() async {
       priceObservationLocalRepository:
           getIt<IPriceObservationLocalRepository>(),
       settingsLocalRepository: getIt<ISettingsLocalRepository>(),
+      storageService: getIt<FirebaseStorageService>(),
+      loggerService: getIt<LoggerService>(),
     ),
   );
 

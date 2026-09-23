@@ -1,3 +1,5 @@
+import '../../../../core/services/firebase/firebase_storage_service.dart';
+import '../../../../core/services/logger_service.dart';
 import '../../../analytics/domain/repositories/i_price_observation_local_repository.dart';
 import '../../../category/domain/repositories/i_category_local_repository.dart';
 import '../../../expense/domain/repositories/i_expense_local_repository.dart';
@@ -38,6 +40,15 @@ import '../repositories/i_settings_local_repository.dart';
 /// The visible symptom was cloud storage still reporting megabytes of receipt
 /// photos after the user had emptied the app, because the `Receipt` rows
 /// naming those photos were never tombstoned.
+///
+/// ## It also empties the bucket
+///
+/// Tombstones only ever remove Firestore DOCUMENTS. Receipt photos, store
+/// logos and product photos are Storage objects that nothing in the sync
+/// cycle deletes, so the Profile storage bar kept reporting megabytes after
+/// every record was gone. [FirebaseStorageService.deleteRecordFiles] now
+/// sweeps them FIRST — before the tombstones trigger the sync whose
+/// `usedBytes` re-measurement the bar shows.
 class DeleteAllRecordsUseCase {
   final IExpenseLocalRepository _expenseLocalRepository;
   final IStoreLocalRepository _storeLocalRepository;
@@ -47,6 +58,8 @@ class DeleteAllRecordsUseCase {
   final IProductLocalRepository _productLocalRepository;
   final IPriceObservationLocalRepository _priceObservationLocalRepository;
   final ISettingsLocalRepository _settingsLocalRepository;
+  final FirebaseStorageService _storageService;
+  final LoggerService _loggerService;
 
   const DeleteAllRecordsUseCase({
     required IExpenseLocalRepository expenseLocalRepository,
@@ -57,6 +70,8 @@ class DeleteAllRecordsUseCase {
     required IProductLocalRepository productLocalRepository,
     required IPriceObservationLocalRepository priceObservationLocalRepository,
     required ISettingsLocalRepository settingsLocalRepository,
+    required FirebaseStorageService storageService,
+    required LoggerService loggerService,
   }) : this._(
          expenseLocalRepository,
          storeLocalRepository,
@@ -66,6 +81,8 @@ class DeleteAllRecordsUseCase {
          productLocalRepository,
          priceObservationLocalRepository,
          settingsLocalRepository,
+         storageService,
+         loggerService,
        );
 
   const DeleteAllRecordsUseCase._(
@@ -77,6 +94,8 @@ class DeleteAllRecordsUseCase {
     this._productLocalRepository,
     this._priceObservationLocalRepository,
     this._settingsLocalRepository,
+    this._storageService,
+    this._loggerService,
   );
 
   /// Tombstones every record in [scope].
@@ -105,7 +124,15 @@ class DeleteAllRecordsUseCase {
   /// them locally while deleting them remotely would need a second,
   /// local-only record state that nothing else in the app has. That is
   /// called out rather than faked.
-  Future<void> call({EDeleteScope scope = EDeleteScope.local}) async {
+  ///
+  /// [uid] is empty when the user is signed out — nothing was ever uploaded
+  /// under a uid, so the bucket sweep is skipped.
+  Future<void> call({
+    required String uid,
+    EDeleteScope scope = EDeleteScope.local,
+  }) async {
+    await _deleteRemoteFiles(uid);
+
     final expenses = await _expenseLocalRepository.getAllIncludingDeleted();
     for (final expense in expenses) {
       await _expenseLocalRepository.delete(expense.id);
@@ -143,10 +170,13 @@ class DeleteAllRecordsUseCase {
       await _productLocalRepository.delete(product.id);
     }
 
+    // `delete`, NOT `deleteLocalOnly`: a hard delete leaves no tombstone, so
+    // the push pass never learns the rows are gone and every observation
+    // stays in Firestore's `priceObservations` after "Delete all data".
     final observations =
         await _priceObservationLocalRepository.getAllIncludingDeleted();
     for (final observation in observations) {
-      await _priceObservationLocalRepository.deleteLocalOnly(observation.id);
+      await _priceObservationLocalRepository.delete(observation.id);
     }
 
     // `dataCleared` is what stops the seed AND (once sync lands) the pull
@@ -156,6 +186,24 @@ class DeleteAllRecordsUseCase {
       final settings = await _settingsLocalRepository.get();
       await _settingsLocalRepository.save(
         settings.copyWith(dataCleared: true),
+      );
+    }
+  }
+
+  /// Swallowed on failure, like `DeleteStoreUseCase._deleteLogo`: an
+  /// offline or transient Storage error must not abort the local wipe the
+  /// user confirmed. The orphan is a quota cost, and a later delete-all
+  /// retries the sweep because it reads the bucket, not local rows.
+  Future<void> _deleteRemoteFiles(String uid) async {
+    if (uid.isEmpty) return;
+    try {
+      await _storageService.deleteRecordFiles(uid);
+    } catch (error, stackTrace) {
+      _loggerService.error(
+        'Delete-all: bucket sweep failed',
+        error: error,
+        stackTrace: stackTrace,
+        name: 'Settings',
       );
     }
   }

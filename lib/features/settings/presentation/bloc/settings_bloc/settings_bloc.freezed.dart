@@ -137,7 +137,7 @@ return deleteAll(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String? code)?  setLocale,TResult Function( String code)?  setCurrency,TResult Function( EAppThemeMode mode)?  pickTheme,TResult Function()?  completeOnboarding,TResult Function()?  toggleFlashMode,TResult Function()?  loadRecordCount,TResult Function()?  deleteAll,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String? code)?  setLocale,TResult Function( String code)?  setCurrency,TResult Function( EAppThemeMode mode)?  pickTheme,TResult Function()?  completeOnboarding,TResult Function()?  toggleFlashMode,TResult Function()?  loadRecordCount,TResult Function( String uid)?  deleteAll,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _SetLocale() when setLocale != null:
@@ -147,7 +147,7 @@ return pickTheme(_that.mode);case _CompleteOnboarding() when completeOnboarding 
 return completeOnboarding();case _ToggleFlashMode() when toggleFlashMode != null:
 return toggleFlashMode();case _LoadRecordCount() when loadRecordCount != null:
 return loadRecordCount();case _DeleteAll() when deleteAll != null:
-return deleteAll();case _:
+return deleteAll(_that.uid);case _:
   return orElse();
 
 }
@@ -165,7 +165,7 @@ return deleteAll();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String? code)  setLocale,required TResult Function( String code)  setCurrency,required TResult Function( EAppThemeMode mode)  pickTheme,required TResult Function()  completeOnboarding,required TResult Function()  toggleFlashMode,required TResult Function()  loadRecordCount,required TResult Function()  deleteAll,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String? code)  setLocale,required TResult Function( String code)  setCurrency,required TResult Function( EAppThemeMode mode)  pickTheme,required TResult Function()  completeOnboarding,required TResult Function()  toggleFlashMode,required TResult Function()  loadRecordCount,required TResult Function( String uid)  deleteAll,}) {final _that = this;
 switch (_that) {
 case _Watch():
 return watch();case _SetLocale():
@@ -175,7 +175,7 @@ return pickTheme(_that.mode);case _CompleteOnboarding():
 return completeOnboarding();case _ToggleFlashMode():
 return toggleFlashMode();case _LoadRecordCount():
 return loadRecordCount();case _DeleteAll():
-return deleteAll();}
+return deleteAll(_that.uid);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -189,7 +189,7 @@ return deleteAll();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String? code)?  setLocale,TResult? Function( String code)?  setCurrency,TResult? Function( EAppThemeMode mode)?  pickTheme,TResult? Function()?  completeOnboarding,TResult? Function()?  toggleFlashMode,TResult? Function()?  loadRecordCount,TResult? Function()?  deleteAll,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String? code)?  setLocale,TResult? Function( String code)?  setCurrency,TResult? Function( EAppThemeMode mode)?  pickTheme,TResult? Function()?  completeOnboarding,TResult? Function()?  toggleFlashMode,TResult? Function()?  loadRecordCount,TResult? Function( String uid)?  deleteAll,}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _SetLocale() when setLocale != null:
@@ -199,7 +199,7 @@ return pickTheme(_that.mode);case _CompleteOnboarding() when completeOnboarding 
 return completeOnboarding();case _ToggleFlashMode() when toggleFlashMode != null:
 return toggleFlashMode();case _LoadRecordCount() when loadRecordCount != null:
 return loadRecordCount();case _DeleteAll() when deleteAll != null:
-return deleteAll();case _:
+return deleteAll(_that.uid);case _:
   return null;
 
 }
@@ -537,42 +537,75 @@ String toString() {
 
 
 class _DeleteAll implements SettingsEvent {
-  const _DeleteAll();
+  const _DeleteAll({this.uid = ''});
   
 
+@JsonKey() final  String uid;
 
-
+/// Create a copy of SettingsEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DeleteAllCopyWith<_DeleteAll> get copyWith => __$DeleteAllCopyWithImpl<_DeleteAll>(this, _$identity);
 
 
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeleteAll);
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _DeleteAll&&(identical(other.uid, uid) || other.uid == uid));
 }
 
 
 @override
-int get hashCode => runtimeType.hashCode;
+int get hashCode => Object.hash(runtimeType,uid);
 
 @override
 String toString() {
-  return 'SettingsEvent.deleteAll()';
+  return 'SettingsEvent.deleteAll(uid: $uid)';
 }
 
 
 }
 
+/// @nodoc
+abstract mixin class _$DeleteAllCopyWith<$Res> implements $SettingsEventCopyWith<$Res> {
+  factory _$DeleteAllCopyWith(_DeleteAll value, $Res Function(_DeleteAll) _then) = __$DeleteAllCopyWithImpl;
+@useResult
+$Res call({
+ String uid
+});
 
 
+
+
+}
+/// @nodoc
+class __$DeleteAllCopyWithImpl<$Res>
+    implements _$DeleteAllCopyWith<$Res> {
+  __$DeleteAllCopyWithImpl(this._self, this._then);
+
+  final _DeleteAll _self;
+  final $Res Function(_DeleteAll) _then;
+
+/// Create a copy of SettingsEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? uid = null,}) {
+  return _then(_DeleteAll(
+uid: null == uid ? _self.uid : uid // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
 
 /// @nodoc
 mixin _$SettingsState {
 
  ESettingsStatus get status; AppSettings get settings; String get errorMessage;/// The current expenses+stores+categories count, for the delete-all
 /// confirm dialog's `{n}` copy. `null` until `loadRecordCount` resolves.
- int? get recordCount;/// Whether the most recent `deleteAll` write failed. A one-shot signal
-/// for an error-toast listener — never read to derive displayed state.
- bool get lastDeleteAllFailed;
+ int? get recordCount;/// Outcome of the most recent `deleteAll` run, for the toast listeners.
+ EDeleteAllStatus get deleteAllStatus;
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -583,16 +616,16 @@ $SettingsStateCopyWith<SettingsState> get copyWith => _$SettingsStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.status, status) || other.status == status)&&(identical(other.settings, settings) || other.settings == settings)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.recordCount, recordCount) || other.recordCount == recordCount)&&(identical(other.lastDeleteAllFailed, lastDeleteAllFailed) || other.lastDeleteAllFailed == lastDeleteAllFailed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SettingsState&&(identical(other.status, status) || other.status == status)&&(identical(other.settings, settings) || other.settings == settings)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.recordCount, recordCount) || other.recordCount == recordCount)&&(identical(other.deleteAllStatus, deleteAllStatus) || other.deleteAllStatus == deleteAllStatus));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,settings,errorMessage,recordCount,lastDeleteAllFailed);
+int get hashCode => Object.hash(runtimeType,status,settings,errorMessage,recordCount,deleteAllStatus);
 
 @override
 String toString() {
-  return 'SettingsState(status: $status, settings: $settings, errorMessage: $errorMessage, recordCount: $recordCount, lastDeleteAllFailed: $lastDeleteAllFailed)';
+  return 'SettingsState(status: $status, settings: $settings, errorMessage: $errorMessage, recordCount: $recordCount, deleteAllStatus: $deleteAllStatus)';
 }
 
 
@@ -603,7 +636,7 @@ abstract mixin class $SettingsStateCopyWith<$Res>  {
   factory $SettingsStateCopyWith(SettingsState value, $Res Function(SettingsState) _then) = _$SettingsStateCopyWithImpl;
 @useResult
 $Res call({
- ESettingsStatus status, AppSettings settings, String errorMessage, int? recordCount, bool lastDeleteAllFailed
+ ESettingsStatus status, AppSettings settings, String errorMessage, int? recordCount, EDeleteAllStatus deleteAllStatus
 });
 
 
@@ -620,14 +653,14 @@ class _$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? settings = null,Object? errorMessage = null,Object? recordCount = freezed,Object? lastDeleteAllFailed = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? status = null,Object? settings = null,Object? errorMessage = null,Object? recordCount = freezed,Object? deleteAllStatus = null,}) {
   return _then(_self.copyWith(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ESettingsStatus,settings: null == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
 as AppSettings,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,recordCount: freezed == recordCount ? _self.recordCount : recordCount // ignore: cast_nullable_to_non_nullable
-as int?,lastDeleteAllFailed: null == lastDeleteAllFailed ? _self.lastDeleteAllFailed : lastDeleteAllFailed // ignore: cast_nullable_to_non_nullable
-as bool,
+as int?,deleteAllStatus: null == deleteAllStatus ? _self.deleteAllStatus : deleteAllStatus // ignore: cast_nullable_to_non_nullable
+as EDeleteAllStatus,
   ));
 }
 /// Create a copy of SettingsState
@@ -718,10 +751,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ESettingsStatus status,  AppSettings settings,  String errorMessage,  int? recordCount,  bool lastDeleteAllFailed)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( ESettingsStatus status,  AppSettings settings,  String errorMessage,  int? recordCount,  EDeleteAllStatus deleteAllStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SettingsState() when $default != null:
-return $default(_that.status,_that.settings,_that.errorMessage,_that.recordCount,_that.lastDeleteAllFailed);case _:
+return $default(_that.status,_that.settings,_that.errorMessage,_that.recordCount,_that.deleteAllStatus);case _:
   return orElse();
 
 }
@@ -739,10 +772,10 @@ return $default(_that.status,_that.settings,_that.errorMessage,_that.recordCount
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ESettingsStatus status,  AppSettings settings,  String errorMessage,  int? recordCount,  bool lastDeleteAllFailed)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( ESettingsStatus status,  AppSettings settings,  String errorMessage,  int? recordCount,  EDeleteAllStatus deleteAllStatus)  $default,) {final _that = this;
 switch (_that) {
 case _SettingsState():
-return $default(_that.status,_that.settings,_that.errorMessage,_that.recordCount,_that.lastDeleteAllFailed);}
+return $default(_that.status,_that.settings,_that.errorMessage,_that.recordCount,_that.deleteAllStatus);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -756,10 +789,10 @@ return $default(_that.status,_that.settings,_that.errorMessage,_that.recordCount
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ESettingsStatus status,  AppSettings settings,  String errorMessage,  int? recordCount,  bool lastDeleteAllFailed)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( ESettingsStatus status,  AppSettings settings,  String errorMessage,  int? recordCount,  EDeleteAllStatus deleteAllStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _SettingsState() when $default != null:
-return $default(_that.status,_that.settings,_that.errorMessage,_that.recordCount,_that.lastDeleteAllFailed);case _:
+return $default(_that.status,_that.settings,_that.errorMessage,_that.recordCount,_that.deleteAllStatus);case _:
   return null;
 
 }
@@ -771,7 +804,7 @@ return $default(_that.status,_that.settings,_that.errorMessage,_that.recordCount
 
 
 class _SettingsState implements SettingsState {
-  const _SettingsState({required this.status, required this.settings, this.errorMessage = '', this.recordCount, this.lastDeleteAllFailed = false});
+  const _SettingsState({required this.status, required this.settings, this.errorMessage = '', this.recordCount, this.deleteAllStatus = EDeleteAllStatus.idle});
   
 
 @override final  ESettingsStatus status;
@@ -780,9 +813,8 @@ class _SettingsState implements SettingsState {
 /// The current expenses+stores+categories count, for the delete-all
 /// confirm dialog's `{n}` copy. `null` until `loadRecordCount` resolves.
 @override final  int? recordCount;
-/// Whether the most recent `deleteAll` write failed. A one-shot signal
-/// for an error-toast listener — never read to derive displayed state.
-@override@JsonKey() final  bool lastDeleteAllFailed;
+/// Outcome of the most recent `deleteAll` run, for the toast listeners.
+@override@JsonKey() final  EDeleteAllStatus deleteAllStatus;
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
@@ -794,16 +826,16 @@ _$SettingsStateCopyWith<_SettingsState> get copyWith => __$SettingsStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsState&&(identical(other.status, status) || other.status == status)&&(identical(other.settings, settings) || other.settings == settings)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.recordCount, recordCount) || other.recordCount == recordCount)&&(identical(other.lastDeleteAllFailed, lastDeleteAllFailed) || other.lastDeleteAllFailed == lastDeleteAllFailed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SettingsState&&(identical(other.status, status) || other.status == status)&&(identical(other.settings, settings) || other.settings == settings)&&(identical(other.errorMessage, errorMessage) || other.errorMessage == errorMessage)&&(identical(other.recordCount, recordCount) || other.recordCount == recordCount)&&(identical(other.deleteAllStatus, deleteAllStatus) || other.deleteAllStatus == deleteAllStatus));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,status,settings,errorMessage,recordCount,lastDeleteAllFailed);
+int get hashCode => Object.hash(runtimeType,status,settings,errorMessage,recordCount,deleteAllStatus);
 
 @override
 String toString() {
-  return 'SettingsState(status: $status, settings: $settings, errorMessage: $errorMessage, recordCount: $recordCount, lastDeleteAllFailed: $lastDeleteAllFailed)';
+  return 'SettingsState(status: $status, settings: $settings, errorMessage: $errorMessage, recordCount: $recordCount, deleteAllStatus: $deleteAllStatus)';
 }
 
 
@@ -814,7 +846,7 @@ abstract mixin class _$SettingsStateCopyWith<$Res> implements $SettingsStateCopy
   factory _$SettingsStateCopyWith(_SettingsState value, $Res Function(_SettingsState) _then) = __$SettingsStateCopyWithImpl;
 @override @useResult
 $Res call({
- ESettingsStatus status, AppSettings settings, String errorMessage, int? recordCount, bool lastDeleteAllFailed
+ ESettingsStatus status, AppSettings settings, String errorMessage, int? recordCount, EDeleteAllStatus deleteAllStatus
 });
 
 
@@ -831,14 +863,14 @@ class __$SettingsStateCopyWithImpl<$Res>
 
 /// Create a copy of SettingsState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? settings = null,Object? errorMessage = null,Object? recordCount = freezed,Object? lastDeleteAllFailed = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? status = null,Object? settings = null,Object? errorMessage = null,Object? recordCount = freezed,Object? deleteAllStatus = null,}) {
   return _then(_SettingsState(
 status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as ESettingsStatus,settings: null == settings ? _self.settings : settings // ignore: cast_nullable_to_non_nullable
 as AppSettings,errorMessage: null == errorMessage ? _self.errorMessage : errorMessage // ignore: cast_nullable_to_non_nullable
 as String,recordCount: freezed == recordCount ? _self.recordCount : recordCount // ignore: cast_nullable_to_non_nullable
-as int?,lastDeleteAllFailed: null == lastDeleteAllFailed ? _self.lastDeleteAllFailed : lastDeleteAllFailed // ignore: cast_nullable_to_non_nullable
-as bool,
+as int?,deleteAllStatus: null == deleteAllStatus ? _self.deleteAllStatus : deleteAllStatus // ignore: cast_nullable_to_non_nullable
+as EDeleteAllStatus,
   ));
 }
 

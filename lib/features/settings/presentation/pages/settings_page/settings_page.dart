@@ -10,6 +10,7 @@ import '../../../../../core/services/scan_capability/e_scan_capability.dart';
 import '../../../../../core/services/scan_capability/i_scan_capability_service.dart';
 import '../../../../../core/services/ui_message_service.dart';
 import '../../../../../core/widgets/confirm_dialog.dart';
+import '../../../../auth/presentation/bloc/auth_bloc/auth_bloc.dart';
 import '../../../domain/models/app_settings/e_app_theme_mode.dart';
 import '../../bloc/settings_bloc/settings_bloc.dart';
 import '../../sheets/currency_sheet/currency_sheet.dart';
@@ -55,6 +56,10 @@ class _SettingsPageState extends State<SettingsPage>
   };
 
   late Future<EScanCapability> _scanCapability;
+
+  /// Blocks re-entry while the count read or the confirm dialog is open, so
+  /// repeated taps cannot stack dialogs behind each other.
+  bool _isDeleteAllOpen = false;
 
   @override
   void initState() {
@@ -126,7 +131,9 @@ class _SettingsPageState extends State<SettingsPage>
   /// — `SettingsBloc` owns the write, and the success/failure toasts live
   /// in the `BlocListener`s below, never at the dispatch site.
   void _onConfirmDeleteAll(BuildContext context) =>
-      context.read<SettingsBloc>().add(const SettingsEvent.deleteAll());
+      context.read<SettingsBloc>().add(
+        SettingsEvent.deleteAll(uid: context.read<AuthBloc>().state.uid),
+      );
 
   /// Dispatches `loadRecordCount` and awaits the resolved count via the
   /// bloc's own stream — `SettingsBloc` now owns the three-repository read
@@ -142,25 +149,34 @@ class _SettingsPageState extends State<SettingsPage>
   }
 
   Future<void> _onDeleteAll(BuildContext context) async {
-    final lo = AppLocalizations.of(context);
-    final n = await _recordCount(context);
-    if (!context.mounted) return;
+    if (_isDeleteAllOpen) return;
+    if (context.read<SettingsBloc>().state.isDeleteAllRunning) return;
+    _isDeleteAllOpen = true;
 
-    await ConfirmDialog.show(
-      context,
-      title: lo.deleteAllTitle,
-      body: lo.deleteAllBody(n, lo.thisDevice),
-      confirmLabel: lo.deleteAllConfirm,
-      cancelLabel: lo.cancel,
-      onConfirm: () => _onConfirmDeleteAll(context),
-    );
+    try {
+      final lo = AppLocalizations.of(context);
+      final n = await _recordCount(context);
+      if (!context.mounted) return;
+
+      await ConfirmDialog.show(
+        context,
+        title: lo.deleteAllTitle,
+        body: lo.deleteAllBody(n, lo.thisDevice),
+        confirmLabel: lo.deleteAllConfirm,
+        cancelLabel: lo.cancel,
+        onConfirm: () => _onConfirmDeleteAll(context),
+      );
+    } finally {
+      _isDeleteAllOpen = false;
+    }
   }
 
   bool _listenWhenDeleteAllFailed(
     SettingsState previous,
     SettingsState current,
   ) {
-    return !previous.isDeleteAllFailed && current.isDeleteAllFailed;
+    return previous.deleteAllStatus != current.deleteAllStatus &&
+        current.isDeleteAllFailed;
   }
 
   void _onDeleteAllFailed(BuildContext context, SettingsState state) =>
@@ -168,11 +184,15 @@ class _SettingsPageState extends State<SettingsPage>
         AppLocalizations.of(context).tSaveFailedGeneric,
       );
 
-  bool _listenWhenDataCleared(SettingsState previous, SettingsState current) {
-    return !previous.settings.dataCleared && current.settings.dataCleared;
+  bool _listenWhenDeleteAllDone(
+    SettingsState previous,
+    SettingsState current,
+  ) {
+    return previous.deleteAllStatus != current.deleteAllStatus &&
+        current.isDeleteAllDone;
   }
 
-  void _onDataCleared(BuildContext context, SettingsState state) =>
+  void _onDeleteAllDone(BuildContext context, SettingsState state) =>
       UiMessageService.showSuccess(AppLocalizations.of(context).tDeletedAll);
 
   @override
@@ -186,12 +206,13 @@ class _SettingsPageState extends State<SettingsPage>
           listenWhen: _listenWhenDeleteAllFailed,
           listener: _onDeleteAllFailed,
         ),
-        // Success is read off the REACTIVE settings stream
-        // (`dataCleared` flipping true), not a `.then(...)` chained at the
-        // dispatch site — the write is confirmed landed, never assumed.
+        // Success is read off the bloc's delete-all outcome, not a
+        // `.then(...)` at the dispatch site. It used to key on `dataCleared`
+        // flipping true, which never flips again once set — so every delete
+        // after the first finished silently and looked like it did nothing.
         BlocListener<SettingsBloc, SettingsState>(
-          listenWhen: _listenWhenDataCleared,
-          listener: _onDataCleared,
+          listenWhen: _listenWhenDeleteAllDone,
+          listener: _onDeleteAllDone,
         ),
       ],
       child: Scaffold(

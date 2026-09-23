@@ -148,6 +148,12 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     _LoadRecordCount event,
     Emitter<SettingsState> emit,
   ) async {
+    // Cleared first so the page's `firstWhere(recordCount != null)` always
+    // sees a NEW state. Re-emitting an unchanged count is deduplicated by
+    // Bloc, which left that wait — and the tap behind it — hanging forever
+    // on every press after the first, then released them all at once on the
+    // next unrelated settings change.
+    emit(state.copyWith(recordCount: null));
     final expenses = await _expenseLocalRepository.getAll();
     final stores = await _storeLocalRepository.getAll();
     final categories = await _categoryLocalRepository.getAll();
@@ -168,11 +174,14 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     _DeleteAll event,
     Emitter<SettingsState> emit,
   ) async {
+    if (state.isDeleteAllRunning) return;
+
+    emit(state.copyWith(deleteAllStatus: EDeleteAllStatus.running));
     try {
-      await _deleteAllRecordsUseCase.call();
-      emit(state.copyWith(lastDeleteAllFailed: false));
+      await _deleteAllRecordsUseCase.call(uid: event.uid);
+      emit(state.copyWith(deleteAllStatus: EDeleteAllStatus.done));
     } catch (_) {
-      emit(state.copyWith(lastDeleteAllFailed: true));
+      emit(state.copyWith(deleteAllStatus: EDeleteAllStatus.failed));
     }
   }
 }
