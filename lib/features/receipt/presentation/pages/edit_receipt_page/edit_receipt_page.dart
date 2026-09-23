@@ -7,6 +7,7 @@ import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../../scanner/domain/pending_receipt_draft_store.dart';
 import '../../../../../core/services/ui_message_service.dart';
+import '../../../../../core/utils/pick_date_time.dart';
 import '../../../../product/domain/use_cases/rename_product_use_case.dart';
 import '../../../../product/domain/repositories/i_product_local_repository.dart';
 import '../../../../store/domain/repositories/i_store_local_repository.dart';
@@ -123,6 +124,13 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
 
   /// Mirrors [_onPickStore] — the Categories page doubles as the picker and
   /// pops the chosen id.
+  Future<void> _onPickPurchasedAt(BuildContext context) async {
+    final initial = _bloc.state.purchasedAt ?? DateTime.now();
+    final picked = await pickDateTime(context, initial);
+    if (picked == null) return;
+    _bloc.add(EditReceiptEvent.setPurchasedAt(picked));
+  }
+
   Future<void> _onPickCategory(BuildContext context) async {
     final pickedId = await CategoriesPageRoute().push<String>(context);
     if (pickedId == null || !context.mounted) return;
@@ -231,6 +239,7 @@ class _EditReceiptPageState extends State<EditReceiptPage> {
           onDone: _onDone,
           onPickStore: () => _onPickStore(context),
           onPickCategory: () => _onPickCategory(context),
+          onPickPurchasedAt: () => _onPickPurchasedAt(context),
           onRemoveItem: _onRemoveItem,
           onCycleItemUnit: _onCycleItemUnit,
           onPickItemProduct: (itemId) => _onPickItemProduct(context, itemId),

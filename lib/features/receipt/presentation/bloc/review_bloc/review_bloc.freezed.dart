@@ -55,7 +55,7 @@ extension ReviewEventPatterns on ReviewEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Load value)?  load,TResult Function( _StartEditItem value)?  startEditItem,TResult Function( _CommitEditedName value)?  commitEditedName,TResult Function( _StopEditItem value)?  stopEditItem,TResult Function( _SetCategory value)?  setCategory,TResult Function( _Save value)?  save,TResult Function( _SaveAndCorrect value)?  saveAndCorrect,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Load value)?  load,TResult Function( _StartEditItem value)?  startEditItem,TResult Function( _CommitEditedName value)?  commitEditedName,TResult Function( _StopEditItem value)?  stopEditItem,TResult Function( _SetCategory value)?  setCategory,TResult Function( _SetPurchasedAt value)?  setPurchasedAt,TResult Function( _Save value)?  save,TResult Function( _SaveAndCorrect value)?  saveAndCorrect,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Load() when load != null:
@@ -63,7 +63,8 @@ return load(_that);case _StartEditItem() when startEditItem != null:
 return startEditItem(_that);case _CommitEditedName() when commitEditedName != null:
 return commitEditedName(_that);case _StopEditItem() when stopEditItem != null:
 return stopEditItem(_that);case _SetCategory() when setCategory != null:
-return setCategory(_that);case _Save() when save != null:
+return setCategory(_that);case _SetPurchasedAt() when setPurchasedAt != null:
+return setPurchasedAt(_that);case _Save() when save != null:
 return save(_that);case _SaveAndCorrect() when saveAndCorrect != null:
 return saveAndCorrect(_that);case _:
   return orElse();
@@ -83,7 +84,7 @@ return saveAndCorrect(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Load value)  load,required TResult Function( _StartEditItem value)  startEditItem,required TResult Function( _CommitEditedName value)  commitEditedName,required TResult Function( _StopEditItem value)  stopEditItem,required TResult Function( _SetCategory value)  setCategory,required TResult Function( _Save value)  save,required TResult Function( _SaveAndCorrect value)  saveAndCorrect,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Load value)  load,required TResult Function( _StartEditItem value)  startEditItem,required TResult Function( _CommitEditedName value)  commitEditedName,required TResult Function( _StopEditItem value)  stopEditItem,required TResult Function( _SetCategory value)  setCategory,required TResult Function( _SetPurchasedAt value)  setPurchasedAt,required TResult Function( _Save value)  save,required TResult Function( _SaveAndCorrect value)  saveAndCorrect,}){
 final _that = this;
 switch (_that) {
 case _Load():
@@ -91,7 +92,8 @@ return load(_that);case _StartEditItem():
 return startEditItem(_that);case _CommitEditedName():
 return commitEditedName(_that);case _StopEditItem():
 return stopEditItem(_that);case _SetCategory():
-return setCategory(_that);case _Save():
+return setCategory(_that);case _SetPurchasedAt():
+return setPurchasedAt(_that);case _Save():
 return save(_that);case _SaveAndCorrect():
 return saveAndCorrect(_that);}
 }
@@ -107,7 +109,7 @@ return saveAndCorrect(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Load value)?  load,TResult? Function( _StartEditItem value)?  startEditItem,TResult? Function( _CommitEditedName value)?  commitEditedName,TResult? Function( _StopEditItem value)?  stopEditItem,TResult? Function( _SetCategory value)?  setCategory,TResult? Function( _Save value)?  save,TResult? Function( _SaveAndCorrect value)?  saveAndCorrect,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Load value)?  load,TResult? Function( _StartEditItem value)?  startEditItem,TResult? Function( _CommitEditedName value)?  commitEditedName,TResult? Function( _StopEditItem value)?  stopEditItem,TResult? Function( _SetCategory value)?  setCategory,TResult? Function( _SetPurchasedAt value)?  setPurchasedAt,TResult? Function( _Save value)?  save,TResult? Function( _SaveAndCorrect value)?  saveAndCorrect,}){
 final _that = this;
 switch (_that) {
 case _Load() when load != null:
@@ -115,7 +117,8 @@ return load(_that);case _StartEditItem() when startEditItem != null:
 return startEditItem(_that);case _CommitEditedName() when commitEditedName != null:
 return commitEditedName(_that);case _StopEditItem() when stopEditItem != null:
 return stopEditItem(_that);case _SetCategory() when setCategory != null:
-return setCategory(_that);case _Save() when save != null:
+return setCategory(_that);case _SetPurchasedAt() when setPurchasedAt != null:
+return setPurchasedAt(_that);case _Save() when save != null:
 return save(_that);case _SaveAndCorrect() when saveAndCorrect != null:
 return saveAndCorrect(_that);case _:
   return null;
@@ -134,14 +137,15 @@ return saveAndCorrect(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  load,TResult Function( String itemId)?  startEditItem,TResult Function( String name)?  commitEditedName,TResult Function()?  stopEditItem,TResult Function( String categoryId)?  setCategory,TResult Function()?  save,TResult Function()?  saveAndCorrect,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  load,TResult Function( String itemId)?  startEditItem,TResult Function( String name)?  commitEditedName,TResult Function()?  stopEditItem,TResult Function( String categoryId)?  setCategory,TResult Function( DateTime purchasedAt)?  setPurchasedAt,TResult Function()?  save,TResult Function()?  saveAndCorrect,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Load() when load != null:
 return load();case _StartEditItem() when startEditItem != null:
 return startEditItem(_that.itemId);case _CommitEditedName() when commitEditedName != null:
 return commitEditedName(_that.name);case _StopEditItem() when stopEditItem != null:
 return stopEditItem();case _SetCategory() when setCategory != null:
-return setCategory(_that.categoryId);case _Save() when save != null:
+return setCategory(_that.categoryId);case _SetPurchasedAt() when setPurchasedAt != null:
+return setPurchasedAt(_that.purchasedAt);case _Save() when save != null:
 return save();case _SaveAndCorrect() when saveAndCorrect != null:
 return saveAndCorrect();case _:
   return orElse();
@@ -161,14 +165,15 @@ return saveAndCorrect();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  load,required TResult Function( String itemId)  startEditItem,required TResult Function( String name)  commitEditedName,required TResult Function()  stopEditItem,required TResult Function( String categoryId)  setCategory,required TResult Function()  save,required TResult Function()  saveAndCorrect,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  load,required TResult Function( String itemId)  startEditItem,required TResult Function( String name)  commitEditedName,required TResult Function()  stopEditItem,required TResult Function( String categoryId)  setCategory,required TResult Function( DateTime purchasedAt)  setPurchasedAt,required TResult Function()  save,required TResult Function()  saveAndCorrect,}) {final _that = this;
 switch (_that) {
 case _Load():
 return load();case _StartEditItem():
 return startEditItem(_that.itemId);case _CommitEditedName():
 return commitEditedName(_that.name);case _StopEditItem():
 return stopEditItem();case _SetCategory():
-return setCategory(_that.categoryId);case _Save():
+return setCategory(_that.categoryId);case _SetPurchasedAt():
+return setPurchasedAt(_that.purchasedAt);case _Save():
 return save();case _SaveAndCorrect():
 return saveAndCorrect();}
 }
@@ -184,14 +189,15 @@ return saveAndCorrect();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  load,TResult? Function( String itemId)?  startEditItem,TResult? Function( String name)?  commitEditedName,TResult? Function()?  stopEditItem,TResult? Function( String categoryId)?  setCategory,TResult? Function()?  save,TResult? Function()?  saveAndCorrect,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  load,TResult? Function( String itemId)?  startEditItem,TResult? Function( String name)?  commitEditedName,TResult? Function()?  stopEditItem,TResult? Function( String categoryId)?  setCategory,TResult? Function( DateTime purchasedAt)?  setPurchasedAt,TResult? Function()?  save,TResult? Function()?  saveAndCorrect,}) {final _that = this;
 switch (_that) {
 case _Load() when load != null:
 return load();case _StartEditItem() when startEditItem != null:
 return startEditItem(_that.itemId);case _CommitEditedName() when commitEditedName != null:
 return commitEditedName(_that.name);case _StopEditItem() when stopEditItem != null:
 return stopEditItem();case _SetCategory() when setCategory != null:
-return setCategory(_that.categoryId);case _Save() when save != null:
+return setCategory(_that.categoryId);case _SetPurchasedAt() when setPurchasedAt != null:
+return setPurchasedAt(_that.purchasedAt);case _Save() when save != null:
 return save();case _SaveAndCorrect() when saveAndCorrect != null:
 return saveAndCorrect();case _:
   return null;
@@ -457,6 +463,72 @@ class __$SetCategoryCopyWithImpl<$Res>
   return _then(_SetCategory(
 null == categoryId ? _self.categoryId : categoryId // ignore: cast_nullable_to_non_nullable
 as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class _SetPurchasedAt implements ReviewEvent {
+  const _SetPurchasedAt(this.purchasedAt);
+  
+
+ final  DateTime purchasedAt;
+
+/// Create a copy of ReviewEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SetPurchasedAtCopyWith<_SetPurchasedAt> get copyWith => __$SetPurchasedAtCopyWithImpl<_SetPurchasedAt>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SetPurchasedAt&&(identical(other.purchasedAt, purchasedAt) || other.purchasedAt == purchasedAt));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,purchasedAt);
+
+@override
+String toString() {
+  return 'ReviewEvent.setPurchasedAt(purchasedAt: $purchasedAt)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SetPurchasedAtCopyWith<$Res> implements $ReviewEventCopyWith<$Res> {
+  factory _$SetPurchasedAtCopyWith(_SetPurchasedAt value, $Res Function(_SetPurchasedAt) _then) = __$SetPurchasedAtCopyWithImpl;
+@useResult
+$Res call({
+ DateTime purchasedAt
+});
+
+
+
+
+}
+/// @nodoc
+class __$SetPurchasedAtCopyWithImpl<$Res>
+    implements _$SetPurchasedAtCopyWith<$Res> {
+  __$SetPurchasedAtCopyWithImpl(this._self, this._then);
+
+  final _SetPurchasedAt _self;
+  final $Res Function(_SetPurchasedAt) _then;
+
+/// Create a copy of ReviewEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? purchasedAt = null,}) {
+  return _then(_SetPurchasedAt(
+null == purchasedAt ? _self.purchasedAt : purchasedAt // ignore: cast_nullable_to_non_nullable
+as DateTime,
   ));
 }
 

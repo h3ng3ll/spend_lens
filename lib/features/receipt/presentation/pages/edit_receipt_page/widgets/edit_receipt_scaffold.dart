@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/localization/gen/app_localizations.dart';
@@ -31,6 +32,7 @@ class EditReceiptScaffold extends StatelessWidget {
   final VoidCallback onDone;
   final VoidCallback onPickStore;
   final VoidCallback onPickCategory;
+  final VoidCallback onPickPurchasedAt;
   final void Function(String itemId) onRemoveItem;
   final VoidCallback onAddItem;
   final void Function(String itemId, String value) onItemNameChanged;
@@ -52,6 +54,7 @@ class EditReceiptScaffold extends StatelessWidget {
     required this.onDone,
     required this.onPickStore,
     required this.onPickCategory,
+    required this.onPickPurchasedAt,
     required this.onRemoveItem,
     required this.onAddItem,
     required this.onItemNameChanged,
@@ -238,6 +241,17 @@ class EditReceiptScaffold extends StatelessWidget {
                       changeLabel: lo.change,
                       onTap: onPickCategory,
                     ),
+                    // When the receipt was issued — it is often entered days
+                    // after the purchase, so the date must be correctable.
+                    ReviewCategoryCard(
+                      sectionLabel: lo.date,
+                      dotColor: null,
+                      categoryLabel: DateFormat.yMMMd().add_jm().format(
+                        state.purchasedAt ?? DateTime.now(),
+                      ),
+                      changeLabel: lo.change,
+                      onTap: onPickPurchasedAt,
+                    ),
                     AppContainer(
                       color: scheme.card,
                       border: Border.all(color: scheme.line, width: 1.0),
@@ -301,8 +315,7 @@ class EditReceiptScaffold extends StatelessWidget {
                               onQuantityChanged: (value) =>
                                   onItemQuantityChanged(item.id, value),
                               onCycleUnit: () => onCycleItemUnit(item.id),
-                              onPickProduct: () =>
-                                  onPickItemProduct(item.id),
+                              onPickProduct: () => onPickItemProduct(item.id),
                               hasPickedProduct: item.productId != null,
                               onPriceChanged: (value) =>
                                   onItemPriceChanged(item.id, value),

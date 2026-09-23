@@ -6,6 +6,7 @@ import '../../../../../core/di/injection.dart';
 import '../../../../../core/resources/localization/gen/app_localizations.dart';
 import '../../../../../core/routes/init_router/init_router.dart';
 import '../../../../../core/services/ui_message_service.dart';
+import '../../../../../core/utils/pick_date_time.dart';
 import '../../../../scanner/domain/pending_receipt_draft_store.dart';
 import '../../../domain/repositories/i_receipt_local_repository.dart';
 import '../../../../store/domain/use_cases/resolve_receipt_store_use_case.dart';
@@ -98,6 +99,13 @@ class _ReviewPageState extends State<ReviewPage> {
     _reviewBloc.add(ReviewEvent.setCategory(pickedId));
   }
 
+  Future<void> _onPickPurchasedAt(BuildContext context) async {
+    final initial = _reviewBloc.state.purchasedAt ?? DateTime.now();
+    final picked = await pickDateTime(context, initial);
+    if (picked == null) return;
+    _reviewBloc.add(ReviewEvent.setPurchasedAt(picked));
+  }
+
   /// Dispatches the intent ONLY. The success toast is NOT shown here: at
   /// this point the bloc has not written anything yet, so a failing save
   /// would still have reported "saved". Feedback for both outcomes lives
@@ -111,50 +119,50 @@ class _ReviewPageState extends State<ReviewPage> {
     return BlocProvider<ReviewBloc>.value(
       value: _reviewBloc,
       child: MultiBlocListener(
-          listeners: [
-            // Two DISTINCT terminal statuses, two DISTINCT navigations — a
-            // shared `saved` status here would fire the wrong route for one
-            // of the two exit paths (see `ReviewState`'s doc comment).
-            BlocListener<ReviewBloc, ReviewState>(
-              listenWhen: (previous, current) =>
-                  !previous.isSaved && current.isSaved,
-              listener: (context, state) {
-                final lo = AppLocalizations.of(context);
-                UiMessageService.showSuccess(lo.tSaved(lo.reviewReceipt));
-                HomePageRoute().go(context);
-              },
+        listeners: [
+          // Two DISTINCT terminal statuses, two DISTINCT navigations — a
+          // shared `saved` status here would fire the wrong route for one
+          // of the two exit paths (see `ReviewState`'s doc comment).
+          BlocListener<ReviewBloc, ReviewState>(
+            listenWhen: (previous, current) =>
+                !previous.isSaved && current.isSaved,
+            listener: (context, state) {
+              final lo = AppLocalizations.of(context);
+              UiMessageService.showSuccess(lo.tSaved(lo.reviewReceipt));
+              HomePageRoute().go(context);
+            },
+          ),
+          // `failed` was reachable and had an `isFailed` getter, but NOTHING
+          // read it — a save that failed was completely silent, leaving the
+          // user on a screen that looked unchanged. Surfacing it is the
+          // other half of moving feedback off the dispatch site.
+          BlocListener<ReviewBloc, ReviewState>(
+            listenWhen: (previous, current) =>
+                !previous.isFailed && current.isFailed,
+            listener: (context, state) => UiMessageService.showError(
+              AppLocalizations.of(context).tSaveFailed,
             ),
-            // `failed` was reachable and had an `isFailed` getter, but NOTHING
-            // read it — a save that failed was completely silent, leaving the
-            // user on a screen that looked unchanged. Surfacing it is the
-            // other half of moving feedback off the dispatch site.
-            BlocListener<ReviewBloc, ReviewState>(
-              listenWhen: (previous, current) =>
-                  !previous.isFailed && current.isFailed,
-              listener: (context, state) => UiMessageService.showError(
-                AppLocalizations.of(context).tSaveFailed,
-              ),
-            ),
-            BlocListener<ReviewBloc, ReviewState>(
-              listenWhen: (previous, current) =>
-                  !previous.isCorrecting && current.isCorrecting,
-              // PUSHED, not `.go()`: the Edit screen is a staging step the
-              // user must be able to Cancel out of, back to THIS screen with
-              // its state intact. `.go()` replaced the stack, which is why
-              // Cancel had nowhere to return to.
-              listener: (context, state) async {
-                await const EditReceiptPageRoute(
-                  receiptId: kPendingDraftReceiptId,
-                ).push<void>(context);
-                if (!context.mounted) return;
-                // Reload on return so Review shows the corrections, and so
-                // the status leaves `correcting` — otherwise the
-                // `listenWhen` transition below could never fire again and
-                // Correct would be a one-shot button.
-                _reviewBloc.add(const ReviewEvent.load());
-              },
-            ),
-          ],
+          ),
+          BlocListener<ReviewBloc, ReviewState>(
+            listenWhen: (previous, current) =>
+                !previous.isCorrecting && current.isCorrecting,
+            // PUSHED, not `.go()`: the Edit screen is a staging step the
+            // user must be able to Cancel out of, back to THIS screen with
+            // its state intact. `.go()` replaced the stack, which is why
+            // Cancel had nowhere to return to.
+            listener: (context, state) async {
+              await const EditReceiptPageRoute(
+                receiptId: kPendingDraftReceiptId,
+              ).push<void>(context);
+              if (!context.mounted) return;
+              // Reload on return so Review shows the corrections, and so
+              // the status leaves `correcting` — otherwise the
+              // `listenWhen` transition below could never fire again and
+              // Correct would be a one-shot button.
+              _reviewBloc.add(const ReviewEvent.load());
+            },
+          ),
+        ],
         child: ReviewScaffold(
           controllerFor: _controllerFor,
           onBack: _onBack,
@@ -162,6 +170,7 @@ class _ReviewPageState extends State<ReviewPage> {
           onStartEditItem: _onStartEditItem,
           onDoneEditingItem: _onDoneEditingItem,
           onPickCategory: () => _onPickCategory(context),
+          onPickPurchasedAt: () => _onPickPurchasedAt(context),
           onSave: _onSave,
           onCorrect: _onCorrect,
         ),

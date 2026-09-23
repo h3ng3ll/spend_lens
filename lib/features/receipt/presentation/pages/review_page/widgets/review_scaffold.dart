@@ -31,6 +31,7 @@ class ReviewScaffold extends StatelessWidget {
   final void Function(String itemId) onStartEditItem;
   final void Function(String itemId) onDoneEditingItem;
   final VoidCallback onPickCategory;
+  final VoidCallback onPickPurchasedAt;
   final VoidCallback onSave;
   final VoidCallback onCorrect;
 
@@ -42,6 +43,7 @@ class ReviewScaffold extends StatelessWidget {
     required this.onStartEditItem,
     required this.onDoneEditingItem,
     required this.onPickCategory,
+    required this.onPickPurchasedAt,
     required this.onSave,
     required this.onCorrect,
   });
@@ -87,6 +89,9 @@ class ReviewScaffold extends StatelessWidget {
     final total = state.printedTotal ?? itemsTotal;
     const discount = 0.0;
     final subtotal = itemsTotal;
+    final purchasedAtLabel = DateFormat.yMMMd().add_jm().format(
+      state.purchasedAt ?? DateTime.now(),
+    );
 
     return Scaffold(
       backgroundColor: scheme.bg,
@@ -109,9 +114,7 @@ class ReviewScaffold extends StatelessWidget {
                     ),
                     ReviewStoreCard(
                       storeName: state.storeName ?? lo.catOther,
-                      dateTimeLabel: DateFormat.yMMMd().add_jm().format(
-                        state.purchasedAt ?? DateTime.now(),
-                      ),
+                      dateTimeLabel: purchasedAtLabel,
                       autoDetectedLabel: lo.autoDetected,
                     ),
                     ReviewCategoryCard(
@@ -122,6 +125,13 @@ class ReviewScaffold extends StatelessWidget {
                       categoryLabel: category?.displayName(lo) ?? lo.category,
                       changeLabel: lo.change,
                       onTap: onPickCategory,
+                    ),
+                    ReviewCategoryCard(
+                      sectionLabel: lo.date,
+                      dotColor: null,
+                      categoryLabel: purchasedAtLabel,
+                      changeLabel: lo.change,
+                      onTap: onPickPurchasedAt,
                     ),
                     ReviewItemsCard(
                       state: state,

@@ -54,6 +54,7 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     on<_CommitEditedName>(_onCommitEditedName);
     on<_StopEditItem>(_onStopEditItem);
     on<_SetCategory>(_onSetCategory);
+    on<_SetPurchasedAt>(_onSetPurchasedAt);
     on<_Save>(_onSave);
     on<_SaveAndCorrect>(_onSaveAndCorrect);
   }
@@ -160,9 +161,15 @@ class ReviewBloc extends Bloc<ReviewEvent, ReviewState> {
     emit(state.copyWith(categoryId: event.categoryId));
   }
 
+  void _onSetPurchasedAt(_SetPurchasedAt event, Emitter<ReviewState> emit) {
+    emit(state.copyWith(purchasedAt: event.purchasedAt));
+  }
+
   Future<void> _onSave(_Save event, Emitter<ReviewState> emit) async {
     final receiptId = await _persist();
-    emit(state.copyWith(status: EReviewStatus.saved, savedReceiptId: receiptId));
+    emit(
+      state.copyWith(status: EReviewStatus.saved, savedReceiptId: receiptId),
+    );
   }
 
   /// `Correct` NAVIGATES — it does not save.

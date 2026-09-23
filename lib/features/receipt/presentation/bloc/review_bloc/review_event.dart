@@ -23,6 +23,11 @@ sealed class ReviewEvent with _$ReviewEvent {
 
   const factory ReviewEvent.setCategory(String categoryId) = _SetCategory;
 
+  /// The user corrected when the receipt was issued — a receipt is often
+  /// scanned days after the purchase, and OCR may misread or miss the date.
+  const factory ReviewEvent.setPurchasedAt(DateTime purchasedAt) =
+      _SetPurchasedAt;
+
   /// Save and return to Home (the "Save Receipt" primary action).
   const factory ReviewEvent.save() = _Save;
 
