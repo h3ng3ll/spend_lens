@@ -55,7 +55,7 @@ extension SettingsEventPatterns on SettingsEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Watch value)?  watch,TResult Function( _SetLocale value)?  setLocale,TResult Function( _SetCurrency value)?  setCurrency,TResult Function( _PickTheme value)?  pickTheme,TResult Function( _CompleteOnboarding value)?  completeOnboarding,TResult Function( _ToggleFlashMode value)?  toggleFlashMode,TResult Function( _LoadRecordCount value)?  loadRecordCount,TResult Function( _DeleteAll value)?  deleteAll,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( _Watch value)?  watch,TResult Function( _SetLocale value)?  setLocale,TResult Function( _SetCurrency value)?  setCurrency,TResult Function( _PickTheme value)?  pickTheme,TResult Function( _CompleteOnboarding value)?  completeOnboarding,TResult Function( _ToggleFlashMode value)?  toggleFlashMode,TResult Function( _SaveScanFrame value)?  saveScanFrame,TResult Function( _LoadRecordCount value)?  loadRecordCount,TResult Function( _DeleteAll value)?  deleteAll,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
@@ -64,7 +64,8 @@ return setLocale(_that);case _SetCurrency() when setCurrency != null:
 return setCurrency(_that);case _PickTheme() when pickTheme != null:
 return pickTheme(_that);case _CompleteOnboarding() when completeOnboarding != null:
 return completeOnboarding(_that);case _ToggleFlashMode() when toggleFlashMode != null:
-return toggleFlashMode(_that);case _LoadRecordCount() when loadRecordCount != null:
+return toggleFlashMode(_that);case _SaveScanFrame() when saveScanFrame != null:
+return saveScanFrame(_that);case _LoadRecordCount() when loadRecordCount != null:
 return loadRecordCount(_that);case _DeleteAll() when deleteAll != null:
 return deleteAll(_that);case _:
   return orElse();
@@ -84,7 +85,7 @@ return deleteAll(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Watch value)  watch,required TResult Function( _SetLocale value)  setLocale,required TResult Function( _SetCurrency value)  setCurrency,required TResult Function( _PickTheme value)  pickTheme,required TResult Function( _CompleteOnboarding value)  completeOnboarding,required TResult Function( _ToggleFlashMode value)  toggleFlashMode,required TResult Function( _LoadRecordCount value)  loadRecordCount,required TResult Function( _DeleteAll value)  deleteAll,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( _Watch value)  watch,required TResult Function( _SetLocale value)  setLocale,required TResult Function( _SetCurrency value)  setCurrency,required TResult Function( _PickTheme value)  pickTheme,required TResult Function( _CompleteOnboarding value)  completeOnboarding,required TResult Function( _ToggleFlashMode value)  toggleFlashMode,required TResult Function( _SaveScanFrame value)  saveScanFrame,required TResult Function( _LoadRecordCount value)  loadRecordCount,required TResult Function( _DeleteAll value)  deleteAll,}){
 final _that = this;
 switch (_that) {
 case _Watch():
@@ -93,7 +94,8 @@ return setLocale(_that);case _SetCurrency():
 return setCurrency(_that);case _PickTheme():
 return pickTheme(_that);case _CompleteOnboarding():
 return completeOnboarding(_that);case _ToggleFlashMode():
-return toggleFlashMode(_that);case _LoadRecordCount():
+return toggleFlashMode(_that);case _SaveScanFrame():
+return saveScanFrame(_that);case _LoadRecordCount():
 return loadRecordCount(_that);case _DeleteAll():
 return deleteAll(_that);}
 }
@@ -109,7 +111,7 @@ return deleteAll(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Watch value)?  watch,TResult? Function( _SetLocale value)?  setLocale,TResult? Function( _SetCurrency value)?  setCurrency,TResult? Function( _PickTheme value)?  pickTheme,TResult? Function( _CompleteOnboarding value)?  completeOnboarding,TResult? Function( _ToggleFlashMode value)?  toggleFlashMode,TResult? Function( _LoadRecordCount value)?  loadRecordCount,TResult? Function( _DeleteAll value)?  deleteAll,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( _Watch value)?  watch,TResult? Function( _SetLocale value)?  setLocale,TResult? Function( _SetCurrency value)?  setCurrency,TResult? Function( _PickTheme value)?  pickTheme,TResult? Function( _CompleteOnboarding value)?  completeOnboarding,TResult? Function( _ToggleFlashMode value)?  toggleFlashMode,TResult? Function( _SaveScanFrame value)?  saveScanFrame,TResult? Function( _LoadRecordCount value)?  loadRecordCount,TResult? Function( _DeleteAll value)?  deleteAll,}){
 final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
@@ -118,7 +120,8 @@ return setLocale(_that);case _SetCurrency() when setCurrency != null:
 return setCurrency(_that);case _PickTheme() when pickTheme != null:
 return pickTheme(_that);case _CompleteOnboarding() when completeOnboarding != null:
 return completeOnboarding(_that);case _ToggleFlashMode() when toggleFlashMode != null:
-return toggleFlashMode(_that);case _LoadRecordCount() when loadRecordCount != null:
+return toggleFlashMode(_that);case _SaveScanFrame() when saveScanFrame != null:
+return saveScanFrame(_that);case _LoadRecordCount() when loadRecordCount != null:
 return loadRecordCount(_that);case _DeleteAll() when deleteAll != null:
 return deleteAll(_that);case _:
   return null;
@@ -137,7 +140,7 @@ return deleteAll(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String? code)?  setLocale,TResult Function( String code)?  setCurrency,TResult Function( EAppThemeMode mode)?  pickTheme,TResult Function()?  completeOnboarding,TResult Function()?  toggleFlashMode,TResult Function()?  loadRecordCount,TResult Function( String uid)?  deleteAll,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  watch,TResult Function( String? code)?  setLocale,TResult Function( String code)?  setCurrency,TResult Function( EAppThemeMode mode)?  pickTheme,TResult Function()?  completeOnboarding,TResult Function()?  toggleFlashMode,TResult Function( double left,  double top,  double width,  double height)?  saveScanFrame,TResult Function()?  loadRecordCount,TResult Function( String uid)?  deleteAll,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _SetLocale() when setLocale != null:
@@ -145,7 +148,8 @@ return setLocale(_that.code);case _SetCurrency() when setCurrency != null:
 return setCurrency(_that.code);case _PickTheme() when pickTheme != null:
 return pickTheme(_that.mode);case _CompleteOnboarding() when completeOnboarding != null:
 return completeOnboarding();case _ToggleFlashMode() when toggleFlashMode != null:
-return toggleFlashMode();case _LoadRecordCount() when loadRecordCount != null:
+return toggleFlashMode();case _SaveScanFrame() when saveScanFrame != null:
+return saveScanFrame(_that.left,_that.top,_that.width,_that.height);case _LoadRecordCount() when loadRecordCount != null:
 return loadRecordCount();case _DeleteAll() when deleteAll != null:
 return deleteAll(_that.uid);case _:
   return orElse();
@@ -165,7 +169,7 @@ return deleteAll(_that.uid);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String? code)  setLocale,required TResult Function( String code)  setCurrency,required TResult Function( EAppThemeMode mode)  pickTheme,required TResult Function()  completeOnboarding,required TResult Function()  toggleFlashMode,required TResult Function()  loadRecordCount,required TResult Function( String uid)  deleteAll,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  watch,required TResult Function( String? code)  setLocale,required TResult Function( String code)  setCurrency,required TResult Function( EAppThemeMode mode)  pickTheme,required TResult Function()  completeOnboarding,required TResult Function()  toggleFlashMode,required TResult Function( double left,  double top,  double width,  double height)  saveScanFrame,required TResult Function()  loadRecordCount,required TResult Function( String uid)  deleteAll,}) {final _that = this;
 switch (_that) {
 case _Watch():
 return watch();case _SetLocale():
@@ -173,7 +177,8 @@ return setLocale(_that.code);case _SetCurrency():
 return setCurrency(_that.code);case _PickTheme():
 return pickTheme(_that.mode);case _CompleteOnboarding():
 return completeOnboarding();case _ToggleFlashMode():
-return toggleFlashMode();case _LoadRecordCount():
+return toggleFlashMode();case _SaveScanFrame():
+return saveScanFrame(_that.left,_that.top,_that.width,_that.height);case _LoadRecordCount():
 return loadRecordCount();case _DeleteAll():
 return deleteAll(_that.uid);}
 }
@@ -189,7 +194,7 @@ return deleteAll(_that.uid);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String? code)?  setLocale,TResult? Function( String code)?  setCurrency,TResult? Function( EAppThemeMode mode)?  pickTheme,TResult? Function()?  completeOnboarding,TResult? Function()?  toggleFlashMode,TResult? Function()?  loadRecordCount,TResult? Function( String uid)?  deleteAll,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  watch,TResult? Function( String? code)?  setLocale,TResult? Function( String code)?  setCurrency,TResult? Function( EAppThemeMode mode)?  pickTheme,TResult? Function()?  completeOnboarding,TResult? Function()?  toggleFlashMode,TResult? Function( double left,  double top,  double width,  double height)?  saveScanFrame,TResult? Function()?  loadRecordCount,TResult? Function( String uid)?  deleteAll,}) {final _that = this;
 switch (_that) {
 case _Watch() when watch != null:
 return watch();case _SetLocale() when setLocale != null:
@@ -197,7 +202,8 @@ return setLocale(_that.code);case _SetCurrency() when setCurrency != null:
 return setCurrency(_that.code);case _PickTheme() when pickTheme != null:
 return pickTheme(_that.mode);case _CompleteOnboarding() when completeOnboarding != null:
 return completeOnboarding();case _ToggleFlashMode() when toggleFlashMode != null:
-return toggleFlashMode();case _LoadRecordCount() when loadRecordCount != null:
+return toggleFlashMode();case _SaveScanFrame() when saveScanFrame != null:
+return saveScanFrame(_that.left,_that.top,_that.width,_that.height);case _LoadRecordCount() when loadRecordCount != null:
 return loadRecordCount();case _DeleteAll() when deleteAll != null:
 return deleteAll(_that.uid);case _:
   return null;
@@ -500,6 +506,78 @@ String toString() {
 
 
 
+
+/// @nodoc
+
+
+class _SaveScanFrame implements SettingsEvent {
+  const _SaveScanFrame({required this.left, required this.top, required this.width, required this.height});
+  
+
+ final  double left;
+ final  double top;
+ final  double width;
+ final  double height;
+
+/// Create a copy of SettingsEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SaveScanFrameCopyWith<_SaveScanFrame> get copyWith => __$SaveScanFrameCopyWithImpl<_SaveScanFrame>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _SaveScanFrame&&(identical(other.left, left) || other.left == left)&&(identical(other.top, top) || other.top == top)&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,left,top,width,height);
+
+@override
+String toString() {
+  return 'SettingsEvent.saveScanFrame(left: $left, top: $top, width: $width, height: $height)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SaveScanFrameCopyWith<$Res> implements $SettingsEventCopyWith<$Res> {
+  factory _$SaveScanFrameCopyWith(_SaveScanFrame value, $Res Function(_SaveScanFrame) _then) = __$SaveScanFrameCopyWithImpl;
+@useResult
+$Res call({
+ double left, double top, double width, double height
+});
+
+
+
+
+}
+/// @nodoc
+class __$SaveScanFrameCopyWithImpl<$Res>
+    implements _$SaveScanFrameCopyWith<$Res> {
+  __$SaveScanFrameCopyWithImpl(this._self, this._then);
+
+  final _SaveScanFrame _self;
+  final $Res Function(_SaveScanFrame) _then;
+
+/// Create a copy of SettingsEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? left = null,Object? top = null,Object? width = null,Object? height = null,}) {
+  return _then(_SaveScanFrame(
+left: null == left ? _self.left : left // ignore: cast_nullable_to_non_nullable
+as double,top: null == top ? _self.top : top // ignore: cast_nullable_to_non_nullable
+as double,width: null == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
+as double,height: null == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
 
 /// @nodoc
 

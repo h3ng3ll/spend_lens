@@ -5,6 +5,7 @@ import '../../../../../../core/models/e_sync_status.dart';
 import '../../../../../../core/routes/init_router/init_router.dart';
 import '../../../../../receipt/domain/models/receipt/receipt.dart';
 import '../../../../../receipt/domain/repositories/i_receipt_local_repository.dart';
+import '../../../../../settings/domain/models/app_settings/app_settings.dart';
 import '../../../../../settings/presentation/bloc/settings_bloc/settings_bloc.dart';
 import '../../../../presentation/bloc/scanner_bloc/scanner_bloc.dart';
 import 'camera_preview_layer.dart';
@@ -81,11 +82,40 @@ class ScannerBody extends StatelessWidget {
     EditReceiptPageRoute(receiptId: receipt.id).pushReplacement(context);
   }
 
+  /// Persists the user's finished frame drag/resize so the next scan opens
+  /// with the same window.
+  void _onFrameChanged(BuildContext context, Rect fraction) {
+    context.read<SettingsBloc>().add(
+      SettingsEvent.saveScanFrame(
+        left: fraction.left,
+        top: fraction.top,
+        width: fraction.width,
+        height: fraction.height,
+      ),
+    );
+  }
+
+  /// The persisted scan window, or `null` until the user has configured one.
+  Rect? _savedFrameFraction(AppSettings settings) {
+    final left = settings.scanFrameLeft;
+    final top = settings.scanFrameTop;
+    final width = settings.scanFrameWidth;
+    final height = settings.scanFrameHeight;
+    if (left == null || top == null || width == null || height == null) {
+      return null;
+    }
+    return Rect.fromLTWH(left, top, width, height);
+  }
+
   @override
   Widget build(BuildContext context) {
     return BlocBuilder<SettingsBloc, SettingsState>(
+      // The scan-frame fields are included so a frame remounted after
+      // Try Again seeds from the LATEST saved window, not a stale one.
       buildWhen: (previous, current) =>
-          previous.settings.flashMode != current.settings.flashMode,
+          previous.settings.flashMode != current.settings.flashMode ||
+          _savedFrameFraction(previous.settings) !=
+              _savedFrameFraction(current.settings),
       builder: (context, settingsState) {
         return BlocListener<ScannerBloc, ScannerState>(
           listenWhen: (previous, current) =>
@@ -99,6 +129,11 @@ class ScannerBody extends StatelessWidget {
                   CameraPreviewLayer(
                     state: state,
                     flashMode: settingsState.settings.flashMode,
+                    savedFrameFraction: _savedFrameFraction(
+                      settingsState.settings,
+                    ),
+                    onFrameChanged: (fraction) =>
+                        _onFrameChanged(context, fraction),
                   ),
                   ScannerTopControls(
                     flashMode: settingsState.settings.flashMode,

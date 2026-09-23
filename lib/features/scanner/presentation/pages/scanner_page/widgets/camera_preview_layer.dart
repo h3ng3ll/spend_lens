@@ -64,11 +64,15 @@ const Duration _kFrameDispatchMinInterval = Duration(milliseconds: 600);
 class CameraPreviewLayer extends StatefulWidget {
   final ScannerState state;
   final EFlashMode flashMode;
+  final Rect? savedFrameFraction;
+  final ValueChanged<Rect> onFrameChanged;
 
   const CameraPreviewLayer({
     super.key,
     required this.state,
     required this.flashMode,
+    required this.savedFrameFraction,
+    required this.onFrameChanged,
   });
 
   @override
@@ -383,6 +387,8 @@ class _CameraPreviewLayerState extends State<CameraPreviewLayer>
           ScannerFrameArea(
             isDetected: state.isDetected,
             showScanLine: state.isSearching,
+            savedFraction: widget.savedFrameFraction,
+            onFrameChanged: widget.onFrameChanged,
           ),
         if (state.isCapturing) const ScannerCaptureFlash(),
         if (!state.isProcessing)

@@ -159,8 +159,8 @@ class DeleteAllRecordsUseCase {
       await _receiptLocalRepository.delete(receipt.id);
     }
 
-    final receiptItems =
-        await _receiptItemLocalRepository.getAllIncludingDeleted();
+    final receiptItems = await _receiptItemLocalRepository
+        .getAllIncludingDeleted();
     for (final item in receiptItems) {
       await _receiptItemLocalRepository.delete(item.id);
     }
@@ -173,8 +173,8 @@ class DeleteAllRecordsUseCase {
     // `delete`, NOT `deleteLocalOnly`: a hard delete leaves no tombstone, so
     // the push pass never learns the rows are gone and every observation
     // stays in Firestore's `priceObservations` after "Delete all data".
-    final observations =
-        await _priceObservationLocalRepository.getAllIncludingDeleted();
+    final observations = await _priceObservationLocalRepository
+        .getAllIncludingDeleted();
     for (final observation in observations) {
       await _priceObservationLocalRepository.delete(observation.id);
     }

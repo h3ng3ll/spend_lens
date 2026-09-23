@@ -16,7 +16,8 @@ enum EDeleteScope {
   /// Both: tombstones pushed AND this device cleared.
   both;
 
-  bool get clearsLocal => this == EDeleteScope.local || this == EDeleteScope.both;
+  bool get clearsLocal =>
+      this == EDeleteScope.local || this == EDeleteScope.both;
 
   bool get clearsRemote =>
       this == EDeleteScope.remote || this == EDeleteScope.both;

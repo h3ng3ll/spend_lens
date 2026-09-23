@@ -68,7 +68,12 @@ mixin _$AppSettings {
 /// acceptable once per install, wasteful every launch. The use case is
 /// idempotent regardless (it skips products that already own a store), so
 /// this flag is an optimisation, not the correctness guarantee.
- bool get productsSplitCompleted;
+ bool get productsSplitCompleted;/// The scanner's last user-configured scan window, as FRACTIONS (0–1)
+/// of the preview box — so the frame restores proportionally on any
+/// screen size. Field indices 9–12, APPENDED (trailing only). All four
+/// `null` until the user first drags or resizes the frame, in which case
+/// the scanner falls back to its default centred window.
+ double? get scanFrameLeft; double? get scanFrameTop; double? get scanFrameWidth; double? get scanFrameHeight;
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -81,16 +86,16 @@ $AppSettingsCopyWith<AppSettings> get copyWith => _$AppSettingsCopyWithImpl<AppS
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared)&&(identical(other.lastSyncedAt, lastSyncedAt) || other.lastSyncedAt == lastSyncedAt)&&(identical(other.legacyPullCompleted, legacyPullCompleted) || other.legacyPullCompleted == legacyPullCompleted)&&(identical(other.productsSplitCompleted, productsSplitCompleted) || other.productsSplitCompleted == productsSplitCompleted));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared)&&(identical(other.lastSyncedAt, lastSyncedAt) || other.lastSyncedAt == lastSyncedAt)&&(identical(other.legacyPullCompleted, legacyPullCompleted) || other.legacyPullCompleted == legacyPullCompleted)&&(identical(other.productsSplitCompleted, productsSplitCompleted) || other.productsSplitCompleted == productsSplitCompleted)&&(identical(other.scanFrameLeft, scanFrameLeft) || other.scanFrameLeft == scanFrameLeft)&&(identical(other.scanFrameTop, scanFrameTop) || other.scanFrameTop == scanFrameTop)&&(identical(other.scanFrameWidth, scanFrameWidth) || other.scanFrameWidth == scanFrameWidth)&&(identical(other.scanFrameHeight, scanFrameHeight) || other.scanFrameHeight == scanFrameHeight));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared,lastSyncedAt,legacyPullCompleted,productsSplitCompleted);
+int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared,lastSyncedAt,legacyPullCompleted,productsSplitCompleted,scanFrameLeft,scanFrameTop,scanFrameWidth,scanFrameHeight);
 
 @override
 String toString() {
-  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared, lastSyncedAt: $lastSyncedAt, legacyPullCompleted: $legacyPullCompleted, productsSplitCompleted: $productsSplitCompleted)';
+  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared, lastSyncedAt: $lastSyncedAt, legacyPullCompleted: $legacyPullCompleted, productsSplitCompleted: $productsSplitCompleted, scanFrameLeft: $scanFrameLeft, scanFrameTop: $scanFrameTop, scanFrameWidth: $scanFrameWidth, scanFrameHeight: $scanFrameHeight)';
 }
 
 
@@ -101,7 +106,7 @@ abstract mixin class $AppSettingsCopyWith<$Res>  {
   factory $AppSettingsCopyWith(AppSettings value, $Res Function(AppSettings) _then) = _$AppSettingsCopyWithImpl;
 @useResult
 $Res call({
- String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared, String? lastSyncedAt, bool legacyPullCompleted, bool productsSplitCompleted
+ String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared, String? lastSyncedAt, bool legacyPullCompleted, bool productsSplitCompleted, double? scanFrameLeft, double? scanFrameTop, double? scanFrameWidth, double? scanFrameHeight
 });
 
 
@@ -118,7 +123,7 @@ class _$AppSettingsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,Object? lastSyncedAt = freezed,Object? legacyPullCompleted = null,Object? productsSplitCompleted = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,Object? lastSyncedAt = freezed,Object? legacyPullCompleted = null,Object? productsSplitCompleted = null,Object? scanFrameLeft = freezed,Object? scanFrameTop = freezed,Object? scanFrameWidth = freezed,Object? scanFrameHeight = freezed,}) {
   return _then(_self.copyWith(
 localeCode: freezed == localeCode ? _self.localeCode : localeCode // ignore: cast_nullable_to_non_nullable
 as String?,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
@@ -129,7 +134,11 @@ as EFlashMode,dataCleared: null == dataCleared ? _self.dataCleared : dataCleared
 as bool,lastSyncedAt: freezed == lastSyncedAt ? _self.lastSyncedAt : lastSyncedAt // ignore: cast_nullable_to_non_nullable
 as String?,legacyPullCompleted: null == legacyPullCompleted ? _self.legacyPullCompleted : legacyPullCompleted // ignore: cast_nullable_to_non_nullable
 as bool,productsSplitCompleted: null == productsSplitCompleted ? _self.productsSplitCompleted : productsSplitCompleted // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,scanFrameLeft: freezed == scanFrameLeft ? _self.scanFrameLeft : scanFrameLeft // ignore: cast_nullable_to_non_nullable
+as double?,scanFrameTop: freezed == scanFrameTop ? _self.scanFrameTop : scanFrameTop // ignore: cast_nullable_to_non_nullable
+as double?,scanFrameWidth: freezed == scanFrameWidth ? _self.scanFrameWidth : scanFrameWidth // ignore: cast_nullable_to_non_nullable
+as double?,scanFrameHeight: freezed == scanFrameHeight ? _self.scanFrameHeight : scanFrameHeight // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 
@@ -211,10 +220,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted,  bool productsSplitCompleted)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted,  bool productsSplitCompleted,  double? scanFrameLeft,  double? scanFrameTop,  double? scanFrameWidth,  double? scanFrameHeight)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AppSettings() when $default != null:
-return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted,_that.productsSplitCompleted);case _:
+return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted,_that.productsSplitCompleted,_that.scanFrameLeft,_that.scanFrameTop,_that.scanFrameWidth,_that.scanFrameHeight);case _:
   return orElse();
 
 }
@@ -232,10 +241,10 @@ return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboar
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted,  bool productsSplitCompleted)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted,  bool productsSplitCompleted,  double? scanFrameLeft,  double? scanFrameTop,  double? scanFrameWidth,  double? scanFrameHeight)  $default,) {final _that = this;
 switch (_that) {
 case _AppSettings():
-return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted,_that.productsSplitCompleted);}
+return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted,_that.productsSplitCompleted,_that.scanFrameLeft,_that.scanFrameTop,_that.scanFrameWidth,_that.scanFrameHeight);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -249,10 +258,10 @@ return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboar
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted,  bool productsSplitCompleted)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String? localeCode,  String currencyCode,  EAppThemeMode themeMode,  bool onboardingCompleted,  EFlashMode flashMode,  bool dataCleared,  String? lastSyncedAt,  bool legacyPullCompleted,  bool productsSplitCompleted,  double? scanFrameLeft,  double? scanFrameTop,  double? scanFrameWidth,  double? scanFrameHeight)?  $default,) {final _that = this;
 switch (_that) {
 case _AppSettings() when $default != null:
-return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted,_that.productsSplitCompleted);case _:
+return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboardingCompleted,_that.flashMode,_that.dataCleared,_that.lastSyncedAt,_that.legacyPullCompleted,_that.productsSplitCompleted,_that.scanFrameLeft,_that.scanFrameTop,_that.scanFrameWidth,_that.scanFrameHeight);case _:
   return null;
 
 }
@@ -264,7 +273,7 @@ return $default(_that.localeCode,_that.currencyCode,_that.themeMode,_that.onboar
 @JsonSerializable()
 
 class _AppSettings implements AppSettings {
-  const _AppSettings({this.localeCode, this.currencyCode = 'MDL', this.themeMode = EAppThemeMode.system, this.onboardingCompleted = false, this.flashMode = EFlashMode.auto, this.dataCleared = false, this.lastSyncedAt, this.legacyPullCompleted = false, this.productsSplitCompleted = false});
+  const _AppSettings({this.localeCode, this.currencyCode = 'MDL', this.themeMode = EAppThemeMode.system, this.onboardingCompleted = false, this.flashMode = EFlashMode.auto, this.dataCleared = false, this.lastSyncedAt, this.legacyPullCompleted = false, this.productsSplitCompleted = false, this.scanFrameLeft, this.scanFrameTop, this.scanFrameWidth, this.scanFrameHeight});
   factory _AppSettings.fromJson(Map<String, dynamic> json) => _$AppSettingsFromJson(json);
 
 /// `null` = follow the device locale. Never defaulted to a concrete
@@ -329,6 +338,15 @@ class _AppSettings implements AppSettings {
 /// idempotent regardless (it skips products that already own a store), so
 /// this flag is an optimisation, not the correctness guarantee.
 @override@JsonKey() final  bool productsSplitCompleted;
+/// The scanner's last user-configured scan window, as FRACTIONS (0–1)
+/// of the preview box — so the frame restores proportionally on any
+/// screen size. Field indices 9–12, APPENDED (trailing only). All four
+/// `null` until the user first drags or resizes the frame, in which case
+/// the scanner falls back to its default centred window.
+@override final  double? scanFrameLeft;
+@override final  double? scanFrameTop;
+@override final  double? scanFrameWidth;
+@override final  double? scanFrameHeight;
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -343,16 +361,16 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared)&&(identical(other.lastSyncedAt, lastSyncedAt) || other.lastSyncedAt == lastSyncedAt)&&(identical(other.legacyPullCompleted, legacyPullCompleted) || other.legacyPullCompleted == legacyPullCompleted)&&(identical(other.productsSplitCompleted, productsSplitCompleted) || other.productsSplitCompleted == productsSplitCompleted));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _AppSettings&&(identical(other.localeCode, localeCode) || other.localeCode == localeCode)&&(identical(other.currencyCode, currencyCode) || other.currencyCode == currencyCode)&&(identical(other.themeMode, themeMode) || other.themeMode == themeMode)&&(identical(other.onboardingCompleted, onboardingCompleted) || other.onboardingCompleted == onboardingCompleted)&&(identical(other.flashMode, flashMode) || other.flashMode == flashMode)&&(identical(other.dataCleared, dataCleared) || other.dataCleared == dataCleared)&&(identical(other.lastSyncedAt, lastSyncedAt) || other.lastSyncedAt == lastSyncedAt)&&(identical(other.legacyPullCompleted, legacyPullCompleted) || other.legacyPullCompleted == legacyPullCompleted)&&(identical(other.productsSplitCompleted, productsSplitCompleted) || other.productsSplitCompleted == productsSplitCompleted)&&(identical(other.scanFrameLeft, scanFrameLeft) || other.scanFrameLeft == scanFrameLeft)&&(identical(other.scanFrameTop, scanFrameTop) || other.scanFrameTop == scanFrameTop)&&(identical(other.scanFrameWidth, scanFrameWidth) || other.scanFrameWidth == scanFrameWidth)&&(identical(other.scanFrameHeight, scanFrameHeight) || other.scanFrameHeight == scanFrameHeight));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared,lastSyncedAt,legacyPullCompleted,productsSplitCompleted);
+int get hashCode => Object.hash(runtimeType,localeCode,currencyCode,themeMode,onboardingCompleted,flashMode,dataCleared,lastSyncedAt,legacyPullCompleted,productsSplitCompleted,scanFrameLeft,scanFrameTop,scanFrameWidth,scanFrameHeight);
 
 @override
 String toString() {
-  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared, lastSyncedAt: $lastSyncedAt, legacyPullCompleted: $legacyPullCompleted, productsSplitCompleted: $productsSplitCompleted)';
+  return 'AppSettings(localeCode: $localeCode, currencyCode: $currencyCode, themeMode: $themeMode, onboardingCompleted: $onboardingCompleted, flashMode: $flashMode, dataCleared: $dataCleared, lastSyncedAt: $lastSyncedAt, legacyPullCompleted: $legacyPullCompleted, productsSplitCompleted: $productsSplitCompleted, scanFrameLeft: $scanFrameLeft, scanFrameTop: $scanFrameTop, scanFrameWidth: $scanFrameWidth, scanFrameHeight: $scanFrameHeight)';
 }
 
 
@@ -363,7 +381,7 @@ abstract mixin class _$AppSettingsCopyWith<$Res> implements $AppSettingsCopyWith
   factory _$AppSettingsCopyWith(_AppSettings value, $Res Function(_AppSettings) _then) = __$AppSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared, String? lastSyncedAt, bool legacyPullCompleted, bool productsSplitCompleted
+ String? localeCode, String currencyCode, EAppThemeMode themeMode, bool onboardingCompleted, EFlashMode flashMode, bool dataCleared, String? lastSyncedAt, bool legacyPullCompleted, bool productsSplitCompleted, double? scanFrameLeft, double? scanFrameTop, double? scanFrameWidth, double? scanFrameHeight
 });
 
 
@@ -380,7 +398,7 @@ class __$AppSettingsCopyWithImpl<$Res>
 
 /// Create a copy of AppSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,Object? lastSyncedAt = freezed,Object? legacyPullCompleted = null,Object? productsSplitCompleted = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? localeCode = freezed,Object? currencyCode = null,Object? themeMode = null,Object? onboardingCompleted = null,Object? flashMode = null,Object? dataCleared = null,Object? lastSyncedAt = freezed,Object? legacyPullCompleted = null,Object? productsSplitCompleted = null,Object? scanFrameLeft = freezed,Object? scanFrameTop = freezed,Object? scanFrameWidth = freezed,Object? scanFrameHeight = freezed,}) {
   return _then(_AppSettings(
 localeCode: freezed == localeCode ? _self.localeCode : localeCode // ignore: cast_nullable_to_non_nullable
 as String?,currencyCode: null == currencyCode ? _self.currencyCode : currencyCode // ignore: cast_nullable_to_non_nullable
@@ -391,7 +409,11 @@ as EFlashMode,dataCleared: null == dataCleared ? _self.dataCleared : dataCleared
 as bool,lastSyncedAt: freezed == lastSyncedAt ? _self.lastSyncedAt : lastSyncedAt // ignore: cast_nullable_to_non_nullable
 as String?,legacyPullCompleted: null == legacyPullCompleted ? _self.legacyPullCompleted : legacyPullCompleted // ignore: cast_nullable_to_non_nullable
 as bool,productsSplitCompleted: null == productsSplitCompleted ? _self.productsSplitCompleted : productsSplitCompleted // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,scanFrameLeft: freezed == scanFrameLeft ? _self.scanFrameLeft : scanFrameLeft // ignore: cast_nullable_to_non_nullable
+as double?,scanFrameTop: freezed == scanFrameTop ? _self.scanFrameTop : scanFrameTop // ignore: cast_nullable_to_non_nullable
+as double?,scanFrameWidth: freezed == scanFrameWidth ? _self.scanFrameWidth : scanFrameWidth // ignore: cast_nullable_to_non_nullable
+as double?,scanFrameHeight: freezed == scanFrameHeight ? _self.scanFrameHeight : scanFrameHeight // ignore: cast_nullable_to_non_nullable
+as double?,
   ));
 }
 

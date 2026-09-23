@@ -42,6 +42,17 @@ sealed class SettingsEvent with _$SettingsEvent {
   /// screen-scoped `ScannerBloc`).
   const factory SettingsEvent.toggleFlashMode() = _ToggleFlashMode;
 
+  /// Persists the scanner's scan window, as fractions (0–1) of the preview
+  /// box, so the next scan opens with the frame the user last configured.
+  /// Dispatched once per completed drag/resize gesture — never per pointer
+  /// move.
+  const factory SettingsEvent.saveScanFrame({
+    required double left,
+    required double top,
+    required double width,
+    required double height,
+  }) = _SaveScanFrame;
+
   /// Loads the current record count across expenses/stores/categories, for
   /// the delete-all confirm dialog's `{n}` copy. Dispatched by
   /// `SettingsPage` right before showing that dialog.
@@ -51,6 +62,5 @@ sealed class SettingsEvent with _$SettingsEvent {
   /// Dispatched from the confirm dialog's `onConfirm` — a pure action, never
   /// itself popping a route. [uid] scopes the cloud-file sweep; empty when
   /// signed out.
-  const factory SettingsEvent.deleteAll({@Default('') String uid}) =
-      _DeleteAll;
+  const factory SettingsEvent.deleteAll({@Default('') String uid}) = _DeleteAll;
 }

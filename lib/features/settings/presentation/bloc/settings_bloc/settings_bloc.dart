@@ -62,6 +62,7 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
     on<_PickTheme>(_onPickTheme);
     on<_CompleteOnboarding>(_onCompleteOnboarding);
     on<_ToggleFlashMode>(_onToggleFlashMode);
+    on<_SaveScanFrame>(_onSaveScanFrame);
     on<_LoadRecordCount>(_onLoadRecordCount);
     on<_DeleteAll>(_onDeleteAll);
   }
@@ -132,6 +133,22 @@ class SettingsBloc extends Bloc<SettingsEvent, SettingsState> {
       EFlashMode.off => EFlashMode.auto,
     };
     final updated = state.settings.copyWith(flashMode: next);
+
+    emit(state.copyWith(settings: updated));
+    await _saveSettingsUseCase(updated);
+  }
+
+  Future<void> _onSaveScanFrame(
+    _SaveScanFrame event,
+    Emitter<SettingsState> emit,
+  ) async {
+    final updated = state.settings.copyWith(
+      scanFrameLeft: event.left,
+      scanFrameTop: event.top,
+      scanFrameWidth: event.width,
+      scanFrameHeight: event.height,
+    );
+    if (updated == state.settings) return;
 
     emit(state.copyWith(settings: updated));
     await _saveSettingsUseCase(updated);

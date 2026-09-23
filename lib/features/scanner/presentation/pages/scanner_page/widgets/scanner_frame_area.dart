@@ -22,18 +22,30 @@ import 'scanner_scan_line.dart';
 /// against THIS rectangle rather than the full screen, so the scan line can
 /// never travel outside the region where the image is actually visible.
 ///
-/// The rect lives in this widget's own state, not in [ScannerBloc]: it is a
-/// pure view-layout affordance with no pipeline meaning (the detector reads
-/// the whole frame), and putting an in-flight drag through a bloc would emit
-/// a state per pointer move.
+/// The in-flight rect lives in this widget's own state, not in
+/// [ScannerBloc]: it is a pure view-layout affordance with no pipeline
+/// meaning (the detector reads the whole frame), and putting an in-flight
+/// drag through a bloc would emit a state per pointer move. Only the
+/// FINISHED gesture is reported, once, through [onFrameChanged] so the
+/// parent can persist it; [savedFraction] seeds the next mount with it.
 class ScannerFrameArea extends StatefulWidget {
   final bool isDetected;
   final bool showScanLine;
+
+  /// The last persisted window as fractions (0–1) of the layout box, or
+  /// `null` for the default centred frame.
+  final Rect? savedFraction;
+
+  /// Reports the window, as fractions of the layout box, when a drag or
+  /// resize gesture ends.
+  final ValueChanged<Rect> onFrameChanged;
 
   const ScannerFrameArea({
     super.key,
     required this.isDetected,
     required this.showScanLine,
+    required this.savedFraction,
+    required this.onFrameChanged,
   });
 
   @override
@@ -55,10 +67,12 @@ class _ScannerFrameAreaState extends State<ScannerFrameArea> {
   static const double _minHeight = 120.0;
   static const double _edgeMargin = 12.0;
 
-  /// Vertical room reserved for the floating top controls and the shutter,
-  /// so a dragged window cannot park itself underneath either of them.
+  /// Vertical room reserved for the floating top controls, so a dragged
+  /// window cannot park itself underneath them. The shutter floats in the
+  /// bottom-right corner and is hit-tested above this widget, so the bottom
+  /// only keeps the edge margin plus the system-gesture inset — letting the
+  /// frame grow tall enough for a long receipt.
   static const double _topReserved = 96.0;
-  static const double _bottomReserved = 168.0;
 
   static const double _borderRadius = 18.0;
   static const double _dimOpacity = 0.72;
@@ -73,6 +87,9 @@ class _ScannerFrameAreaState extends State<ScannerFrameArea> {
   /// The box [_window] was last resolved against, so a size change can
   /// rescale the user's frame instead of discarding it.
   Size? _lastSize;
+
+  double get _bottomReserved =>
+      _edgeMargin + MediaQuery.paddingOf(context).bottom;
 
   /// Clamps [rect] back inside the draggable area — applied after every
   /// drag delta AND on every layout change, so a rotation or a keyboard
@@ -102,6 +119,19 @@ class _ScannerFrameAreaState extends State<ScannerFrameArea> {
   }
 
   Rect _initialWindow(Size size) {
+    final saved = widget.savedFraction;
+    if (saved != null) {
+      return _constrain(
+        Rect.fromLTWH(
+          saved.left * size.width,
+          saved.top * size.height,
+          saved.width * size.width,
+          saved.height * size.height,
+        ),
+        size,
+      );
+    }
+
     final width = size.width * _initialWidthFraction;
     final height = size.height * _initialHeightFraction;
 
@@ -145,6 +175,24 @@ class _ScannerFrameAreaState extends State<ScannerFrameArea> {
       _lastSize = size;
       _window = _constrain(window.shift(details.delta), size);
     });
+  }
+
+  /// Reports the finished gesture's window as fractions of [size], so it
+  /// restores proportionally on any screen. Reads `_window`, which the drag
+  /// handlers have just refreshed; a gesture that never moved leaves it
+  /// `null` and reports nothing.
+  void _onDragEnd(Size size) {
+    final window = _window;
+    if (window == null) return;
+
+    widget.onFrameChanged(
+      Rect.fromLTWH(
+        window.left / size.width,
+        window.top / size.height,
+        window.width / size.width,
+        window.height / size.height,
+      ),
+    );
   }
 
   /// Grips resize SYMMETRICALLY about the window's centre, so growing the
@@ -215,6 +263,7 @@ class _ScannerFrameAreaState extends State<ScannerFrameArea> {
               child: GestureDetector(
                 behavior: HitTestBehavior.translucent,
                 onPanUpdate: (details) => _onWindowDrag(details, window, size),
+                onPanEnd: (_) => _onDragEnd(size),
                 child: Stack(
                   fit: StackFit.expand,
                   children: [
@@ -300,6 +349,7 @@ class _ScannerFrameAreaState extends State<ScannerFrameArea> {
           axis: axis,
           isLeading: isLeading,
         ),
+        onPanEnd: (_) => _onDragEnd(size),
         child: ScannerFrameHandle(color: color, axis: axis),
       ),
     );

@@ -28,13 +28,17 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       lastSyncedAt: fields[6] as String?,
       legacyPullCompleted: fields[7] == null ? false : fields[7] as bool,
       productsSplitCompleted: fields[8] == null ? false : fields[8] as bool,
+      scanFrameLeft: (fields[9] as num?)?.toDouble(),
+      scanFrameTop: (fields[10] as num?)?.toDouble(),
+      scanFrameWidth: (fields[11] as num?)?.toDouble(),
+      scanFrameHeight: (fields[12] as num?)?.toDouble(),
     );
   }
 
   @override
   void write(BinaryWriter writer, AppSettings obj) {
     writer
-      ..writeByte(9)
+      ..writeByte(13)
       ..writeByte(0)
       ..write(obj.localeCode)
       ..writeByte(1)
@@ -52,7 +56,15 @@ class AppSettingsAdapter extends TypeAdapter<AppSettings> {
       ..writeByte(7)
       ..write(obj.legacyPullCompleted)
       ..writeByte(8)
-      ..write(obj.productsSplitCompleted);
+      ..write(obj.productsSplitCompleted)
+      ..writeByte(9)
+      ..write(obj.scanFrameLeft)
+      ..writeByte(10)
+      ..write(obj.scanFrameTop)
+      ..writeByte(11)
+      ..write(obj.scanFrameWidth)
+      ..writeByte(12)
+      ..write(obj.scanFrameHeight);
   }
 
   @override

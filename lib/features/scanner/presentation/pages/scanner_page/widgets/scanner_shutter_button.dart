@@ -4,12 +4,16 @@ import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/colors/app_colors.dart';
 import '../../../../../../core/widgets/app_container.dart';
 
-/// The bottom shutter control, present in every non-processing sub-state
+/// The corner shutter control, present in every non-processing sub-state
 /// (`SpendLens.dc.html`'s all three camera artboards show it). Breathes
 /// (`slBreathe`, 1.4s) only once a receipt is [isDetected] — the design's
 /// `shutterDetected` is the only variant with `animation: slBreathe`; the
 /// plain searching shutter is static. The breathing controller is scoped to
 /// this widget and only ever runs while [isDetected] is true.
+///
+/// Floats in the bottom-RIGHT corner rather than centred over the preview,
+/// so it no longer sits on top of the receipt being framed and the scan
+/// window can extend almost to the bottom edge.
 ///
 /// Positioned above the bottom system-gesture inset via
 /// [MediaQuery.paddingOf] — never flush to `bottom: 0`, or the control sits
@@ -32,9 +36,9 @@ class ScannerShutterButton extends StatefulWidget {
 class _ScannerShutterButtonState extends State<ScannerShutterButton>
     with SingleTickerProviderStateMixin {
   static const _breatheDuration = Duration(milliseconds: 1400);
-  static const _ringSize = 76.0;
-  static const _knobSize = 60.0;
-  static const _bottomOffset = 64.0;
+  static const _ringSize = 64.0;
+  static const _knobSize = 50.0;
+  static const _edgeOffset = 24.0;
 
   late final AnimationController _breatheController;
   late final Animation<double> _scale;
@@ -79,36 +83,31 @@ class _ScannerShutterButtonState extends State<ScannerShutterButton>
     final bottomInset = MediaQuery.paddingOf(context).bottom;
 
     return Positioned(
-      left: 0.0,
-      right: 0.0,
-      bottom: _bottomOffset + bottomInset,
-      child: Center(
-        child: GestureDetector(
-          onTap: widget.onTap,
-          behavior: HitTestBehavior.opaque,
-          child: AnimatedBuilder(
-            animation: _scale,
-            builder: (context, child) => Transform.scale(
-              scale: widget.isDetected ? _scale.value : 1.0,
-              child: child,
+      right: _edgeOffset,
+      bottom: _edgeOffset + bottomInset,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedBuilder(
+          animation: _scale,
+          builder: (context, child) => Transform.scale(
+            scale: widget.isDetected ? _scale.value : 1.0,
+            child: child,
+          ),
+          child: AppContainer(
+            width: _ringSize,
+            height: _ringSize,
+            shape: BoxShape.circle,
+            border: Border.all(
+              color: widget.isDetected ? scheme.accent : AppColors.white.value,
+              width: 3.5,
             ),
+            alignment: Alignment.center,
             child: AppContainer(
-              width: _ringSize,
-              height: _ringSize,
+              width: _knobSize,
+              height: _knobSize,
               shape: BoxShape.circle,
-              border: Border.all(
-                color: widget.isDetected
-                    ? scheme.accent
-                    : AppColors.white.value,
-                width: 4.0,
-              ),
-              alignment: Alignment.center,
-              child: AppContainer(
-                width: _knobSize,
-                height: _knobSize,
-                shape: BoxShape.circle,
-                color: AppColors.white.value,
-              ),
+              color: AppColors.white.value,
             ),
           ),
         ),

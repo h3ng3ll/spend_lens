@@ -20,6 +20,10 @@ _AppSettings _$AppSettingsFromJson(Map<String, dynamic> json) => _AppSettings(
   lastSyncedAt: json['lastSyncedAt'] as String?,
   legacyPullCompleted: json['legacyPullCompleted'] as bool? ?? false,
   productsSplitCompleted: json['productsSplitCompleted'] as bool? ?? false,
+  scanFrameLeft: (json['scanFrameLeft'] as num?)?.toDouble(),
+  scanFrameTop: (json['scanFrameTop'] as num?)?.toDouble(),
+  scanFrameWidth: (json['scanFrameWidth'] as num?)?.toDouble(),
+  scanFrameHeight: (json['scanFrameHeight'] as num?)?.toDouble(),
 );
 
 Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
@@ -33,6 +37,10 @@ Map<String, dynamic> _$AppSettingsToJson(_AppSettings instance) =>
       'lastSyncedAt': instance.lastSyncedAt,
       'legacyPullCompleted': instance.legacyPullCompleted,
       'productsSplitCompleted': instance.productsSplitCompleted,
+      'scanFrameLeft': instance.scanFrameLeft,
+      'scanFrameTop': instance.scanFrameTop,
+      'scanFrameWidth': instance.scanFrameWidth,
+      'scanFrameHeight': instance.scanFrameHeight,
     };
 
 const _$EAppThemeModeEnumMap = {

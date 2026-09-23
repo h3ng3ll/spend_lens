@@ -93,6 +93,16 @@ sealed class AppSettings with _$AppSettings {
     /// idempotent regardless (it skips products that already own a store), so
     /// this flag is an optimisation, not the correctness guarantee.
     @Default(false) bool productsSplitCompleted,
+
+    /// The scanner's last user-configured scan window, as FRACTIONS (0–1)
+    /// of the preview box — so the frame restores proportionally on any
+    /// screen size. Field indices 9–12, APPENDED (trailing only). All four
+    /// `null` until the user first drags or resizes the frame, in which case
+    /// the scanner falls back to its default centred window.
+    double? scanFrameLeft,
+    double? scanFrameTop,
+    double? scanFrameWidth,
+    double? scanFrameHeight,
   }) = _AppSettings;
 
   factory AppSettings.fromJson(Map<String, dynamic> json) =>

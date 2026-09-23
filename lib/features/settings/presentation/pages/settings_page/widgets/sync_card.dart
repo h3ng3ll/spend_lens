@@ -28,8 +28,8 @@ class SyncCard extends StatelessWidget {
   /// stored cursor, so anything the cursor has already passed is invisible
   /// to it no matter how many times the button is tapped.
   void _onSyncNow(BuildContext context) => context.read<SyncBloc>().add(
-        const SyncEvent.syncNow(fullResync: true),
-      );
+    const SyncEvent.syncNow(fullResync: true),
+  );
 
   @override
   Widget build(BuildContext context) {

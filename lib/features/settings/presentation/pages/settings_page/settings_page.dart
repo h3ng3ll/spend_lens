@@ -110,9 +110,8 @@ class _SettingsPageState extends State<SettingsPage>
 
   void _onCurrency(BuildContext context) => CurrencySheet.show(context);
 
-  void _onPickTheme(BuildContext context, EAppThemeMode mode) => context
-      .read<SettingsBloc>()
-      .add(SettingsEvent.pickTheme(mode: mode));
+  void _onPickTheme(BuildContext context, EAppThemeMode mode) =>
+      context.read<SettingsBloc>().add(SettingsEvent.pickTheme(mode: mode));
 
   void _onCategories(BuildContext context) =>
       CategoriesPageRoute().push(context);

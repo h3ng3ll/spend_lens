@@ -37,6 +37,7 @@ class SettingsBody extends StatelessWidget {
   final VoidCallback onPrivacy;
   final VoidCallback onTerms;
   final VoidCallback onAbout;
+
   /// `null` while the capability probe is in flight — passed straight
   /// through to [ScanCapabilityRow], which renders a neutral "checking"
   /// state rather than a fabricated concrete cause.
