@@ -5,6 +5,7 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:flutter/material.dart' show Rect;
 import 'package:freezed_annotation/freezed_annotation.dart';
 
+import '../../../../../core/services/image_region_cropper.dart';
 import '../../../../../core/services/ocr/i_receipt_detector.dart';
 import '../../../../../core/services/ocr/ocr_service.dart';
 import '../../../domain/i_receipt_parse_pipeline.dart';
@@ -54,6 +55,7 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
   final OcrService _ocrService;
   final IReceiptParsePipeline _parsePipeline;
   final PendingReceiptDraftStore _draftStore;
+  final ImageRegionCropper _imageRegionCropper;
 
   DateTime? _lastDetectionAttempt;
 
@@ -62,6 +64,7 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
     required this._ocrService,
     required this._parsePipeline,
     required this._draftStore,
+    required this._imageRegionCropper,
   }) : super(const ScannerState()) {
     on<_Reset>(_onReset);
     // `droppable()` BOUNDS the preview-frame queue at one in-flight event.
@@ -147,8 +150,14 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
   /// the 4 real processing stages in sequence from THIS single handler,
   /// emitting exactly ONE `processingStep` advance per stage as it actually
   /// finishes (design_spendlens.md §8) — never via a self-dispatched
-  /// `add()` (BLoC rule A3.10). Detection failure never blocks OCR (§24) —
-  /// a `null` rect proceeds with the ORIGINAL image, not a cropped one.
+  /// `add()` (BLoC rule A3.10).
+  ///
+  /// OCR runs ONLY on the region the user framed on screen
+  /// ([_CaptureCompleted.cropFraction]): everything outside the frame is
+  /// background the user excluded, and recognising it cost time and fed
+  /// stray text to the parser. The user's frame replaces the automatic
+  /// detector crop here — re-detecting inside an already-framed region could
+  /// only shave off lines the user deliberately included.
   Future<void> _onCaptureCompleted(
     _CaptureCompleted event,
     Emitter<ScannerState> emit,
@@ -158,11 +167,11 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
 
     emit(state.copyWith(status: EScannerStatus.processing, processingStep: 0));
 
-    // Step 1 — Detecting receipt (detect/crop).
-    final rect = await _receiptDetector.detectReceiptRect(bytes);
-    final workingBytes = rect == null
-        ? bytes
-        : await _receiptDetector.cropPerspective(bytes, rect);
+    // Step 1 — Detecting receipt (crop to the user's frame).
+    final workingBytes = await _imageRegionCropper.cropToFraction(
+      bytes,
+      event.cropFraction,
+    );
     if (state.status != EScannerStatus.processing) return;
     emit(state.copyWith(processingStep: 1));
 
@@ -171,10 +180,10 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
     if (state.status != EScannerStatus.processing) return;
     emit(state.copyWith(processingStep: 2));
 
-    // Step 3 — Finding products (parse + normalize). The ORIGINAL captured
-    // bytes (never the cropped/working copy) are what get attached to the
-    // draft — the design keeps the actual capture for Review's photo card
-    // and the scan-failed sheet, never a perspective-corrected substitute.
+    // Step 3 — Finding products (parse + normalize). The CROPPED working
+    // copy — exactly the region OCR read — is what gets attached to the
+    // draft, so Review's photo card (and the saved receipt's photo) show the
+    // user precisely what the parse was based on and they can re-check it.
     // Written to DISK here, not retained: `attachImageBytes` persists the
     // capture and keeps only its filename, so the multi-megabyte buffer is
     // collectable as soon as this handler returns. Holding it across the
@@ -182,7 +191,7 @@ class ScannerBloc extends Bloc<ScannerEvent, ScannerState> {
     // 2 GB EXC_RESOURCE kill (see `PendingReceiptDraft.imageFilename`).
     final pipeline = _parsePipeline;
     if (pipeline is ReceiptParsePipeline) {
-      await pipeline.attachImageBytes(bytes);
+      await pipeline.attachImageBytes(workingBytes);
     }
     final productCount = await _parsePipeline.findProducts(blocks);
     if (state.status != EScannerStatus.processing) return;

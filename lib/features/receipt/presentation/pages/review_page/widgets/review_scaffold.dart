@@ -14,6 +14,7 @@ import 'correct_button.dart';
 import 'review_category_card.dart';
 import 'review_header.dart';
 import 'review_items_card.dart';
+import 'review_photo_card.dart';
 import 'review_store_card.dart';
 import 'review_totals_card.dart';
 import 'review_failed_state.dart';
@@ -144,7 +145,8 @@ class ReviewScaffold extends StatelessWidget {
                         ),
                       ),
                     ),
-
+                    if (state.imageFilename case final filename?)
+                      ReviewPhotoCard(filename: filename),
                   ],
                 ),
               ),

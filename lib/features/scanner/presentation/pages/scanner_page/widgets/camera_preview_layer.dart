@@ -341,7 +341,13 @@ class _CameraPreviewLayerState extends State<CameraPreviewLayer>
       final bytes = await picture.readAsBytes();
       if (!mounted) return;
 
-      context.read<ScannerBloc>().add(ScannerEvent.captureCompleted(bytes));
+      // The frame the user had on screen — the persisted one, or the
+      // default when they never moved it — so OCR reads only that region.
+      final cropFraction =
+          widget.savedFrameFraction ?? ScannerFrameArea.defaultFraction;
+      context.read<ScannerBloc>().add(
+        ScannerEvent.captureCompleted(bytes, cropFraction),
+      );
     } on CameraException {
       if (mounted) {
         context.read<ScannerBloc>().add(

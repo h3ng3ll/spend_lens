@@ -11,6 +11,7 @@ import '../services/connectivity_service.dart';
 import '../services/firebase/firebase_firestore_service.dart';
 import '../services/firebase/firebase_storage_service.dart';
 import '../services/image_compression_service.dart';
+import '../services/image_region_cropper.dart';
 import '../services/logger_service.dart';
 import '../services/ocr/i_receipt_detector.dart';
 import '../services/ocr/method_channel_ocr_service.dart';
@@ -85,6 +86,10 @@ Future<void> initDependencies() async {
 
   getIt.registerLazySingleton(
     () => const ImageCompressionService(),
+  );
+
+  getIt.registerLazySingleton(
+    () => const ImageRegionCropper(),
   );
 
   // M7: the single channel contract (design_spendlens.md §6), identical on

@@ -128,13 +128,13 @@ return failed(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  reset,TResult Function( Uint8List imageBytes)?  previewFrame,TResult Function()?  capture,TResult Function( Uint8List imageBytes)?  captureCompleted,TResult Function( String reason)?  failed,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function()?  reset,TResult Function( Uint8List imageBytes)?  previewFrame,TResult Function()?  capture,TResult Function( Uint8List imageBytes,  Rect cropFraction)?  captureCompleted,TResult Function( String reason)?  failed,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Reset() when reset != null:
 return reset();case _PreviewFrame() when previewFrame != null:
 return previewFrame(_that.imageBytes);case _Capture() when capture != null:
 return capture();case _CaptureCompleted() when captureCompleted != null:
-return captureCompleted(_that.imageBytes);case _Failed() when failed != null:
+return captureCompleted(_that.imageBytes,_that.cropFraction);case _Failed() when failed != null:
 return failed(_that.reason);case _:
   return orElse();
 
@@ -153,13 +153,13 @@ return failed(_that.reason);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  reset,required TResult Function( Uint8List imageBytes)  previewFrame,required TResult Function()  capture,required TResult Function( Uint8List imageBytes)  captureCompleted,required TResult Function( String reason)  failed,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function()  reset,required TResult Function( Uint8List imageBytes)  previewFrame,required TResult Function()  capture,required TResult Function( Uint8List imageBytes,  Rect cropFraction)  captureCompleted,required TResult Function( String reason)  failed,}) {final _that = this;
 switch (_that) {
 case _Reset():
 return reset();case _PreviewFrame():
 return previewFrame(_that.imageBytes);case _Capture():
 return capture();case _CaptureCompleted():
-return captureCompleted(_that.imageBytes);case _Failed():
+return captureCompleted(_that.imageBytes,_that.cropFraction);case _Failed():
 return failed(_that.reason);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -174,13 +174,13 @@ return failed(_that.reason);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  reset,TResult? Function( Uint8List imageBytes)?  previewFrame,TResult? Function()?  capture,TResult? Function( Uint8List imageBytes)?  captureCompleted,TResult? Function( String reason)?  failed,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function()?  reset,TResult? Function( Uint8List imageBytes)?  previewFrame,TResult? Function()?  capture,TResult? Function( Uint8List imageBytes,  Rect cropFraction)?  captureCompleted,TResult? Function( String reason)?  failed,}) {final _that = this;
 switch (_that) {
 case _Reset() when reset != null:
 return reset();case _PreviewFrame() when previewFrame != null:
 return previewFrame(_that.imageBytes);case _Capture() when capture != null:
 return capture();case _CaptureCompleted() when captureCompleted != null:
-return captureCompleted(_that.imageBytes);case _Failed() when failed != null:
+return captureCompleted(_that.imageBytes,_that.cropFraction);case _Failed() when failed != null:
 return failed(_that.reason);case _:
   return null;
 
@@ -323,10 +323,11 @@ String toString() {
 
 
 class _CaptureCompleted implements ScannerEvent {
-  const _CaptureCompleted(this.imageBytes);
+  const _CaptureCompleted(this.imageBytes, this.cropFraction);
   
 
  final  Uint8List imageBytes;
+ final  Rect cropFraction;
 
 /// Create a copy of ScannerEvent
 /// with the given fields replaced by the non-null parameter values.
@@ -338,16 +339,16 @@ _$CaptureCompletedCopyWith<_CaptureCompleted> get copyWith => __$CaptureComplete
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CaptureCompleted&&const DeepCollectionEquality().equals(other.imageBytes, imageBytes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CaptureCompleted&&const DeepCollectionEquality().equals(other.imageBytes, imageBytes)&&(identical(other.cropFraction, cropFraction) || other.cropFraction == cropFraction));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(imageBytes));
+int get hashCode => Object.hash(runtimeType,const DeepCollectionEquality().hash(imageBytes),cropFraction);
 
 @override
 String toString() {
-  return 'ScannerEvent.captureCompleted(imageBytes: $imageBytes)';
+  return 'ScannerEvent.captureCompleted(imageBytes: $imageBytes, cropFraction: $cropFraction)';
 }
 
 
@@ -358,7 +359,7 @@ abstract mixin class _$CaptureCompletedCopyWith<$Res> implements $ScannerEventCo
   factory _$CaptureCompletedCopyWith(_CaptureCompleted value, $Res Function(_CaptureCompleted) _then) = __$CaptureCompletedCopyWithImpl;
 @useResult
 $Res call({
- Uint8List imageBytes
+ Uint8List imageBytes, Rect cropFraction
 });
 
 
@@ -375,10 +376,11 @@ class __$CaptureCompletedCopyWithImpl<$Res>
 
 /// Create a copy of ScannerEvent
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? imageBytes = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? imageBytes = null,Object? cropFraction = null,}) {
   return _then(_CaptureCompleted(
 null == imageBytes ? _self.imageBytes : imageBytes // ignore: cast_nullable_to_non_nullable
-as Uint8List,
+as Uint8List,null == cropFraction ? _self.cropFraction : cropFraction // ignore: cast_nullable_to_non_nullable
+as Rect,
   ));
 }
 

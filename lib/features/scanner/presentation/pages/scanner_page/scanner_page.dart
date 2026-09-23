@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../../core/di/injection.dart';
 import '../../../../../core/resources/colors/app_colors.dart';
+import '../../../../../core/services/image_region_cropper.dart';
 import '../../../../../core/services/ocr/i_receipt_detector.dart';
 import '../../../../../core/services/ocr/ocr_service.dart';
 import '../../../../receipt/domain/repositories/i_receipt_local_repository.dart';
@@ -42,6 +43,7 @@ class _ScannerPageState extends State<ScannerPage> {
     ocrService: getIt<OcrService>(),
     parsePipeline: getIt<IReceiptParsePipeline>(),
     draftStore: getIt<PendingReceiptDraftStore>(),
+    imageRegionCropper: getIt<ImageRegionCropper>(),
   );
 
   @override

@@ -38,8 +38,13 @@ sealed class ScannerEvent with _$ScannerEvent {
   /// Fired when `CameraController.takePicture()` actually completes. The
   /// bloc runs the full detect/crop → OCR → parse → price-check pipeline
   /// from this single handler (never via a self-dispatched `add()`).
-  const factory ScannerEvent.captureCompleted(Uint8List imageBytes) =
-      _CaptureCompleted;
+  ///
+  /// [cropFraction] is the scanner frame the user had on screen, as
+  /// fractions (0–1) of the preview — OCR runs on that region only.
+  const factory ScannerEvent.captureCompleted(
+    Uint8List imageBytes,
+    Rect cropFraction,
+  ) = _CaptureCompleted;
 
   /// Fired when a stage throws or OCR yields nothing usable.
   const factory ScannerEvent.failed(String reason) = _Failed;

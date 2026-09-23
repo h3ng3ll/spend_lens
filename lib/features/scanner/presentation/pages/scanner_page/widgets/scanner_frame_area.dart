@@ -40,6 +40,12 @@ class ScannerFrameArea extends StatefulWidget {
   /// resize gesture ends.
   final ValueChanged<Rect> onFrameChanged;
 
+  /// The default window, as fractions of the layout box: centred, 78% wide
+  /// and 46% tall, so it is proportional on every screen size instead of a
+  /// fixed dp rect that overflows a small phone. Public because the capture
+  /// crop uses it when the user never moved the frame.
+  static const Rect defaultFraction = Rect.fromLTWH(0.11, 0.27, 0.78, 0.46);
+
   const ScannerFrameArea({
     super.key,
     required this.isDetected,
@@ -53,12 +59,6 @@ class ScannerFrameArea extends StatefulWidget {
 }
 
 class _ScannerFrameAreaState extends State<ScannerFrameArea> {
-  /// Fractions of the available preview box used for the INITIAL window, so
-  /// the default frame is proportional on every screen size instead of a
-  /// fixed dp rect that overflows a small phone.
-  static const double _initialWidthFraction = 0.78;
-  static const double _initialHeightFraction = 0.46;
-
   /// Smallest the user may pull the window on each axis. A frame below the
   /// minimum cannot hold a receipt line at all; the maximum is the available
   /// area itself, beyond which a grip would be swallowed by the screen edge
@@ -119,28 +119,14 @@ class _ScannerFrameAreaState extends State<ScannerFrameArea> {
   }
 
   Rect _initialWindow(Size size) {
-    final saved = widget.savedFraction;
-    if (saved != null) {
-      return _constrain(
-        Rect.fromLTWH(
-          saved.left * size.width,
-          saved.top * size.height,
-          saved.width * size.width,
-          saved.height * size.height,
-        ),
-        size,
-      );
-    }
-
-    final width = size.width * _initialWidthFraction;
-    final height = size.height * _initialHeightFraction;
+    final fraction = widget.savedFraction ?? ScannerFrameArea.defaultFraction;
 
     return _constrain(
       Rect.fromLTWH(
-        (size.width - width) / 2.0,
-        (size.height - height) / 2.0,
-        width,
-        height,
+        fraction.left * size.width,
+        fraction.top * size.height,
+        fraction.width * size.width,
+        fraction.height * size.height,
       ),
       size,
     );
