@@ -144,6 +144,53 @@ class ReceiptParser {
           lineConfidence: line.confidence,
           lineIndex: itemLineIndex,
         );
+
+        // TWO receipt layouts print a continuation line, and they mean
+        // opposite things:
+        //
+        //   wrapped name     NAME (no price)          <- held as pending
+        //                    ...rest 1 x 54.99 54.99  <- completes it
+        //
+        //   detail line      NAME            17.90 A  <- ALREADY an item
+        //                      1.000 x 17.90          <- its qty/unit
+        //
+        // The second is what Kaufland prints, and it was being read as the
+        // first: with nothing pending, the line was dropped and the item
+        // above kept `quantity: 1, unitPrice: null`. So `2.000 x 13.40`
+        // was thrown away and a two-pack reported as one.
+        //
+        // Nothing pending + an item already emitted + this line carries a
+        // quantity expression => it DETAILS that item. The line total is
+        // not taken from here: the item's own right-aligned total is the
+        // authoritative figure, and `qty x unit` can disagree with it
+        // through rounding.
+        if (pendingNameParts.isEmpty &&
+            built != null &&
+            built.rawName.trim().isEmpty &&
+            items.isNotEmpty) {
+          final last = items.last;
+          items[items.length - 1] = ParsedLineCandidate(
+            rawName: last.rawName,
+            name: last.name,
+            quantity: _reconciledQuantity(
+              quantity: built.quantity,
+              unitPrice: built.unitPrice,
+              lineTotal: last.lineTotal,
+            ),
+            unit: built.unit,
+            // The detail line's own `qty x unit` is the printed unit
+            // price; fall back to whatever the item line could infer.
+            unitPrice: built.unitPrice ?? last.unitPrice,
+            // NOT `built.lineTotal`: the item's right-aligned total is the
+            // authoritative figure, and `qty x unit` can disagree with it
+            // by a rounding step (`0.868 x 25.50` = 22.134 against a
+            // printed 22.13).
+            lineTotal: last.lineTotal,
+            confidence: last.confidence,
+            lineIndex: last.lineIndex,
+          );
+          continue;
+        }
         if (built != null) {
           // The name comes from EVERY held fragment above, joined in print
           // order; the numbers come from this line. `built.rawName` is
@@ -307,6 +354,72 @@ class ReceiptParser {
       discount: discount,
       items: items,
     );
+  }
+
+  /// Tolerance for "these three printed numbers agree", in currency units.
+  /// A cent of rounding on a weighed line is normal; more is a mis-read.
+  static const _quantityAgreementTolerance = 0.02;
+
+  /// The largest quantity a single receipt line can plausibly carry.
+  /// Bounds a division that a mis-read unit price could otherwise blow up.
+  static const _maxPlausibleQuantity = 1000.0;
+
+  /// How far from a whole number a derived quantity may sit and still be
+  /// treated as that whole number.
+  ///
+  /// A till prints counts as exact integers, so `1.994` is not a quantity
+  /// anyone bought — it is `2` seen through a mis-read digit. 1% leaves
+  /// room for that while staying far below the gap to the next integer, and
+  /// weighed lines (`0.868`) are nowhere near an integer to begin with.
+  static const _wholeQuantitySnapTolerance = 0.01;
+
+  /// Recovers a quantity OCR mangled, using the two numbers it read more
+  /// reliably.
+  ///
+  /// A receipt prints three related figures — `qty x unitPrice = total` —
+  /// and the total is by far the most legible: it is right-aligned, printed
+  /// larger, and this parser already trusts it over the multiplication.
+  /// So when `qty x unitPrice` does NOT reproduce the printed total, the
+  /// quantity is the term to doubt.
+  ///
+  /// This is not hypothetical. On a faint print the digit `0` reads as `8`,
+  /// so `1.000 x 139.88` came through as `1.888` and `1.000 x 59.98` as
+  /// `1008`, and the Review screen showed quantities of `1.1`, `2.7` and
+  /// `1008` against perfectly correct prices. Character substitution cannot
+  /// fix that — `0` and `8` are both digits, so nothing marks which is
+  /// wrong — but the arithmetic can.
+  ///
+  /// Deliberately conservative: it returns the OCR value untouched whenever
+  /// that value already explains the total, so a legitimate `2 x 13.40 =
+  /// 26.80` is never second-guessed. A near-integer result is snapped to
+  /// the whole number (a two-pack reads as `2`, not `1.994`); anything else
+  /// keeps three decimals, which is what a weighed line needs.
+  double _reconciledQuantity({
+    required double quantity,
+    required double? unitPrice,
+    required double lineTotal,
+  }) {
+    if (unitPrice == null || unitPrice <= 0) return quantity;
+
+    // The printed numbers already agree — nothing to repair.
+    if ((quantity * unitPrice - lineTotal).abs() <=
+        _quantityAgreementTolerance) {
+      return quantity;
+    }
+
+    final implied = lineTotal / unitPrice;
+    if (implied <= 0 || implied > _maxPlausibleQuantity) return quantity;
+
+    // Snapped on the QUANTITY's own scale, not the money's. A count line's
+    // unit price is already known to be slightly mis-read here (that is why
+    // the figures disagreed), so scaling the tolerance by it made a genuine
+    // two-pack land on `1.994` — a quantity no till ever prints.
+    final whole = implied.roundToDouble();
+    if (whole >= 1 && (implied - whole).abs() <= _wholeQuantitySnapTolerance) {
+      return whole;
+    }
+
+    return (implied * 1000).round() / 1000;
   }
 
   /// Rejects an arithmetically impossible printed total.

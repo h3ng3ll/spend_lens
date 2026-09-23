@@ -130,8 +130,18 @@ class ReceiptCandidateBuilder {
       '',
     );
 
+    // The optional trailing letter is the VAT CLASS CODE, and without it
+    // this whole method was a no-op on the most common receipt shape there
+    // is. `TESS CEAI 180G 139.80 A` ends with `A`, so a `$`-anchored price
+    // pattern never matched and the price stayed IN the product name —
+    // which is exactly what shipped: items called
+    // `TESS CEAI 188G 139.88 A`.
+    //
+    // A single letter only. Requiring the price immediately before it
+    // keeps a real name ending in a short word (`... 1L`) out of range,
+    // because the price has to match first.
     final withoutTrailingPrice = withoutQuantityMarker.replaceAll(
-      RegExp(r'\s*\d{1,3}(?:[.,]\d{3})*[.,]\d{2}\s*$'),
+      RegExp(r'\s*\d{1,3}(?:[.,]\d{3})*[.,]\d{2}\s*[A-Za-z]?\s*$'),
       '',
     );
 

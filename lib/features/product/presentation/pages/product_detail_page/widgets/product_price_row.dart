@@ -9,7 +9,7 @@ import '../../../../../analytics/domain/models/price_observation/price_observati
 import '../../../../../analytics/domain/models/price_observation/price_observation_origin_x.dart';
 import '../../../utils/product_price_points.dart';
 
-/// One price point: when, where, and how much.
+/// One price point: where, when, and how much.
 ///
 /// EVERY row is tappable, but they lead to different places, because a price
 /// is only ever editable where it is DEFINED:
@@ -69,6 +69,17 @@ class ProductPriceRow extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.center,
           spacing: 12.0,
           children: [
+            // The STORE leads, the date sits under it.
+            //
+            // It used to be the other way round, with the store name as the
+            // grey subtitle sharing its line with `· from receipt`. A real
+            // store name is long (`KAUFLAND ...`), so that line had to wrap
+            // or ellipsize while the date above it — always ten characters —
+            // sat on a half-empty row.
+            //
+            // The store is also what the reader is scanning for: every row
+            // here prices the SAME product, so where it was bought is what
+            // distinguishes one row from the next, not when.
             Expanded(
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -76,11 +87,18 @@ class ProductPriceRow extends StatelessWidget {
                 spacing: 2.0,
                 children: [
                   Text(
-                    _formatDate(observation.observedAt),
+                    meta,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: textTheme.body17.copyWith(color: scheme.ink),
                   ),
                   Text(
-                    isManual ? meta : '$meta · ${lo.fromReceipt}',
+                    isManual
+                        ? _formatDate(observation.observedAt)
+                        : '${_formatDate(observation.observedAt)} · '
+                              '${lo.fromReceipt}',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                     style: textTheme.footnote13.copyWith(color: scheme.ter),
                   ),
                 ],

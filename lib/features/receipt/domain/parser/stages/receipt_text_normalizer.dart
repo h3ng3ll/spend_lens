@@ -17,7 +17,40 @@ class ReceiptTextNormalizer {
   String normalizeLine(String raw) {
     final withoutNoise = raw.replaceAll(RegExp(r'[_~`]'), ' ');
     final collapsed = withoutNoise.replaceAll(RegExp(r'\s+'), ' ').trim();
-    return _closeDecimalGaps(collapsed);
+    return _restoreMissingSeparators(_closeDecimalGaps(collapsed));
+  }
+
+  /// Restores a decimal separator OCR dropped ENTIRELY, leaving only a
+  /// space: `17 98 A` -> `17.98 A`, `1 098 x` -> `1.098 x`.
+  ///
+  /// [_closeDecimalGaps] only repairs a separator that is still PRESENT but
+  /// spaced (`206. 11`). On a faint thermal print the dot vanishes
+  /// altogether, and the consequences were severe and silent: `17 98 A`
+  /// parsed as the integer **98**, so a 17.98 item was recorded at 98.00,
+  /// `1 098 x 17 98` gave a quantity of 98, and a whole scan came back with
+  /// quantities like `1.1 x` and `1008 x`.
+  ///
+  /// Two narrowly anchored positions, because a bare "join adjacent
+  /// numbers" rule would corrupt real product text (`BABUS PELMENI 900 G`,
+  /// `SET 2 LAVETE`, `AVITON OUA XL 10B`):
+  ///
+  ///  * EXACTLY two trailing digits at end-of-line, optionally before a
+  ///    single VAT class letter — where a receipt prints its amount;
+  ///  * exactly three digits immediately before an `x`/`@` multiplier —
+  ///    the thousandths quantity this till prints (`1.000 x`).
+  ///
+  /// Anchoring is what makes this safe: a name's digits are followed by
+  /// more words, so neither pattern can reach them.
+  String _restoreMissingSeparators(String line) {
+    final withQuantity = line.replaceAllMapped(
+      RegExp(r'(?<=\d)\s+(\d{3})(?=\s*[x×@])', caseSensitive: false),
+      (match) => '.${match[1]}',
+    );
+
+    return withQuantity.replaceAllMapped(
+      RegExp(r'(?<=\d)\s+(\d{2})(?=\s*[A-Za-z]?\s*$)'),
+      (match) => '.${match[1]}',
+    );
   }
 
   /// Removes whitespace that OCR injects AROUND a decimal separator, so a

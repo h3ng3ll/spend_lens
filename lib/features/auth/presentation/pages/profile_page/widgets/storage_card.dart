@@ -64,35 +64,35 @@ class StorageCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             spacing: 10.0,
             children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                spacing: 12.0,
-                children: [
-                  // The LABEL flexes and the amount does not: the amount is
-                  // the number the row exists to show, and wrapping or
-                  // ellipsizing it would be the wrong thing to lose. Neither
-                  // was bounded before, so a locale whose label is wider than
-                  // English overflowed the row — `Облачное хранилище` against
-                  // `5 MB из 100 MB` ran 31px past the edge.
-                  Flexible(
-                    child: Text(
-                      isSignedIn ? lo.cloudStorage : lo.storage,
-                      style: textTheme.subhead15.copyWith(color: scheme.ink),
-                    ),
-                  ),
-                  Text(
-                    isSignedIn
-                        ? lo.storageUsedOf(
-                            formatBytes(syncState.usedBytes),
-                            quotaLabel,
-                          )
-                        : lo.unlimited,
-                    style: textTheme.subhead15.copyWith(
-                      color: scheme.sec,
-                      fontFeatures: const [FontFeature.tabularFigures()],
-                    ),
-                  ),
-                ],
+              // STACKED, not a `spaceBetween` row.
+              //
+              // Both halves used to share one row. Unbounded, they overflowed
+              // (`Облачное хранилище` against `5 MB из 100 MB` ran 31px past
+              // the edge); flexing the label instead squeezed it until
+              // `Хранилище` broke MID-WORD across three lines, because the
+              // signed-out value `Без ограничений · на устройстве` is far
+              // wider than the signed-in figure and left the label almost no
+              // room.
+              //
+              // Neither is a layout one row can hold at every locale and both
+              // states. Stacking gives each its own full width, so nothing
+              // competes and nothing wraps: the label reads as the heading it
+              // is, and the value sits left-aligned beneath it.
+              Text(
+                isSignedIn ? lo.cloudStorage : lo.storage,
+                style: textTheme.subhead15.copyWith(color: scheme.ink),
+              ),
+              Text(
+                isSignedIn
+                    ? lo.storageUsedOf(
+                        formatBytes(syncState.usedBytes),
+                        quotaLabel,
+                      )
+                    : lo.unlimited,
+                style: textTheme.subhead15.copyWith(
+                  color: scheme.sec,
+                  fontFeatures: const [FontFeature.tabularFigures()],
+                ),
               ),
               if (isSignedIn) StorageUsageBar(fraction: syncState.usedFraction),
               Text(

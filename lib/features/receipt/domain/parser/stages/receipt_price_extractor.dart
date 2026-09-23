@@ -10,8 +10,20 @@
 /// Deterministic, no LLM (spec §33) — pure regex + arithmetic, never a
 /// guess at "the largest or last number" on the line.
 class ReceiptPriceExtractor {
+  /// The `\d+[.,]\d{2}` alternative is what makes an UNGROUPED amount of
+  /// four digits or more readable.
+  ///
+  /// The grouped alternative starts `\d{1,3}`, so in `1054.38` it cannot
+  /// match `1054` at all; matching fell through to the bare-integer branch
+  /// and produced TWO tokens, `1054` and `38`. `extractLastPrice` takes the
+  /// last, so a receipt totalling `SUMA 1054.38` reported **38.00** — and
+  /// because that is far below the item sum, `_plausibleTotal` then
+  /// discarded it and the receipt showed no printed total at all.
+  ///
+  /// Order matters: the grouped form is tried first so `1.234,56` is read
+  /// whole rather than as `1` + `234,56`.
   static final _priceToken = RegExp(
-    r'(\d{1,3}(?:[.,]\d{3})*[.,]\d{2}|\d+)',
+    r'(\d{1,3}(?:[.,]\d{3})+[.,]\d{2}|\d+[.,]\d{2}|\d+)',
   );
 
   const ReceiptPriceExtractor();

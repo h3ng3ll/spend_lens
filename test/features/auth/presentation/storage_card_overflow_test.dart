@@ -23,7 +23,11 @@ import 'package:spend_lens/features/sync/presentation/bloc/sync_bloc/sync_bloc.d
 /// depends on the resolved string. Pumping the real widget in the locale that
 /// breaks it is what catches it.
 void main() {
-  Widget harness({required Locale locale, required int usedBytes}) {
+  Widget harness({
+    required Locale locale,
+    required int usedBytes,
+    bool isSignedIn = true,
+  }) {
     return MaterialApp(
       locale: locale,
       localizationsDelegates: AppLocalizations.localizationsDelegates,
@@ -36,7 +40,7 @@ void main() {
         child: Scaffold(
           body: StorageCard(
             deviceNoun: 'this device',
-            isSignedIn: true,
+            isSignedIn: isSignedIn,
             isPurchaseAvailable: true,
             onUpgrade: () {},
           ),
@@ -103,6 +107,87 @@ void main() {
     // The fix flexes the LABEL, not the amount: the number is what the row
     // exists to show, so it must never be the thing that gets ellipsized.
     expect(find.textContaining('100 MB'), findsWidgets);
+  });
+
+  /// The label and the value must each get a line of their own.
+  ///
+  /// THE REGRESSION: both shared one `spaceBetween` row. Flexing the label to
+  /// stop it overflowing let it be squeezed instead, and `Хранилище` broke
+  /// MID-WORD across three lines — `Хран` / `илищ` / `е`. Worst in the
+  /// SIGNED-OUT state, whose value (`Без ограничений · на устройстве`) is far
+  /// wider than the signed-in figure.
+  ///
+  /// An overflow throws and is easy to assert; a mid-word break is silent, so
+  /// this measures the rendered line count instead.
+  int lineCount(WidgetTester tester, Finder finder) {
+    final widget = tester.widget<Text>(finder);
+    final painter = TextPainter(
+      text: TextSpan(text: widget.data, style: widget.style),
+      textDirection: TextDirection.ltr,
+    )..layout(maxWidth: tester.getSize(finder).width);
+    return painter.computeLineMetrics().length;
+  }
+
+  testWidgets('the Russian label never breaks mid-word', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    // Signed OUT — the state in the report, and the widest value string.
+    await tester.pumpWidget(
+      harness(locale: const Locale('ru'), usedBytes: 0, isSignedIn: false),
+    );
+    await tester.pumpAndSettle();
+
+    expect(
+      lineCount(tester, find.text('Хранилище')),
+      1,
+      reason: 'THE BUG: rendered as Хран / илищ / е across three lines',
+    );
+  });
+
+  testWidgets('no supported locale wraps the storage label', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    for (final locale in AppLocalizations.supportedLocales) {
+      await tester.pumpWidget(
+        harness(locale: locale, usedBytes: 0, isSignedIn: false),
+      );
+      await tester.pumpAndSettle();
+
+      // The label is the card's first Text.
+      final label = find.byType(Text).first;
+
+      expect(
+        lineCount(tester, label),
+        1,
+        reason: 'the storage label wrapped in ${locale.languageCode}',
+      );
+    }
+  });
+
+  testWidgets('signed out, the card does not overflow either', (tester) async {
+    tester.view.physicalSize = const Size(1080, 2400);
+    tester.view.devicePixelRatio = 3.0;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    for (final locale in AppLocalizations.supportedLocales) {
+      await tester.pumpWidget(
+        harness(locale: locale, usedBytes: 0, isSignedIn: false),
+      );
+      await tester.pumpAndSettle();
+
+      expect(
+        tester.takeException(),
+        isNull,
+        reason: 'signed-out card overflowed in ${locale.languageCode}',
+      );
+    }
   });
 }
 

@@ -81,6 +81,111 @@ class SyntheticReceiptFixtures {
     _block('TOTAL DE PLATA 151.10', left: 60.0, top: 500.0),
   ];
 
+  /// A VERBATIM device OCR dump of a faint Kaufland thermal print.
+  ///
+  /// Captured from `OCR_DIAG` on a real scan, blocks in the order the
+  /// recognizer emitted them — deliberately unsorted and un-cleaned,
+  /// because both properties were load-bearing in the failure:
+  ///
+  ///  * the separator is MISSING, not merely spaced: `17 98 A` (the
+  ///    existing `206. 11` repair does not cover this, and the price read
+  ///    as **98.00**);
+  ///  * `0` is read as `8`, so `1.000 x` arrives as `1.888` or `1008`;
+  ///  * name and amount are ~8px apart vertically and must group as one
+  ///    row, while the `qty x unit` line sits ~20px below as its own row.
+  static List<OcrTextBlock> faintThermalPrintReceipt() => [
+    _block('SACOSA ECOTAX8, 15Te1', left: 211.0, top: 19.0, height: 26.0),
+    _block('1 098 x 17 98', left: 366.0, top: 48.0, height: 26.0),
+    _block('TESS CEAI 180G', left: 214.0, top: 77.0, height: 26.0),
+    _block('FILEU PUT 8,9KG', left: 212.0, top: 141.0, height: 26.0),
+    _block('BABUS PELHENI 988 G', left: 210.0, top: 197.0, height: 26.0),
+    _block('TALIEI VITA 858', left: 212.0, top: 319.0, height: 26.0),
+    _block('1. B08 x 71.98', left: 366.0, top: 169.0, height: 26.0),
+    _block('DET CAPSULE 288UC', left: 209.0, top: 257.0, height: 26.0),
+    _block('POLONIG', left: 209.0, top: 445.0, height: 26.0),
+    _block('SET 2 LAVETE NF', left: 210.0, top: 380.0, height: 26.0),
+    _block('1. 888 x 139 88', left: 377.0, top: 106.0, height: 26.0),
+    _block('BANANE', left: 208.0, top: 569.0, height: 26.0),
+    _block('1W16688804811', left: 419.0, top: -2.0, height: 26.0),
+    _block('1. 888 x 88 58', left: 379.0, top: 222.0, height: 26.0),
+    _block('2. 088 x 13. 48', left: 365.0, top: 344.0, height: 26.0),
+    _block('1. 088 x 99 08', left: 376.0, top: 280.0, height: 26.0),
+    _block('1,008 x 59.98', left: 367.0, top: 408.0, height: 26.0),
+    _block('GARTOF1 ALBI SPALATI', left: 208.0, top: 502.0, height: 26.0),
+    _block('1. 088 x 6.58', left: 368.0, top: 532.0, height: 26.0),
+    _block('8.868 x 25.58', left: 367.0, top: 594.0, height: 26.0),
+    _block('OREZ CLASIC 908G', left: 208.0, top: 628.0, height: 26.0),
+    _block('1. 808', left: 381.0, top: 656.0, height: 26.0),
+    _block('PAN MACARON SC IKG', left: 207.0, top: 692.0, height: 26.0),
+    _block('AVITON OUA XL 188', left: 205.0, top: 758.0, height: 26.0),
+    _block('K. EHMENT. 4886', left: 201.0, top: 891.0, height: 26.0),
+    _block('1. 889 x 14.58', left: 382.0, top: 722.0, height: 26.0),
+    _block('1.088 x 48. 98', left: 369.0, top: 788.0, height: 26.0),
+    _block('HILINA FRANZELA SUD', left: 203.0, top: 824.0, height: 26.0),
+    _block('1.908 x 6.48', left: 369.0, top: 855.0, height: 26.0),
+    _block('x 19 35', left: 435.0, top: 654.0, height: 26.0),
+    _block('1. 086 x 99. 98', left: 383.0, top: 921.0, height: 26.0),
+    _block('DOLCE IAURT CAP 1156', left: 201.0, top: 955.0, height: 26.0),
+    _block('2. 688 x 12. 95', left: 366.0, top: 991.0, height: 26.0),
+    _block('CASUIA HEA CHEF939G', left: 201.0, top: 1029.0, height: 26.0),
+    _block('1.888 x 23 45', left: 369.0, top: 1057.0, height: 26.0),
+    _block('APIFERA MIERE 15806', left: 200.0, top: 1098.0, height: 26.0),
+    _block('17 98 A', left: 635.0, top: 27.0, height: 26.0),
+    _block('139 88 A', left: 625.0, top: 82.0, height: 26.0),
+    _block('71. 98 A', left: 641.0, top: 138.0, height: 26.0),
+    _block('88 58 A', left: 638.0, top: 196.0, height: 26.0),
+    _block('99 88 A', left: 640.0, top: 257.0, height: 26.0),
+    _block('26.88 A', left: 642.0, top: 316.0, height: 26.0),
+    _block('59. 98 A', left: 643.0, top: 376.0, height: 26.0),
+    _block('119 88 A', left: 643.0, top: 432.0, height: 26.0),
+    _block('6 55 B', left: 658.0, top: 500.0, height: 26.0),
+    _block('22. 13 A', left: 649.0, top: 560.0, height: 26.0),
+    _block('19.95 A', left: 653.0, top: 623.0, height: 26.0),
+    _block('14.58 A', left: 655.0, top: 690.0, height: 26.0),
+    _block('48 99 A', left: 655.0, top: 754.0, height: 26.0),
+    _block('6 48 B', left: 674.0, top: 820.0, height: 26.0),
+    _block('99. 98 A', left: 658.0, top: 889.0, height: 26.0),
+    _block('25. 98 B', left: 659.0, top: 955.0, height: 26.0),
+    _block('23. 45 B', left: 661.0, top: 1021.0, height: 26.0),
+    _block('179.38', left: 654.0, top: 1097.0, height: 26.0),
+  ];
+
+  /// The Kaufland two-row layout: `NAME ... TOTAL` then an INDENTED
+  /// `qty x unitPrice` detail line beneath it.
+  ///
+  /// This is the shape that produced items named after their own prices
+  /// (`TESS CEAI 188G 139.88 A`), quantities of `1` on two-packs, and a
+  /// receipt whose printed `SUMA 1054.38` was read as 38.00 and then
+  /// discarded as implausible.
+  ///
+  /// Distinct from a WRAPPED name, where the continuation completes the
+  /// name of a line that had no price. Here the item is already complete
+  /// and priced; the line below only details how that price was reached.
+  static List<OcrTextBlock> quantityDetailLineReceipt() => [
+    _block('KAUFLAND S.R.L.', left: 200.0, top: 40.0),
+    _block('IDNO 1016600004811', left: 200.0, top: 90.0),
+
+    // Single-quantity item: name + right-aligned total, then its detail.
+    _block('TESS CEAI 180G', left: 60.0, top: 150.0),
+    _block('139.80 A', left: 600.0, top: 150.0, width: 120.0),
+    _block('1.000 x 139.80', left: 250.0, top: 190.0),
+
+    // TWO-pack — the quantity is only on the detail line.
+    _block('TAITEI VITA 85G', left: 60.0, top: 230.0),
+    _block('26.80 A', left: 600.0, top: 230.0, width: 120.0),
+    _block('2.000 x 13.40', left: 250.0, top: 270.0),
+
+    // Weighed, and its `qty x unit` does NOT equal the printed total
+    // (0.868 x 25.50 = 22.134 against a printed 22.13).
+    _block('BANANE', left: 60.0, top: 310.0),
+    _block('22.13 A', left: 600.0, top: 310.0, width: 120.0),
+    _block('0.868 x 25.50', left: 250.0, top: 350.0),
+
+    // A four-digit total with NO thousands separator.
+    _block('SUMA', left: 60.0, top: 500.0),
+    _block('1054.38', left: 600.0, top: 500.0, width: 120.0),
+  ];
+
   /// A receipt where an AMOUNT plus its VAT CLASS CODE lands on its own
   /// grouped row — `99.88 A`.
   ///
