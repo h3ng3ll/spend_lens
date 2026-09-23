@@ -122,15 +122,6 @@ RouteBase get $appShellRoute => StatefulShellRouteData.$route(
     StatefulShellBranchData.$branch(
       routes: [
         GoRouteData.$route(
-          path: '/compare',
-          hasOverriddenOnExit: false,
-          factory: $ComparePageRoute._fromState,
-        ),
-      ],
-    ),
-    StatefulShellBranchData.$branch(
-      routes: [
-        GoRouteData.$route(
           path: '/history',
           hasOverriddenOnExit: false,
           factory: $HistoryPageRoute._fromState,
@@ -200,27 +191,6 @@ mixin $StorePageRoute on GoRouteData {
 
   @override
   String get location => GoRouteData.$location('/stores');
-
-  @override
-  void go(BuildContext context) => context.go(location);
-
-  @override
-  Future<T?> push<T>(BuildContext context) => context.push<T>(location);
-
-  @override
-  void pushReplacement(BuildContext context) =>
-      context.pushReplacement(location);
-
-  @override
-  void replace(BuildContext context) => context.replace(location);
-}
-
-mixin $ComparePageRoute on GoRouteData {
-  static ComparePageRoute _fromState(GoRouterState state) =>
-      const ComparePageRoute();
-
-  @override
-  String get location => GoRouteData.$location('/compare');
 
   @override
   void go(BuildContext context) => context.go(location);

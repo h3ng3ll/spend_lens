@@ -23,7 +23,6 @@ import '../../../features/settings/presentation/pages/about_page/about_page.dart
 import '../../../features/settings/presentation/pages/privacy_page/privacy_page.dart';
 import '../../../features/settings/presentation/pages/terms_page/terms_page.dart';
 import '../../../features/settings/presentation/pages/settings_page/settings_page.dart';
-import '../../../features/compare/presentation/pages/compare_page/compare_page.dart';
 import '../../../features/product/presentation/pages/choose_product_page/choose_product_page.dart';
 import '../../../features/product/presentation/pages/edit_product_page/edit_product_page.dart';
 import '../../../features/product/presentation/pages/new_product_page/new_product_page.dart';
@@ -158,7 +157,12 @@ class OnboardingPageRoute extends GoRouteData with $OnboardingPageRoute {
   }
 }
 
-// ─────────────────────────── 6-branch shell ───────────────────────────
+// ─────────────────────────── 5-branch shell ───────────────────────────
+//
+// Compare is withheld from production while it is unstable: its branch and
+// route are removed rather than commented out (no_commented_code_rules.md).
+// `lib/features/compare/` is kept intact, so restoring it means re-adding
+// the branch here and the tab in `RootPage` at the same index.
 
 @TypedStatefulShellRoute<AppShellRoute>(
   branches: [
@@ -175,11 +179,6 @@ class OnboardingPageRoute extends GoRouteData with $OnboardingPageRoute {
     TypedStatefulShellBranch(
       routes: [
         TypedGoRoute<StorePageRoute>(path: '/stores'),
-      ],
-    ),
-    TypedStatefulShellBranch(
-      routes: [
-        TypedGoRoute<ComparePageRoute>(path: '/compare'),
       ],
     ),
     TypedStatefulShellBranch(
@@ -231,15 +230,6 @@ class StorePageRoute extends GoRouteData with $StorePageRoute {
   @override
   Page<void> buildPage(BuildContext context, GoRouterState state) {
     return NoTransitionPage<void>(child: const StorePage());
-  }
-}
-
-class ComparePageRoute extends GoRouteData with $ComparePageRoute {
-  const ComparePageRoute();
-
-  @override
-  Page<void> buildPage(BuildContext context, GoRouterState state) {
-    return NoTransitionPage<void>(child: const ComparePage());
   }
 }
 

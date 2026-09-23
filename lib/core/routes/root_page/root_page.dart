@@ -7,7 +7,10 @@ import '../../resources/localization/gen/app_localizations.dart';
 import '../../widgets/app_container.dart';
 import 'widgets/shell_tab_item.dart';
 
-/// The 6-branch shell: Home, Analytics, Stores, Compare, History, Settings.
+/// The 5-branch shell: Home, Analytics, Stores, History, Settings.
+///
+/// Compare is withheld from production while it is unstable — see the
+/// note above the shell route in `init_router.dart`.
 ///
 /// The order here MUST match the branch order in the router's
 /// `TypedStatefulShellRoute` — `goBranch` addresses branches by index, so a
@@ -58,7 +61,6 @@ class RootPage extends StatelessWidget {
       (AppIcons.tabHome, lo.tabHome),
       (AppIcons.tabAnalytics, lo.tabAnalytics),
       (AppIcons.tabStores, lo.tabStores),
-      (AppIcons.tabCompare, lo.tabCompare),
       (AppIcons.tabHistory, lo.tabHistory),
       (AppIcons.tabSettings, lo.tabSettings),
     ];

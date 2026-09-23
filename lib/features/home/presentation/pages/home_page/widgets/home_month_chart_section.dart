@@ -1,5 +1,6 @@
 import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../../../core/resources/colors/app_color_scheme.dart';
 import '../../../../../../core/resources/text/app_text_theme.dart';
@@ -40,6 +41,8 @@ class HomeMonthChartSection extends StatelessWidget {
     return max <= 0.0 ? 1.0 : max;
   }
 
+  bool get _hasAnySpend => days.any((day) => day.hasData);
+
   /// Only the first, middle and last day get a label — 30 numbers across a
   /// phone width is unreadable, and at that size they collide.
   bool _isLabelledDay(int day) =>
@@ -51,15 +54,24 @@ class HomeMonthChartSection extends StatelessWidget {
     final textTheme = AppTextTheme.of(context);
 
     final maxAmount = _maxAmount;
+    // Compact ("1.2K") so the axis stays narrow whatever the month's peak.
+    final amountFormat = NumberFormat.compact();
 
     return AppSectionCard(
-      padding: const EdgeInsets.fromLTRB(20.0, 16.0, 20.0, 12.0),
+      // Tighter on the LEFT only: the amount axis already sits there, so the
+      // full 20dp inset stacked on top of it read as an empty gutter. The
+      // label is indented back to 20dp so it still lines up with the other
+      // Home cards.
+      padding: const EdgeInsets.fromLTRB(8.0, 16.0, 20.0, 12.0),
       child: Column(
         mainAxisSize: MainAxisSize.min,
         crossAxisAlignment: CrossAxisAlignment.start,
         spacing: 14.0,
         children: [
-          SectionLabel(text: label),
+          Padding(
+            padding: const EdgeInsets.only(left: 12.0),
+            child: SectionLabel(text: label),
+          ),
           SizedBox(
             height: 160.0,
             child: BarChart(
@@ -78,8 +90,25 @@ class HomeMonthChartSection extends StatelessWidget {
                   rightTitles: const AxisTitles(
                     sideTitles: SideTitles(showTitles: false),
                   ),
-                  leftTitles: const AxisTitles(
-                    sideTitles: SideTitles(showTitles: false),
+                  // The amount scale: 0, half the peak and the peak. Hidden
+                  // for a month with no spend, where the axis would only
+                  // label the placeholder 0–1 scale the stubs sit on.
+                  leftTitles: AxisTitles(
+                    sideTitles: SideTitles(
+                      showTitles: _hasAnySpend,
+                      interval: maxAmount / 2.0,
+                      // Scaled for the same reason as the day labels below.
+                      reservedSize: MediaQuery.textScalerOf(
+                        context,
+                      ).scale(30.0),
+                      getTitlesWidget: (value, meta) => _amountLabel(
+                        value,
+                        meta,
+                        amountFormat,
+                        textTheme,
+                        scheme,
+                      ),
+                    ),
                   ),
                   bottomTitles: AxisTitles(
                     sideTitles: SideTitles(
@@ -101,6 +130,26 @@ class HomeMonthChartSection extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _amountLabel(
+    double value,
+    TitleMeta meta,
+    NumberFormat amountFormat,
+    AppTextTheme textTheme,
+    AppColorScheme scheme,
+  ) {
+    // `SideTitleWidget` pins the label against the bars instead of centring
+    // it in the reserved strip, so no dead space opens up on its left.
+    return SideTitleWidget(
+      meta: meta,
+      space: 4.0,
+      child: Text(
+        amountFormat.format(value),
+        maxLines: 1,
+        style: textTheme.footnote13.copyWith(color: scheme.ter),
       ),
     );
   }
